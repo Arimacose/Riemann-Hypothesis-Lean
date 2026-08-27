@@ -1,0 +1,63 @@
+name: Riemann CvS fixed-Hermite Weil-tail exploration
+
+on:
+  push:
+    branches:
+      - research/cvs-prolate-v17
+    paths:
+      - 'research/riemann-cvs-numerics/explore_fixed_hermite_weil_tail.py'
+      - '.github/workflows/riemann-cvs-fixed-hermite-weil-exploration.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  explore:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install numerical dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy==2.2.6 scipy==1.15.3
+
+      - name: Run floating-point pressure test
+        run: |
+          set -euo pipefail
+          mkdir -p research/riemann-cvs-numerics/artifacts
+          python research/riemann-cvs-numerics/explore_fixed_hermite_weil_tail.py \
+            --lambdas 3,4,5,6,8 \
+            --oversample 48 \
+            --y-max 24 \
+            --dilation-terms 4 \
+            --prime-extra 24 \
+            --json-out research/riemann-cvs-numerics/artifacts/fixed_hermite_weil_tail_exploration.json
+
+      - name: Show calibrated summary
+        run: |
+          python - <<'PY'
+          import json
+          path = 'research/riemann-cvs-numerics/artifacts/fixed_hermite_weil_tail_exploration.json'
+          with open(path, encoding='utf-8') as stream:
+              data = json.load(stream)
+          print(json.dumps({
+              'status': data['status'],
+              'proof_status': data['proof_status'],
+              'predicted_mass_constant': data['predicted_mass_constant'],
+              'paired_summary': data['paired_summary'],
+              'limitations': data['limitations'],
+          }, indent=2))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: riemann-cvs-fixed-hermite-weil-tail-exploration
+          path: research/riemann-cvs-numerics/artifacts/fixed_hermite_weil_tail_exploration.json
+          if-no-files-found: error
