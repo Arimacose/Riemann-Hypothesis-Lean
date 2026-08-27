@@ -110,9 +110,10 @@ theorem fixedHermiteParityFromHalfRelativeError
   have hRightFirst :
       (A / 2) * 16 ≤ (A / 2) * lambda ^ 4 :=
     mul_le_mul_of_nonneg_left hLambdaFourth (by positivity)
+  have hLambdaFourthNonneg : 0 ≤ lambda ^ 4 := by positivity
   have hRightSecond :
       (A / 2) * lambda ^ 4 ≤ (A - delta) * lambda ^ 4 :=
-    mul_le_mul_of_nonneg_right hLowerCoeff (pow_nonneg lambda 4)
+    mul_le_mul_of_nonneg_right hLowerCoeff hLambdaFourthNonneg
   have hMargin :
       (A + delta) * (9 / 16 : ℝ) <
         (A - delta) * lambda ^ 4 := by
