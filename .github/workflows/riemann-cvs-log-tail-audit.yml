@@ -3,7 +3,7 @@ name: Riemann CvS logarithmic-tail structure audit
 on:
   push:
     branches:
-      - research/riemann-cvs-lean-v3
+      - main
     paths:
       - 'research/riemann-cvs-numerics/audit_log_tail_structure.py'
       - 'research/riemann-cvs-notes/EXPLICIT_LOG_TAIL_THEOREM.md'

@@ -3,7 +3,7 @@ name: Riemann CvS fixed-Hermite tail-anchor verification
 on:
   push:
     branches:
-      - research/riemann-cvs-lean-v3
+      - main
     paths:
       - 'research/riemann-cvs-lean/RiemannCvs/HermiteTailAnchor.lean'
       - '.github/workflows/riemann-cvs-hermite-tail-anchor.yml'

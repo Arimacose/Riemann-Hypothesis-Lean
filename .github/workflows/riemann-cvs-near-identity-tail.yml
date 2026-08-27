@@ -3,7 +3,7 @@ name: Riemann CvS near-identity tail verification
 on:
   push:
     branches:
-      - research/riemann-cvs-lean-v3
+      - main
     paths:
       - 'research/riemann-cvs-lean/RiemannCvs/NearIdentityTailMap.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/NearIdentityTailMapAudit.lean'

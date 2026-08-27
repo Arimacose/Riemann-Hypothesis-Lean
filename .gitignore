@@ -1,0 +1,8 @@
+# Lean/Lake build output
+.lake/
+**/.lake/
+
+# Python bytecode and generated certificate artifacts
+__pycache__/
+*.py[cod]
+research/riemann-cvs-numerics/artifacts/

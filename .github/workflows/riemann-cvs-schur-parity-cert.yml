@@ -3,7 +3,7 @@ name: Riemann CvS finite Schur-parity certificate
 on:
   push:
     branches:
-      - research/riemann-cvs-lean-v3
+      - main
     paths:
       - 'research/riemann-cvs-numerics/certify_parity_gap.py'
       - 'research/riemann-cvs-numerics/certify_schur_parity.py'

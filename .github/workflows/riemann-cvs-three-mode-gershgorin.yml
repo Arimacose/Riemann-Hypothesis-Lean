@@ -3,7 +3,7 @@ name: Riemann CvS three-mode Gershgorin verification
 on:
   push:
     branches:
-      - research/riemann-cvs-lean-v3
+      - main
     paths:
       - 'research/riemann-cvs-lean/RiemannCvs/ThreeModeGershgorin.lean'
       - '.github/workflows/riemann-cvs-three-mode-gershgorin.yml'
