@@ -1,122 +1,113 @@
-# Fixed-Hermite boundary layers and the actual Weil form
+# Fixed-Hermite boundary layers and the actual Weil tail form
 
-## 1. Purpose and status
+## Status and scope
 
-This note attacks the remaining scalar bridge
+This note develops a large-parameter estimate for the **actual full Weil
+quadratic form** on the two explicit exterior tails supplied by the first
+boundary-zero Hermite vectors in the additive Fourier `+1` and `-1` classes.
+
+The target estimate is
 
 \[
-\text{reference exterior-tail mass}
-\quad\Longrightarrow\quad
-\text{actual Weil tail energy}
+QW(t_{\pm,\lambda})
+ =\bigl(2\log\lambda+O(1)\bigr)
+   \|t_{\pm,\lambda}\|_2^2,
+\tag{1}
 \]
 
-for the first exact Fourier `+1` and `-1` Hermite radical vectors.  The main
-conclusion is the following large-parameter comparison.
-
-> **Boundary-layer theorem.**  Let
-> \(F_\pm=\mathcal E(\widetilde\psi_\pm)\), where
-> \(\widetilde\psi_\pm\) are the unit-normalized fixed-Hermite radical vectors
-> defined below.  Let \(t_{\pm,\lambda}\) be the restriction of \(F_\pm\) to the
-> exterior of \([\lambda^{-1},\lambda]\).  Then
-> \[
-> QW(t_{\pm,\lambda})
-> =\bigl(2\log\lambda+O(1)\bigr)
->   \|t_{\pm,\lambda}\|_2^2,
-> \qquad \lambda\to\infty.
-> \tag{1}
-> \]
-> Moreover,
-> \[
-> \frac{QW(t_{+,\lambda})}{QW(t_{-,\lambda})}
-> \sim
-> \frac{195}{88\pi^2}\lambda^{-4}.
-> \tag{2}
-> \]
-
-The result concerns two explicit trial directions.  It does **not** lower-bound
-the entire inversion-odd sector and therefore does not yet prove that the true
-Weil ground state is even.  Its significance is that it closes the
-`reference-tail -> actual-Weil-energy` comparison on these directions without
-assuming an abstract relative-form conjecture.
-
-The scalar implication from a common leading coefficient to strict parity
-ordering is formalized separately in
-`RiemannCvs/CommonLeadingWeilTransfer.lean`.  The Fourier, Gaussian-tail, prime
-correlation, and form-domain analysis in this note is not yet formalized in
-Lean.
-
-## 2. Exact radical vectors and inversion parity
-
-Use the unitary additive Fourier convention
+with an `O(1)` bound uniform in the two signs.  Combined with the exact tail
+mass asymptotic
 
 \[
-\widehat f(y)=\int_{\mathbb R}f(x)e^{2\pi ixy}\,dx.
+\frac{\|t_{+,\lambda}\|_2^2}
+     {\|t_{-,\lambda}\|_2^2}
+ \sim \frac{195}{88\pi^2}\lambda^{-4},
+\tag{2}
 \]
 
-The first boundary-zero vectors in the two Fourier classes are
+this gives
 
 \[
-\psi_+(x)=h_4(x)-\sqrt{\frac38}\,h_0(x),
-\qquad
-\psi_-(x)=-h_6(x)+\sqrt{\frac58}\,h_2(x).
+\frac{QW(t_{+,\lambda})}
+     {QW(t_{-,\lambda})}
+ \sim \frac{195}{88\pi^2}\lambda^{-4}.
 \tag{3}
 \]
 
-They satisfy
+Equation (3) is an ordering of two explicit Weil trial directions.  It does
+**not** by itself lower-bound the entire odd sector, and therefore does not prove
+the simple-even hypothesis or the Riemann Hypothesis.
+
+The derivation below is intended as a proof-level analytic reduction, but it has
+not yet received independent expert audit and is not formalized in Lean.  Lean
+formalizes only the finite scalar implication from a common leading coefficient
+to strict parity ordering.
+
+Primary conventions are those of Connes--Consani--Moscovici,
+*Zeta Spectral Triples*, arXiv:2511.22755, and *Zeta zeros and prolate wave
+operators*, arXiv:2310.18423.
+
+---
+
+## 1. The two exact radical vectors
+
+Let
 
 \[
-\widehat{\psi_+}=\psi_+,
+\widetilde\psi_+
+ =\sqrt{\frac8{11}}\left(h_4-\sqrt{\frac38}\,h_0\right),
 \qquad
-\widehat{\psi_-}=-\psi_-,
-\qquad
-\psi_\pm(0)=\widehat\psi_\pm(0)=0,
+\widetilde\psi_-
+ =\sqrt{\frac8{13}}\left(-h_6+\sqrt{\frac58}\,h_2\right).
 \tag{4}
 \]
 
-and
+They are unit vectors and satisfy
 
 \[
-\|\psi_+\|_2^2=\frac{11}{8},
+\widehat{\widetilde\psi_+}=\widetilde\psi_+,
 \qquad
-\|\psi_-\|_2^2=\frac{13}{8}.
+\widehat{\widetilde\psi_-}=-\widetilde\psi_-,
+\qquad
+\widetilde\psi_\pm(0)
+ =\widehat{\widetilde\psi_\pm}(0)=0.
 \tag{5}
 \]
 
-Write
+Define
 
 \[
-\widetilde\psi_+=\sqrt{\frac8{11}}\,\psi_+,
-\qquad
-\widetilde\psi_-=\sqrt{\frac8{13}}\,\psi_-.
+F_\pm(u)=\mathcal E(\widetilde\psi_\pm)(u)
+ =u^{1/2}\sum_{m\ge1}\widetilde\psi_\pm(mu).
 \tag{6}
 \]
 
-For
-
-\[
-\mathcal E(f)(u)=u^{1/2}\sum_{m\ge1}f(mu),
-\qquad u>0,
-\tag{7}
-\]
-
-Poisson summation gives
+Poisson summation gives exact inversion parity
 
 \[
 F_+(u^{-1})=F_+(u),
 \qquad
-F_-(u^{-1})=-F_-(u),
+F_-(u^{-1})=-F_-(u).
+\tag{7}
+\]
+
+For \(\lambda\ge2\), let
+
+\[
+t_{\pm,\lambda}
+ =1_{(0,\lambda^{-1})\cup(\lambda,\infty)}F_\pm,
 \qquad
-F_\pm:=\mathcal E(\widetilde\psi_\pm).
+ e_\pm(\lambda)=\|t_{\pm,\lambda}\|_2^2.
 \tag{8}
 \]
 
-Thus the two vectors have exact multiplicative inversion parity.  The range of
-`E` on the boundary-zero even Schwartz space is the radical of the full Weil
-form in the Connes--Consani framework.
+The symmetric cutoff preserves the two exact parity classes.
 
-## 3. Exact exterior-mass asymptotic
+---
 
-The explicit Hermite formulas are
+## 2. Exact leading tail-mass ratio
+
+The explicit unnormalized Hermite combinations are
 
 \[
 \psi_+(x)
@@ -136,544 +127,638 @@ A_-=\frac{2\,2^{1/4}\sqrt5\,\pi}{15}.
 \tag{10}
 \]
 
-Let \(c_+\) and \(c_-\) denote the leading coefficients of the normalized
-vectors in (6):
+Their positive prefactors satisfy
 
 \[
-\widetilde\psi_+(x)
- =c_+x^4e^{-\pi x^2}(1+O(x^{-2})),
+\frac{A_+}{A_-}=\sqrt{30}.
 \tag{11}
 \]
 
+For fixed sign and \(u\to\infty\), the term \(m=1\) in (6) dominates all
+integer dilates.  Indeed every term has the same sign for \(u\ge2\), and the
+relative contribution of \(m\ge2\) is bounded by a fixed polynomial times
+\(e^{-3\pi u^2}\).  Consequently
+
 \[
-\widetilde\psi_-(x)
- =-c_-x^6e^{-\pi x^2}(1+O(x^{-2})).
+F_+(u)
+ =c_+u^{9/2}e^{-\pi u^2}\bigl(1+O(u^{-2})\bigr),
 \tag{12}
 \]
 
-Their squared ratio is
-
 \[
-\begin{aligned}
-\frac{c_+^2}{c_-^2}
-&=\frac{13}{11}
-  \frac{(A_+\,2\pi)^2}{(A_-\,8\pi^2)^2}\\
-&=\frac{13}{11}\frac{30}{16\pi^2}
- =\boxed{\frac{195}{88\pi^2}}.
-\end{aligned}
+F_-(u)
+ =-c_-u^{13/2}e^{-\pi u^2}\bigl(1+O(u^{-2})\bigr),
 \tag{13}
 \]
 
-For \(u\to\infty\), the `m=1` summand in (7) dominates exponentially:
+where
 
 \[
-F_\pm(u)
- =u^{1/2}\widetilde\psi_\pm(u)
-  \left(1+O\!\left(u^M e^{-3\pi u^2}\right)\right)
+c_+=\sqrt{\frac8{11}}\,(2\pi A_+),
+\qquad
+c_-=\sqrt{\frac8{13}}\,(8\pi^2 A_-).
 \tag{14}
 \]
 
-for a fixed integer \(M\).  Indeed, all summands have the same sign once
-\(u\ge2\), and the `m`-th term with \(m\ge2\) gains
-\(e^{-\pi(m^2-1)u^2}\).
-
-Let
-
-\[
-e_\pm(\lambda)
- =\|t_{\pm,\lambda}\|_{L^2(\mathbb R_+^*,d^*u)}^2.
-\tag{15}
-\]
-
-By (8), the lower and upper exterior wings have equal mass.  Hence (14) and the
-standard Gaussian-tail formula
+Since \(d^*u=du/u\), the standard Gaussian-tail estimate
 
 \[
 \int_\lambda^\infty u^k e^{-2\pi u^2}\,du
  \sim \frac{1}{4\pi}
        \lambda^{k-1}e^{-2\pi\lambda^2}
-\tag{16}
+\tag{15}
 \]
 
-give
+gives, after doubling for the two inversion-related wings,
 
 \[
 e_+(\lambda)
  \sim \frac{c_+^2}{2\pi}
        \lambda^7e^{-2\pi\lambda^2},
-\tag{17}
+\tag{16}
 \]
 
 \[
 e_-(\lambda)
  \sim \frac{c_-^2}{2\pi}
        \lambda^{11}e^{-2\pi\lambda^2}.
+\tag{17}
+\]
+
+The exact leading-coefficient ratio is
+
+\[
+\begin{aligned}
+\frac{c_+^2}{c_-^2}
+ &=\frac{13}{11}
+   \left(\frac{A_+}{A_-}\right)^2
+   \left(\frac{2\pi}{8\pi^2}\right)^2\\
+ &=\frac{13}{11}\frac{30}{16\pi^2}
+ =\frac{195}{88\pi^2}.
+\end{aligned}
 \tag{18}
 \]
 
-Therefore
+Equations (16)--(18) prove (2).  The previously proved non-asymptotic estimate
 
 \[
-\boxed{
-\frac{e_+(\lambda)}{e_-(\lambda)}
- \sim \frac{195}{88\pi^2}\lambda^{-4}.
-}
+\lambda^4e_+(\lambda)
+ \le\frac9{16}e_-(\lambda),
+\qquad \lambda\ge2,
 \tag{19}
 \]
 
-The earlier pointwise argument also supplies the stronger finite-scale but less
-sharp estimate
+remains useful because it leaves a much wider error budget than the sharp
+constant in (18).
 
-\[
-\lambda^4e_+(\lambda)\le\frac9{16}e_-(\lambda),
-\qquad \lambda\ge2.
-\tag{20}
-\]
+---
 
-## 4. Logarithmic boundary-layer profile
+## 3. Logarithmic boundary-layer coordinates
 
-Put
+Write
 
 \[
 L=\log\lambda,
 \qquad
-\delta=\lambda^{-2},
-\qquad
-h_\pm(x)=F_\pm(e^x).
+\delta=\lambda^{-2}.
+\tag{20}
+\]
+
+On the upper wing define
+
+\[
+g_{\pm,\lambda}(x)=F_\pm(e^x),
+\qquad x\ge L.
 \tag{21}
 \]
 
-Let \(g_{\pm,\lambda}=1_{[L,\infty)}h_\pm\) be the upper exterior wing.  The
-Gaussian in (9)--(10) shows that the natural boundary-layer width in the log
-variable is \(\delta\).  More precisely, with
+The natural boundary coordinate is
 
 \[
-a_+=\frac92,
-\qquad
-a_-=\frac{13}{2},
-\qquad
-b_{\pm,\lambda}=\lambda^{a_\pm}e^{-\pi\lambda^2},
+x=L+\delta y,
+\qquad y\ge0.
 \tag{22}
 \]
 
-one may write
+For suitable nonzero amplitudes \(b_{\pm,\lambda}\), set
 
 \[
 g_{\pm,\lambda}(L+\delta y)
- =b_{\pm,\lambda}\phi_{\pm,\lambda}(y),
-\qquad y\ge0.
+ =b_{\pm,\lambda}\phi_{\pm,\lambda}(y).
 \tag{23}
 \]
 
-The explicit formulas and the exponentially dominated Riemann sum imply
-uniform constants \(c,C>0\) such that, for both signs and every
-\(\lambda\ge2\),
+The Gaussian identity
 
 \[
-c\le\|\phi_{\pm,\lambda}\|_2\le C,
+\lambda^2\bigl(e^{2\delta y}-1\bigr)
+ \ge2y
 \tag{24}
+\]
+
+and the fixed polynomial degrees in (9)--(10) imply uniform constants
+\(c_0,C_0>0\) such that, for both signs and all sufficiently large \(\lambda\),
+
+\[
+c_0\le\|\phi_{\pm,\lambda}\|_2^2\le C_0,
+\qquad
+\|\phi_{\pm,\lambda}\|_1
+ +\|\phi'_{\pm,\lambda}\|_1\le C_0.
+\tag{25}
+\]
+
+More precisely, both normalized profiles converge in these norms to a nonzero
+multiple of
+
+\[
+\phi_\infty(y)=1_{[0,\infty)}(y)e^{-2\pi y}.
+\tag{26}
+\]
+
+The contribution of the dilates \(m\ge2\) is uniformly
+\(O(e^{-3\pi\lambda^2})\) relative to the first term, so it does not alter
+(25).
+
+These bounds also place the sharp-cutoff tails in the logarithmic Fourier-form
+domain: a one-sided jump gives Fourier decay \(O(|s|^{-1})\), and
+\(\log(1+|s|)|s|^{-2}\) is integrable.
+
+---
+
+## 4. One-wing logarithmic multiplier estimate
+
+Use the logarithmic Fourier transform
+
+\[
+\widehat g(s)=\int_{\mathbb R}g(x)e^{-isx}\,dx.
+\tag{27}
+\]
+
+From (23),
+
+\[
+\widehat g_{\pm,\lambda}(s)
+ =b_{\pm,\lambda}\delta e^{-isL}
+  \widehat\phi_{\pm,\lambda}(\delta s).
+\tag{28}
+\]
+
+Let
+
+\[
+A_{\log}(g)
+ =\int_{\mathbb R}|\widehat g(s)|^2
+   \log(1+|s|)\frac{ds}{2\pi}.
+\tag{29}
+\]
+
+Changing variables \(\xi=\delta s\) and using
+
+\[
+\log(1+|s|)
+ =\log(\delta^{-1})+\log(\delta+|\xi|)
+\tag{30}
+\]
+
+gives
+
+\[
+\frac{A_{\log}(g_{\pm,\lambda})}
+     {\|g_{\pm,\lambda}\|_2^2}
+ =\log(\delta^{-1})+R_{\pm,\lambda},
+\tag{31}
+\]
+
+where
+
+\[
+R_{\pm,\lambda}
+ =\frac{
+   \int |\widehat\phi_{\pm,\lambda}(\xi)|^2
+          \log(\delta+|\xi|)\,d\xi
+ }{
+   \int |\widehat\phi_{\pm,\lambda}(\xi)|^2\,d\xi
+ }.
+\tag{32}
+\]
+
+The remainder is uniformly bounded.  For \(|\xi|\le1\),
+
+\[
+|\widehat\phi(\xi)|\le\|\phi\|_1,
+\tag{33}
+\]
+
+and \(\int_0^1|\log(\delta+\xi)|d\xi\) is uniformly bounded.  For
+\(|\xi|\ge1\), integration by parts and (25) give
+
+\[
+|\widehat\phi(\xi)|
+ \le\frac{|\phi(0)|+\|\phi'\|_1}{|\xi|}
+ \le\frac{C}{|\xi|},
+\tag{34}
+\]
+
+while \(\int_1^\infty\log(1+\xi)\xi^{-2}d\xi<\infty\).  The denominator in
+(32) stays bounded away from zero by (25) and Plancherel.  Hence
+
+\[
+A_{\log}(g_{\pm,\lambda})
+ =\bigl(2\log\lambda+O(1)\bigr)
+  \|g_{\pm,\lambda}\|_2^2.
+\tag{35}
+\]
+
+---
+
+## 5. The two wings: exact cancellation of the leading cross term
+
+Let \(Jg(x)=g(-x)\) and \(\varepsilon_+=1\), \(\varepsilon_-=-1\).  In
+logarithmic coordinates the complete tail is
+
+\[
+t_{\pm,\lambda}
+ =g_{\pm,\lambda}+\varepsilon_\pm Jg_{\pm,\lambda}.
+\tag{36}
+\]
+
+The two summands have disjoint supports, so
+
+\[
+\langle g_{\pm,\lambda},Jg_{\pm,\lambda}\rangle=0,
+\qquad
+\|t_{\pm,\lambda}\|_2^2
+ =2\|g_{\pm,\lambda}\|_2^2.
+\tag{37}
+\]
+
+The important point is that the large scalar part in (30) has **no cross
+term at all**:
+
+\[
+\log(\delta^{-1})
+ \langle g_{\pm,\lambda},Jg_{\pm,\lambda}\rangle=0.
+\tag{38}
+\]
+
+Only the remainder multiplier \(\log(\delta+|\xi|)\) contributes to the
+interaction of the two wings.  By Cauchy--Schwarz with the absolute logarithmic
+moment estimated in (33)--(34), this cross contribution is
+
+\[
+O(1)\|g_{\pm,\lambda}\|_2^2.
+\tag{39}
+\]
+
+Thus no oscillatory-integral or stationary-phase estimate is required, and
+
+\[
+A_{\log}(t_{\pm,\lambda})
+ =\bigl(2\log\lambda+O(1)\bigr)e_\pm(\lambda).
+\tag{40}
+\]
+
+This exact cancellation is stronger and cleaner than treating the two wings by
+rapid-oscillation arguments.
+
+---
+
+## 6. The archimedean Weil multiplier
+
+The archimedean part of the full Weil form is the Fourier multiplier
+
+\[
+m(s)=2\theta'(s)
+ =-\log\pi+
+   \Re\psi\!\left(\frac14+\frac{is}{2}\right).
+\tag{41}
+\]
+
+The standard digamma asymptotic in the right half-plane gives
+
+\[
+m(s)=\log|s|-\log(2\pi)+O(|s|^{-1})
+\qquad(|s|\to\infty).
+\tag{42}
+\]
+
+Since \(m\) is continuous on bounded intervals,
+
+\[
+m(s)-\log(1+|s|)\in L^\infty(\mathbb R).
+\tag{43}
+\]
+
+A bounded multiplier changes a quadratic form by at most a constant times the
+squared norm.  Combining (40) and (43),
+
+\[
+A_\infty(t_{\pm,\lambda})
+ =\bigl(2\log\lambda+O(1)\bigr)e_\pm(\lambda).
+\tag{44}
+\]
+
+The `O(1)` constant may differ between intermediate estimates, but a common
+uniform bound works for the two fixed signs.
+
+---
+
+## 7. The pole term is smaller by \(\lambda^{-1}\)
+
+The pole contribution has the form
+
+\[
+P_0(t)=2\Re\left(
+ \widehat t(i/2)\overline{\widehat t(-i/2)}
+\right).
+\tag{45}
+\]
+
+For one wing, (23) gives
+
+\[
+\int_L^\infty |g(x)|e^{x/2}dx
+ \le C|b_{\pm,\lambda}|\delta\lambda^{1/2},
+\tag{46}
 \]
 
 and
 
 \[
-\|\phi_{\pm,\lambda}\|_1
- +\|\phi'_{\pm,\lambda}\|_1
- +\|y\phi_{\pm,\lambda}\|_1
- \le C.
-\tag{25}
-\]
-
-A direct dominating function follows from
-
-\[
-\lambda^2\left(e^{2\delta y}-1\right)\ge2y
-\tag{26}
-\]
-
-and the fact that all polynomial factors grow only as \(e^{O(\delta y)}\).
-Thus the profiles and their first derivatives are bounded by a uniform
-exponential in \(y\).  They converge locally and in every norm needed below to
-a nonzero multiple of
-
-\[
-\phi_\infty(y)=1_{[0,\infty)}(y)e^{-2\pi y}.
-\tag{27}
-\]
-
-## 5. Archimedean contribution
-
-For the multiplicative Fourier transform
-
-\[
-\widehat t(s)=\int_{\mathbb R}t(x)e^{-isx}\,dx,
-\tag{28}
-\]
-
-the archimedean part of the Weil quadratic form is
-
-\[
-A_\infty(t)
- =\int_{\mathbb R}|\widehat t(s)|^2m(s)\frac{ds}{2\pi},
-\qquad
-m(s)=2\theta'(s).
-\tag{29}
-\]
-
-The digamma formula gives
-
-\[
-m(s)=-\log\pi
- +\Re\psi\!\left(\frac14+\frac{is}{2}\right).
-\tag{30}
-\]
-
-The standard digamma estimate in a fixed right half-plane implies
-
-\[
-m(s)-\log(1+|s|)\in L^\infty(\mathbb R).
-\tag{31}
-\]
-
-### Boundary-layer Fourier lemma
-
-Suppose
-
-\[
-g_\delta(L+\delta y)=b_\delta\phi_\delta(y),
-\qquad y\ge0,
-\tag{32}
-\]
-
-where the family \(\phi_\delta\) satisfies (24)--(25).  Scaling the Fourier
-variable gives
-
-\[
-\frac{
- \langle\log(1+|D|)g_\delta,g_\delta\rangle
-}{\|g_\delta\|_2^2}
- =\log(\delta^{-1})+O(1).
-\tag{33}
-\]
-
-Indeed, after \(\xi=\delta s\), the remainder is the normalized integral
-
-\[
-\int_{\mathbb R}
- |\widehat\phi_\delta(\xi)|^2
- \log(\delta+|\xi|)\frac{d\xi}{2\pi}.
-\tag{34}
-\]
-
-It is uniformly bounded: near zero use
-\(|\widehat\phi_\delta|\le\|\phi_\delta\|_1\) and the local integrability of
-`log`; for \(|\xi|\ge1\), integration by parts and (25) give
-\(|\widehat\phi_\delta(\xi)|\le C/|\xi|\).
-
-The full tail is
-
-\[
-t_{\pm,\lambda}(x)
- =g_{\pm,\lambda}(x)
-  \pm g_{\pm,\lambda}(-x).
-\tag{35}
-\]
-
-The two wings are disjoint in physical space, so their ordinary squared norms
-add exactly.  For the logarithmic multiplier, the cross term is still only
-\(O(\|t\|_2^2)\).  In scaled Fourier variables it contains the oscillatory
-factor
-
-\[
-\exp\left(-2i\frac{L}{\delta}\xi\right).
-\tag{36}
-\]
-
-Splitting at \(|\xi|=\delta\) and integrating by parts elsewhere, (25) gives a
-bound
-
-\[
-O\!\left(\frac{\delta\log(1/\delta)}{L}\right)
- \|t\|_2^2,
-\tag{37}
-\]
-
-which is more than sufficient.  The bounded multiplier difference in (31)
-contributes only \(O(\|t\|_2^2)\).
-
-Since \(\log(\delta^{-1})=2\log\lambda\), we obtain
-
-\[
-\boxed{
-A_\infty(t_{\pm,\lambda})
- =\bigl(2\log\lambda+O(1)\bigr)e_\pm(\lambda).
-}
-\tag{38}
-\]
-
-## 6. Pole contribution
-
-The pole term is
-
-\[
-P_0(t)
- =2\Re\left(
-   \widehat t(i/2)\overline{\widehat t(-i/2)}
-  \right).
-\tag{39}
-\]
-
-Using (23)--(25), an upper-wing exponential moment satisfies
-
-\[
-\left|\int_L^\infty
-  g_{\pm,\lambda}(x)e^{x/2}\,dx\right|^2
- \le C\lambda^{-1}\|g_{\pm,\lambda}\|_2^2.
-\tag{40}
-\]
-
-The opposite moment is handled by the reflected wing and exact inversion
-parity.  Therefore
-
-\[
-\boxed{
-|P_0(t_{\pm,\lambda})|
- \le C\lambda^{-1}e_\pm(\lambda).
-}
-\tag{41}
-\]
-
-## 7. Prime contribution
-
-For a real log-coordinate function \(t\), set
-
-\[
-C_t(y)=\int_{\mathbb R}t(x)t(x+y)\,dx.
-\tag{42}
-\]
-
-The prime part of the full Weil form is bounded by
-
-\[
-2\sum_{n\ge2}rac{\Lambda(n)}{\sqrt n}
- |C_t(\log n)|.
-\tag{43}
-\]
-
-Here \(\Lambda(n)=0\) away from prime powers, so summing over all integers only
-enlarges the estimate.
-
-For \(u\ge2\), the explicit Hermite formulas and same-sign Riemann sums give
-
-\[
-c_\pm u^{a_\pm}e^{-\pi u^2}
- \le |F_\pm(u)|
- \le C_\pm u^{a_\pm}e^{-\pi u^2}.
-\tag{44}
-\]
-
-### 7.1 Same-wing correlations
-
-A translation by \(\log n\), \(n\ge2\), sends the upper argument `u` to `nu`.
-Equation (44) gives
-
-\[
-\sum_{n\ge2}\frac{\Lambda(n)}{\sqrt n}
- |C_{\rm same}(\log n)|
- \le Ce^{-c\lambda^2}e_\pm(\lambda).
-\tag{45}
-\]
-
-The lower-lower contribution is identical in magnitude.
-
-### 7.2 Cross-wing correlations
-
-A lower-to-upper overlap is possible only if
-
-\[
-\log n>2L,
-\qquad\text{equivalently}\qquad n>\lambda^2.
-\tag{46}
-\]
-
-After writing the lower coordinate as `u^{-1}`, the relevant integral is
-bounded by
-
-\[
-C n^{a_\pm}
- \int_\lambda^{n/\lambda}
- \exp\!\left(-\pi\left(u^2+\frac{n^2}{u^2}\right)\right)
- \frac{du}{u}.
+\int_L^\infty |g(x)|e^{-x/2}dx
+ \le C|b_{\pm,\lambda}|\delta\lambda^{-1/2}.
 \tag{47}
 \]
 
 Since
 
 \[
-u^2+\frac{n^2}{u^2}\ge2n,
+\|g_{\pm,\lambda}\|_2^2
+ \asymp |b_{\pm,\lambda}|^2\delta,
 \tag{48}
 \]
 
-and
+and the reflected wing exchanges the two exponential weights,
 
 \[
-\log\frac{n}{\lambda^2}
- \le\frac{n-\lambda^2}{\lambda^2},
+|P_0(t_{\pm,\lambda})|
+ \le C\lambda^{-1}e_\pm(\lambda).
 \tag{49}
 \]
 
-comparison with the lower bound for the tail norm yields
+---
+
+## 8. Prime translations: same-wing and cross-wing parts
+
+For a real logarithmic tail set
 
 \[
-\frac{|C_{\rm cross}(\log n)|}{e_\pm(\lambda)}
- \le
- C\left(\frac{n}{\lambda^2}\right)^{a_\pm}
- (n-\lambda^2)
- e^{-2\pi(n-\lambda^2)}.
+C_t(y)=\int_{\mathbb R}t(x)t(x+y)dx.
 \tag{50}
 \]
 
-Using only \(\Lambda(n)\le\log n\), the exponentially convergent sum in
-\(n-\lambda^2\) gives
+The prime part of the full Weil form is
 
 \[
-\boxed{
-\sum_{n\ge2}\frac{\Lambda(n)}{\sqrt n}
- |C_t(\log n)|
- \le
- C\frac{\log(2+\lambda)}{\lambda}
- e_\pm(\lambda).
-}
+P_{\rm pr}(t)
+ =\sum_{n\ge2}\frac{\Lambda(n)}{\sqrt n}
+   \bigl(C_t(\log n)+C_t(-\log n)\bigr)
+ =2\sum_{n\ge2}\frac{\Lambda(n)}{\sqrt n}C_t(\log n).
 \tag{51}
 \]
 
-No next-prime estimate or prime-gap theorem enters this bound.
+The second equality uses the reality of the tail.
 
-## 8. Actual Weil-tail asymptotic
-
-The full Weil form decomposes into the archimedean, pole, and prime terms:
+For \(u\ge2\), the explicit formulas and the same-sign dilation sums give
+constants \(c,C>0\) and
 
 \[
-QW(t)=A_\infty(t)+P_0(t)-P_{\rm prime}(t).
+a_+=\frac92,
+\qquad
+a_-=\frac{13}{2},
 \tag{52}
 \]
 
-Combining (38), (41), and (51),
+such that
+
+\[
+c\,u^{a_\pm}e^{-\pi u^2}
+ \le |F_\pm(u)|
+ \le C\,u^{a_\pm}e^{-\pi u^2}.
+\tag{53}
+\]
+
+### 8.1 Same-wing overlap
+
+For \(n\ge2\), the upper-upper correlation is
+
+\[
+\int_\lambda^\infty F_\pm(u)F_\pm(nu)\frac{du}{u}.
+\tag{54}
+\]
+
+Relative to the tail mass, it is bounded by a fixed polynomial in \(n\) times
+
+\[
+e^{-\pi(n^2-1)\lambda^2}.
+\tag{55}
+\]
+
+The lower-lower term has the same bound.  Summing (55), even with
+\(\Lambda(n)\le\log n\), gives
+
+\[
+|P_{\rm same}(t_{\pm,\lambda})|
+ \le Ce^{-c\lambda^2}e_\pm(\lambda).
+\tag{56}
+\]
+
+### 8.2 Cross-wing overlap
+
+A lower wing can meet an upper wing after translation only when
+\(n>\lambda^2\).  Its absolute correlation is bounded by
+
+\[
+\int_\lambda^{n/\lambda}
+ |F_\pm(u)F_\pm(n/u)|\frac{du}{u}.
+\tag{57}
+\]
+
+The polynomial powers cancel in the integration variable:
+
+\[
+|F_\pm(u)F_\pm(n/u)|
+ \le Cn^{a_\pm}
+ e^{-\pi(u^2+n^2/u^2)}.
+\tag{58}
+\]
+
+Using
+
+\[
+u^2+\frac{n^2}{u^2}\ge2n,
+\qquad
+\log\frac{n}{\lambda^2}
+ \le\frac{n-\lambda^2}{\lambda^2},
+\tag{59}
+\]
+
+and the lower tail estimate following from (53), one obtains
+
+\[
+\frac{|C_{\rm cross}(\log n)|}{e_\pm(\lambda)}
+ \le C
+ \left(\frac{n}{\lambda^2}\right)^{a_\pm}
+ (n-\lambda^2)e^{-2\pi(n-\lambda^2)}.
+\tag{60}
+\]
+
+The right side is summable uniformly after writing \(n=\lambda^2+k\).  Since
+\(\Lambda(n)\le\log n\) and \(n^{-1/2}\asymp\lambda^{-1}\) in the only
+non-negligible range,
+
+\[
+|P_{\rm cross}(t_{\pm,\lambda})|
+ \le C\frac{\log(2+\lambda)}{\lambda}
+ e_\pm(\lambda).
+\tag{61}
+\]
+
+No prime-gap theorem or distributional information about primes is used.
+Combining (56) and (61),
+
+\[
+|P_{\rm pr}(t_{\pm,\lambda})|
+ \le C\frac{\log(2+\lambda)}{\lambda}
+ e_\pm(\lambda).
+\tag{62}
+\]
+
+The sign of the cross-wing term depends on inversion parity, but its magnitude
+is already lower order than the common archimedean scale.
+
+---
+
+## 9. Full Weil-tail asymptotic
+
+The full Weil form decomposes as
+
+\[
+QW(t)=A_\infty(t)+P_0(t)-P_{\rm pr}(t).
+\tag{63}
+\]
+
+Equations (44), (49), and (62) yield
 
 \[
 \boxed{
 QW(t_{\pm,\lambda})
  =\bigl(2\log\lambda+O(1)\bigr)e_\pm(\lambda).
 }
-\tag{53}
+\tag{64}
 \]
 
-In particular, both tail energies are positive for all sufficiently large
-\(\lambda\), and their scalar distortion relative to the reference tail norm
-has condition number tending to one.
+In particular, both energies are positive for sufficiently large \(\lambda\),
+and
 
-Equations (19) and (53) give
+\[
+\frac{QW(t_{+,\lambda})}{QW(t_{-,\lambda})}
+ =\frac{e_+(\lambda)}{e_-(\lambda)}
+  \left(1+O\!\left(\frac1{\log\lambda}\right)\right).
+\tag{65}
+\]
+
+Using (2),
 
 \[
 \boxed{
 \frac{QW(t_{+,\lambda})}{QW(t_{-,\lambda})}
- \sim
- \frac{195}{88\pi^2}\lambda^{-4}.
+ \sim \frac{195}{88\pi^2}\lambda^{-4}.
 }
-\tag{54}
+\tag{66}
 \]
 
-The weaker finite-scale reference estimate (20), together with (53), is already
-enough to obtain strict ordering without using the sharp constant in (54).
-Indeed, for large \(\lambda\), both energies lie within fifty percent of the
-common leading scale
+A weaker but more robust finite-scale consequence follows from (19): once the
+common-scale error is at most fifty percent, the Lean theorem
+`fixedHermiteParityFromHalfRelativeError` already forces strict ordering.
+
+---
+
+## 10. Transfer to retained interval trial vectors
+
+The range of \(\mathcal E\) on the boundary-zero even Schwartz space lies in
+the radical of the full Weil form.  Write
 
 \[
-A_\lambda=2\log\lambda.
-\tag{55}
+F_\pm=g_{\pm,\lambda}+t_{\pm,\lambda},
+\tag{67}
 \]
 
-`CommonLeadingWeilTransfer.fixedHermiteParityFromHalfRelativeError` formally
-verifies that (20) and this coarse error budget imply
+where \(g\) is retained on \([\lambda^{-1},\lambda]\).  The radical splitting
+identity gives
 
 \[
-QW(t_{+,\lambda})<QW(t_{-,\lambda}).
-\tag{56}
+QW(g_{\pm,\lambda},g_{\pm,\lambda})
+ =QW(t_{\pm,\lambda},t_{\pm,\lambda}).
+\tag{68}
 \]
 
-## 9. Transfer to retained trial vectors
-
-Write
+Thus (66) gives a strict large-parameter ordering for the two **actual retained
+Weil trial energies**:
 
 \[
-F_\pm=g_{\pm,\lambda}^{\rm in}+t_{\pm,\lambda},
-\tag{57}
+QW(g_{+,\lambda})<QW(g_{-,\lambda})
+\qquad(\lambda\text{ sufficiently large}).
+\tag{69}
 \]
 
-where the first term is retained on
-\([\lambda^{-1},\lambda]\).  Since \(F_\pm\) lies in the radical of the full
-Weil form, symmetry and bilinearity give the exact identity
+This closes the scalar `reference tail norm -> actual Weil energy` bridge for
+the two fixed-Hermite anchor directions, subject to independent audit of the
+analytic estimates above.
+
+---
+
+## 11. What remains open
+
+Equation (69) compares two trial values.  Variationally,
 
 \[
-QW(g_{\pm,\lambda}^{\rm in})
- =QW(t_{\pm,\lambda}).
-\tag{58}
+\mu_+(\lambda)\le R(g_{+,\lambda}),
+\qquad
+\mu_-(\lambda)\le R(g_{-,\lambda}),
+\tag{70}
 \]
 
-Therefore (54)--(56) are also actual Weil-energy statements for two explicit
-compactly supported trial vectors of exact opposite inversion parity:
+so their ordering does not imply
+\(\mu_+(\lambda)<\mu_-(\lambda)\).  The remaining large-parameter obstacle is
+an **odd-sector lower bound**, for example through one of:
 
-\[
-\boxed{
-\frac{
- QW(g_{+,\lambda}^{\rm in})
-}{
- QW(g_{-,\lambda}^{\rm in})
-}
- \sim
- \frac{195}{88\pi^2}\lambda^{-4}.
-}
-\tag{59}
-\]
+1. a Temple estimate for a genuine odd approximate eigenvector;
+2. a low/high Schur-complement certificate with a uniform odd complement gap;
+3. a constrained-ground/no-crossing theorem that identifies the relevant odd
+   branch.
 
-This closes the actual-Weil comparison on the two fixed-Hermite anchor
-directions.
+The fixed-Hermite boundary-layer theorem supplies a robust even trial upper
+bound and a verified common-scale mechanism.  The prolate candidate remains the
+preferred object for residual control and for convergence toward the Riemann
+`Xi` function.
 
-## 10. What remains open
+---
 
-Equation (59) compares two trial values.  It gives an upper bound in each parity
-sector, not a lower bound on the full odd sector.  The next main-chain theorem
-must control arbitrary inversion-odd competitors.  Two viable routes remain:
+## 12. Formalization boundary
 
-1. a Temple estimate for the explicit odd trial vector, using a lower bound for
-   the next odd spectral value and a residual estimate;
-2. a low/high Schur decomposition in the odd sector, using the logarithmic
-   high-mode coercivity already developed in `EXPLICIT_LOG_TAIL_THEOREM.md`, or
-   the sharper prolate internal gap when available.
+`RiemannCvs/CommonLeadingWeilTransfer.lean` proves the exact finite scalar
+implications used after (64):
 
-Thus the updated chain is
+- asymmetric common-leading errors;
+- symmetric absolute relative-form errors;
+- survival of the fixed-Hermite `9/(16 lambda^4)` margin under fifty-percent
+  relative distortion.
 
-\[
-\begin{aligned}
-&\text{fixed Hermite exact parity and quartic exterior mass}\\
-&\Downarrow\\
-&\text{boundary-layer analysis of the full Weil formula}\\
-&\Downarrow\\
-&QW(g_{+,\lambda}^{\rm in})
-  /QW(g_{-,\lambda}^{\rm in})
-  =\Theta(\lambda^{-4})\\
-&\Downarrow\\
-&\color{#555}{\text{remaining: odd-sector lower bound / Schur control}}\\
-&\Downarrow\\
-&\text{true simple-even Weil ground state.}
-\end{aligned}
-\]
+It does not formalize:
 
-## References
-
-- A. Connes, C. Consani, H. Moscovici, *Zeta Spectral Triples*,
-  arXiv:2511.22755, especially the full Weil decomposition in Section 3.
-- A. Connes, C. Consani, *Zeta zeros and prolate wave operators: Semilocal
-  adelic operators*, arXiv:2310.18423, especially the description of the
-  radical as the range of `E` and the Hermite/prolate link.
-- `FIXED_HERMITE_ANCHOR.md` and `GRADING_BRIDGE_AUDIT.md` in this repository.
+- the explicit Hermite/`E` estimates;
+- the logarithmic Fourier multiplier argument;
+- the pole or prime correlation bounds;
+- the full Weil explicit formula;
+- any ground-state or Riemann-Hypothesis conclusion.
