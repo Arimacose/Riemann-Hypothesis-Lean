@@ -1,0 +1,104 @@
+name: Riemann CvS V17 consolidated audit
+
+on:
+  push:
+    branches:
+      - research/cvs-prolate-v17
+    paths:
+      - 'research/riemann-cvs-lean/RiemannCvs/CommonLeadingWeilTransfer.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/HermiteWeilTailConstants.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/ConstraintGapTransfer.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/V17Audit.lean'
+      - 'research/riemann-cvs-numerics/explore_fixed_hermite_weil_tail.py'
+      - '.github/workflows/riemann-cvs-v17-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lean-audit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: leanprover/lean-action@6835ef47e8423fa9e9eacfcbb8fdf83fae42c820
+        with:
+          lake-package-directory: research/riemann-cvs-lean
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: true
+
+      - name: Build V17 modules
+        working-directory: research/riemann-cvs-lean
+        run: lake build RiemannCvs.V17Audit
+
+      - name: Reject placeholders and print theorem axioms
+        working-directory: research/riemann-cvs-lean
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=(
+            RiemannCvs/CommonLeadingWeilTransfer.lean
+            RiemannCvs/HermiteWeilTailConstants.lean
+            RiemannCvs/ConstraintGapTransfer.lean
+            RiemannCvs/V17Audit.lean
+          )
+          if grep -nE '(^|[^[:alnum:]_])(sorry|admit)([^[:alnum:]_]|$)' "${files[@]}"; then
+            exit 1
+          fi
+          cat > /tmp/V17Axioms.lean <<'EOF'
+          import RiemannCvs.V17Audit
+          #print axioms RiemannCvs.CommonLeadingWeilTransfer.fixedHermiteParityFromHalfRelativeError
+          #print axioms RiemannCvs.CommonLeadingWeilTransfer.fixedHermiteParityFromQuarterRelativeError
+          #print axioms RiemannCvs.HermiteWeilTailConstants.normalizedHermiteLeadingRatio
+          #print axioms RiemannCvs.HermiteWeilTailConstants.hermiteCoefficient_eq_sixteen_mul_prolateCoefficient
+          #print axioms RiemannCvs.HermiteWeilTailConstants.hermiteCoefficient_lt_oneQuarter
+          #print axioms RiemannCvs.ConstraintGapTransfer.eighthPowerGapTransfer
+          #print axioms RiemannCvs.ConstraintGapTransfer.twoSectorEighthPowerGaps
+          #print axioms RiemannCvs.ConstraintGapTransfer.plusConstraintGapCoefficient
+          #print axioms RiemannCvs.ConstraintGapTransfer.minusConstraintGapCoefficient
+          EOF
+          lake env lean /tmp/V17Axioms.lean | tee v17-axioms.txt
+          if grep -E 'sorryAx' v17-axioms.txt; then
+            exit 1
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: riemann-cvs-v17-axioms
+          path: research/riemann-cvs-lean/v17-axioms.txt
+
+  numerical-pressure-test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install numerical dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy==2.2.6 scipy==1.15.3
+
+      - name: Run calibrated floating-point experiment
+        run: |
+          set -euo pipefail
+          mkdir -p research/riemann-cvs-numerics/artifacts
+          python research/riemann-cvs-numerics/explore_fixed_hermite_weil_tail.py \
+            --lambdas 3,4,5,6,8 \
+            --oversample 48 \
+            --y-max 24 \
+            --dilation-terms 4 \
+            --prime-extra 24 \
+            --json-out research/riemann-cvs-numerics/artifacts/fixed_hermite_weil_tail_exploration.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: riemann-cvs-v17-fixed-hermite-exploration
+          path: research/riemann-cvs-numerics/artifacts/fixed_hermite_weil_tail_exploration.json
+          if-no-files-found: error
