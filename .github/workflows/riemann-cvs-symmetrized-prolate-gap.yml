@@ -1,0 +1,61 @@
+name: Riemann CvS symmetrized-prolate gap verification
+
+on:
+  push:
+    branches:
+      - research/cvs-prolate-v17
+    paths:
+      - 'research/riemann-cvs-lean/RiemannCvs/SymmetrizedProlateGap.lean'
+      - '.github/workflows/riemann-cvs-symmetrized-prolate-gap.yml'
+  pull_request:
+    paths:
+      - 'research/riemann-cvs-lean/RiemannCvs/SymmetrizedProlateGap.lean'
+      - '.github/workflows/riemann-cvs-symmetrized-prolate-gap.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: leanprover/lean-action@6835ef47e8423fa9e9eacfcbb8fdf83fae42c820
+        with:
+          lake-package-directory: research/riemann-cvs-lean
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: true
+
+      - name: Build symmetrized gap module
+        working-directory: research/riemann-cvs-lean
+        run: lake build RiemannCvs.SymmetrizedProlateGap
+
+      - name: Reject placeholders and print theorem axioms
+        working-directory: research/riemann-cvs-lean
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -nE '(^|[^[:alnum:]_])(sorry|admit)([^[:alnum:]_]|$)' \
+            RiemannCvs/SymmetrizedProlateGap.lean; then
+            exit 1
+          fi
+          cat > /tmp/SymmetrizedProlateGapAxioms.lean <<'EOF'
+          import RiemannCvs.SymmetrizedProlateGap
+          #print axioms RiemannCvs.SymmetrizedProlateGap.normalizedDefectBounds
+          #print axioms RiemannCvs.SymmetrizedProlateGap.normalizedHighGap
+          #print axioms RiemannCvs.SymmetrizedProlateGap.symmetrizedResidueLe
+          #print axioms RiemannCvs.SymmetrizedProlateGap.halfResidueLeSymmetrized
+          EOF
+          lake env lean /tmp/SymmetrizedProlateGapAxioms.lean | tee symmetrized-prolate-gap-axioms.txt
+          if grep -E 'sorryAx' symmetrized-prolate-gap-axioms.txt; then
+            exit 1
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: riemann-cvs-symmetrized-prolate-gap-axioms
+          path: research/riemann-cvs-lean/symmetrized-prolate-gap-axioms.txt
