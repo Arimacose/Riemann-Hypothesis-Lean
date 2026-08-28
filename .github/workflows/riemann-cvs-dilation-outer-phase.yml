@@ -1,0 +1,49 @@
+name: Riemann CvS dilation outer-phase verification
+
+on:
+  push:
+    branches:
+      - research/cvs-prolate-v17
+    paths:
+      - research/riemann-cvs-lean/RiemannCvs/ProlateDilationOuterPhase.lean
+      - .github/workflows/riemann-cvs-dilation-outer-phase.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@6835ef47e8423fa9e9eacfcbb8fdf83fae42c820
+        with:
+          lake-package-directory: research/riemann-cvs-lean
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: true
+      - name: Build outer-phase module
+        working-directory: research/riemann-cvs-lean
+        run: lake build RiemannCvs.ProlateDilationOuterPhase
+      - name: Reject placeholders and print axioms
+        working-directory: research/riemann-cvs-lean
+        run: |
+          set -euo pipefail
+          FILE=RiemannCvs/ProlateDilationOuterPhase.lean
+          if grep -nE '\b(sorry|admit)\b|^[[:space:]]*(axiom|constant)[[:space:]]' "$FILE"; then
+            echo 'Forbidden placeholder or user axiom found.' >&2
+            exit 1
+          fi
+          cat > OuterPhaseAudit.lean <<'EOF'
+          import RiemannCvs.ProlateDilationOuterPhase
+          #print axioms RiemannCvs.ProlateDilationOuterPhase.two_mul_r_le_innerSlope
+          #print axioms RiemannCvs.ProlateDilationOuterPhase.dilatedSlope_le_threeHalves
+          #print axioms RiemannCvs.ProlateDilationOuterPhase.endpointSlopeUpper
+          #print axioms RiemannCvs.ProlateDilationOuterPhase.innerSlope_le_fourFifths
+          #print axioms RiemannCvs.ProlateDilationOuterPhase.one_le_dilatedSlope
+          #print axioms RiemannCvs.ProlateDilationOuterPhase.farSlopeLower
+          EOF
+          lake env lean OuterPhaseAudit.lean | tee outer-phase-axioms.txt
