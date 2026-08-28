@@ -1,0 +1,50 @@
+name: Riemann CvS scaled phase-separation verification
+
+on:
+  push:
+    branches:
+      - research/cvs-prolate-v17
+    paths:
+      - research/riemann-cvs-lean/RiemannCvs/ProlateScaledStationaryFamily.lean
+      - research/riemann-cvs-lean/RiemannCvs/ProlateScaledPhaseSeparation.lean
+      - .github/workflows/riemann-cvs-scaled-phase-separation.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@6835ef47e8423fa9e9eacfcbb8fdf83fae42c820
+        with:
+          lake-package-directory: research/riemann-cvs-lean
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: true
+      - name: Build scaled phase-separation module
+        working-directory: research/riemann-cvs-lean
+        run: lake build RiemannCvs.ProlateScaledPhaseSeparation
+      - name: Reject placeholders and print axioms
+        working-directory: research/riemann-cvs-lean
+        run: |
+          set -euo pipefail
+          FILE=RiemannCvs/ProlateScaledPhaseSeparation.lean
+          if grep -nE '\b(sorry|admit)\b|^[[:space:]]*(axiom|constant)[[:space:]]' "$FILE"; then
+            echo 'Forbidden placeholder or user axiom found.' >&2
+            exit 1
+          fi
+          cat > ScaledPhaseSeparationAudit.lean <<'EOF'
+          import RiemannCvs.ProlateScaledPhaseSeparation
+          #print axioms RiemannCvs.ProlateScaledPhaseSeparation.scaledSlopeDifference
+          #print axioms RiemannCvs.ProlateScaledPhaseSeparation.differenceCoefficientLower
+          #print axioms RiemannCvs.ProlateScaledPhaseSeparation.numeratorLowerRightOfRoot
+          #print axioms RiemannCvs.ProlateScaledPhaseSeparation.numeratorLowerLeftOfRoot
+          #print axioms RiemannCvs.ProlateScaledPhaseSeparation.phaseDerivativeLowerRight
+          #print axioms RiemannCvs.ProlateScaledPhaseSeparation.phaseDerivativeUpperLeft
+          EOF
+          lake env lean ScaledPhaseSeparationAudit.lean | tee scaled-phase-separation-axioms.txt
