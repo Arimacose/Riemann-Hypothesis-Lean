@@ -1,0 +1,59 @@
+name: Riemann CvS boundary rank-one gap verification
+
+on:
+  push:
+    branches:
+      - research/cvs-prolate-v17
+    paths:
+      - research/riemann-cvs-lean/RiemannCvs/BoundaryRankOneGap.lean
+      - .github/workflows/riemann-cvs-boundary-rank-one-gap.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: leanprover/lean-action@6835ef47e8423fa9e9eacfcbb8fdf83fae42c820
+        with:
+          lake-package-directory: research/riemann-cvs-lean
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: true
+
+      - name: Elaborate boundary rank-one gap module
+        working-directory: research/riemann-cvs-lean
+        run: |
+          set -euo pipefail
+          lake build RiemannCvs.BoundaryRankOneGap
+
+      - name: Reject placeholders and audit axioms
+        working-directory: research/riemann-cvs-lean
+        run: |
+          set -euo pipefail
+          if grep -R -nE '\b(sorry|admit)\b' RiemannCvs/BoundaryRankOneGap.lean; then
+            echo 'placeholder detected' >&2
+            exit 1
+          fi
+          if grep -R -nE '^\s*(axiom|constant)\b' RiemannCvs/BoundaryRankOneGap.lean; then
+            echo 'user axiom/constant detected' >&2
+            exit 1
+          fi
+          cat > /tmp/BoundaryRankOneGapAxioms.lean <<'LEAN'
+          import RiemannCvs.BoundaryRankOneGap
+          #print axioms RiemannCvs.BoundaryRankOneGap.updateVanishesOnBoundaryKernel
+          #print axioms RiemannCvs.BoundaryRankOneGap.negativeRankOneLowersValue
+          #print axioms RiemannCvs.BoundaryRankOneGap.constrainedGapMonotone
+          #print axioms RiemannCvs.BoundaryRankOneGap.strictDecreaseFromBoundaryOverlap
+          LEAN
+          lake env lean /tmp/BoundaryRankOneGapAxioms.lean | tee /tmp/axioms.log
+          if grep -vE 'propext|Classical.choice|Quot.sound|depends on axioms|^$' /tmp/axioms.log | grep -E 'axiom'; then
+            echo 'unexpected axiom detected' >&2
+            exit 1
+          fi
