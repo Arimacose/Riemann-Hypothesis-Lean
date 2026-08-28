@@ -1,0 +1,45 @@
+name: Riemann CvS weak constraint-gap verification
+
+on:
+  push:
+    branches:
+      - research/cvs-prolate-v17
+    paths:
+      - 'research/riemann-cvs-lean/RiemannCvs/WeakConstraintGapBudget.lean'
+      - '.github/workflows/riemann-cvs-weak-constraint-gap.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@6835ef47e8423fa9e9eacfcbb8fdf83fae42c820
+        with:
+          lake-package-directory: research/riemann-cvs-lean
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: true
+      - name: Elaborate and build theorem
+        working-directory: research/riemann-cvs-lean
+        run: |
+          set -euo pipefail
+          lake env lean RiemannCvs/WeakConstraintGapBudget.lean
+          lake build RiemannCvs.WeakConstraintGapBudget
+      - name: Placeholder and axiom audit
+        working-directory: research/riemann-cvs-lean
+        run: |
+          set -euo pipefail
+          if grep -nE '(^|[^[:alnum:]_])(sorry|admit)([^[:alnum:]_]|$)' RiemannCvs/WeakConstraintGapBudget.lean; then exit 1; fi
+          cat > WeakConstraintGapAxioms.lean <<'EOF'
+          import RiemannCvs.WeakConstraintGapBudget
+          #print axioms RiemannCvs.WeakConstraintGapBudget.seventhPowerLowerBridgeSuffices
+          #print axioms RiemannCvs.WeakConstraintGapBudget.sixthPowerLowerBridgeSuffices
+          #print axioms RiemannCvs.WeakConstraintGapBudget.linearUpperAndSixthPowerLowerSuffice
+          EOF
+          lake env lean WeakConstraintGapAxioms.lean | tee weak-constraint-gap-axioms.txt
+          if grep -E 'sorryAx' weak-constraint-gap-axioms.txt; then exit 1; fi
