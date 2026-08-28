@@ -1,0 +1,45 @@
+name: Riemann CvS scaled denominator verification
+
+on:
+  push:
+    branches:
+      - research/cvs-prolate-v17
+    paths:
+      - research/riemann-cvs-lean/RiemannCvs/ProlateScaledDenominator.lean
+      - .github/workflows/riemann-cvs-scaled-denominator.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@6835ef47e8423fa9e9eacfcbb8fdf83fae42c820
+        with:
+          lake-package-directory: research/riemann-cvs-lean
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: true
+      - name: Build scaled denominator module
+        working-directory: research/riemann-cvs-lean
+        run: lake build RiemannCvs.ProlateScaledDenominator
+      - name: Reject placeholders and print axioms
+        working-directory: research/riemann-cvs-lean
+        run: |
+          set -euo pipefail
+          FILE=RiemannCvs/ProlateScaledDenominator.lean
+          if grep -nE '\b(sorry|admit)\b|^[[:space:]]*(axiom|constant)[[:space:]]' "$FILE"; then
+            echo 'Forbidden placeholder or user axiom found.' >&2
+            exit 1
+          fi
+          cat > ScaledDenominatorAudit.lean <<'EOF'
+          import RiemannCvs.ProlateScaledDenominator
+          #print axioms RiemannCvs.ProlateScaledDenominator.phaseDenominator_pos
+          #print axioms RiemannCvs.ProlateScaledDenominator.phaseDenominator_le_sixtyEight
+          EOF
+          lake env lean ScaledDenominatorAudit.lean | tee scaled-denominator-axioms.txt
