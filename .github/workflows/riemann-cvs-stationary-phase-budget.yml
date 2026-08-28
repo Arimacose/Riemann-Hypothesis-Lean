@@ -1,0 +1,60 @@
+name: Riemann CvS stationary-phase budget verification
+
+on:
+  push:
+    branches:
+      - research/cvs-prolate-v17
+    paths:
+      - research/riemann-cvs-lean/RiemannCvs/StationaryPhaseSplitBudget.lean
+      - .github/workflows/riemann-cvs-stationary-phase-budget.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: leanprover/lean-action@6835ef47e8423fa9e9eacfcbb8fdf83fae42c820
+        with:
+          lake-package-directory: research/riemann-cvs-lean
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: true
+
+      - name: Elaborate stationary-phase budget
+        working-directory: research/riemann-cvs-lean
+        run: |
+          set -euo pipefail
+          lake build RiemannCvs.StationaryPhaseSplitBudget
+
+      - name: Reject placeholders and audit axioms
+        working-directory: research/riemann-cvs-lean
+        run: |
+          set -euo pipefail
+          if grep -R -nE '\b(sorry|admit)\b' RiemannCvs/StationaryPhaseSplitBudget.lean; then
+            echo 'placeholder detected' >&2
+            exit 1
+          fi
+          if grep -R -nE '^\s*(axiom|constant)\b' RiemannCvs/StationaryPhaseSplitBudget.lean; then
+            echo 'user axiom/constant detected' >&2
+            exit 1
+          fi
+          cat > /tmp/StationaryPhaseBudgetAxioms.lean <<'LEAN'
+          import RiemannCvs.StationaryPhaseSplitBudget
+          #print axioms RiemannCvs.StationaryPhaseSplitBudget.farBoundAtNaturalWidth
+          #print axioms RiemannCvs.StationaryPhaseSplitBudget.oneCriticalPointBudget
+          #print axioms RiemannCvs.StationaryPhaseSplitBudget.oneCriticalPointAtNaturalWidth
+          #print axioms RiemannCvs.StationaryPhaseSplitBudget.mainRemainderAggregate
+          #print axioms RiemannCvs.StationaryPhaseSplitBudget.conductorDominatesPrimeRemainder
+          LEAN
+          lake env lean /tmp/StationaryPhaseBudgetAxioms.lean | tee /tmp/axioms.log
+          if grep -vE 'propext|Classical.choice|Quot.sound|depends on axioms|^$' /tmp/axioms.log | grep -E 'axiom'; then
+            echo 'unexpected axiom detected' >&2
+            exit 1
+          fi
