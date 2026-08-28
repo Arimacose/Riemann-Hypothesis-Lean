@@ -24,10 +24,11 @@ jobs:
           test: false
           lint: false
           use-mathlib-cache: true
-      - name: Elaborate and build theorem
+      - name: Build dependency and elaborate theorem
         working-directory: research/riemann-cvs-lean
         run: |
           set -euo pipefail
+          lake build RiemannCvs.ConstraintGapTransfer
           lake env lean RiemannCvs/WeakConstraintGapBudget.lean
           lake build RiemannCvs.WeakConstraintGapBudget
       - name: Placeholder and axiom audit
