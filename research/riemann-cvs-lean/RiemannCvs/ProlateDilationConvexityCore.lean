@@ -57,8 +57,7 @@ theorem uniformCorePositive
           (128 * u ^ 4 + 1328 * u ^ 3 + 2136 * u ^ 2 + 1179 * u + 243) +
         (1 / 2) * (1088 * u ^ 3 + 1872 * u ^ 2 + 972 * u + 189) := by
     positivity
-  rw [hidentity]
-  exact hpos
+  nlinarith [hidentity, hpos]
 
 /-- The actual parameter-dependent squared curvature comparison follows from
 the universal core inequality. -/
@@ -77,9 +76,9 @@ theorem radialCurvatureSquareDominance
   have htm1 : 0 ≤ t - 1 := by linarith
   have hMt : 0 ≤ M * t := mul_nonneg hM0 ht0
   have hMt1 : 0 ≤ M * t - 1 := by nlinarith
-  have htail : 0 ≤ (t - 1) ^ 3 := positivity
-  have hMtail : 0 ≤ M ^ 3 * (t - 1) ^ 3 := positivity
-  have hMtTail : 0 ≤ (M * t - 1) ^ 3 := positivity
+  have htail : 0 ≤ (t - 1) ^ 3 := by positivity
+  have hMtail : 0 ≤ M ^ 3 * (t - 1) ^ 3 := by positivity
+  have hMtTail : 0 ≤ (M * t - 1) ^ 3 := by positivity
   have hba : 0 ≤ 1 - b := by linarith
   have hbaSq : (1 - b) ^ 2 ≤ 1 := by nlinarith
   have hta0 : 0 ≤ t - a := by linarith
