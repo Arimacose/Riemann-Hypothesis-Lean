@@ -1,0 +1,48 @@
+name: Riemann CvS piecewise parity-continuation verification
+
+on:
+  push:
+    branches:
+      - research/cvs-prolate-v17
+    paths:
+      - research/riemann-cvs-lean/RiemannCvs/ParityOrderContinuation.lean
+      - research/riemann-cvs-lean/RiemannCvs/PrimeEventParityMonotonicity.lean
+      - research/riemann-cvs-lean/RiemannCvs/PiecewiseParityContinuation.lean
+      - .github/workflows/riemann-cvs-piecewise-parity.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@6835ef47e8423fa9e9eacfcbb8fdf83fae42c820
+        with:
+          lake-package-directory: research/riemann-cvs-lean
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: true
+      - name: Build piecewise parity module
+        working-directory: research/riemann-cvs-lean
+        run: lake build RiemannCvs.PiecewiseParityContinuation
+      - name: Reject placeholders and print axioms
+        working-directory: research/riemann-cvs-lean
+        run: |
+          set -euo pipefail
+          FILE=RiemannCvs/PiecewiseParityContinuation.lean
+          if grep -nE '\b(sorry|admit)\b|^[[:space:]]*(axiom|constant)[[:space:]]' "$FILE"; then
+            echo 'Forbidden placeholder or user axiom found.' >&2
+            exit 1
+          fi
+          cat > PiecewiseParityAudit.lean <<'EOF'
+          import RiemannCvs.PiecewiseParityContinuation
+          #print axioms RiemannCvs.PiecewiseParityContinuation.orderAcrossOnePrimeEvent
+          #print axioms RiemannCvs.PiecewiseParityContinuation.orderAcrossRankOnePrimeEvent
+          #print axioms RiemannCvs.PiecewiseParityContinuation.marginAcrossPrimeEvent
+          EOF
+          lake env lean PiecewiseParityAudit.lean | tee piecewise-parity-axioms.txt
