@@ -45,7 +45,7 @@ jobs:
               exit 1
             fi
           done
-          cat > /tmp/V17StationaryAxioms.lean <<'EOF'
+          cat > V17StationaryAxioms.lean <<'EOF'
           import RiemannCvs.ProlateCrossDilationStationaryPoint
           import RiemannCvs.ProlateScaledStationaryFamily
           import RiemannCvs.ExteriorLogMomentTransfer
@@ -55,7 +55,8 @@ jobs:
           #print axioms RiemannCvs.ProlateScaledStationaryFamily.scaledSlopePolynomialAtReciprocal
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.normalizedWeightedMomentBound
           EOF
-          lake env lean /tmp/V17StationaryAxioms.lean | tee v17-stationary-axioms.txt
+          lake env lean V17StationaryAxioms.lean | tee v17-stationary-axioms.txt
+          rm V17StationaryAxioms.lean
           if grep -E 'sorryAx' v17-stationary-axioms.txt; then
             exit 1
           fi
