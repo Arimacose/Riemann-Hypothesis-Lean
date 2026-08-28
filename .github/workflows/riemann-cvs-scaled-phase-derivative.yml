@@ -1,0 +1,49 @@
+name: Riemann CvS scaled phase-derivative verification
+
+on:
+  push:
+    branches:
+      - research/cvs-prolate-v17
+    paths:
+      - research/riemann-cvs-lean/RiemannCvs/ProlateScaledStationaryFamily.lean
+      - research/riemann-cvs-lean/RiemannCvs/ProlateScaledPhaseSeparation.lean
+      - research/riemann-cvs-lean/RiemannCvs/ProlateScaledDenominator.lean
+      - research/riemann-cvs-lean/RiemannCvs/ProlateScaledPhaseDerivative.lean
+      - .github/workflows/riemann-cvs-scaled-phase-derivative.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@6835ef47e8423fa9e9eacfcbb8fdf83fae42c820
+        with:
+          lake-package-directory: research/riemann-cvs-lean
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: true
+      - name: Build concrete scaled phase derivative
+        working-directory: research/riemann-cvs-lean
+        run: lake build RiemannCvs.ProlateScaledPhaseDerivative
+      - name: Reject placeholders and print axioms
+        working-directory: research/riemann-cvs-lean
+        run: |
+          set -euo pipefail
+          FILE=RiemannCvs/ProlateScaledPhaseDerivative.lean
+          if grep -nE '\b(sorry|admit)\b|^[[:space:]]*(axiom|constant)[[:space:]]' "$FILE"; then
+            echo 'Forbidden placeholder or user axiom found.' >&2
+            exit 1
+          fi
+          cat > ScaledPhaseDerivativeAudit.lean <<'EOF'
+          import RiemannCvs.ProlateScaledPhaseDerivative
+          #print axioms RiemannCvs.ProlateScaledPhaseDerivative.derivative_times_denominator
+          #print axioms RiemannCvs.ProlateScaledPhaseDerivative.derivativeLowerRight
+          #print axioms RiemannCvs.ProlateScaledPhaseDerivative.derivativeUpperLeft
+          EOF
+          lake env lean ScaledPhaseDerivativeAudit.lean | tee scaled-phase-derivative-axioms.txt
