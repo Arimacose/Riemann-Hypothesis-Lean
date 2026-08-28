@@ -28,8 +28,6 @@ theorem limitingSlopeNumerator
   unfold scaledSlopeNumerator
   ring
 
-/-- Relation between the compact parameter `u = 1/M` and the scaled
-stationary polynomial. -/
 theorem scaledSlopePolynomialRelation
     (M u a b s Q : ℝ)
     (hQ :
@@ -56,7 +54,8 @@ theorem scaledSlopePolynomialAtReciprocal
         M * s ^ 2 - 2 * M * s + M - s ^ 2 + s) :
     M ^ 2 * scaledSlopeNumerator u a b s = Q := by
   have h := scaledSlopePolynomialRelation M u a b s Q hQ
-  rw [hMu, sub_self, zero_mul, neg_zero] at h
+  rw [hMu] at h
+  norm_num at h
   linarith
 
 end RiemannCvs.ProlateScaledStationaryFamily
