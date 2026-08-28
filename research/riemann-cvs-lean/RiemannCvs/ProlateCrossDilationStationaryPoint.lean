@@ -74,7 +74,7 @@ theorem scaledDifferenceFactorPositive
 theorem scaledAtQuarterNegative
     (M a b : ℝ)
     (hM : 4 ≤ M)
-    (ha0 : 0 ≤ a)
+    (_ha0 : 0 ≤ a)
     (ha1 : a ≤ 1 / 2)
     (hb0 : 0 ≤ b) :
     scaledStationaryPoly M a b (1 / 4) < 0 := by
@@ -106,8 +106,9 @@ theorem scaledAtTwoPositive
     (hb1 : b ≤ 1 / 2) :
     0 < scaledStationaryPoly M a b 2 := by
   have hM0 : 0 ≤ M := by linarith
+  have htwoM : 0 ≤ 2 * M := by nlinarith
   have hbScaled : 2 * M * b ≤ M := by
-    have h := mul_le_mul_of_nonneg_left hb1 (mul_nonneg (by norm_num) hM0)
+    have h := mul_le_mul_of_nonneg_left hb1 htwoM
     nlinarith
   have hidentity :
       scaledStationaryPoly M a b 2 =
@@ -203,7 +204,7 @@ theorem scaledDerivativeLower
 theorem scaledDenominatorBudget
     (M s : ℝ)
     (hM : 4 ≤ M)
-    (hs0 : 0 ≤ s)
+    (_hs0 : 0 ≤ s)
     (hs2 : s ≤ 2) :
     s * (M + s - 1) ≤ (5 / 2 : ℝ) * M := by
   have hfactor : 0 ≤ M + s - 1 := by linarith
