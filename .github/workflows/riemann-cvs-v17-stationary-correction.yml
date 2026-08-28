@@ -7,6 +7,7 @@ on:
     paths:
       - 'research/riemann-cvs-lean/RiemannCvs/ProlateCrossDilationStationaryPoint.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ProlateScaledStationaryFamily.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/ProlateDilationConvexityCore.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ExteriorLogMomentTransfer.lean'
       - '.github/workflows/riemann-cvs-v17-stationary-correction.yml'
   workflow_dispatch:
@@ -31,6 +32,7 @@ jobs:
         run: |
           lake env lean RiemannCvs/ProlateCrossDilationStationaryPoint.lean
           lake env lean RiemannCvs/ProlateScaledStationaryFamily.lean
+          lake env lean RiemannCvs/ProlateDilationConvexityCore.lean
           lake env lean RiemannCvs/ExteriorLogMomentTransfer.lean
       - name: Reject placeholders and print axioms
         working-directory: research/riemann-cvs-lean
@@ -40,6 +42,7 @@ jobs:
           for f in \
             RiemannCvs/ProlateCrossDilationStationaryPoint.lean \
             RiemannCvs/ProlateScaledStationaryFamily.lean \
+            RiemannCvs/ProlateDilationConvexityCore.lean \
             RiemannCvs/ExteriorLogMomentTransfer.lean; do
             if grep -nE '(^|[^[:alnum:]_])(sorry|admit)([^[:alnum:]_]|$)' "$f"; then
               exit 1
@@ -48,11 +51,14 @@ jobs:
           cat > V17StationaryAxioms.lean <<'EOF'
           import RiemannCvs.ProlateCrossDilationStationaryPoint
           import RiemannCvs.ProlateScaledStationaryFamily
+          import RiemannCvs.ProlateDilationConvexityCore
           import RiemannCvs.ExteriorLogMomentTransfer
           #print axioms RiemannCvs.ProlateCrossDilationStationaryPoint.scaledRootLayer
           #print axioms RiemannCvs.ProlateCrossDilationStationaryPoint.uniqueScaledRoot
           #print axioms RiemannCvs.ProlateCrossDilationStationaryPoint.curvatureScaleFromBudgets
           #print axioms RiemannCvs.ProlateScaledStationaryFamily.scaledSlopePolynomialAtReciprocal
+          #print axioms RiemannCvs.ProlateDilationConvexityCore.uniformCorePositive
+          #print axioms RiemannCvs.ProlateDilationConvexityCore.radialCurvatureSquareDominance
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.normalizedWeightedMomentBound
           EOF
           lake env lean V17StationaryAxioms.lean | tee v17-stationary-axioms.txt
