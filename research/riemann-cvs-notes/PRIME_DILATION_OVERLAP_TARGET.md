@@ -1,221 +1,173 @@
-# Prime dilation-overlap target for fixed-index prolate leakage
+# Prime dilation-overlap target — corrected stationary-phase version
 
-## Purpose
+> **Status correction (2026-08-28).** The earlier linear-carrier model in this
+> note incorrectly suggested that the true radial PSWF dilation phase is
+> globally nonstationary.  The actual Liouville phase has one nondegenerate
+> stationary point.  The old `O(c^-1)` integration-by-parts target is therefore
+> superseded by the stationary-phase target below.
 
-A global operator-norm estimate for the finite prime block is too crude for the
-lowest prolate scale: the sum of absolute von Mangoldt weights grows much faster
-than the logarithmic archimedean coefficient.  The relevant quantity is instead
-the prime block **restricted to the fixed-index exterior leakage tails**.
+## 1. Actual radial phase
 
-For endpoint-generated oscillatory tails, dilation by an integer changes the
-carrier phase by a nonstationary amount.  This should supply an additional
-factor \(1/[c(m-1)]\), making the prime contribution lower order relative to the
-leakage mass.
-
----
-
-## 1. Model exterior tail
-
-Let \(c=2\pi\lambda^2\).  For one exterior wing, the fixed-index prolate
-continuation is expected to have an endpoint-oscillatory expansion of the form
+For a fixed-index radial prolate mode, write the Liouville phase as
 
 \[
-t_{n,c}(y)
-=
-A_{n,c}\,
-\frac{e^{icy}\,a_{n,c}(y)
-      +\varepsilon_n e^{-icy}\,b_{n,c}(y)}{y},
-\qquad y\ge1,
+\xi_a'(x)=\sqrt{\frac{x^2-a}{x^2-1}},\qquad x>1,
 \]
 
-where, for each fixed index \(n\),
+where for the fixed modes of interest `0 <= a <= 1/2` once the bandwidth is
+large enough.  For two modes with parameters `a,b` and a dilation `r >= 2`,
 
 \[
-\sup_{c\ge c_0}
-\left(
-\|a_{n,c}\|_\infty+
-\|b_{n,c}\|_\infty+
-\|a'_{n,c}\|_{L^1}+
-\|b'_{n,c}\|_{L^1}
-\right)<\infty.
+\Phi_{a,b,r}(x)=\xi_b(rx)-\xi_a(x).
 \]
 
-The amplitude \(A_{n,c}\) contains the exponentially small fixed-index factor.
-The total exterior mass should satisfy
+Put
 
 \[
-\|t_{n,c}\|_2^2
-\asymp |A_{n,c}|^2.
+M=r^2,\qquad t=x^2,\qquad s=M(t-1).
 \]
 
-The exact power of \(c\) in \(A_{n,c}\) is supplied by the Fuchs asymptotic;
-only a uniform relative profile estimate is needed below.
-
----
-
-## 2. Dilation overlap
-
-Let
+After squaring the stationary equation and clearing positive denominators, the
+root is governed by
 
 \[
-(D_mf)(y)=m^{1/2}f(my)
+M(M-1)t^2+(1-M^2+M(a-b))t+Mb-a=0.
 \]
 
-be the unitary dilation.  A representative same-carrier term in
+The Lean module `ProlateCrossDilationStationaryPoint.lean` formalizes the
+polynomial geometry.  In particular, the unique exterior root satisfies
 
 \[
-I_{n,k}(m;c)
-=
-\langle t_{n,c},D_mt_{k,c}\rangle
+\boxed{\frac14<s_*<2,}
 \]
 
-has phase
+so
 
 \[
-e^{ic(m-1)y}.
+\frac1{4r^2}<x_*^2-1<\frac2{r^2}.
 \]
 
-For \(m\ge2\), this phase has no stationary point on \([1,\infty)\).  One
-integration by parts gives, schematically,
+The same module reduces the curvature estimate to division-free scalar
+budgets; the current conservative target is
 
 \[
-\left|
-\int_1^\infty
-e^{ic(m-1)y}F_{n,k,m,c}(y)dy
-\right|
-\le
-\frac{
-|F_{n,k,m,c}(1)|+\|F'_{n,k,m,c}\|_1
-}{c(m-1)}.
+\boxed{\Phi''(x_*)\ge r^3/20.}
 \]
 
-The opposite-carrier terms have phase \(c(m+1)y\) and are at least as small.
-Under the uniform profile bounds,
+## 2. Correct overlap scale
+
+Dunster's uniform radial PSWF expansion expresses each fixed-index exterior
+mode as a Bessel/Hankel oscillatory term plus an `O(c^-1)` envelope remainder.
+The main-main overlap is therefore a one-dimensional oscillatory integral with
+one uniformly nondegenerate stationary point.
+
+The correct target is
 
 \[
 \boxed{
-|I_{n,k}(m;c)|
-\le
-\frac{C_{n,k}}{c(m-1)\sqrt m}
-\|t_{n,c}\|_2\|t_{k,c}\|_2.
-}
-\]
-
-A slightly different power of \(m\) is harmless; any summable majorant after
-multiplication by \(\Lambda(m)/\sqrt m\) suffices.
-
----
-
-## 3. Summing the prime block
-
-The prime block contains weights of the form
-
-\[
-\frac{\Lambda(m)}{\sqrt m}.
-\]
-
-The preceding overlap estimate gives
-
-\[
-\begin{aligned}
-\left|
-\sum_{m\le\lambda^2}
-\frac{\Lambda(m)}{\sqrt m}
-I_{n,k}(m;c)
-\right|
-&\le
-\frac{C_{n,k}}c
+|\langle t_{n,c},D_rt_{k,c}\rangle|
+\le C_{n,k}c^{-1/2}r^{-3/2}
 \|t_{n,c}\|_2\|t_{k,c}\|_2
-\sum_{m\ge2}
-\frac{\Lambda(m)}{m(m-1)}.
-\end{aligned}
-\]
-
-The numerical series on the right converges absolutely.  Therefore
-
-\[
-\boxed{
-|Q_{\mathrm{prime}}(t_{n,c},t_{k,c})|
-\le
-\frac{C'_{n,k}}c
-\|t_{n,c}\|_2\|t_{k,c}\|_2.
++\operatorname{Err}_{n,k}(c,r).
 }
 \]
 
-Since
+The first term is the stationary-phase contribution.  The Dunster envelope
+remainder should give a summably weaker contribution; even a relative
+`O(c^-1)` remainder with no additional `r` decay is sufficient after the prime
+sum.
+
+## 3. Prime summation
+
+The prime-power coefficient is `Lambda(r)/sqrt(r)`.  The main stationary term
+therefore contributes
 
 \[
-c=2\pi\lambda^2,
+\frac1{\sqrt c}
+\sum_{r\ge2}\frac{\Lambda(r)}{r^2},
 \]
 
-this is \(O(\lambda^{-2})\) in units of the exterior Gram matrix and is
-negligible relative to the logarithmic conductor scale.
-
----
-
-## 4. Why the global norm is misleading
-
-The triangle-inequality operator bound
+and
 
 \[
-\|W_p\|
-\le
-2\sum_{m\le\lambda^2}
-\frac{\Lambda(m)}{\sqrt m}
+\sum_{r\ge2}\frac{\Lambda(r)}{r^2}
+=-\frac{\zeta'(2)}{\zeta(2)}<\infty.
 \]
 
-ignores the carrier-phase change under dilation.  It is suitable for a fixed
-cutoff finite-section theorem but not for the moving-cutoff prolate asymptotic.
-The restricted oscillatory estimate above is the correct scale-sensitive
-quantity.
-
----
-
-## 5. Precise theorem needed from prolate asymptotics
-
-For the fixed indices used in the parity proof, it is enough to establish:
-
-1. an exterior expansion with a \(1/y\)-type integrable envelope;
-2. uniform weighted \(C^1\) control of the envelope;
-3. two-sided comparison between \(|A_{n,c}|^2\) and the exact concentration
-   defect \(d_n(c)\);
-4. uniformity under the finite set of dilation factors after summation, or a
-   summable bound valid for every integer \(m\ge2\).
-
-A pointwise leading asymptotic without a derivative/integrable remainder is not
-sufficient for the prime sum.
-
----
-
-## 6. Consequence for the Schur coupling
-
-If the prime Gram matrix on the exact-parity tail basis is
+Hence the fixed-mode prime Gram contribution is expected at the scale
 
 \[
-O(c^{-1})
+\boxed{O(c^{-1/2})}
 \]
 
-relative to the defect Gram, while the conductor part is
+relative to the exterior defect Gram, not `O(c^-1)`.
+
+This is still negligible compared with the common archimedean conductor scale
+`asymp log(lambda)` because `c = 2*pi*lambda^2`.
+
+## 4. Compact scaled family
+
+Set
 
 \[
-\asymp\log\lambda,
+u=r^{-2},\qquad x=\sqrt{1+us},\qquad \Psi=r\Phi.
 \]
 
-then prime low/high coupling is far below the threshold required by the
-\(\Theta(\lambda^8)\) internal prolate gap.  The remaining pole block is finite
-rank and can be treated by the same endpoint-amplitude estimates.
+Then the scaled phase derivative has a smooth compact-parameter description;
+the multiplication-only algebra is recorded in
+`ProlateScaledStationaryFamily.lean`.  The relevant parameter set is
 
-This would close the most dangerous perturbative part of the
-prolate-to-Weil transfer.
+\[
+0\le u\le1/4,\quad 0\le a,b\le1/2,
+\]
 
----
+with the stationary point confined to `1/4 < s < 2`.
 
-## 7. Status
+For the moving arithmetic cutoff used in the project,
 
-The nonstationary-phase calculation is elementary once the uniform exterior
-profile is available.  The missing research input is a source-level uniform
-fixed-index PSWF exterior asymptotic strong enough to justify the integration
-by parts and the defect normalization.
+\[
+r\le c/(2\pi),
+\]
 
-Until that theorem is supplied, the \(O(c^{-1})\) prime estimate remains a
-well-defined target rather than a proved property of the actual prolate tails.
+so the effective oscillatory parameter
+
+\[
+\mu=c/r
+\]
+
+always satisfies `mu >= 2*pi`.  Thus the remaining main-term proof is a
+standard-looking **uniform single-stationary-point theorem on a compact
+parameter family**, rather than an endpoint-degeneracy problem.
+
+## 5. What remains analytic
+
+To promote the target to a theorem for the actual PSWF tails, one still needs
+to write down, with constants uniform over the fixed set of modes:
+
+1. Dunster's radial Bessel expansion in the project's normalization;
+2. an amplitude `C^1`/variation bound on the scaled stationary region;
+3. a uniform stationary-phase estimate for the compact family;
+4. the `L2` effect of the `O(c^-1)` Bessel-envelope remainder;
+5. the final prime-power summation.
+
+The exterior logarithmic-moment estimate is treated separately in
+`PSWF_EXTERIOR_LOG_MOMENT_REDUCTION.md` and
+`ExteriorLogMomentTransfer.lean`.
+
+## 6. Consequence for the main line
+
+If the corrected estimate is completed, the fixed low prolate tail spaces have
+
+\[
+Q_{\rm prime}=O(c^{-1/2})P_{\rm defect},
+\]
+
+while the conductor part is
+
+\[
+Q_{\rm arch}=(2\log\lambda+O(1))P_{\rm defect}.
+\]
+
+This is more than sufficient to preserve the existing `lambda^-4` parity
+margin on the fixed-index block.  It does **not** by itself control the entire
+odd complement; that remains a separate global coercivity/no-intruder issue.
