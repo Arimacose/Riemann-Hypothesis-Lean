@@ -34,7 +34,7 @@ jobs:
           test: false
           lint: false
           use-mathlib-cache: true
-      - name: Elaborate V17 stationary modules
+      - name: Elaborate and compile V17 stationary modules
         working-directory: research/riemann-cvs-lean
         shell: bash
         run: |
@@ -43,6 +43,11 @@ jobs:
           lake env lean RiemannCvs/ProlateCrossDilationStationaryPoint.lean
           lake env lean RiemannCvs/ProlateScaledStationaryFamily.lean
           lake env lean RiemannCvs/ExteriorLogMomentTransfer.lean
+          lake build \
+            RiemannCvs.ProlateDilationStationaryPoint \
+            RiemannCvs.ProlateCrossDilationStationaryPoint \
+            RiemannCvs.ProlateScaledStationaryFamily \
+            RiemannCvs.ExteriorLogMomentTransfer
       - name: Reject placeholders and print axioms
         working-directory: research/riemann-cvs-lean
         shell: bash
@@ -57,7 +62,7 @@ jobs:
           if grep -nE '(^|[^[:alnum:]_])(sorry|admit)([^[:alnum:]_]|$)' "${files[@]}"; then
             exit 1
           fi
-          cat > /tmp/V17StationaryAxioms.lean <<'EOF'
+          cat > V17StationaryAxioms.lean <<'EOF'
           import RiemannCvs.ProlateDilationStationaryPoint
           import RiemannCvs.ProlateCrossDilationStationaryPoint
           import RiemannCvs.ProlateScaledStationaryFamily
@@ -69,7 +74,7 @@ jobs:
           #print axioms RiemannCvs.ProlateScaledStationaryFamily.scaledSlopePolynomialAtReciprocal
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.normalizedWeightedMomentBound
           EOF
-          lake env lean /tmp/V17StationaryAxioms.lean | tee v17-stationary-axioms.txt
+          lake env lean V17StationaryAxioms.lean | tee v17-stationary-axioms.txt
           if grep -E 'sorryAx' v17-stationary-axioms.txt; then
             exit 1
           fi
