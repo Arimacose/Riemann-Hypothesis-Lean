@@ -1,0 +1,38 @@
+name: Riemann CvS parity-block sign audit
+
+on:
+  push:
+    branches:
+      - research/cvs-prolate-v17
+    paths:
+      - 'research/riemann-cvs-numerics/audit_parity_offdiagonal_signs.py'
+      - '.github/workflows/riemann-cvs-parity-sign-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        c: [5, 13, 29]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install numerical dependencies
+        run: python -m pip install --upgrade python-flint
+      - name: Run Arb sign audit
+        working-directory: research/riemann-cvs-numerics
+        run: |
+          python audit_parity_offdiagonal_signs.py \
+            --c ${{ matrix.c }} --N 20 --prec 500 \
+            --json-out artifacts/parity_sign_c${{ matrix.c }}_N20.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: parity-sign-c${{ matrix.c }}-N20
+          path: research/riemann-cvs-numerics/artifacts/parity_sign_c${{ matrix.c }}_N20.json
