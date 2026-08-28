@@ -29,9 +29,9 @@ theorem weightedStationaryOverlapBound
     (weight decay overlap : ι → ℝ)
     (scale normProduct : ℝ)
     (hWeight : ∀ i, 0 ≤ weight i)
-    (hDecay : ∀ i, 0 ≤ decay i)
-    (hScale : 0 ≤ scale)
-    (hNorm : 0 ≤ normProduct)
+    (_hDecay : ∀ i, 0 ≤ decay i)
+    (_hScale : 0 ≤ scale)
+    (_hNorm : 0 ≤ normProduct)
     (hOverlap :
       ∀ i, |overlap i| ≤ scale * decay i * normProduct) :
     |∑ i, weight i * overlap i| ≤
@@ -91,7 +91,7 @@ theorem combineMainAndEnvelopeRemainder
     |total| ≤ (mainScale + remainderScale) * normSq := by
   rw [hTotal]
   calc
-    |main + remainder| ≤ |main| + |remainder| := abs_add _ _
+    |main + remainder| ≤ |main| + |remainder| := abs_add_le _ _
     _ ≤ mainScale * normSq + remainderScale * normSq :=
       add_le_add hMain hRemainder
     _ = (mainScale + remainderScale) * normSq := by ring
@@ -104,7 +104,7 @@ theorem conductorDominatesPrimePerturbation
     (hConductor : logScale * normSq ≤ conductor)
     (hPrime : |prime| ≤ errorScale * normSq)
     (hTotal : total = conductor + prime)
-    (hEta0 : 0 ≤ eta)
+    (_hEta0 : 0 ≤ eta)
     (hMargin : errorScale ≤ eta * logScale) :
     (1 - eta) * logScale * normSq ≤ total := by
   have hPrimeLower : -(errorScale * normSq) ≤ prime := by
