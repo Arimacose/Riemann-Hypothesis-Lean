@@ -9,6 +9,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/ProlateScaledStationaryFamily.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ProlateDilationConvexityCore.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ExteriorLogMomentTransfer.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/PrimeStationaryBudget.lean'
       - '.github/workflows/riemann-cvs-v17-stationary-correction.yml'
   workflow_dispatch:
 
@@ -34,6 +35,7 @@ jobs:
           lake env lean RiemannCvs/ProlateScaledStationaryFamily.lean
           lake env lean RiemannCvs/ProlateDilationConvexityCore.lean
           lake env lean RiemannCvs/ExteriorLogMomentTransfer.lean
+          lake env lean RiemannCvs/PrimeStationaryBudget.lean
       - name: Reject placeholders and print axioms
         working-directory: research/riemann-cvs-lean
         shell: bash
@@ -43,7 +45,8 @@ jobs:
             RiemannCvs/ProlateCrossDilationStationaryPoint.lean \
             RiemannCvs/ProlateScaledStationaryFamily.lean \
             RiemannCvs/ProlateDilationConvexityCore.lean \
-            RiemannCvs/ExteriorLogMomentTransfer.lean; do
+            RiemannCvs/ExteriorLogMomentTransfer.lean \
+            RiemannCvs/PrimeStationaryBudget.lean; do
             if grep -nE '(^|[^[:alnum:]_])(sorry|admit)([^[:alnum:]_]|$)' "$f"; then
               exit 1
             fi
@@ -53,6 +56,7 @@ jobs:
           import RiemannCvs.ProlateScaledStationaryFamily
           import RiemannCvs.ProlateDilationConvexityCore
           import RiemannCvs.ExteriorLogMomentTransfer
+          import RiemannCvs.PrimeStationaryBudget
           #print axioms RiemannCvs.ProlateCrossDilationStationaryPoint.scaledRootLayer
           #print axioms RiemannCvs.ProlateCrossDilationStationaryPoint.uniqueScaledRoot
           #print axioms RiemannCvs.ProlateCrossDilationStationaryPoint.curvatureScaleFromBudgets
@@ -60,6 +64,8 @@ jobs:
           #print axioms RiemannCvs.ProlateDilationConvexityCore.uniformCorePositive
           #print axioms RiemannCvs.ProlateDilationConvexityCore.radialCurvatureSquareDominance
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.normalizedWeightedMomentBound
+          #print axioms RiemannCvs.PrimeStationaryBudget.weightedStationaryOverlapWithSeriesCap
+          #print axioms RiemannCvs.PrimeStationaryBudget.conductorDominatesPrimePerturbation
           EOF
           lake env lean V17StationaryAxioms.lean | tee v17-stationary-axioms.txt
           rm V17StationaryAxioms.lean
