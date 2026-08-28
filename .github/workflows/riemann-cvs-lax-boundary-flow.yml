@@ -1,0 +1,60 @@
+name: Riemann CvS Lax-boundary flow verification
+
+on:
+  push:
+    branches:
+      - research/cvs-prolate-v17
+    paths:
+      - research/riemann-cvs-lean/RiemannCvs/LaxBoundaryFlow.lean
+      - .github/workflows/riemann-cvs-lax-boundary-flow.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: leanprover/lean-action@6835ef47e8423fa9e9eacfcbb8fdf83fae42c820
+        with:
+          lake-package-directory: research/riemann-cvs-lean
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: true
+
+      - name: Elaborate Lax-boundary flow module
+        working-directory: research/riemann-cvs-lean
+        run: |
+          set -euo pipefail
+          lake build RiemannCvs.LaxBoundaryFlow
+
+      - name: Reject placeholders and audit axioms
+        working-directory: research/riemann-cvs-lean
+        run: |
+          set -euo pipefail
+          if grep -R -nE '\b(sorry|admit)\b' RiemannCvs/LaxBoundaryFlow.lean; then
+            echo 'placeholder detected' >&2
+            exit 1
+          fi
+          if grep -R -nE '^\s*(axiom|constant)\b' RiemannCvs/LaxBoundaryFlow.lean; then
+            echo 'user axiom/constant detected' >&2
+            exit 1
+          fi
+          cat > /tmp/LaxBoundaryFlowAxioms.lean <<'LEAN'
+          import RiemannCvs.LaxBoundaryFlow
+          #print axioms RiemannCvs.LaxBoundaryFlow.commutatorExpectationVanishes
+          #print axioms RiemannCvs.LaxBoundaryFlow.eigenvalueVelocity
+          #print axioms RiemannCvs.LaxBoundaryFlow.gapVelocityNonnegative
+          #print axioms RiemannCvs.LaxBoundaryFlow.gapVelocityPositive
+          #print axioms RiemannCvs.LaxBoundaryFlow.approximateGapVelocity
+          LEAN
+          lake env lean /tmp/LaxBoundaryFlowAxioms.lean | tee /tmp/axioms.log
+          if grep -vE 'propext|Classical.choice|Quot.sound|depends on axioms|^$' /tmp/axioms.log | grep -E 'axiom'; then
+            echo 'unexpected axiom detected' >&2
+            exit 1
+          fi
