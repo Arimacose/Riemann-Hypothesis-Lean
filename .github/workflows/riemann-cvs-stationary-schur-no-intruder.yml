@@ -1,0 +1,55 @@
+name: Riemann CvS stationary-Schur no-intruder verification
+
+on:
+  push:
+    branches:
+      - research/cvs-prolate-v17
+    paths:
+      - research/riemann-cvs-lean/RiemannCvs/BlockGapTransfer.lean
+      - research/riemann-cvs-lean/RiemannCvs/StationarySchurNoIntruder.lean
+      - .github/workflows/riemann-cvs-stationary-schur-no-intruder.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: leanprover/lean-action@6835ef47e8423fa9e9eacfcbb8fdf83fae42c820
+        with:
+          lake-package-directory: research/riemann-cvs-lean
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: true
+
+      - name: Build stationary-Schur module
+        working-directory: research/riemann-cvs-lean
+        run: lake build RiemannCvs.StationarySchurNoIntruder
+
+      - name: Reject placeholders and print axioms
+        working-directory: research/riemann-cvs-lean
+        run: |
+          set -euo pipefail
+          FILE=RiemannCvs/StationarySchurNoIntruder.lean
+          if grep -nE '\b(sorry|admit)\b|^[[:space:]]*(axiom|constant)[[:space:]]' "$FILE"; then
+            echo 'Forbidden placeholder or user axiom found.' >&2
+            exit 1
+          fi
+          cat > StationarySchurAudit.lean <<'EOF'
+          import RiemannCvs.StationarySchurNoIntruder
+          #print axioms RiemannCvs.StationarySchurNoIntruder.determinantBudgetFromStationaryScale
+          #print axioms RiemannCvs.StationarySchurNoIntruder.oddLowerBoundFromStationaryScale
+          #print axioms RiemannCvs.StationarySchurNoIntruder.quarticParityFromStationarySchur
+          #print axioms RiemannCvs.StationarySchurNoIntruder.thresholdMonotone
+          EOF
+          lake env lean StationarySchurAudit.lean | tee stationary-schur-axioms.txt
+          if grep -E '\[.*sorryAx|\[.*Classical.choice.*Classical.choice' stationary-schur-axioms.txt; then
+            echo 'Unexpected axiom output.' >&2
+            exit 1
+          fi
