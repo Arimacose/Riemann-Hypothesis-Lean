@@ -228,11 +228,16 @@ def certify(
     prec: int,
     dps: int,
     iterations: int,
+    margin_left: str,
+    margin_right: str,
+    margin_prefix_index: int,
 ) -> dict[str, Any]:
     if c < 2 or N < 1:
         raise ValueError("require c >= 2 and N >= 1")
     if prec < 256 or dps < 80 or iterations < 20:
         raise ValueError("require prec >= 256, dps >= 80, iterations >= 20")
+    if margin_prefix_index < 0 or margin_prefix_index >= N:
+        raise ValueError("require 0 <= margin_prefix_index < N")
 
     ctx.prec = prec
     mp.mp.dps = dps
@@ -309,6 +314,31 @@ def certify(
     if not prefixes[-1].contains(1):
         raise RuntimeError("total residue interval does not contain monic value 1")
 
+    margin_left_ball = arb(margin_left)
+    margin_right_ball = arb(margin_right)
+    if not margin_left_ball.is_exact() or not margin_right_ball.is_exact():
+        raise ValueError("compact margin endpoints must be exact point balls")
+    if not margin_left_ball <= margin_right_ball:
+        raise RuntimeError("compact margin interval endpoints are unordered")
+    if not margin_right_ball < even_boxes[0]:
+        raise RuntimeError(
+            "compact margin interval is not strictly before the first pole"
+        )
+    k = margin_prefix_index
+    left_weight_drop = (
+        arb(1) / (even_boxes[k] - margin_left_ball)
+        - arb(1) / (even_boxes[k + 1] - margin_left_ball)
+    )
+    if not left_weight_drop > 0:
+        raise RuntimeError(
+            f"prefix weight drop {k} is not certified positive"
+        )
+    compact_prefix_margin = prefixes[k] * left_weight_drop
+    if not compact_prefix_margin > 0:
+        raise RuntimeError(
+            f"compact prefix margin {k} is not certified positive"
+        )
+
     negative_indices = [j for j, r in enumerate(residues) if r < 0]
     indeterminate_indices = [
         j for j, r in enumerate(residues) if not (r > 0 or r < 0)
@@ -343,6 +373,38 @@ def certify(
         "negative_residue_indices": negative_indices,
         "indeterminate_residue_indices": indeterminate_indices,
         "total_residue_contains_one": True,
+        "compact_prefix_margin_certificate": {
+            "interval_left": _ball_record(margin_left_ball),
+            "interval_right": _ball_record(margin_right_ball),
+            "prefix_index": k,
+            "cumulative_residue": _ball_record(prefixes[k]),
+            "left_endpoint_reciprocal_weight_drop": _ball_record(
+                left_weight_drop
+            ),
+            "weyl_lower_bound_on_interval": _ball_record(
+                compact_prefix_margin
+            ),
+            "strictly_positive": True,
+            "lean_theorems": [
+                (
+                    "RiemannCvs.BoundaryWeylCumulative."
+                    "weightedSum_ge_prefixDrop"
+                ),
+                (
+                    "RiemannCvs.BoundaryWeylCumulative."
+                    "reciprocalPoleDrop_monoOnLeft"
+                ),
+                (
+                    "RiemannCvs.BoundaryWeylCumulative."
+                    "finiteBoundaryWeyl_ge_prefixDropAtLeft"
+                ),
+            ],
+            "justification": (
+                "finite Abel prefix-drop lower bound plus monotonic increase "
+                "of reciprocal pole drop as x moves right before the first "
+                "pole"
+            ),
+        },
     }
 
 
@@ -353,6 +415,9 @@ def main() -> int:
     parser.add_argument("--prec", type=int, default=900)
     parser.add_argument("--dps", type=int, default=180)
     parser.add_argument("--iterations", type=int, default=120)
+    parser.add_argument("--margin-left", default="-100")
+    parser.add_argument("--margin-right", default="0")
+    parser.add_argument("--margin-prefix-index", type=int, default=11)
     parser.add_argument("--json-out", required=True)
     args = parser.parse_args()
 
@@ -362,6 +427,9 @@ def main() -> int:
         prec=args.prec,
         dps=args.dps,
         iterations=args.iterations,
+        margin_left=args.margin_left,
+        margin_right=args.margin_right,
+        margin_prefix_index=args.margin_prefix_index,
     )
     certificate.update(
         {
@@ -397,6 +465,9 @@ def main() -> int:
                 "first_cumulative_residue": first_prefix,
                 "negative_residue_indices": certificate[
                     "negative_residue_indices"
+                ],
+                "compact_prefix_margin_certificate": certificate[
+                    "compact_prefix_margin_certificate"
                 ],
                 "json_out": str(output),
             },

@@ -8,6 +8,7 @@ on:
     paths:
       - 'research/riemann-cvs-lean/RiemannCvs/BoundaryGapNoCrossing.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/BoundaryWeylCumulative.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/BoundaryWeylUniformLimit.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/CvSParityDisplacement.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V23BoundaryWeylMainline.lean'
@@ -27,6 +28,7 @@ on:
     paths:
       - 'research/riemann-cvs-lean/RiemannCvs/BoundaryGapNoCrossing.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/BoundaryWeylCumulative.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/BoundaryWeylUniformLimit.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/CvSParityDisplacement.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V23BoundaryWeylMainline.lean'
@@ -85,6 +87,8 @@ jobs:
           set -euo pipefail
           lake build RiemannCvs.BoundaryWeylCumulative
           lake env lean RiemannCvs/BoundaryWeylCumulative.lean
+          lake build RiemannCvs.BoundaryWeylUniformLimit
+          lake env lean RiemannCvs/BoundaryWeylUniformLimit.lean
           lake build RiemannCvs.V23BoundaryWeylMainline
           lake env lean RiemannCvs/V23BoundaryWeylMainline.lean
 
@@ -96,6 +100,7 @@ jobs:
           files=(
             RiemannCvs/BoundaryGapNoCrossing.lean
             RiemannCvs/BoundaryWeylCumulative.lean
+            RiemannCvs/BoundaryWeylUniformLimit.lean
             RiemannCvs/CvSParityDisplacement.lean
             RiemannCvs/ObliqueWeylDeterminant.lean
             RiemannCvs/V23BoundaryWeylMainline.lean
@@ -128,11 +133,29 @@ jobs:
           #print axioms RiemannCvs.ObliqueWeylDeterminant.determinantFactorization_eq_neg_boundaryWeylSum
           #print axioms RiemannCvs.BoundaryWeylCumulative.finiteAbelSummation
           #print axioms RiemannCvs.BoundaryWeylCumulative.weightedSum_posOfCumulative
+          #print axioms RiemannCvs.BoundaryWeylCumulative.weightedSum_ge_finalCumulativeTerm
+          #print axioms RiemannCvs.BoundaryWeylCumulative.weightedSum_ge_prefixDrop
+          #print axioms RiemannCvs.BoundaryWeylCumulative.reciprocalPoleDrop_monoOnLeft
+          #print axioms RiemannCvs.BoundaryWeylCumulative.finiteBoundaryWeyl_ge_finalCumulativeTerm
+          #print axioms RiemannCvs.BoundaryWeylCumulative.finiteBoundaryWeyl_ge_prefixDrop
+          #print axioms RiemannCvs.BoundaryWeylCumulative.finiteBoundaryWeyl_ge_prefixDropAtLeft
+          #print axioms RiemannCvs.BoundaryWeylCumulative.finiteBoundaryWeyl_ge_margin
+          #print axioms RiemannCvs.BoundaryWeylCumulative.finiteBoundaryWeyl_ge_ratio_of_finalBounds
           #print axioms RiemannCvs.BoundaryWeylCumulative.finiteBoundaryWeyl_pos_beforeFirstPole
           #print axioms RiemannCvs.BoundaryWeylCumulative.finiteBoundaryWeyl_ne_zero_beforeFirstPole
           #print axioms RiemannCvs.BoundaryWeylCumulative.factorizedNumerator_ne_zero_beforeFirstPole
           #print axioms RiemannCvs.BoundaryWeylCumulative.rankOneCorrectedWeyl_pos
           #print axioms RiemannCvs.BoundaryWeylCumulative.rankOneCorrectedBoundaryWeyl_pos_beforeFirstPole
+          #print axioms RiemannCvs.BoundaryWeylUniformLimit.lowerBoundOn_of_pointwiseLimit
+          #print axioms RiemannCvs.BoundaryWeylUniformLimit.positiveOn_of_pointwiseLimit_uniformMargin
+          #print axioms RiemannCvs.BoundaryWeylUniformLimit.nonzeroOn_of_pointwiseLimit_uniformMargin
+          #print axioms RiemannCvs.BoundaryWeylUniformLimit.positiveOn_of_finiteMargin_and_uniformError
+          #print axioms RiemannCvs.BoundaryWeylUniformLimit.boundaryWeylLimit_pos_of_uniformFinalTerms
+          #print axioms RiemannCvs.BoundaryWeylUniformLimit.boundaryWeylLimit_pos_of_uniformPrefixDrops
+          #print axioms RiemannCvs.BoundaryWeylUniformLimit.boundaryWeylLimit_pos_of_oneCutoffError
+          #print axioms RiemannCvs.BoundaryWeylUniformLimit.boundaryWeylLimit_ne_zero_of_oneCutoffError
+          #print axioms RiemannCvs.BoundaryWeylUniformLimit.boundaryWeylLimit_pos_of_prefixDropError
+          #print axioms RiemannCvs.BoundaryWeylUniformLimit.boundaryWeylLimit_posOn_Icc_of_prefixDropAtLeftError
           LEAN
           lake env lean V23BoundaryWeylAxioms.lean | tee v23-boundary-weyl-axioms.txt
           if grep -vE 'propext|Classical.choice|Quot.sound|depends on axioms|^$' \
@@ -198,7 +221,27 @@ jobs:
             --prec 900 \
             --dps 180 \
             --iterations 120 \
+            --margin-left=-100 \
+            --margin-right=0 \
+            --margin-prefix-index 11 \
             --json-out research/riemann-cvs-numerics/artifacts/v23_c13_N20_boundary_weyl_cumulative.json
+
+      - name: Probe the fixed-prefix compact margin across a cutoff grid
+        shell: bash
+        run: |
+          set -euo pipefail
+          for N in 12 16 24; do
+            python research/riemann-cvs-numerics/certify_boundary_weyl_cumulative.py \
+              --c 13 \
+              --N "${N}" \
+              --prec 900 \
+              --dps 180 \
+              --iterations 120 \
+              --margin-left=-100 \
+              --margin-right=0 \
+              --margin-prefix-index 11 \
+              --json-out "research/riemann-cvs-numerics/artifacts/v23_c13_N${N}_boundary_weyl_compact_margin.json"
+          done
 
       - name: Upload V23 regression artifacts
         if: always()
@@ -209,4 +252,7 @@ jobs:
             research/riemann-cvs-numerics/artifacts/v23_v22_zero_mode_c13.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N20_parity_gap.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N20_boundary_weyl_cumulative.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_N12_boundary_weyl_compact_margin.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_N16_boundary_weyl_compact_margin.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_N24_boundary_weyl_compact_margin.json
           if-no-files-found: error

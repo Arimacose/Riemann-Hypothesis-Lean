@@ -110,14 +110,85 @@ theorem weightedSum_posOfCumulative
   intro j hj
   have hjN : j < N := Finset.mem_range.mp hj
   exact mul_nonneg
+      (hProperPrefix j hjN)
+      (sub_nonneg.mpr (hWeightDecreasing j hjN))
+
+/-- Quantitative Abel lower bound: nonnegative proper cumulative terms may be
+dropped, leaving the final cumulative mass times the final weight. -/
+theorem weightedSum_ge_finalCumulativeTerm
+    (r weight : ℕ → ℝ) (N : ℕ)
+    (hProperPrefix : ∀ j, j < N → 0 ≤ prefixSum r j)
+    (hWeightDecreasing : ∀ j, j < N → weight (j + 1) ≤ weight j) :
+    prefixSum r N * weight N ≤
+      ∑ j ∈ Finset.range (N + 1), r j * weight j := by
+  rw [finiteAbelSummation]
+  apply le_add_of_nonneg_right
+  apply Finset.sum_nonneg
+  intro j hj
+  have hjN : j < N := Finset.mem_range.mp hj
+  exact mul_nonneg
     (hProperPrefix j hjN)
     (sub_nonneg.mpr (hWeightDecreasing j hjN))
+
+/-- Quantitative Abel lower bound from any proper prefix.  This is often
+stronger than the final-term bound when the largest pole moves outward with
+the cutoff. -/
+theorem weightedSum_ge_prefixDrop
+    (r weight : ℕ → ℝ) (N k : ℕ)
+    (hk : k < N)
+    (hPrefix : ∀ j, j ≤ N → 0 ≤ prefixSum r j)
+    (hLastWeight : 0 ≤ weight N)
+    (hWeightDecreasing : ∀ j, j < N → weight (j + 1) ≤ weight j) :
+    prefixSum r k * (weight k - weight (k + 1)) ≤
+      ∑ j ∈ Finset.range (N + 1), r j * weight j := by
+  rw [finiteAbelSummation]
+  have hFinal : 0 ≤ prefixSum r N * weight N :=
+    mul_nonneg (hPrefix N le_rfl) hLastWeight
+  have hTerms : ∀ j ∈ Finset.range N,
+      0 ≤ prefixSum r j * (weight j - weight (j + 1)) := by
+    intro j hj
+    have hjN : j < N := Finset.mem_range.mp hj
+    exact mul_nonneg
+      (hPrefix j (Nat.le_of_lt hjN))
+      (sub_nonneg.mpr (hWeightDecreasing j hjN))
+  exact (Finset.single_le_sum hTerms (Finset.mem_range.mpr hk)).trans
+    (le_add_of_nonneg_left hFinal)
 
 /-- Finite boundary-Weyl sum with real poles and residues.  The sign convention
 uses positive denominators to the left of the first pole. -/
 noncomputable def finiteBoundaryWeyl
     (poles residues : ℕ → ℝ) (N : ℕ) (x : ℝ) : ℝ :=
   ∑ j ∈ Finset.range (N + 1), residues j / (poles j - x)
+
+/-- The reciprocal-weight drop between two ordered poles increases as the
+evaluation point moves right while staying to the left of both poles. -/
+theorem reciprocalPoleDrop_monoOnLeft
+    (a b x y : ℝ) (hab : a < b) (hxy : x ≤ y) (hya : y < a) :
+    1 / (a - x) - 1 / (b - x) ≤
+      1 / (a - y) - 1 / (b - y) := by
+  have hay : 0 < a - y := sub_pos.mpr hya
+  have hby : 0 < b - y := by linarith
+  have hax : 0 < a - x := by linarith
+  have hbx : 0 < b - x := by linarith
+  have ha : a - y ≤ a - x := by linarith
+  have hb : b - y ≤ b - x := by linarith
+  have hprod :
+      (a - y) * (b - y) ≤ (a - x) * (b - x) := by
+    exact mul_le_mul ha hb (le_of_lt hby) (le_of_lt hax)
+  have hfrac :
+      (b - a) / ((a - x) * (b - x)) ≤
+        (b - a) / ((a - y) * (b - y)) :=
+    div_le_div_of_nonneg_left
+      (sub_nonneg.mpr (le_of_lt hab)) (mul_pos hay hby) hprod
+  calc
+    1 / (a - x) - 1 / (b - x) =
+        (b - a) / ((a - x) * (b - x)) := by
+          field_simp [ne_of_gt hax, ne_of_gt hbx]
+          ring
+    _ ≤ (b - a) / ((a - y) * (b - y)) := hfrac
+    _ = 1 / (a - y) - 1 / (b - y) := by
+          field_simp [ne_of_gt hay, ne_of_gt hby]
+          ring
 
 /-- Cumulative residue criterion: the finite boundary-Weyl function is
 strictly positive everywhere to the left of its first pole. -/
@@ -146,6 +217,122 @@ theorem finiteBoundaryWeyl_pos_beforeFirstPole
     weightedSum_posOfCumulative residues
       (fun j => 1 / (poles j - x)) N
       hProperPrefix hFinalPrefix hLastWeight hWeightDecreasing
+
+/-- Quantitative version of the cumulative-residue criterion.  The finite
+boundary-Weyl value dominates its final Abel term. -/
+theorem finiteBoundaryWeyl_ge_finalCumulativeTerm
+    (poles residues : ℕ → ℝ) (N : ℕ) (x : ℝ)
+    (hPoles : StrictMono poles)
+    (hBefore : x < poles 0)
+    (hProperPrefix : ∀ j, j < N → 0 ≤ prefixSum residues j) :
+    prefixSum residues N / (poles N - x) ≤
+      finiteBoundaryWeyl poles residues N x := by
+  have hWeightDecreasing :
+      ∀ j, j < N →
+        1 / (poles (j + 1) - x) ≤ 1 / (poles j - x) := by
+    intro j _hjN
+    have hxj : x < poles j :=
+      lt_of_lt_of_le hBefore (hPoles.monotone (Nat.zero_le j))
+    apply one_div_le_one_div_of_le (sub_pos.mpr hxj)
+    have hj : poles j < poles (j + 1) :=
+      hPoles (Nat.lt_succ_self j)
+    linarith
+  simpa [finiteBoundaryWeyl, div_eq_mul_inv] using
+    weightedSum_ge_finalCumulativeTerm residues
+      (fun j => 1 / (poles j - x)) N
+      hProperPrefix hWeightDecreasing
+
+/-- Quantitative boundary-Weyl lower bound supplied by any proper cumulative
+residue times its reciprocal-weight drop. -/
+theorem finiteBoundaryWeyl_ge_prefixDrop
+    (poles residues : ℕ → ℝ) (N k : ℕ) (x : ℝ)
+    (hk : k < N)
+    (hPoles : StrictMono poles)
+    (hBefore : x < poles 0)
+    (hPrefix : ∀ j, j ≤ N → 0 ≤ prefixSum residues j) :
+    prefixSum residues k *
+        (1 / (poles k - x) - 1 / (poles (k + 1) - x)) ≤
+      finiteBoundaryWeyl poles residues N x := by
+  have hLastWeight : 0 ≤ 1 / (poles N - x) := by
+    apply (one_div_nonneg).mpr
+    have hxN : x < poles N :=
+      lt_of_lt_of_le hBefore (hPoles.monotone (Nat.zero_le N))
+    exact sub_nonneg.mpr (le_of_lt hxN)
+  have hWeightDecreasing :
+      ∀ j, j < N →
+        1 / (poles (j + 1) - x) ≤ 1 / (poles j - x) := by
+    intro j _hjN
+    have hxj : x < poles j :=
+      lt_of_lt_of_le hBefore (hPoles.monotone (Nat.zero_le j))
+    apply one_div_le_one_div_of_le (sub_pos.mpr hxj)
+    have hj : poles j < poles (j + 1) :=
+      hPoles (Nat.lt_succ_self j)
+    linarith
+  simpa [finiteBoundaryWeyl, div_eq_mul_inv] using
+    weightedSum_ge_prefixDrop residues
+      (fun j => 1 / (poles j - x)) N k hk hPrefix
+      hLastWeight hWeightDecreasing
+
+/-- A prefix-drop value certified at the left endpoint of a compact interval
+is a valid lower bound at every point to its right that remains before the
+first pole. -/
+theorem finiteBoundaryWeyl_ge_prefixDropAtLeft
+    (poles residues : ℕ → ℝ) (N k : ℕ)
+    (xLeft x : ℝ)
+    (hk : k < N)
+    (hPoles : StrictMono poles)
+    (hLeft : xLeft ≤ x)
+    (hBefore : x < poles 0)
+    (hPrefix : ∀ j, j ≤ N → 0 ≤ prefixSum residues j) :
+    prefixSum residues k *
+        (1 / (poles k - xLeft) -
+          1 / (poles (k + 1) - xLeft)) ≤
+      finiteBoundaryWeyl poles residues N x := by
+  have hBeforeK : x < poles k :=
+    lt_of_lt_of_le hBefore (hPoles.monotone (Nat.zero_le k))
+  have hDrop := reciprocalPoleDrop_monoOnLeft
+    (poles k) (poles (k + 1)) xLeft x
+    (hPoles (Nat.lt_succ_self k)) hLeft hBeforeK
+  have hScaled := mul_le_mul_of_nonneg_left hDrop
+    (hPrefix k (Nat.le_of_lt hk))
+  exact hScaled.trans (finiteBoundaryWeyl_ge_prefixDrop
+    poles residues N k x hk hPoles hBefore hPrefix)
+
+/-- Any explicit lower bound for the last Abel term is therefore a lower
+bound for the complete finite boundary-Weyl function. -/
+theorem finiteBoundaryWeyl_ge_margin
+    (poles residues : ℕ → ℝ) (N : ℕ) (x margin : ℝ)
+    (hPoles : StrictMono poles)
+    (hBefore : x < poles 0)
+    (hProperPrefix : ∀ j, j < N → 0 ≤ prefixSum residues j)
+    (hMargin :
+      margin ≤ prefixSum residues N / (poles N - x)) :
+    margin ≤ finiteBoundaryWeyl poles residues N x :=
+  hMargin.trans (finiteBoundaryWeyl_ge_finalCumulativeTerm
+    poles residues N x hPoles hBefore hProperPrefix)
+
+/-- A lower bound on the final cumulative mass together with an upper bound
+on the final pole distance yields an explicit cutoff-stable ratio bound. -/
+theorem finiteBoundaryWeyl_ge_ratio_of_finalBounds
+    (poles residues : ℕ → ℝ) (N : ℕ) (x rho gap : ℝ)
+    (hPoles : StrictMono poles)
+    (hBefore : x < poles 0)
+    (hProperPrefix : ∀ j, j < N → 0 ≤ prefixSum residues j)
+    (hRho : 0 ≤ rho)
+    (hFinalPrefix : rho ≤ prefixSum residues N)
+    (hFinalPoleDistance : poles N - x ≤ gap) :
+    rho / gap ≤ finiteBoundaryWeyl poles residues N x := by
+  have hxN : x < poles N :=
+    lt_of_lt_of_le hBefore (hPoles.monotone (Nat.zero_le N))
+  have hDenominator : 0 < poles N - x := sub_pos.mpr hxN
+  have hFinalNonnegative : 0 ≤ prefixSum residues N :=
+    hRho.trans hFinalPrefix
+  have hRatio :
+      rho / gap ≤ prefixSum residues N / (poles N - x) :=
+    div_le_div₀ hFinalNonnegative hFinalPrefix
+      hDenominator hFinalPoleDistance
+  exact hRatio.trans (finiteBoundaryWeyl_ge_finalCumulativeTerm
+    poles residues N x hPoles hBefore hProperPrefix)
 
 /-- In particular, the finite boundary-Weyl function has no zero before its
 first pole. -/
