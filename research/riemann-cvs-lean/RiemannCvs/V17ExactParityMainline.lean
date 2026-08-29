@@ -24,8 +24,8 @@ the revised main line:
 5. defect-weighted conductor coercivity;
 6. common-leading Weil transfer and odd-sector Temple budgets.
 
-The source-specific change of variables, uniform variation bounds, and Dunster
-remainder estimate instantiating the fixed-interval Bessel bridge, closed-form radical
+The source-specific reduced-weight derivative and uniform variation bounds,
+plus the Dunster remainder estimate instantiating the fixed-interval Bessel bridge, closed-form radical
 extension, prime oscillatory bound, and actual odd-sector spectral gap are not
 asserted by this module.
 -/

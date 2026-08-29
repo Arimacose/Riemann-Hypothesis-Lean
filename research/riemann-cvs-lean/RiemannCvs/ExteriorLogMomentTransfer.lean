@@ -393,6 +393,264 @@ theorem linearPhaseWeightedCosSqLowerOfVariation
   exact weightedCosSqIntervalIntegralLower weight
     (fun x => (frequency * x + offset) / 2) a b hWeight hOsc hLower
 
+/-- Integration by parts for a nonlinear phase without a measure-theoretic
+change of variables.  The reduced weight satisfies `weight = reducedWeight ·
+phase'`; this is the direct form needed for Dunster's phase `ξ`. -/
+theorem nonlinearPhaseIntegrationByPartsIdentity
+    (weight phase phase' reducedWeight reducedWeight' : ℝ → ℝ)
+    (a b frequency offset : ℝ)
+    (hPhaseDeriv :
+      ∀ x ∈ uIcc a b, HasDerivAt phase (phase' x) x)
+    (hReducedDeriv :
+      ∀ x ∈ uIcc a b, HasDerivAt reducedWeight (reducedWeight' x) x)
+    (hReducedPrimeIntegrable :
+      IntervalIntegrable reducedWeight' volume a b)
+    (hSinPrimeIntegrable :
+      IntervalIntegrable
+        (fun x => frequency * phase' x * cos (frequency * phase x + offset))
+        volume a b)
+    (hWeightFactor :
+      ∀ x ∈ uIcc a b, weight x = reducedWeight x * phase' x) :
+    frequency *
+        (∫ x in a..b, weight x * cos (frequency * phase x + offset)) =
+      reducedWeight b * sin (frequency * phase b + offset) -
+        reducedWeight a * sin (frequency * phase a + offset) -
+        ∫ x in a..b,
+          reducedWeight' x * sin (frequency * phase x + offset) := by
+  have hSinDeriv :
+      ∀ x ∈ uIcc a b,
+        HasDerivAt (fun y : ℝ => sin (frequency * phase y + offset))
+          (frequency * phase' x * cos (frequency * phase x + offset)) x := by
+    intro x hx
+    simpa only [mul_comm, mul_left_comm, mul_assoc] using
+      ((((hPhaseDeriv x hx).const_mul frequency).add_const offset).sin)
+  have hIBP := intervalIntegral.integral_mul_deriv_eq_deriv_mul
+    hReducedDeriv hSinDeriv hReducedPrimeIntegrable hSinPrimeIntegrable
+  calc
+    frequency *
+        (∫ x in a..b, weight x * cos (frequency * phase x + offset)) =
+        ∫ x in a..b,
+          frequency * (weight x * cos (frequency * phase x + offset)) := by
+      rw [intervalIntegral.integral_const_mul]
+    _ = ∫ x in a..b,
+        reducedWeight x *
+          (frequency * phase' x * cos (frequency * phase x + offset)) := by
+      apply intervalIntegral.integral_congr
+      intro x hx
+      change frequency * (weight x * cos (frequency * phase x + offset)) =
+        reducedWeight x *
+          (frequency * phase' x * cos (frequency * phase x + offset))
+      rw [hWeightFactor x hx]
+      ring
+    _ = reducedWeight b * sin (frequency * phase b + offset) -
+        reducedWeight a * sin (frequency * phase a + offset) -
+        ∫ x in a..b,
+          reducedWeight' x * sin (frequency * phase x + offset) := hIBP
+
+/-- Endpoint-plus-total-variation control for a nonlinear phase.  It applies to
+the reduced weight `W = weight / phase'` once the factorization hypothesis is
+verified on the compact interval. -/
+theorem nonlinearPhaseOscillatoryIntegralBoundByVariation
+    (weight phase phase' reducedWeight reducedWeight' : ℝ → ℝ)
+    (a b frequency offset : ℝ)
+    (hab : a ≤ b)
+    (hFrequency : 0 < frequency)
+    (hPhaseDeriv :
+      ∀ x ∈ uIcc a b, HasDerivAt phase (phase' x) x)
+    (hPhasePrimeIntegrable : IntervalIntegrable phase' volume a b)
+    (hReducedDeriv :
+      ∀ x ∈ uIcc a b, HasDerivAt reducedWeight (reducedWeight' x) x)
+    (hReducedPrimeIntegrable :
+      IntervalIntegrable reducedWeight' volume a b)
+    (hWeightFactor :
+      ∀ x ∈ uIcc a b, weight x = reducedWeight x * phase' x) :
+    |∫ x in a..b, weight x * cos (frequency * phase x + offset)| ≤
+      (|reducedWeight b| + |reducedWeight a| +
+          ∫ x in a..b, |reducedWeight' x|) /
+        frequency := by
+  have hPhaseContinuous : ContinuousOn phase (uIcc a b) := by
+    intro x hx
+    exact (hPhaseDeriv x hx).continuousAt.continuousWithinAt
+  have hCosContinuous :
+      ContinuousOn (fun x : ℝ => cos (frequency * phase x + offset))
+        (uIcc a b) := by
+    fun_prop
+  have hSinContinuous :
+      ContinuousOn (fun x : ℝ => sin (frequency * phase x + offset))
+        (uIcc a b) := by
+    fun_prop
+  have hSinPrimeIntegrable :
+      IntervalIntegrable
+        (fun x => frequency * phase' x * cos (frequency * phase x + offset))
+        volume a b := by
+    have hProduct := hPhasePrimeIntegrable.mul_continuousOn hCosContinuous
+    simpa only [mul_assoc] using hProduct.const_mul frequency
+  have hIdentity := nonlinearPhaseIntegrationByPartsIdentity
+    weight phase phase' reducedWeight reducedWeight' a b frequency offset
+      hPhaseDeriv hReducedDeriv hReducedPrimeIntegrable hSinPrimeIntegrable
+      hWeightFactor
+  have hProductIntegrable :
+      IntervalIntegrable
+        (fun x : ℝ => reducedWeight' x * sin (frequency * phase x + offset))
+        volume a b :=
+    hReducedPrimeIntegrable.mul_continuousOn hSinContinuous
+  have hVariation :
+      |∫ x in a..b,
+          reducedWeight' x * sin (frequency * phase x + offset)| ≤
+        ∫ x in a..b, |reducedWeight' x| := by
+    calc
+      |∫ x in a..b,
+          reducedWeight' x * sin (frequency * phase x + offset)| ≤
+          ∫ x in a..b,
+            |reducedWeight' x * sin (frequency * phase x + offset)| :=
+        intervalIntegral.abs_integral_le_integral_abs hab
+      _ ≤ ∫ x in a..b, |reducedWeight' x| := by
+        apply intervalIntegral.integral_mono_on hab
+          hProductIntegrable.norm hReducedPrimeIntegrable.norm
+        intro x _
+        rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_mul]
+        simpa using mul_le_mul_of_nonneg_left
+          (abs_sin_le_one (frequency * phase x + offset))
+          (abs_nonneg (reducedWeight' x))
+  have hEndpointB :
+      |reducedWeight b * sin (frequency * phase b + offset)| ≤
+        |reducedWeight b| := by
+    rw [abs_mul]
+    simpa using mul_le_mul_of_nonneg_left
+      (abs_sin_le_one (frequency * phase b + offset))
+      (abs_nonneg (reducedWeight b))
+  have hEndpointA :
+      |reducedWeight a * sin (frequency * phase a + offset)| ≤
+        |reducedWeight a| := by
+    rw [abs_mul]
+    simpa using mul_le_mul_of_nonneg_left
+      (abs_sin_le_one (frequency * phase a + offset))
+      (abs_nonneg (reducedWeight a))
+  have hTriangle :
+      |reducedWeight b * sin (frequency * phase b + offset) -
+          reducedWeight a * sin (frequency * phase a + offset) -
+          ∫ x in a..b,
+            reducedWeight' x * sin (frequency * phase x + offset)| ≤
+        |reducedWeight b * sin (frequency * phase b + offset)| +
+          |reducedWeight a * sin (frequency * phase a + offset)| +
+          |∫ x in a..b,
+            reducedWeight' x * sin (frequency * phase x + offset)| := by
+    rw [sub_eq_add_neg, sub_eq_add_neg]
+    calc
+      |reducedWeight b * sin (frequency * phase b + offset) +
+          -(reducedWeight a * sin (frequency * phase a + offset)) +
+          -(∫ x in a..b,
+            reducedWeight' x * sin (frequency * phase x + offset))| ≤
+          |reducedWeight b * sin (frequency * phase b + offset) +
+            -(reducedWeight a * sin (frequency * phase a + offset))| +
+            |-(∫ x in a..b,
+              reducedWeight' x * sin (frequency * phase x + offset))| :=
+        abs_add_le _ _
+      _ ≤
+          (|reducedWeight b * sin (frequency * phase b + offset)| +
+            |-(reducedWeight a * sin (frequency * phase a + offset))|) +
+            |-(∫ x in a..b,
+              reducedWeight' x * sin (frequency * phase x + offset))| :=
+        add_le_add (abs_add_le _ _) (le_refl _)
+      _ = |reducedWeight b * sin (frequency * phase b + offset)| +
+          |reducedWeight a * sin (frequency * phase a + offset)| +
+          |∫ x in a..b,
+            reducedWeight' x * sin (frequency * phase x + offset)| := by
+        rw [abs_neg, abs_neg]
+  have hScaled :
+      frequency *
+          |∫ x in a..b, weight x * cos (frequency * phase x + offset)| ≤
+        |reducedWeight b| + |reducedWeight a| +
+          ∫ x in a..b, |reducedWeight' x| := by
+    calc
+      frequency *
+          |∫ x in a..b, weight x * cos (frequency * phase x + offset)| =
+          |frequency *
+            (∫ x in a..b, weight x * cos (frequency * phase x + offset))| := by
+        rw [abs_mul, abs_of_pos hFrequency]
+      _ = |reducedWeight b * sin (frequency * phase b + offset) -
+          reducedWeight a * sin (frequency * phase a + offset) -
+          ∫ x in a..b,
+            reducedWeight' x * sin (frequency * phase x + offset)| := by
+        rw [hIdentity]
+      _ ≤ |reducedWeight b * sin (frequency * phase b + offset)| +
+          |reducedWeight a * sin (frequency * phase a + offset)| +
+          |∫ x in a..b,
+            reducedWeight' x * sin (frequency * phase x + offset)| := hTriangle
+      _ ≤ |reducedWeight b| + |reducedWeight a| +
+          ∫ x in a..b, |reducedWeight' x| := by linarith
+  exact (le_div_iff₀ hFrequency).2 (by simpa [mul_comm] using hScaled)
+
+/-- Complete weighted `cos²` lower bound for a nonlinear phase.  If the
+reduced-weight endpoint and total-variation budget is at most half of the
+nonoscillatory weight mass, one quarter of that mass survives. -/
+theorem nonlinearPhaseWeightedCosSqLowerOfVariation
+    (weight phase phase' reducedWeight reducedWeight' : ℝ → ℝ)
+    (a b frequency offset : ℝ)
+    (hab : a ≤ b)
+    (hFrequency : 0 < frequency)
+    (hWeight : IntervalIntegrable weight volume a b)
+    (hPhaseDeriv :
+      ∀ x ∈ uIcc a b, HasDerivAt phase (phase' x) x)
+    (hPhasePrimeIntegrable : IntervalIntegrable phase' volume a b)
+    (hReducedDeriv :
+      ∀ x ∈ uIcc a b, HasDerivAt reducedWeight (reducedWeight' x) x)
+    (hReducedPrimeIntegrable :
+      IntervalIntegrable reducedWeight' volume a b)
+    (hWeightFactor :
+      ∀ x ∈ uIcc a b, weight x = reducedWeight x * phase' x)
+    (hOscillatoryBudget :
+      (|reducedWeight b| + |reducedWeight a| +
+          ∫ x in a..b, |reducedWeight' x|) /
+          frequency ≤
+        (1 / 2 : ℝ) * (∫ x in a..b, weight x)) :
+    (1 / 4 : ℝ) * (∫ x in a..b, weight x) ≤
+      ∫ x in a..b,
+        weight x * cos ((frequency * phase x + offset) / 2) ^ 2 := by
+  have hPhaseContinuous : ContinuousOn phase (uIcc a b) := by
+    intro x hx
+    exact (hPhaseDeriv x hx).continuousAt.continuousWithinAt
+  have hOscContinuous :
+      ContinuousOn (fun x : ℝ => cos (frequency * phase x + offset))
+        (uIcc a b) := by
+    fun_prop
+  have hOscBase :
+      IntervalIntegrable
+        (fun x : ℝ => weight x * cos (frequency * phase x + offset))
+        volume a b :=
+    hWeight.mul_continuousOn hOscContinuous
+  have hOsc :
+      IntervalIntegrable
+        (fun x : ℝ =>
+          weight x * cos (2 * ((frequency * phase x + offset) / 2)))
+        volume a b := by
+    convert hOscBase using 1
+    funext x
+    congr 1
+    ring_nf
+  have hAbs := nonlinearPhaseOscillatoryIntegralBoundByVariation
+    weight phase phase' reducedWeight reducedWeight' a b frequency offset
+      hab hFrequency hPhaseDeriv hPhasePrimeIntegrable hReducedDeriv
+      hReducedPrimeIntegrable hWeightFactor
+  have hAbsHalf :
+      |∫ x in a..b, weight x * cos (frequency * phase x + offset)| ≤
+        (1 / 2 : ℝ) * (∫ x in a..b, weight x) :=
+    hAbs.trans hOscillatoryBudget
+  have hLowerBase :
+      -((1 / 2 : ℝ) * (∫ x in a..b, weight x)) ≤
+        ∫ x in a..b, weight x * cos (frequency * phase x + offset) :=
+    neg_le_of_abs_le hAbsHalf
+  have hLower :
+      -((1 / 2 : ℝ) * (∫ x in a..b, weight x)) ≤
+        ∫ x in a..b,
+          weight x * cos (2 * ((frequency * phase x + offset) / 2)) := by
+    convert hLowerBase using 1
+    apply intervalIntegral.integral_congr
+    intro x _
+    ring_nf
+  exact weightedCosSqIntervalIntegralLower weight
+    (fun x => (frequency * phase x + offset) / 2) a b hWeight hOsc hLower
+
 /-- Scalar `L²`-approximation budget.  If the reference mass is controlled by
 twice the actual mass plus twice the error mass, a reference lower bound and an
 error upper bound leave the displayed positive part of the reference scale in

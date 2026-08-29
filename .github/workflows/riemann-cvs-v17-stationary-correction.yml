@@ -70,6 +70,7 @@ jobs:
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.weightedCosSqIntegralLower
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.linearPhaseOscillatoryIntegralBoundByVariation
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.linearPhaseWeightedCosSqLowerOfVariation
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.nonlinearPhaseWeightedCosSqLowerOfVariation
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.massLowerOfReferenceAndQuarterError
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.exteriorEnvelopeLogMomentBound
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfSechEnvelope
