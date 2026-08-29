@@ -582,14 +582,35 @@ formalize a separate measure-theoretic substitution.  On `[2,3]`, set
 performs integration by parts directly in the original `x` variable and gives
 the same endpoint-plus-variation bound.
 
+The source relation for the positive radial slope has now also been reduced to
+an explicit Lean lemma.  `ProlateDilationStationaryPoint.prolateSlopeBoundsOnTwoThree`
+proves
+
+\[
+1\le \xi'(x)\le 2,\qquad 2\le x\le3,
+\]
+
+from \(0\le s^2\le1/2\) and the cleared identity
+\((x^2-1)\xi'(x)^2=x^2-s^2\).  Hence the denominator in
+\(W=w_{n,c}/\xi'\) is uniformly nonzero.  Theorems
+`reducedWeightDerivative` and `reducedWeightFactorization` provide the quotient
+rule and the required factorization, while
+`intervalVariationBoundOnTwoThree` turns a uniform pointwise bound on \(|W'|\)
+into a total-variation bound.  Finally,
+`nonlinearPhaseWeightedCosSqLowerOfUniformBudget` packages the endpoint,
+variation, mass, and frequency inequalities into the one-quarter mean-square
+lower bound.
+
 Theorems
 `massLowerOfReferenceAndErrorBudget` and
 `massLowerOfReferenceAndQuarterError` then absorb Dunster's explicit
 remainder into the actual radial mass.  The remaining source-specific
-formalization boundary is therefore source-specific: define
-\(W=w_{n,c}/\xi'\) on `[2,3]`, verify its factorization and derivative data, and
-prove uniform endpoint and total-variation bounds for \(W\), together with the
-explicit Dunster remainder budget.  The nonlinear-phase integration-by-parts,
+formalization boundary is therefore source-specific: define the explicit
+Dunster weight \(w_{n,c}\) on `[2,3]`, instantiate its derivative and the radial
+second derivative in the quotient-rule formula, and prove the resulting
+uniform endpoint and pointwise \(|W'|\) constants, together with the explicit
+Dunster remainder budget.  The phase-slope bounds, reduced-weight
+factorization, nonlinear-phase integration-by-parts, variation integration,
 remainder absorption, defect normalization, and logarithmic-moment algebra are
 already in Lean.
 

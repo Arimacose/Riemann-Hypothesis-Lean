@@ -68,6 +68,7 @@ jobs:
           import RiemannCvs.ProlateScaledStationaryFamily
           import RiemannCvs.ExteriorLogMomentTransfer
           #print axioms RiemannCvs.ProlateDilationStationaryPoint.rootWidthBudget
+          #print axioms RiemannCvs.ProlateDilationStationaryPoint.prolateSlopeBoundsOnTwoThree
           #print axioms RiemannCvs.ProlateCrossDilationStationaryPoint.scaledRootLayer
           #print axioms RiemannCvs.ProlateCrossDilationStationaryPoint.uniqueScaledRoot
           #print axioms RiemannCvs.ProlateCrossDilationStationaryPoint.curvatureScaleFromBudgets
@@ -77,6 +78,7 @@ jobs:
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.linearPhaseOscillatoryIntegralBoundByVariation
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.linearPhaseWeightedCosSqLowerOfVariation
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.nonlinearPhaseWeightedCosSqLowerOfVariation
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.nonlinearPhaseWeightedCosSqLowerOfUniformBudget
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.massLowerOfReferenceAndQuarterError
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.exteriorEnvelopeLogMomentBound
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfSechEnvelope

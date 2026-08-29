@@ -75,12 +75,14 @@ jobs:
           #print axioms RiemannCvs.SymmetrizedProlateBridge.normalized_tail_fraction
           #print axioms RiemannCvs.SymmetrizedProlateSecular.twoPoleWeightPerturbation
           #print axioms RiemannCvs.SymmetrizedProlateGap.normalizedHighGap
+          #print axioms RiemannCvs.ProlateDilationStationaryPoint.prolateSlopeBoundsOnTwoThree
           #print axioms RiemannCvs.ProlateConductorIdentity.conductorEnergyIdentityOfConcentrationDefect
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfCommonScale
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.weightedCosSqIntegralLower
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.linearPhaseOscillatoryIntegralBoundByVariation
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.linearPhaseWeightedCosSqLowerOfVariation
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.nonlinearPhaseWeightedCosSqLowerOfVariation
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.nonlinearPhaseWeightedCosSqLowerOfUniformBudget
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.massLowerOfReferenceAndQuarterError
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.exteriorEnvelopeLogMomentBound
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfSechEnvelope

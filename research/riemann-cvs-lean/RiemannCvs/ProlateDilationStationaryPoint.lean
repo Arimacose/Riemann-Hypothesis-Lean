@@ -28,6 +28,34 @@ theorem pswfCoefficientShift
   rw [hchi]
   ring
 
+/-- Explicit compact-interval bounds for the positive prolate radial slope.
+The cleared relation is the division-free form of
+`ξ'(x)^2 = (x^2 - a) / (x^2 - 1)`.  Dunster's fixed-index estimate eventually
+places `a` in `[0, 1/2]`; on `x ∈ [2,3]` this gives `1 ≤ ξ'(x) ≤ 2`. -/
+theorem prolateSlopeBoundsOnTwoThree
+    (a x slope : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2)
+    (hxLower : 2 ≤ x)
+    (hxUpper : x ≤ 3)
+    (hSlopeNonneg : 0 ≤ slope)
+    (hSlopeSquare : (x ^ 2 - 1) * slope ^ 2 = x ^ 2 - a) :
+    1 ≤ slope ∧ slope ≤ 2 := by
+  have hxSquareLower : 4 ≤ x ^ 2 := by nlinarith
+  have hxSquareUpper : x ^ 2 ≤ 9 := by nlinarith
+  have hDenPos : 0 < x ^ 2 - 1 := by nlinarith
+  constructor
+  · by_contra hnot
+    have hSlopeLt : slope < 1 := lt_of_not_ge hnot
+    have hSlopeSquareLt : slope ^ 2 < 1 := by nlinarith
+    have hScaledLt := mul_lt_mul_of_pos_left hSlopeSquareLt hDenPos
+    nlinarith
+  · by_contra hnot
+    have hSlopeGt : 2 < slope := lt_of_not_ge hnot
+    have hSlopeSquareGt : 4 < slope ^ 2 := by nlinarith
+    have hScaledGt := mul_lt_mul_of_pos_left hSlopeSquareGt hDenPos
+    nlinarith
+
 /-- Polynomial obtained after squaring the stationary equation and clearing
 positive denominators.  Here `M = m²`, `a = sigma²`, and `t = x²`. -/
 def stationaryPoly (M a t : ℝ) : ℝ :=

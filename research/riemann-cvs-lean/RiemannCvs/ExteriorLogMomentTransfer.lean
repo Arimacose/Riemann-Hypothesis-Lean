@@ -393,6 +393,31 @@ theorem linearPhaseWeightedCosSqLowerOfVariation
   exact weightedCosSqIntervalIntegralLower weight
     (fun x => (frequency * x + offset) / 2) a b hWeight hOsc hLower
 
+/-- Quotient-rule derivative for the reduced oscillatory weight
+`W = weight / phasePrime`. -/
+theorem reducedWeightDerivative
+    (weight weight' phasePrime phaseSecond : ℝ → ℝ) (x : ℝ)
+    (hWeight : HasDerivAt weight (weight' x) x)
+    (hPhasePrime : HasDerivAt phasePrime (phaseSecond x) x)
+    (hPhasePrimeNe : phasePrime x ≠ 0) :
+    HasDerivAt (fun y => weight y / phasePrime y)
+      ((weight' x * phasePrime x - weight x * phaseSecond x) /
+        phasePrime x ^ 2) x := by
+  have h := hWeight.div hPhasePrime hPhasePrimeNe
+  change HasDerivAt (fun y => weight y / phasePrime y)
+    ((weight' x * phasePrime x - weight x * phaseSecond x) /
+      phasePrime x ^ 2) x at h
+  exact h
+
+/-- The quotient definition of the reduced weight gives the factorization
+needed by nonlinear-phase integration by parts whenever the phase slope is
+nonzero. -/
+theorem reducedWeightFactorization
+    (weight phasePrime : ℝ → ℝ) (x : ℝ)
+    (hPhasePrimeNe : phasePrime x ≠ 0) :
+    weight x = (weight x / phasePrime x) * phasePrime x := by
+  field_simp
+
 /-- Integration by parts for a nonlinear phase without a measure-theoretic
 change of variables.  The reduced weight satisfies `weight = reducedWeight ·
 phase'`; this is the direct form needed for Dunster's phase `ξ`. -/
@@ -650,6 +675,78 @@ theorem nonlinearPhaseWeightedCosSqLowerOfVariation
     ring_nf
   exact weightedCosSqIntervalIntegralLower weight
     (fun x => (frequency * phase x + offset) / 2) a b hWeight hOsc hLower
+
+/-- A uniform pointwise derivative bound controls total variation on `[2,3]`. -/
+theorem intervalVariationBoundOnTwoThree
+    (derivative : ℝ → ℝ) (bound : ℝ)
+    (hDerivativeIntegrable : IntervalIntegrable derivative volume 2 3)
+    (hBound : ∀ x ∈ uIcc (2 : ℝ) 3, |derivative x| ≤ bound) :
+    (∫ x in (2 : ℝ)..3, |derivative x|) ≤ bound := by
+  calc
+    (∫ x in (2 : ℝ)..3, |derivative x|) ≤
+        ∫ _x in (2 : ℝ)..3, bound := by
+      apply intervalIntegral.integral_mono_on (by norm_num)
+        hDerivativeIntegrable.norm intervalIntegrable_const
+      intro x hx
+      have hx' : x ∈ uIcc (2 : ℝ) 3 := by
+        simpa [uIcc_of_le (by norm_num : (2 : ℝ) ≤ 3)] using hx
+      simpa [Real.norm_eq_abs] using hBound x hx'
+    _ = bound := by norm_num
+
+/-- Nonlinear-phase weighted mean-square lower bound from uniform endpoint,
+variation, and mass constants. -/
+theorem nonlinearPhaseWeightedCosSqLowerOfUniformBudget
+    (weight phase phase' reducedWeight reducedWeight' : ℝ → ℝ)
+    (a b frequency offset endpointBound variationBound massLower : ℝ)
+    (hab : a ≤ b)
+    (hFrequency : 0 < frequency)
+    (hWeight : IntervalIntegrable weight volume a b)
+    (hPhaseDeriv :
+      ∀ x ∈ uIcc a b, HasDerivAt phase (phase' x) x)
+    (hPhasePrimeIntegrable : IntervalIntegrable phase' volume a b)
+    (hReducedDeriv :
+      ∀ x ∈ uIcc a b, HasDerivAt reducedWeight (reducedWeight' x) x)
+    (hReducedPrimeIntegrable :
+      IntervalIntegrable reducedWeight' volume a b)
+    (hWeightFactor :
+      ∀ x ∈ uIcc a b, weight x = reducedWeight x * phase' x)
+    (hEndpointA : |reducedWeight a| ≤ endpointBound)
+    (hEndpointB : |reducedWeight b| ≤ endpointBound)
+    (hVariation :
+      (∫ x in a..b, |reducedWeight' x|) ≤ variationBound)
+    (hMassLower : massLower ≤ ∫ x in a..b, weight x)
+    (hThreshold :
+      2 * (2 * endpointBound + variationBound) ≤ frequency * massLower) :
+    (1 / 4 : ℝ) * (∫ x in a..b, weight x) ≤
+      ∫ x in a..b,
+        weight x * cos ((frequency * phase x + offset) / 2) ^ 2 := by
+  have hNumerator :
+      |reducedWeight b| + |reducedWeight a| +
+          (∫ x in a..b, |reducedWeight' x|) ≤
+        2 * endpointBound + variationBound := by
+    linarith
+  have hTwiceNumerator :
+      2 * (|reducedWeight b| + |reducedWeight a| +
+          (∫ x in a..b, |reducedWeight' x|)) ≤
+        frequency * (∫ x in a..b, weight x) := by
+    calc
+      2 * (|reducedWeight b| + |reducedWeight a| +
+          (∫ x in a..b, |reducedWeight' x|)) ≤
+          2 * (2 * endpointBound + variationBound) := by linarith
+      _ ≤ frequency * massLower := hThreshold
+      _ ≤ frequency * (∫ x in a..b, weight x) :=
+        mul_le_mul_of_nonneg_left hMassLower (le_of_lt hFrequency)
+  have hOscillatoryBudget :
+      (|reducedWeight b| + |reducedWeight a| +
+          ∫ x in a..b, |reducedWeight' x|) /
+          frequency ≤
+        (1 / 2 : ℝ) * (∫ x in a..b, weight x) := by
+    apply (div_le_iff₀ hFrequency).2
+    nlinarith
+  exact nonlinearPhaseWeightedCosSqLowerOfVariation
+    weight phase phase' reducedWeight reducedWeight' a b frequency offset
+      hab hFrequency hWeight hPhaseDeriv hPhasePrimeIntegrable hReducedDeriv
+      hReducedPrimeIntegrable hWeightFactor hOscillatoryBudget
 
 /-- Scalar `L²`-approximation budget.  If the reference mass is controlled by
 twice the actual mass plus twice the error mass, a reference lower bound and an

@@ -64,6 +64,7 @@ jobs:
           #print axioms RiemannCvs.ProlateScaledStationaryFamily.scaledSlopePolynomialAtReciprocal
           #print axioms RiemannCvs.ProlateDilationConvexityCore.uniformCorePositive
           #print axioms RiemannCvs.ProlateDilationConvexityCore.radialCurvatureSquareDominance
+          #print axioms RiemannCvs.ProlateDilationStationaryPoint.prolateSlopeBoundsOnTwoThree
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.normalizedWeightedMomentBound
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBounds
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfCommonScale
@@ -71,6 +72,7 @@ jobs:
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.linearPhaseOscillatoryIntegralBoundByVariation
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.linearPhaseWeightedCosSqLowerOfVariation
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.nonlinearPhaseWeightedCosSqLowerOfVariation
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.nonlinearPhaseWeightedCosSqLowerOfUniformBudget
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.massLowerOfReferenceAndQuarterError
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.exteriorEnvelopeLogMomentBound
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfSechEnvelope
