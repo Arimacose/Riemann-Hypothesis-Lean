@@ -22,10 +22,14 @@ theorem normalizeTwoSidedFormBound
     lower * (defect / normSq) ≤ energy / normSq ∧
       energy / normSq ≤ upper * (defect / normSq) := by
   constructor
-  · exact (div_le_div_iff_of_pos_right hNorm).2 (by
-      simpa [mul_div_assoc] using hLower)
-  · exact (div_le_div_iff_of_pos_right hNorm).2 (by
-      simpa [mul_div_assoc] using hUpper)
+  · calc
+      lower * (defect / normSq) = (lower * defect) / normSq := by ring
+      _ ≤ energy / normSq :=
+        (div_le_div_iff_of_pos_right hNorm).2 hLower
+  · calc
+      energy / normSq ≤ (upper * defect) / normSq :=
+        (div_le_div_iff_of_pos_right hNorm).2 hUpper
+      _ = upper * (defect / normSq) := by ring
 
 /-- Specialization to the exact Fourier-symmetrization norm
 `2 + 2 sigma`. -/
@@ -67,7 +71,12 @@ theorem normalizedQuarticRatio
     (hRatio : lambda ^ 4 * dPlus * nMinus ≤ C * dMinus * nPlus) :
     lambda ^ 4 * ePlus ≤ C * eMinus := by
   rw [hePlus, heMinus]
-  apply (div_le_div_iff₀ hnPlus hnMinus).2
-  nlinarith
+  calc
+    lambda ^ 4 * (dPlus / nPlus) =
+        (lambda ^ 4 * dPlus) / nPlus := by ring
+    _ ≤ (C * dMinus) / nMinus :=
+      (div_le_div_iff₀ hnPlus hnMinus).2 (by
+        simpa only [mul_assoc] using hRatio)
+    _ = C * (dMinus / nMinus) := by ring
 
 end RiemannCvs.NormalizedSymmetrizedConductor

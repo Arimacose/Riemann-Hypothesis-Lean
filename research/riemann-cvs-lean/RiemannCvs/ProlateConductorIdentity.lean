@@ -42,8 +42,33 @@ theorem fourier_tail_identity
   have h := congrArg fourier hDecomp
   rw [map_add, map_smul, hFourierSq] at h
   rw [hDecomp] at h
-  module at h ⊢
-  exact h
+  have hCoeff :
+      (epsilon * sigma) * (epsilon * sigma) = sigma ^ 2 := by
+    calc
+      (epsilon * sigma) * (epsilon * sigma) =
+          epsilon ^ 2 * sigma ^ 2 := by ring
+      _ = sigma ^ 2 := by rw [hSign, one_mul]
+  have hExpanded :
+      p = ((epsilon * sigma) * (epsilon * sigma)) • p +
+        (epsilon * sigma) • t + fourier t := by
+    simpa only [smul_add, smul_smul] using h
+  have hRearranged :
+      fourier t + (epsilon * sigma) • t =
+        p - ((epsilon * sigma) * (epsilon * sigma)) • p := by
+    apply (eq_sub_iff_add_eq).2
+    calc
+      fourier t + (epsilon * sigma) • t +
+          ((epsilon * sigma) * (epsilon * sigma)) • p =
+        ((epsilon * sigma) * (epsilon * sigma)) • p +
+          (epsilon * sigma) • t + fourier t := by abel
+      _ = p := hExpanded.symm
+  apply (eq_sub_iff_add_eq).2
+  calc
+    fourier t + (epsilon * sigma) • t =
+        p - ((epsilon * sigma) * (epsilon * sigma)) • p := hRearranged
+    _ = (1 - sigma ^ 2) • p := by
+      rw [hCoeff]
+      module
 
 /-- The same identity with the concentration defect named explicitly. -/
 theorem fourier_tail_identity_with_defect
@@ -79,10 +104,12 @@ theorem transformedMultiplicationEnergy
     B (defect • p - (epsilon * sigma) • t)
         (defect • p - (epsilon * sigma) • t) =
       defect ^ 2 * B p p + sigma ^ 2 * B t t := by
-  simp only [map_sub, map_smul, LinearMap.map_sub,
-    LinearMap.map_smul, hCrossPT, hCrossTP]
-  module
-  nlinarith
+  simp only [map_sub, map_smul, LinearMap.sub_apply,
+    LinearMap.smul_apply, hCrossPT, hCrossTP, smul_eq_mul,
+    mul_zero, sub_zero, zero_sub]
+  ring_nf
+  rw [hSign]
+  ring
 
 /-- Exact conductor identity.  Here `B t t` is the physical logarithmic
 multiplication energy and `B (Fourier t) (Fourier t)` is the Fourier-side
@@ -179,13 +206,15 @@ theorem conductorComparableToLogScale
         (2 - defect) * tailMoment + defect ^ 2 * retainedMoment) :
     L * defect ≤ conductor ∧
       conductor ≤ (2 * K + 1 / 2) * L * defect := by
+  have hLNonneg : 0 ≤ L := le_of_lt hL
+  have hKNonneg : 0 ≤ K := by linarith [hK]
   have hLower := conductorLowerBound
     conductor tailMoment retainedMoment defect L L
     hDefectNonneg (by linarith) hTailLower hRetainedLower hIdentity
   have hUpper := conductorUpperBound
     conductor tailMoment retainedMoment defect (K * L) L
     hDefectNonneg (by linarith) hTailUpper hRetainedUpper hIdentity
-  constructor <;> nlinarith
+  constructor <;> nlinarith [hLNonneg, hKNonneg]
 
 end Bounds
 

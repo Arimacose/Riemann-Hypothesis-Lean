@@ -25,8 +25,13 @@ theorem normalizedDefectIdentity
     intro h
     apply hSigma
     nlinarith
-  field_simp [hden]
-  ring
+  have hOnePlus : 1 + sigma ≠ 0 := by
+    intro h
+    apply hSigma
+    linarith
+  rw [show 1 - sigma ^ 2 = (1 - sigma) * (1 + sigma) by ring]
+  rw [show 2 + 2 * sigma = 2 * (1 + sigma) by ring]
+  field_simp [hOnePlus]
 
 /-- If the unnormalized symmetrized boundary value is `(1 + sigma) b` and the
 squared norm is `2(1 + sigma)`, then the normalized squared residue is
@@ -41,7 +46,6 @@ theorem normalizedBoundaryResidueIdentity
     apply hSigma
     nlinarith
   field_simp [hden]
-  ring
 
 /-- Exact comparison between the ratio of symmetrized defects and the ratio of
 the usual squared concentration defects. -/

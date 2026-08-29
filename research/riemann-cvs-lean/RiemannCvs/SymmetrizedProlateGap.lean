@@ -52,13 +52,16 @@ theorem normalizedHighGap
 nonnegative squared boundary residue. -/
 theorem symmetrizedResidueLe
     (sigma r : ℝ)
-    (hSigmaNonneg : 0 ≤ sigma)
+    (_hSigmaNonneg : 0 ≤ sigma)
     (hSigmaLeOne : sigma ≤ 1)
     (hR : 0 ≤ r) :
     ((1 + sigma) / 2) * r ≤ r := by
   have hFactor : (1 + sigma) / 2 ≤ 1 := by
     nlinarith
-  exact mul_le_of_le_one_left hR (by nlinarith) hFactor
+  calc
+    ((1 + sigma) / 2) * r ≤ 1 * r :=
+      mul_le_mul_of_nonneg_right hFactor hR
+    _ = r := one_mul r
 
 /-- The same residue multiplier retains at least one half of a nonnegative
 boundary residue. -/
@@ -69,6 +72,9 @@ theorem halfResidueLeSymmetrized
     r / 2 ≤ ((1 + sigma) / 2) * r := by
   have hFactor : (1 / 2 : ℝ) ≤ (1 + sigma) / 2 := by
     nlinarith
-  exact mul_le_mul_of_nonneg_right hFactor hR
+  calc
+    r / 2 = (1 / 2 : ℝ) * r := by ring
+    _ ≤ ((1 + sigma) / 2) * r :=
+      mul_le_mul_of_nonneg_right hFactor hR
 
 end RiemannCvs.SymmetrizedProlateGap

@@ -24,18 +24,23 @@ inputs.
 namespace RiemannCvs.ConductorDefectCoercivity
 
 /-- Pointwise coefficient estimate behind the finite-family conductor lower
-bound. -/
+bound.  The sign condition `0 ≤ L + C` is necessary because the difference
+between the two sides is `(L + C) * d * (delta - d)`. -/
 theorem oneModeDefectCoefficient
     (d L C delta : ℝ)
+    (hLC : 0 ≤ L + C)
     (hd : 0 ≤ d)
     (hdDelta : d ≤ delta) :
     (2 * L - (L + C) * delta) * d ≤
       L * d + L * (1 - d) * d - C * d ^ 2 := by
-  nlinarith
+  have hProduct : 0 ≤ (L + C) * d * (delta - d) :=
+    mul_nonneg (mul_nonneg hLC hd) (sub_nonneg.mpr hdDelta)
+  nlinarith [hProduct]
 
 /-- Summed scalar form for three fixed-index modes. -/
 theorem threeModeConductorLower
     (q d0 d1 d2 a0 a1 a2 L C delta : ℝ)
+    (hLC : 0 ≤ L + C)
     (hd0 : 0 ≤ d0) (hd1 : 0 ≤ d1) (hd2 : 0 ≤ d2)
     (hd0Delta : d0 ≤ delta)
     (hd1Delta : d1 ≤ delta)
@@ -49,9 +54,9 @@ theorem threeModeConductorLower
           d1 ^ 2 * a1 ^ 2 + d2 ^ 2 * a2 ^ 2) ≤ q) :
     (2 * L - (L + C) * delta) *
         (d0 * a0 ^ 2 + d1 * a1 ^ 2 + d2 * a2 ^ 2) ≤ q := by
-  have h0 := oneModeDefectCoefficient d0 L C delta hd0 hd0Delta
-  have h1 := oneModeDefectCoefficient d1 L C delta hd1 hd1Delta
-  have h2 := oneModeDefectCoefficient d2 L C delta hd2 hd2Delta
+  have h0 := oneModeDefectCoefficient d0 L C delta hLC hd0 hd0Delta
+  have h1 := oneModeDefectCoefficient d1 L C delta hLC hd1 hd1Delta
+  have h2 := oneModeDefectCoefficient d2 L C delta hLC hd2 hd2Delta
   have ha0 : 0 ≤ a0 ^ 2 := sq_nonneg a0
   have ha1 : 0 ≤ a1 ^ 2 := sq_nonneg a1
   have ha2 : 0 ≤ a2 ^ 2 := sq_nonneg a2
@@ -60,13 +65,15 @@ theorem threeModeConductorLower
   have h2s := mul_le_mul_of_nonneg_right h2 ha2
   nlinarith
 
-/-- A convenient positive-margin specialization.  If the retained logarithmic
-lower-bound constant is at most `K L` and the active defects are small enough,
-the conductor retains at least one full unit of `L` times the defect energy. -/
+/-- A convenient positive-margin specialization.  If the nonnegative retained
+logarithmic lower-bound constant is at most `K L` and the active defects are
+small enough, the conductor retains at least one full unit of `L` times the
+defect energy. -/
 theorem threeModeConductorAtLeastLogDefect
     (q d0 d1 d2 a0 a1 a2 L C K delta : ℝ)
     (hL : 0 < L)
-    (hK : 0 ≤ K)
+    (_hK : 0 ≤ K)
+    (hCNonneg : 0 ≤ C)
     (hC : C ≤ K * L)
     (hDelta : (1 + K) * delta ≤ 1)
     (hd0 : 0 ≤ d0) (hd1 : 0 ≤ d1) (hd2 : 0 ≤ d2)
@@ -81,9 +88,10 @@ theorem threeModeConductorAtLeastLogDefect
         C * (d0 ^ 2 * a0 ^ 2 +
           d1 ^ 2 * a1 ^ 2 + d2 ^ 2 * a2 ^ 2) ≤ q) :
     L * (d0 * a0 ^ 2 + d1 * a1 ^ 2 + d2 * a2 ^ 2) ≤ q := by
+  have hLC : 0 ≤ L + C := by linarith
   have hbase := threeModeConductorLower
     q d0 d1 d2 a0 a1 a2 L C delta
-    hd0 hd1 hd2 hd0Delta hd1Delta hd2Delta hq
+    hLC hd0 hd1 hd2 hd0Delta hd1Delta hd2Delta hq
   have hCoefficient : L ≤ 2 * L - (L + C) * delta := by
     have hDeltaNonneg : 0 ≤ delta := le_trans hd0 hd0Delta
     have hLC : L + C ≤ (1 + K) * L := by
@@ -101,7 +109,7 @@ theorem threeModeConductorAtLeastLogDefect
 `-R * defectEnergy` preserves positive coercivity whenever `R < L`. -/
 theorem addPerturbationToConductorLower
     (conductor perturbation total defectEnergy L R : ℝ)
-    (hDefect : 0 ≤ defectEnergy)
+    (_hDefect : 0 ≤ defectEnergy)
     (hConductor : L * defectEnergy ≤ conductor)
     (hPerturbation : -(R * defectEnergy) ≤ perturbation)
     (hTotal : total = conductor + perturbation) :

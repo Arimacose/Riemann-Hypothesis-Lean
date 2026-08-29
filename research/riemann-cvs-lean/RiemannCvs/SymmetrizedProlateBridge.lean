@@ -41,6 +41,10 @@ theorem symmetrize_fourier_eigenvector
       epsilon • symmetrize fourier epsilon p := by
   unfold symmetrize
   rw [map_add, map_smul, hFourierSq]
+  rw [smul_add, smul_smul]
+  have hCoeff : epsilon * epsilon = 1 := by
+    simpa only [pow_two] using hSign
+  rw [hCoeff, one_smul]
   module
 
 /-- A linear boundary functional vanishes on the symmetrized vector exactly
@@ -95,6 +99,12 @@ theorem retained_symmetrize_of_compressed_eigenvector
       (1 + sigma) • p := by
   unfold symmetrize
   rw [map_add, map_smul, hRetainedP, hCompressed]
+  rw [smul_smul]
+  have hCoeff : epsilon * (epsilon * sigma) = sigma := by
+    calc
+      epsilon * (epsilon * sigma) = epsilon ^ 2 * sigma := by ring
+      _ = sigma := by rw [hSign, one_mul]
+  rw [hCoeff]
   module
 
 end Algebra
@@ -114,7 +124,7 @@ theorem norm_tail_symmetrize
     ‖tail (symmetrize fourier epsilon p)‖ =
       ‖tail (fourier p)‖ := by
   rw [tail_symmetrize fourier tail epsilon p hTailP, norm_smul]
-  simpa [Real.norm_eq_abs, hSignAbs]
+  simp [Real.norm_eq_abs, hSignAbs]
 
 /-- Squared-norm version of `norm_tail_symmetrize`. -/
 theorem normSq_tail_symmetrize
@@ -164,8 +174,11 @@ theorem normalized_tail_fraction
       (1 - sigma) / 2 := by
   have hden : 2 + 2 * sigma ≠ 0 := by
     nlinarith
-  field_simp [hden]
-  ring
+  have hOnePlus : 1 + sigma ≠ 0 := by
+    nlinarith
+  rw [show 1 - sigma ^ 2 = (1 - sigma) * (1 + sigma) by ring]
+  rw [show 2 + 2 * sigma = 2 * (1 + sigma) by ring]
+  field_simp [hOnePlus]
 
 end Hilbert
 
