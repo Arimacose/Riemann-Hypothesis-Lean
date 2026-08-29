@@ -5,6 +5,7 @@ import RiemannCvs.SymmetrizedProlateSecular
 import RiemannCvs.SymmetrizedProlateGap
 import RiemannCvs.ProlateDilationStationaryPoint
 import RiemannCvs.ProlateConductorIdentity
+import RiemannCvs.BesselJ0DifferentialEquation
 import RiemannCvs.BesselJ0Dlmf
 import RiemannCvs.ExteriorLogMomentTransfer
 import RiemannCvs.ConductorDefectCoercivity
@@ -33,8 +34,11 @@ the revised main line:
    Dunster four-root prefactor, a concrete everywhere-convergent real `J₀`
    series, the corresponding intermediate, and both difference-error functions
    are now defined internally.  The series is proved summable at every real
-   argument, continuous, even, normalized by `J₀(0) = 1`, and equipped with its
-   Bessel coefficient recurrence.  Source-phase positivity and all
+   argument, continuous, even, normalized by `J₀(0) = 1`, twice differentiable,
+   and equipped with its Bessel coefficient recurrence.  Its termwise first and
+   second derivative series satisfy `J₀'(0) = 0`, `J₀''(0) = -1/2`, and the
+   order-zero Bessel differential equation on the whole real axis.
+   Source-phase positivity and all
    continuity/integrability adapters are discharged from the phase derivative,
    `sourcePhase 2 ≥ 1`, continuity of `J₀`, and continuity of the actual radial
    mode.  DLMF 10.17.1 is specialized internally at order zero, proving
@@ -54,7 +58,9 @@ The source-specific analytic inputs still to be supplied are Dunster's uniform
 PSWF-to-Bessel remainder in the repository normalization, a concrete
 `a ≤ parameterK / c` constant and eventual threshold, and the analytic
 construction of the even and odd real-argument DLMF remainders for the concrete
-repository `J₀` series.  Their coefficient specialization, first-neglected-term
+repository `J₀` series, now approachable through an integral representation or
+uniqueness bridge from the proved differential equation.  Their coefficient
+specialization, first-neglected-term
 combination, source-interval specialization, and conductor adapters are now
 formalized.  The
 closed-form radical extension, prime

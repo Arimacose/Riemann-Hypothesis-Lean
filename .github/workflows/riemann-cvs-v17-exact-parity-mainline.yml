@@ -12,6 +12,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/SymmetrizedProlateGap.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ProlateConductorIdentity.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/BesselJ0Series.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/BesselJ0DifferentialEquation.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/BesselJ0Dlmf.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ExteriorLogMomentTransfer.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ConductorDefectCoercivity.lean'
@@ -26,6 +27,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/SymmetrizedProlateGap.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ProlateConductorIdentity.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/BesselJ0Series.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/BesselJ0DifferentialEquation.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/BesselJ0Dlmf.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ExteriorLogMomentTransfer.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ConductorDefectCoercivity.lean'
@@ -52,7 +54,14 @@ jobs:
 
       - name: Build V17 exact-parity mainline
         working-directory: research/riemann-cvs-lean
-        run: lake build RiemannCvs.V17ExactParityMainline
+        run: |
+          lake env lean RiemannCvs/BesselJ0Series.lean
+          lake build RiemannCvs.BesselJ0Series
+          lake env lean RiemannCvs/BesselJ0DifferentialEquation.lean
+          lake build RiemannCvs.BesselJ0DifferentialEquation
+          lake env lean RiemannCvs/BesselJ0Dlmf.lean
+          lake build RiemannCvs.BesselJ0Dlmf
+          lake build RiemannCvs.V17ExactParityMainline
 
       - name: Reject placeholders in V17 modules
         working-directory: research/riemann-cvs-lean
@@ -66,12 +75,16 @@ jobs:
             RiemannCvs/SymmetrizedProlateGap.lean
             RiemannCvs/ProlateConductorIdentity.lean
             RiemannCvs/BesselJ0Series.lean
+            RiemannCvs/BesselJ0DifferentialEquation.lean
             RiemannCvs/BesselJ0Dlmf.lean
             RiemannCvs/ExteriorLogMomentTransfer.lean
             RiemannCvs/ConductorDefectCoercivity.lean
             RiemannCvs/NormalizedSymmetrizedConductor.lean
           )
           if grep -nE '(^|[^[:alnum:]_])(sorry|admit)([^[:alnum:]_]|$)' "${files[@]}"; then
+            exit 1
+          fi
+          if grep -nE '^[[:space:]]*(axiom|constant)[[:space:]]' "${files[@]}"; then
             exit 1
           fi
           cat > /tmp/V17MainlineAxioms.lean <<'EOF'
@@ -89,6 +102,14 @@ jobs:
           #print axioms RiemannCvs.BesselJ0Series.besselJ0_zero
           #print axioms RiemannCvs.BesselJ0Series.besselJ0_neg
           #print axioms RiemannCvs.BesselJ0Series.besselJ0Term_succ
+          #print axioms RiemannCvs.BesselJ0DifferentialEquation.hasDerivAt_besselJ0
+          #print axioms RiemannCvs.BesselJ0DifferentialEquation.hasDerivAt_besselJ0Deriv
+          #print axioms RiemannCvs.BesselJ0DifferentialEquation.differentiable_deriv_besselJ0
+          #print axioms RiemannCvs.BesselJ0DifferentialEquation.besselJ0SecondDeriv_zero
+          #print axioms RiemannCvs.BesselJ0DifferentialEquation.deriv_deriv_besselJ0_zero
+          #print axioms RiemannCvs.BesselJ0DifferentialEquation.besselJ0_differentialEquation
+          #print axioms RiemannCvs.BesselJ0DifferentialEquation.besselJ0_deriv_differentialEquation
+          #print axioms RiemannCvs.BesselJ0DifferentialEquation.besselJ0_second_order_differentialEquation
           #print axioms RiemannCvs.BesselJ0Dlmf.orderZeroCoefficient_three
           #print axioms RiemannCvs.BesselJ0Dlmf.firstRemainderEnvelope_nonneg
           #print axioms RiemannCvs.BesselJ0Dlmf.leadingCosine_error_of_separated_remainders

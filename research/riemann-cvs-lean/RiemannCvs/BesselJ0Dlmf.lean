@@ -1,4 +1,4 @@
-import RiemannCvs.BesselJ0Series
+import RiemannCvs.BesselJ0DifferentialEquation
 
 namespace RiemannCvs.BesselJ0Dlmf
 

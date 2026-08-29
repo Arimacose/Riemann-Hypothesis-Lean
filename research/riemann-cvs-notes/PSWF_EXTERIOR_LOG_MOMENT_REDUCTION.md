@@ -892,6 +892,25 @@ t_{n+1}(x)
 =-\frac{x^2/4}{(n+1)^2}t_n(x).
 \]
 
+`BesselJ0DifferentialEquation` now differentiates this concrete series twice,
+with compact-interval summable majorants for both derivative series.  Lean
+proves the two global derivative identities, the initial values
+
+\[
+J_0'(0)=0,\qquad J_0''(0)=-\frac12,
+\]
+
+and the order-zero equation
+
+\[
+x^2J_0''(x)+xJ_0'(x)+x^2J_0(x)=0
+\]
+
+on the whole real axis.  This removes the differential-equation
+characterization of the repository series from the remaining DLMF boundary;
+the next bridge can therefore identify an integral/asymptotic construction by
+ODE uniqueness instead of re-proving the power-series recurrence downstream.
+
 The specializations
 `prolateFixedSourceActualMassLowerOfConcreteJ0DlmfDunsterErrors` and
 `dilationLogMomentBoundsOfConcreteJ0DunsterSource` consequently remove both
@@ -936,7 +955,8 @@ construct the even and odd DLMF remainders for the concrete series and prove
 their first-neglected-term bounds; state Dunster's uniform PSWF-to-Bessel error
 in the exact normalized prefactor above; and supply a concrete
 (a\le K_a/c\) estimate, its eventual threshold, and the source-phase
-derivative.  The Bessel function, its global convergence and continuity, the
+derivative.  The Bessel function, its global convergence, continuity, two
+termwise derivatives, initial data, and order-zero differential equation, the
 first DLMF coefficient specialization, separated-remainder combination,
 source-interval transport, source function definitions,
 phase-base conversion, error construction, leading weight and mass, every

@@ -9,6 +9,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/ProlateCrossDilationStationaryPoint.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ProlateScaledStationaryFamily.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/BesselJ0Series.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/BesselJ0DifferentialEquation.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/BesselJ0Dlmf.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ExteriorLogMomentTransfer.lean'
       - '.github/workflows/riemann-cvs-v17-stationary-geometry.yml'
@@ -18,6 +19,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/ProlateCrossDilationStationaryPoint.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ProlateScaledStationaryFamily.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/BesselJ0Series.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/BesselJ0DifferentialEquation.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/BesselJ0Dlmf.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ExteriorLogMomentTransfer.lean'
       - '.github/workflows/riemann-cvs-v17-stationary-geometry.yml'
@@ -48,6 +50,8 @@ jobs:
           lake env lean RiemannCvs/ProlateScaledStationaryFamily.lean
           lake env lean RiemannCvs/BesselJ0Series.lean
           lake build RiemannCvs.BesselJ0Series
+          lake env lean RiemannCvs/BesselJ0DifferentialEquation.lean
+          lake build RiemannCvs.BesselJ0DifferentialEquation
           lake env lean RiemannCvs/BesselJ0Dlmf.lean
           lake build RiemannCvs.BesselJ0Dlmf
           lake env lean RiemannCvs/ExteriorLogMomentTransfer.lean
@@ -56,6 +60,7 @@ jobs:
             RiemannCvs.ProlateCrossDilationStationaryPoint \
             RiemannCvs.ProlateScaledStationaryFamily \
             RiemannCvs.BesselJ0Series \
+            RiemannCvs.BesselJ0DifferentialEquation \
             RiemannCvs.BesselJ0Dlmf \
             RiemannCvs.ExteriorLogMomentTransfer
       - name: Reject placeholders and print axioms
@@ -68,10 +73,14 @@ jobs:
             RiemannCvs/ProlateCrossDilationStationaryPoint.lean
             RiemannCvs/ProlateScaledStationaryFamily.lean
             RiemannCvs/BesselJ0Series.lean
+            RiemannCvs/BesselJ0DifferentialEquation.lean
             RiemannCvs/BesselJ0Dlmf.lean
             RiemannCvs/ExteriorLogMomentTransfer.lean
           )
           if grep -nE '(^|[^[:alnum:]_])(sorry|admit)([^[:alnum:]_]|$)' "${files[@]}"; then
+            exit 1
+          fi
+          if grep -nE '^[[:space:]]*(axiom|constant)[[:space:]]' "${files[@]}"; then
             exit 1
           fi
           cat > V17StationaryAxioms.lean <<'EOF'
@@ -79,6 +88,7 @@ jobs:
           import RiemannCvs.ProlateCrossDilationStationaryPoint
           import RiemannCvs.ProlateScaledStationaryFamily
           import RiemannCvs.BesselJ0Series
+          import RiemannCvs.BesselJ0DifferentialEquation
           import RiemannCvs.BesselJ0Dlmf
           import RiemannCvs.ExteriorLogMomentTransfer
           #print axioms RiemannCvs.ProlateDilationStationaryPoint.rootWidthBudget
@@ -93,6 +103,14 @@ jobs:
           #print axioms RiemannCvs.BesselJ0Series.besselJ0_zero
           #print axioms RiemannCvs.BesselJ0Series.besselJ0_neg
           #print axioms RiemannCvs.BesselJ0Series.besselJ0Term_succ
+          #print axioms RiemannCvs.BesselJ0DifferentialEquation.hasDerivAt_besselJ0
+          #print axioms RiemannCvs.BesselJ0DifferentialEquation.hasDerivAt_besselJ0Deriv
+          #print axioms RiemannCvs.BesselJ0DifferentialEquation.differentiable_deriv_besselJ0
+          #print axioms RiemannCvs.BesselJ0DifferentialEquation.besselJ0SecondDeriv_zero
+          #print axioms RiemannCvs.BesselJ0DifferentialEquation.deriv_deriv_besselJ0_zero
+          #print axioms RiemannCvs.BesselJ0DifferentialEquation.besselJ0_differentialEquation
+          #print axioms RiemannCvs.BesselJ0DifferentialEquation.besselJ0_deriv_differentialEquation
+          #print axioms RiemannCvs.BesselJ0DifferentialEquation.besselJ0_second_order_differentialEquation
           #print axioms RiemannCvs.BesselJ0Dlmf.orderZeroCoefficient_three
           #print axioms RiemannCvs.BesselJ0Dlmf.firstRemainderEnvelope_nonneg
           #print axioms RiemannCvs.BesselJ0Dlmf.leadingCosine_error_of_separated_remainders
