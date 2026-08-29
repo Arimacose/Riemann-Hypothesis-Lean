@@ -77,7 +77,12 @@ this certificate with the final `q = 999/1000` form leaves the exact balanced
 reference-energy reserve coefficient `1/666`.  Positive diagonal growth
 extends all four finite stages to every `x ≤ -1/1024`.  This is evidence for,
 and a scalable inductive interface toward, the all-cutoff target rather than
-a replacement for its operator proof.  The
+a replacement for its operator proof.  A separate midpoint-only diagnostic at
+`960 -> 1920` finds direct `q₀` shell ratios about `0.04318` and `0.07808`, so
+`rho = 1/12` is the next rational interval-certificate candidate.  The same
+diagnostic finds reference coefficients about `0.04327` and `0.05486`, far
+above `1/666`; thus the balanced reserve is an eventual-tail interface rather
+than the immediate next-shell bound.  The
 finite certificate is valid at the endpoint, but the real-valued
 finite-to-limit resolvent comparison must be applied on compact subintervals
 whose right endpoint is strictly negative: the certified lowest even pole
@@ -101,8 +106,10 @@ with some `q < 1`: this removes the boundary vector entirely and is now the
 preferred target.  The finite recursive chain through `N = 480` preserves
 the concrete `q = 999/1000` benchmark, while the stricter `q₀ = 249/250`
 certificate reaches `N = 960` and exposes a `1/666` reference-energy reserve
-for that benchmark.  The remaining proof obligation is now the more concrete
-uniform estimate `kappa_K ≤ rho/666` with one `rho < 1` for every later dyadic
-shell, followed by passage from finite-support vectors to the closed tail
-operator.
+for that benchmark.  The next finite obligation is to turn the midpoint
+`960 -> 1920`, `q₀ = 249/250`, `rho = 1/12` candidate into an interval
+certificate.  Beyond that bridge, the analytic obligation is either a uniform
+direct core-relative coefficient below one, or an eventual estimate
+`kappa_K ≤ rho/666` once the reference coupling has decayed enough, followed
+by passage from finite-support vectors to the closed tail operator.
 -/

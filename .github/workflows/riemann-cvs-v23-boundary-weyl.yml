@@ -314,6 +314,24 @@ jobs:
             --target-q 999/1000 \
             --json-out research/riemann-cvs-numerics/artifacts/v23_c13_q996_N480_to_N960_shell.json
 
+      - name: Smoke-test the relative-shell midpoint probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          python research/riemann-cvs-numerics/probe_relative_shell_budget.py \
+            --c 13 \
+            --low-cutoff 20 \
+            --core-cutoff 120 \
+            --shell-cutoff 240 \
+            --prec 160 \
+            --shift-gain 1/1024 \
+            --reference-q 999/1000 \
+            --direct-q 999/1000 \
+            --direct-q 249/250 \
+            --reserve 1/666 \
+            --candidate-rho 1/3 \
+            --json-out research/riemann-cvs-numerics/artifacts/v23_c13_N120_to_N240_shell_midpoint_smoke.json
+
       - name: Replay the corrected finite Arb parity certificate
         shell: bash
         run: |
@@ -370,6 +388,7 @@ jobs:
             research/riemann-cvs-numerics/artifacts/v23_c13_N20_to_N120_relative_energy.json
             research/riemann-cvs-numerics/artifacts/v23_c13_recursive_relative_energy_shells.json
             research/riemann-cvs-numerics/artifacts/v23_c13_q996_N480_to_N960_shell.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_N120_to_N240_shell_midpoint_smoke.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N20_parity_gap.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N20_boundary_weyl_cumulative.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N12_boundary_weyl_compact_margin.json

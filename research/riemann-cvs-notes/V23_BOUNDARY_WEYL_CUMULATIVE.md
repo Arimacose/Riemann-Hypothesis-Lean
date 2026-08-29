@@ -614,18 +614,54 @@ V23 specialization:
 
 The theorem `relativeShell_of_referenceReserve` then converts a shell estimate
 against the simpler reference energy into the core-relative hypothesis used by
-the recursive gluing theorem.  Consequently the open analytic estimate has the
-explicit form
+the recursive gluing theorem.  It supplies the following explicit sufficient
+condition whenever the reference coupling has become small enough:
 
 ```text
 C_K(s,t)^2 <= kappa_K * (q*L + H_K)(s,s) * H_shell(t,t),
 kappa_K <= rho/666
 ```
 
-for one uniform `rho<1` on all later dyadic shells.  This is strictly sharper
-than asking directly for an unspecified core-relative coefficient: the finite
-certificate has supplied the exact amount of reference energy available to
-pay for every later coupling.
+with `rho<1`.  This is a useful eventual-tail interface, but the `1/666`
+worst-case reserve should not be assumed to pay for the very next shell.
+
+The tracked midpoint-only diagnostic `probe_relative_shell_budget.py` tests
+that distinction before launching another expensive interval-LDL run.  For
+`N=960 -> 1920` at 160-bit Arb construction precision it reports
+
+```powershell
+python research/riemann-cvs-numerics/probe_relative_shell_budget.py `
+  --c 13 --low-cutoff 20 --core-cutoff 960 --shell-cutoff 1920 `
+  --prec 160 --shift-gain 1/1024 --reference-q 999/1000 `
+  --direct-q 999/1000 --direct-q 249/250 `
+  --reserve 1/666 --candidate-rho 1/12 --json-out <artifact.json>
+```
+
+The resulting midpoint ratios are
+
+```text
+                              even                 odd
+reference kappa, q=999/1000   0.04326543019694135   0.05485286505445342
+kappa / (1/666)              28.81477651116294      36.53200812626598
+direct rho, q=999/1000        0.043129289872473      0.06607458242245198
+direct rho, q_0=249/250       0.04317011018121593   0.07807620268908923
+```
+
+The JSON explicitly records `MIDPOINT_DIAGNOSTIC_ONLY` and
+`rigorous_certificate = false`; its SHA-256 is
+`A2F775129E3B9C7811B309AC335D3B95DEF4355EC418575EB2B6BCC59C55A6BD`.
+Thus the immediate `1/666` reference route is quantitatively the wrong bound
+for this shell, while the direct `q_0` shell ratio remains below the rational
+candidate `rho=1/12`.  The next rigorous finite target is therefore
+
+```text
+N = 960 -> 1920, q_0 = 249/250, rho = 1/12,
+```
+
+followed by either a uniform direct core-relative estimate below one or an
+eventual cutoff beyond which the reference coefficient finally fits inside
+the `1/666` reserve.  This separates a verified algebraic reserve from the
+additional quantitative decay needed to use it.
 
 `BoundaryWeylFarLeft.lean` closes the algebraic part of the exterior
 normalization.  If all finite poles are nonnegative, the total residue is one,
@@ -736,14 +772,17 @@ The following are still explicit proof obligations:
 
 1. instantiate the characteristic-polynomial identification for the concrete
    self-adjoint CvS blocks from a Lean-side ordered eigenvalue enumeration;
-2. prove the uniform reference-energy estimate `kappa_K <= rho/666` for one
-   `rho<1` on every recursive dyadic shell after the rigorously checked chain
-   `N=20 -> 120 -> 240 -> 480 -> 960`, and pass the resulting
-   `q=999/1000` finite-support inequality to the closed high complement,
-   uniformly on compact domains with right endpoint `< 0`; the tighter
-   `q_0=249/250` certificate supplies the exact `1/666` reserve; the older
-   `a/gamma/epsilon` and restricted `errorSpace` budgets remain fallback
-   interfaces, and the relative form inequality is the preferred route;
+2. convert the midpoint candidate for `N=960 -> 1920` into a rigorous
+   `q_0=249/250`, `rho=1/12` interval certificate, then prove either one
+   uniform direct core-relative coefficient below one on every remaining
+   dyadic shell or an eventual reference-energy estimate
+   `kappa_K <= rho/666`; pass the resulting `q=999/1000` finite-support
+   inequality to the closed high complement uniformly on compact domains with
+   right endpoint `< 0`.  The exact `1/666` reserve is already formalized, but
+   the midpoint diagnostic shows that it is not the immediate `960 -> 1920`
+   bound.  The older `a/gamma/epsilon` and restricted `errorSpace` budgets
+   remain fallback interfaces, and the relative form inequality is the
+   preferred route;
 3. prove a cutoff-uniform upper bound for the absolute first spectral moment
    consumed by the new far-left theorem;
 4. keep the V22 central-mode functional distinct from the Sylvester boundary
@@ -761,7 +800,9 @@ reference-energy reserve for `q=999/1000`.  The exact
 finite displacement, characteristic-product, residue-normalization,
 determinant-ratio, quantitative Abel, energy-normalized monotonicity, and
 recursive shell and reference-reserve adapters are now formalized.  The
-uniform later-shell reference-energy bound,
+midpoint-only `960 -> 1920` probe selects `rho=1/12` for the next direct
+certificate and rules out immediate use of the conservative `1/666` reserve.
+That next interval certificate, the uniform later-shell bound,
 closed-form passage, uniform moment bound, and limiting resolvent construction
 remain the dominant proof boundary.
 
