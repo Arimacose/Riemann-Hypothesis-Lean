@@ -45,6 +45,7 @@ jobs:
           lake env lean RiemannCvs/ProlateCrossDilationStationaryPoint.lean
           lake env lean RiemannCvs/ProlateScaledStationaryFamily.lean
           lake env lean RiemannCvs/BesselJ0Series.lean
+          lake build RiemannCvs.BesselJ0Series
           lake env lean RiemannCvs/ExteriorLogMomentTransfer.lean
           lake build \
             RiemannCvs.ProlateDilationStationaryPoint \
