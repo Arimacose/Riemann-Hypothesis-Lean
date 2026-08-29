@@ -8,6 +8,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/ProlateCrossDilationStationaryPoint.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ProlateScaledStationaryFamily.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ProlateDilationConvexityCore.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/ProlateDilationStationaryPoint.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ExteriorLogMomentTransfer.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeStationaryBudget.lean'
       - '.github/workflows/riemann-cvs-v17-stationary-correction.yml'
@@ -35,6 +36,7 @@ jobs:
             RiemannCvs.ProlateCrossDilationStationaryPoint \
             RiemannCvs.ProlateScaledStationaryFamily \
             RiemannCvs.ProlateDilationConvexityCore \
+            RiemannCvs.ProlateDilationStationaryPoint \
             RiemannCvs.ExteriorLogMomentTransfer \
             RiemannCvs.PrimeStationaryBudget
       - name: Reject placeholders and print axioms
@@ -46,6 +48,7 @@ jobs:
             RiemannCvs/ProlateCrossDilationStationaryPoint.lean \
             RiemannCvs/ProlateScaledStationaryFamily.lean \
             RiemannCvs/ProlateDilationConvexityCore.lean \
+            RiemannCvs/ProlateDilationStationaryPoint.lean \
             RiemannCvs/ExteriorLogMomentTransfer.lean \
             RiemannCvs/PrimeStationaryBudget.lean; do
             if grep -nE '(^|[^[:alnum:]_])(sorry|admit)([^[:alnum:]_]|$)' "$f"; then
@@ -56,6 +59,7 @@ jobs:
           import RiemannCvs.ProlateCrossDilationStationaryPoint
           import RiemannCvs.ProlateScaledStationaryFamily
           import RiemannCvs.ProlateDilationConvexityCore
+          import RiemannCvs.ProlateDilationStationaryPoint
           import RiemannCvs.ExteriorLogMomentTransfer
           import RiemannCvs.PrimeStationaryBudget
           #print axioms RiemannCvs.ProlateCrossDilationStationaryPoint.scaledRootLayer
