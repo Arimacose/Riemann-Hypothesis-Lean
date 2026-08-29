@@ -1,5 +1,12 @@
 # Boundary-layer reduction for the archimedean logarithmic multiplier
 
+> **Scope/status.**  The \(\lambda^{-2}\) spatial-profile calculation below is
+> exact for the stated fixed-profile ansatz and is appropriate for the
+> fixed-Hermite model.  It is not an established profile theorem for optimal
+> fixed-index prolate leakage.  For the current prolate main line, use
+> `PROLATE_LOG_MULTIPLIER_CONDUCTOR_AUDIT.md`: exact conductor identity plus a
+> coarse normalized exterior logarithmic-moment bound.
+
 ## Executive statement
 
 The large-parameter Weil/prolate bridge does not require a full operator-norm

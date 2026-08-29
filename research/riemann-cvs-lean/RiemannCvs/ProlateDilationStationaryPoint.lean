@@ -18,8 +18,9 @@ remain explicit research obligations.
 
 namespace RiemannCvs.ProlateDilationStationaryPoint
 
-/-- Dunster's separation parameter `lambda` and the concentration-operator
-parameter `chi` are related by `chi = lambda + gamma²`. -/
+/-- Dunster/DLMF's separation parameter `lambda` and the coefficient `chi` in
+the common angular PSWF equation are related by `chi = lambda + gamma²`.
+Neither symbol denotes the compressed concentration singular value. -/
 theorem pswfCoefficientShift
     (lambda gamma chi x : ℝ)
     (hchi : chi = lambda + gamma ^ 2) :
@@ -96,7 +97,6 @@ theorem rootStrictlyAboveOne
 This multiplication-only form avoids division and is interval-friendly. -/
 theorem rootWidthBudget
     (M a t : ℝ)
-    (hM : 0 < M)
     (ha : 0 ≤ a)
     (ht : 1 ≤ t)
     (hroot : stationaryPoly M a t = 0) :

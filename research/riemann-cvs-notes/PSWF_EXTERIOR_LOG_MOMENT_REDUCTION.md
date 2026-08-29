@@ -23,13 +23,22 @@ estimate for the exterior PSWF equation is sufficient.
 
 ## 1. Exterior prolate equation
 
+To keep the two prolate spectra distinct, write \(\Lambda_n(c)\) for the
+differential-equation separation eigenvalue.  The concentration singular value
+will be denoted by \(\sigma_n(c)\) in Section 6.  In particular,
+\(\Lambda_n(c)\) is unbounded and is not a number in \((0,1)\).  In the
+[DLMF 30.2.1](https://dlmf.nist.gov/30.2.E1) convention,
+\(\Lambda_n(c)=\lambda_n^0(c^2)+c^2\); hence
+[DLMF 30.9.1](https://dlmf.nist.gov/30.9.E1) gives
+\(\Lambda_n(c)=(2n+1)c+O(1)\) for fixed \(n\).
+
 An angular prolate mode satisfies
 
 \[
 (1-y^2)\psi''(y)
 -2y\psi'(y)
 +
-\bigl(\chi_n(c)-c^2y^2\bigr)\psi(y)
+\bigl(\Lambda_n(c)-c^2y^2\bigr)\psi(y)
 =0.
 \]
 
@@ -39,7 +48,7 @@ For \(y>1\), this becomes
 \frac d{dy}
 \left((y^2-1)\psi'(y)\right)
 +
-\bigl(c^2y^2-\chi_n(c)\bigr)\psi(y)
+\bigl(c^2y^2-\Lambda_n(c)\bigr)\psi(y)
 =0.
 \]
 
@@ -57,7 +66,7 @@ Then
 +
 \coth u\,\psi_u
 +
-\bigl(c^2\cosh^2u-\chi_n(c)\bigr)\psi
+\bigl(c^2\cosh^2u-\Lambda_n(c)\bigr)\psi
 =0.
 \]
 
@@ -78,15 +87,15 @@ where
 \[
 q_{n,c}(u)
 =
-c^2\cosh^2u-\chi_n(c)
-+
+c^2\cosh^2u-\Lambda_n(c)
+-
 \frac14
 +
 \frac1{4\sinh^2u},
 \]
 
-up to the sign convention of the last elementary correction, which must be
-checked when the detailed proof is written.  Away from the endpoint transition,
+with the elementary correction fixed by substituting
+\(\psi(\cosh u)=(\sinh u)^{-1/2}v(u)\).  Away from the endpoint transition,
 
 \[
 q_{n,c}(u)\asymp c^2\cosh^2u.
@@ -246,18 +255,36 @@ The second is easier because \(\log y\) vanishes at the endpoint.
 
 ## 6. Connection with the Fuchs defect
 
-The finite Fourier transform of a prolate eigenfunction is proportional to its
-entire continuation.  Therefore the exterior leakage mass equals the fixed-index
-concentration defect after normalization.  The Fuchs asymptotic identifies
+Let \(\sigma_n(c)\in(0,1)\) denote the singular value of the compressed finite
+Fourier transform and set
 
 \[
-\frac{|A_{n,c}|^2}{c}
-\asymp
-1-\chi_n(c).
+d_n(c)=1-\sigma_n(c)^2.
 \]
 
-For the log-moment argument, an exact asymptotic constant is unnecessary; a
-uniform two-sided comparison is sufficient.
+After the same normalization is used on the retained mode and its entire
+continuation, the exterior leakage mass equals \(d_n(c)\).  A Fuchs asymptotic
+controls this concentration defect.  It does not, by notation alone, identify
+the defect with the differential separation eigenvalue \(\Lambda_n(c)\).
+
+The WKB reduction additionally needs the matching amplitude \(A_{n,c}\) to be
+tied to that normalization.  The sufficient statement is the two-sided
+comparison
+
+\[
+c_n\frac{|A_{n,c}|^2}{c}
+\le d_n(c)
+\le C_n\frac{|A_{n,c}|^2}{c}.
+\]
+
+Thus the source audit has two logically separate obligations:
+
+1. a Fuchs-type fixed-index estimate for \(d_n(c)\);
+2. a matching/normalization theorem comparing the exterior WKB amplitude scale
+   \(|A_{n,c}|^2/c\) with \(d_n(c)\).
+
+For the log-moment argument, exact asymptotic constants are unnecessary; uniform
+two-sided comparisons are sufficient.
 
 ---
 
@@ -283,18 +310,43 @@ Thus one uniform exterior theorem can potentially provide both:
 
 ---
 
-## 8. Minimal literature/source audit
+## 8. Source audit and next proof obligation
 
-The next literature task is to locate a fixed-order, large-bandwidth PSWF
-asymptotic that is uniform:
+[Dunster, *Asymptotics of prolate spheroidal wave functions* (2017),
+DOI 10.7153/jca-11-01](https://files.ele-math.com/articles/jca-11-01.pdf)
+provides a source matching most of the required radial estimate.  Its parameter
+range includes every fixed \(m,n\) as \(c\to\infty\).  In the radial case:
 
-- through the endpoint transition;
-- on the whole exterior half-line;
-- with at least one derivative of the remainder;
-- with normalization linked to the concentration defect.
+- equation (3.5) gives a Bessel approximation, with an \(O(c^{-1})\) Bessel-
+  envelope remainder, uniformly for the whole interval \(1<x<\infty\);
+- equation (3.7) identifies the multiplicative constant by endpoint matching;
+- equation (3.8) gives the far-field amplitude
+  \([(x^2-1)(x^2-s^2)]^{-1/4}\), whose squared tail is of order \(x^{-2}\)
+  and is therefore integrable with a \(\log x\) weight.
 
-If the available theorem lacks one of these features, the missing estimate
-should be proved directly from the Liouville-transformed equation rather than
-assumed.
+Here \(s\) denotes the paper's turning-point parameter; the paper calls it
+\(\sigma\), but it is not the concentration singular value
+\(\sigma_n(c)\) used in Section 6.
+
+This source reduces the conductor-side analytic task to the following explicit
+normalization lemma:
+
+1. translate Dunster's \(m=0\) radial function and endpoint constant into the
+   Fourier convention used by the repository;
+2. integrate the Bessel envelope, including the endpoint region, to obtain
+
+   \[
+   \int_1^\infty \log x\,|\psi(x)|^2dx
+   \le C_n\frac{|A_{n,c}|^2}{c};
+   \]
+3. prove the matching two-sided comparison
+   \(|A_{n,c}|^2/c\asymp d_n(c)\) in that same normalization;
+4. feed those scalar bounds to
+   `ExteriorLogMomentTransfer.dilationLogMomentBoundsOfCommonScale`.
+
+The displayed radial theorem does not itself state the derivative bound needed
+for the separate prime-dilation overlap.  That bound must be extracted from the
+underlying Olver error theorem or proved from the transformed equation.  It is
+not needed for the conductor logarithmic-moment estimate above.
 
 This note is a reduction, not a completed PSWF asymptotic proof.

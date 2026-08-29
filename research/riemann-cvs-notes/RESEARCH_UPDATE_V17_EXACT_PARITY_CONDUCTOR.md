@@ -220,7 +220,7 @@ The compressed Fourier relation implies
 \boxed{
 \mathcal Ft_n
 =
-d_np_n-arepsilon_n\sigma_nt_n.
+d_np_n-\varepsilon_n\sigma_nt_n.
 }
 \]
 
