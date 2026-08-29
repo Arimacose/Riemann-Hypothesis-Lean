@@ -29,7 +29,7 @@ The functions `energy` and `normSq` are deliberately abstract.  In a Hilbert
 space application they are the quadratic form and squared norm. -/
 theorem boundaryValueNonzeroOfStrictConstraintGap
     {E : Type*}
-    (boundary : E →ₗ[ℝ] ℝ)
+    (boundary : E → ℝ)
     (energy normSq : E → ℝ)
     (x : E) (lambda mu : ℝ)
     (hnorm : 0 < normSq x)
