@@ -31,7 +31,8 @@ theorem determinantBudgetFromStationaryScale
     (hThreshold : 4 * C ^ 2 ≤ m * G * lambda ^ 2) :
     k ^ 2 ≤ (m / 2) * (G * lambda ^ 8 - m / 2) := by
   have hm0 : 0 ≤ m := le_of_lt hm
-  have hlambda6 : 0 ≤ lambda ^ 6 := sq_nonneg (lambda ^ 3)
+  have hlambda0 : 0 ≤ lambda := by linarith
+  have hlambda6 : 0 ≤ lambda ^ 6 := pow_nonneg hlambda0 6
   have hThresholdScaled :=
     mul_le_mul_of_nonneg_right hThreshold hlambda6
   have hCouplingToQuarter :

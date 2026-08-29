@@ -63,13 +63,17 @@ theorem lambdaEightBlockLowerBound
       e * (m * x ^ 2 + G * lambda ^ 8 * y ^ 2 - 2 * k * x * y) ≤ q) :
     e * (m / 2) * (x ^ 2 + y ^ 2) ≤ q := by
   have hpivot : 0 < m - m / 2 := by nlinarith
+  have hdet' :
+      k ^ 2 ≤ (m - m / 2) * (G * lambda ^ 8 - m / 2) := by
+    rw [show m - m / 2 = m / 2 by ring]
+    exact hdet
   have hbase :
       (m / 2) * (x ^ 2 + y ^ 2) ≤
         m * x ^ 2 + G * lambda ^ 8 * y ^ 2 - 2 * k * x * y := by
     exact blockLowerBound
       (m * x ^ 2 + G * lambda ^ 8 * y ^ 2 - 2 * k * x * y)
       x y m (G * lambda ^ 8) k (m / 2)
-      hpivot hdet le_rfl
+      hpivot hdet' le_rfl
   have hscaled := mul_le_mul_of_nonneg_left hbase (le_of_lt he)
   nlinarith
 
@@ -112,7 +116,7 @@ theorem quarticEvenOddSeparation
       lambda ^ 4 * qPlus < lambda ^ 4 * (e * (m / 2)) := by
     nlinarith
   have hEven : qPlus < e * (m / 2) := by
-    exact (mul_lt_mul_left hlambda4).mp hEvenStrictScaled
+    exact lt_of_mul_lt_mul_left hEvenStrictScaled (le_of_lt hlambda4)
   exact lt_of_lt_of_le hEven hOddLower
 
 /-- Same conclusion using the division-free coupling budget directly. -/
