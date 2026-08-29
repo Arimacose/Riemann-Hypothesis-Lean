@@ -342,7 +342,116 @@ normalization lemma:
 3. prove the matching two-sided comparison
    \(|A_{n,c}|^2/c\asymp d_n(c)\) in that same normalization;
 4. feed those scalar bounds to
-   `ExteriorLogMomentTransfer.dilationLogMomentBoundsOfCommonScale`.
+   `ExteriorLogMomentTransfer.dilationLogMomentBoundsOfSechEnvelope`.
+
+The elementary integration in the last step is now formalized.  With
+
+\[
+\rho_{n,c}(u)
+=
+|\psi(\cosh u)|^2\sinh u,
+\]
+
+the Lean theorem takes the two remaining analytic inputs
+
+\[
+0\le\rho_{n,c}(u)
+\le
+\frac{U_n|A_{n,c}|^2/c}{\cosh u},
+\qquad
+L_n\frac{|A_{n,c}|^2}{c}
+\le
+\int_1^\infty |\psi(x)|^2dx,
+\]
+
+and proves, with the explicit coarse constant
+\(\operatorname{sech}u\le2e^{-u}\), that
+
+\[
+\int_0^\infty
+\log(\cosh u)\rho_{n,c}(u)du
+\le
+2U_n\frac{|A_{n,c}|^2}{c}.
+\]
+
+It then combines this bound with the dilation identity and the mass lower bound
+to give the physical logarithmic-moment interval.  Thus no improper-integral or
+normalization division remains outside Lean once the displayed pointwise
+envelope and matching mass lower bound are supplied.
+
+### 8.1 Extracting the `sech` envelope from Dunster (3.5)
+
+Write (E_0(z)=\operatorname{env}J_0(z)).  The envelope used by Dunster is the
+one defined in [DLMF 2.8.33--2.8.34](https://dlmf.nist.gov/2.8#E33): it is a
+fixed multiple of (J_0) below a positive matching point and
+((J_0^2+Y_0^2)^{1/2}) above it.  The small- and large-argument Bessel
+asymptotics therefore give a finite fixed constant
+
+\[
+B_0
+:=
+\sup_{z>0} zE_0(z)^2
+<\infty.
+\]
+
+For (m=0), Dunster (3.5) has the form
+
+\[
+\psi(x)
+=
+A_{n,c}
+\left\{
+\frac{\eta}
+{(x^2-1)(x^2-s^2)}
+\right\}^{1/4}
+\left[J_0(c\sqrt\eta)+O(c^{-1})E_0(c\sqrt\eta)\right].
+\]
+
+After fixing (n) and taking (c\ge c_n), uniformity of the remainder and
+
+\[
+E_0(z)^2\le\frac{B_0}{z}
+\]
+
+give
+
+\[
+|\psi(x)|^2
+\le
+\frac{C_n|A_{n,c}|^2}
+{c\sqrt{(x^2-1)(x^2-s^2)}}.
+\]
+
+Under (x=\cosh u), multiplication by
+(dx/du=\sinh u=\sqrt{x^2-1}) yields
+
+\[
+\rho_{n,c}(u)
+\le
+\frac{C_n|A_{n,c}|^2}
+{c\sqrt{x^2-s^2}}.
+\]
+
+Dunster (3.10) gives (s^2=O_n(c^{-1})).  Enlarging (c_n) so that
+(0\le s^2\le1/2), and using (x\ge1), gives
+
+\[
+x^2-s^2\ge\frac{x^2}{2},
+\qquad
+\rho_{n,c}(u)
+\le
+\frac{\sqrt2C_n|A_{n,c}|^2/c}{\cosh u}.
+\]
+
+This is exactly the pointwise hypothesis of
+`dilationLogMomentBoundsOfSechEnvelope`.  Consequently the conductor-side
+weighted-tail integration is reduced to choosing the uniform remainder
+constant in Dunster's theorem.  The genuinely normalization-sensitive item
+left in this fixed-index conductor step is the matching lower mass bound
+
+\[
+L_n|A_{n,c}|^2/c\le d_n(c).
+\]
 
 The displayed radial theorem does not itself state the derivative bound needed
 for the separate prime-dilation overlap.  That bound must be extracted from the

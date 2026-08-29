@@ -77,6 +77,8 @@ jobs:
           #print axioms RiemannCvs.SymmetrizedProlateGap.normalizedHighGap
           #print axioms RiemannCvs.ProlateConductorIdentity.conductorEnergyIdentityOfConcentrationDefect
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfCommonScale
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.exteriorEnvelopeLogMomentBound
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfSechEnvelope
           #print axioms RiemannCvs.ConductorDefectCoercivity.threeModeConductorAtLeastLogDefect
           #print axioms RiemannCvs.NormalizedSymmetrizedConductor.normalizedExactParityConductorBound
           EOF

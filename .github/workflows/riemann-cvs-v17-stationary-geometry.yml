@@ -73,6 +73,8 @@ jobs:
           #print axioms RiemannCvs.ProlateCrossDilationStationaryPoint.curvatureScaleFromBudgets
           #print axioms RiemannCvs.ProlateScaledStationaryFamily.scaledSlopePolynomialAtReciprocal
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.normalizedWeightedMomentBound
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.exteriorEnvelopeLogMomentBound
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfSechEnvelope
           EOF
           lake env lean V17StationaryAxioms.lean | tee v17-stationary-axioms.txt
           if grep -E 'sorryAx' v17-stationary-axioms.txt; then
