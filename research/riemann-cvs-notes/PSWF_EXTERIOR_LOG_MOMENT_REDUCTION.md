@@ -545,6 +545,26 @@ for all sufficiently large \(c\).  Dunster's
 term on this fixed interval.  After enlarging the threshold once more, this
 proves the required positive constant \(L_n\).
 
+The main weight is now explicit.  Dunster (3.1) gives \(\eta=\xi^2\); combining
+the fourth-root prefactor in (3.5) with the leading squared Bessel amplitude
+\(2/(\pi c\xi)\) leaves, up to the global constant \(2/\pi\),
+
+\[
+w_a(x)=\frac{1}{\sqrt{(x^2-1)(x^2-a)}},
+\qquad a=s^2.
+\]
+
+Lean definitions `prolateFixedWeightRadicand` and `prolateFixedWeight` encode
+this formula.  On \(0\le a\le1/2\), \(2\le x\le3\), the theorem
+`prolateFixedWeightBounds` proves
+
+\[
+\frac19\le w_a(x)\le\frac13,
+\]
+
+and `prolateFixedWeightMassLowerOnTwoThree` proves the integral lower bound
+\(\int_2^3w_a(x)dx\ge1/9\), including continuity and interval integrability.
+
 The nonoscillatory algebra is now formalized in the set-integral theorems
 `ExteriorLogMomentTransfer.weightedCosSqIntegralIdentity` and
 `ExteriorLogMomentTransfer.weightedCosSqIntegralLower`, with interval-integral
@@ -605,14 +625,13 @@ Theorems
 `massLowerOfReferenceAndErrorBudget` and
 `massLowerOfReferenceAndQuarterError` then absorb Dunster's explicit
 remainder into the actual radial mass.  The remaining source-specific
-formalization boundary is therefore source-specific: define the explicit
-Dunster weight \(w_{n,c}\) on `[2,3]`, instantiate its derivative and the radial
-second derivative in the quotient-rule formula, and prove the resulting
-uniform endpoint and pointwise \(|W'|\) constants, together with the explicit
-Dunster remainder budget.  The phase-slope bounds, reduced-weight
-factorization, nonlinear-phase integration-by-parts, variation integration,
-remainder absorption, defect normalization, and logarithmic-moment algebra are
-already in Lean.
+formalization boundary is therefore source-specific: differentiate the now
+explicit weight, instantiate the radial second derivative in the quotient-rule
+formula, and prove the resulting uniform pointwise \(|W'|\) constant, together
+with the explicit Dunster remainder budget.  The fixed-interval weight and mass
+lower bound, phase-slope bounds, reduced-weight factorization, nonlinear-phase
+integration-by-parts, variation integration, remainder absorption, defect
+normalization, and logarithmic-moment algebra are already in Lean.
 
 The displayed radial theorem does not itself state the derivative bound needed
 for the separate prime-dilation overlap.  That bound must be extracted from the

@@ -781,6 +781,121 @@ theorem massLowerOfReferenceAndQuarterError
 
 end OscillatoryAverage
 
+section ProlateFixedIntervalWeight
+
+/-- Algebraic radicand in the `m = 0` fixed-interval weight extracted from
+Dunster (3.1), (3.5) and the leading Bessel amplitude. -/
+def prolateFixedWeightRadicand (a x : ℝ) : ℝ :=
+  (x ^ 2 - 1) * (x ^ 2 - a)
+
+/-- The Dunster fixed-interval oscillatory weight, with the global factor
+`2 / π` left in the radial amplitude scale. -/
+noncomputable def prolateFixedWeight (a x : ℝ) : ℝ :=
+  1 / sqrt (prolateFixedWeightRadicand a x)
+
+/-- Crude uniform radicand bounds on `a ∈ [0, 1/2]`, `x ∈ [2,3]`. -/
+theorem prolateFixedWeightRadicandBounds
+    (a x : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2)
+    (hxLower : 2 ≤ x)
+    (hxUpper : x ≤ 3) :
+    9 ≤ prolateFixedWeightRadicand a x ∧
+      prolateFixedWeightRadicand a x ≤ 81 := by
+  have hxSquareLower : 4 ≤ x ^ 2 := by nlinarith
+  have hxSquareUpper : x ^ 2 ≤ 9 := by nlinarith
+  have hFirstLower : 3 ≤ x ^ 2 - 1 := by linarith
+  have hFirstUpper : x ^ 2 - 1 ≤ 8 := by linarith
+  have hSecondLower : 3 ≤ x ^ 2 - a := by linarith
+  have hSecondUpper : x ^ 2 - a ≤ 9 := by linarith
+  have hProductLower :
+      3 * 3 ≤ (x ^ 2 - 1) * (x ^ 2 - a) :=
+    mul_le_mul hFirstLower hSecondLower (by norm_num) (by linarith)
+  have hProductUpper :
+      (x ^ 2 - 1) * (x ^ 2 - a) ≤ 8 * 9 :=
+    mul_le_mul hFirstUpper hSecondUpper (by linarith) (by norm_num)
+  unfold prolateFixedWeightRadicand
+  constructor <;> nlinarith
+
+/-- Explicit positive upper and lower bounds for the fixed-interval weight. -/
+theorem prolateFixedWeightBounds
+    (a x : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2)
+    (hxLower : 2 ≤ x)
+    (hxUpper : x ≤ 3) :
+    (1 / 9 : ℝ) ≤ prolateFixedWeight a x ∧
+      prolateFixedWeight a x ≤ 1 / 3 := by
+  have hRadicand := prolateFixedWeightRadicandBounds
+    a x haNonneg haUpper hxLower hxUpper
+  have hRadicandNonneg : 0 ≤ prolateFixedWeightRadicand a x := by
+    linarith [hRadicand.1]
+  have hSqrtSquare := Real.sq_sqrt hRadicandNonneg
+  have hSqrtNonneg := Real.sqrt_nonneg (prolateFixedWeightRadicand a x)
+  have hSqrtLower : 3 ≤ sqrt (prolateFixedWeightRadicand a x) := by
+    nlinarith [hRadicand.1]
+  have hSqrtUpper : sqrt (prolateFixedWeightRadicand a x) ≤ 9 := by
+    nlinarith [hRadicand.2]
+  have hSqrtPos : 0 < sqrt (prolateFixedWeightRadicand a x) := by
+    linarith
+  unfold prolateFixedWeight
+  constructor
+  · simpa using one_div_le_one_div_of_le hSqrtPos hSqrtUpper
+  · simpa using one_div_le_one_div_of_le (by norm_num : (0 : ℝ) < 3) hSqrtLower
+
+/-- The fixed-interval weight is continuous because its radicand stays uniformly
+away from zero. -/
+theorem prolateFixedWeightContinuousOnTwoThree
+    (a : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2) :
+    ContinuousOn (prolateFixedWeight a) (uIcc (2 : ℝ) 3) := by
+  have hRadicandContinuous : Continuous (prolateFixedWeightRadicand a) := by
+    unfold prolateFixedWeightRadicand
+    fun_prop
+  have hSqrtContinuous :
+      Continuous (fun x => sqrt (prolateFixedWeightRadicand a x)) :=
+    continuous_sqrt.comp hRadicandContinuous
+  unfold prolateFixedWeight
+  apply continuousOn_const.div hSqrtContinuous.continuousOn
+  intro x hx
+  have hx' : x ∈ Icc (2 : ℝ) 3 := by
+    simpa [uIcc_of_le (by norm_num : (2 : ℝ) ≤ 3)] using hx
+  have hBounds := prolateFixedWeightBounds a x haNonneg haUpper hx'.1 hx'.2
+  have hLower :
+      (1 / 9 : ℝ) ≤ 1 / sqrt (prolateFixedWeightRadicand a x) := by
+    simpa [prolateFixedWeight] using hBounds.1
+  have hPos : 0 < 1 / sqrt (prolateFixedWeightRadicand a x) :=
+    lt_of_lt_of_le (by norm_num) hLower
+  exact ne_of_gt (one_div_pos.mp hPos)
+
+/-- Interval integrability of the explicit Dunster weight. -/
+theorem prolateFixedWeightIntervalIntegrableOnTwoThree
+    (a : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2) :
+    IntervalIntegrable (prolateFixedWeight a) volume 2 3 :=
+  (prolateFixedWeightContinuousOnTwoThree a haNonneg haUpper).intervalIntegrable
+
+/-- The unit-length interval `[2,3]` carries at least `1/9` of the unscaled
+Dunster oscillatory weight. -/
+theorem prolateFixedWeightMassLowerOnTwoThree
+    (a : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2) :
+    (1 / 9 : ℝ) ≤ ∫ x in (2 : ℝ)..3, prolateFixedWeight a x := by
+  have hWeightIntegrable :=
+    prolateFixedWeightIntervalIntegrableOnTwoThree a haNonneg haUpper
+  calc
+    (1 / 9 : ℝ) = ∫ _x in (2 : ℝ)..3, (1 / 9 : ℝ) := by norm_num
+    _ ≤ ∫ x in (2 : ℝ)..3, prolateFixedWeight a x := by
+      apply intervalIntegral.integral_mono_on (by norm_num)
+        intervalIntegrable_const hWeightIntegrable
+      intro x hx
+      exact (prolateFixedWeightBounds a x haNonneg haUpper hx.1 hx.2).1
+
+end ProlateFixedIntervalWeight
+
 section HyperbolicEnvelope
 
 /-- The elementary exponential envelope for the hyperbolic secant. -/
