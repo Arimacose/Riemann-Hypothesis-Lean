@@ -67,10 +67,39 @@ jobs:
           #print axioms RiemannCvs.BlockGapTransfer.quarticEvenOddSeparationFromCouplingBudget
           EOF
           lake env lean BlockGapAxioms.lean | tee block-gap-axioms.txt
-          if grep -E 'sorryAx|RiemannCvs\..*axiom' block-gap-axioms.txt; then
-            echo 'Unexpected axiom dependency detected.' >&2
-            exit 1
-          fi
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          text = Path('block-gap-axioms.txt').read_text(encoding='utf-8')
+          pattern = re.compile(
+              r"'([^']+)'\s+(?:depends on axioms:\s*\[([^\]]*)\]"
+              r'|does not depend on any axioms)',
+              re.DOTALL,
+          )
+          reports = pattern.findall(text)
+          expected = {
+              'RiemannCvs.BlockGapTransfer.twoByTwoFormNonnegative',
+              'RiemannCvs.BlockGapTransfer.blockLowerBound',
+              'RiemannCvs.BlockGapTransfer.lambdaEightBlockLowerBound',
+              'RiemannCvs.BlockGapTransfer.lambdaEightDeterminantFromCouplingBudget',
+              'RiemannCvs.BlockGapTransfer.quarticEvenOddSeparation',
+              'RiemannCvs.BlockGapTransfer.quarticEvenOddSeparationFromCouplingBudget',
+          }
+          names = [name for name, _ in reports]
+          if len(names) != len(expected) or set(names) != expected:
+              raise SystemExit(f'Incomplete axiom report: {names!r}')
+
+          allowed = {'propext', 'Classical.choice', 'Quot.sound'}
+          for name, body in reports:
+              axioms = set(re.findall(r'[A-Za-z0-9_.]+', body))
+              unexpected = axioms - allowed
+              if unexpected:
+                  raise SystemExit(
+                      f'Unexpected axioms for {name}: {sorted(unexpected)!r}'
+                  )
+          print('Axiom audit passed for all block-gap theorems.')
+          PY
 
       - name: Upload axiom report
         uses: actions/upload-artifact@v4
