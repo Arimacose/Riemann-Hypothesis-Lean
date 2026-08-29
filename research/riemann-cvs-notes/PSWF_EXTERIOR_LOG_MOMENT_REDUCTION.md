@@ -922,8 +922,19 @@ J_0(x)=\frac1\pi\int_0^\pi \cos(x\sin t)\,dt
 
 The concrete repository series is therefore connected to a real oscillatory
 integral without appealing to ordinary ODE uniqueness at the regular singular
-point.  The remaining DLMF task can start directly from the stationary point
-at (t=\pi/2) and prove quantitative even/odd remainder estimates.
+point.  `BesselJ0StationaryPhase` now translates the stationary point
+`t=\pi/2` to the origin, proves the centered and half-interval formulas
+
+\[
+J_0(x)=\frac2\pi\int_0^{\pi/2}\cos(x\cos u)\,du,
+\]
+
+and certifies that this is the unique critical point, with first derivative
+zero and second derivative `-1`.  The exact coordinate
+`s=2\sin(u/2)` is strictly increasing on the reduced interval and turns the
+phase into `\cos u=1-s^2/2`; the integrand is also split into its exact cosine
+and sine quadratic-oscillation sectors.  The remaining DLMF task now starts at
+the transformed Jacobian and its even-power remainder bounds.
 
 The specializations
 `prolateFixedSourceActualMassLowerOfConcreteJ0DlmfDunsterErrors` and
@@ -965,8 +976,8 @@ positive-axis predicate automatically supplies the old pointwise hypothesis on
 single global predicate directly.
 
 The remaining source-specific fixed-interval obligation is now narrower:
-construct the even and odd DLMF remainders for the concrete series and prove
-their first-neglected-term bounds; state Dunster's uniform PSWF-to-Bessel error
+construct the even and odd DLMF remainders from the exact quadratic coordinate
+and prove their first-neglected-term bounds; state Dunster's uniform PSWF-to-Bessel error
 in the exact normalized prefactor above; and supply a concrete
 (a\le K_a/c\) estimate, its eventual threshold, and the source-phase
 derivative.  The Bessel function, its global convergence, continuity, two

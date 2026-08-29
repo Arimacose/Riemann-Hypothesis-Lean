@@ -5,7 +5,7 @@ import RiemannCvs.SymmetrizedProlateSecular
 import RiemannCvs.SymmetrizedProlateGap
 import RiemannCvs.ProlateDilationStationaryPoint
 import RiemannCvs.ProlateConductorIdentity
-import RiemannCvs.BesselJ0IntegralRepresentation
+import RiemannCvs.BesselJ0StationaryPhase
 import RiemannCvs.BesselJ0Dlmf
 import RiemannCvs.ExteriorLogMomentTransfer
 import RiemannCvs.ConductorDefectCoercivity
@@ -40,7 +40,10 @@ the revised main line:
    order-zero Bessel differential equation on the whole real axis.  A direct
    dominated-convergence argument now also identifies this series with the
    Poisson--Schlafli integral
-   `π⁻¹ ∫ t in 0..π, cos (x * sin t)` for every real `x`.
+   `π⁻¹ ∫ t in 0..π, cos (x * sin t)` for every real `x`.  This integral is
+   translated to its unique nondegenerate stationary point, reduced by
+   evenness to `[0, π / 2]`, and equipped with the exact coordinate
+   `s = 2 sin (u / 2)`, in which the phase is `1 - s² / 2`.
    Source-phase positivity and all
    continuity/integrability adapters are discharged from the phase derivative,
    `sourcePhase 2 ≥ 1`, continuity of `J₀`, and continuity of the actual radial
@@ -61,8 +64,8 @@ The source-specific analytic inputs still to be supplied are Dunster's uniform
 PSWF-to-Bessel remainder in the repository normalization, a concrete
 `a ≤ parameterK / c` constant and eventual threshold, and the analytic
 construction of the even and odd real-argument DLMF remainders for the concrete
-repository `J₀` series by a quantitative stationary-phase analysis of the proved
-oscillatory integral.  Their coefficient
+repository `J₀` series from the proved quadratic stationary coordinate and its
+Jacobian.  Their coefficient
 specialization, first-neglected-term
 combination, source-interval specialization, and conductor adapters are now
 formalized.  The

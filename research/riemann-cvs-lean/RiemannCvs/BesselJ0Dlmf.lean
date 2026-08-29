@@ -1,4 +1,4 @@
-import RiemannCvs.BesselJ0IntegralRepresentation
+import RiemannCvs.BesselJ0StationaryPhase
 
 namespace RiemannCvs.BesselJ0Dlmf
 
@@ -11,6 +11,21 @@ theorem concreteJ0_integral_representation (x : ℝ) :
       Real.pi⁻¹ * ∫ t in (0 : ℝ)..Real.pi,
         Real.cos (x * Real.sin t) :=
   BesselJ0IntegralRepresentation.besselJ0_integral_representation x
+
+/-- The concrete series with its stationary point translated to the origin. -/
+theorem concreteJ0_centered_integral_representation (x : ℝ) :
+    BesselJ0Series.besselJ0 x =
+      Real.pi⁻¹ * ∫ u in -(Real.pi / 2)..Real.pi / 2,
+        Real.cos (x * Real.cos u) :=
+  BesselJ0StationaryPhase.besselJ0_centered_integral_representation x
+
+/-- The reduced endpoint-stationary representation used to construct the two
+DLMF parity remainders. -/
+theorem concreteJ0_half_interval_representation (x : ℝ) :
+    BesselJ0Series.besselJ0 x =
+      (2 / Real.pi) * ∫ u in (0 : ℝ)..Real.pi / 2,
+        Real.cos (x * Real.cos u) :=
+  BesselJ0StationaryPhase.besselJ0_half_interval_representation x
 
 /-!
 # The order-zero DLMF large-argument remainder interface
