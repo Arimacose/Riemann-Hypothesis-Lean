@@ -668,6 +668,21 @@ derivative \(p_a\) on `[2,3]` and every offset \(\theta\),
 Thus the leading fixed-interval oscillatory lower bound is no longer an open
 calculus or variation obligation in the Lean development.
 
+The phase is now closed as an internal object as well.  Lean defines
+
+\[
+\xi_a^{[2]}(x)=\int_2^x p_a(t)\,dt
+\]
+
+as `prolateFixedPhase` and proves
+`prolateFixedPhase_hasDerivAt`.  Theorems
+`prolateFixedPhaseWeightedCosSqLower` and
+`prolateFixedPhaseActualMassLowerOfInvFrequencyError` specialize the leading
+and error-absorption results to this explicit primitive.  Dunster's phase from
+(2.7) has the same derivative on `[2,3]`; its different lower integration limit
+therefore changes only the additive phase offset already quantified by these
+theorems.
+
 The remainder conversion is now formalized at function level rather than only
 as scalar algebra.  `intervalSqReferenceSplit` integrates
 \((f+e)^2\le2f^2+2e^2\), and
@@ -692,10 +707,10 @@ whenever \(48\kappa\le1\).  Its fixed-index specialization
 
 The remaining source-specific fixed-interval obligation is now narrower:
 state Dunster's uniform error estimate with the repository's normalization,
-identify the normalized reference, actual, and error functions, connect its
-parameter and phase to \(0\le a\le1/2\) and derivative \(p_a\) (an additive
-phase constant is absorbed by the offset), and supply the resulting pointwise
-\(K/c\) hypothesis.  The explicit leading weight and mass, every required
+identify the normalized reference, actual, and error functions, verify its
+parameter range \(0\le a\le1/2\), match its phase to the explicit primitive up
+to an additive constant, and supply the resulting pointwise \(K/c\) hypothesis.
+The explicit phase primitive, leading weight and mass, every required
 derivative and variation constant, nonlinear integration by parts, the leading
 \(1/36\) lower bound, the complete \(K/c\) error absorption to
 \(\mathcal A/144\), defect normalization, and logarithmic-moment algebra are

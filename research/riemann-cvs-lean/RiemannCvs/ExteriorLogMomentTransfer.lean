@@ -1617,6 +1617,108 @@ theorem prolateFixedIntervalActualMassLowerOfInvFrequencyError
     hReferenceSqIntegrable hErrorSqIntegrable hReferencePointwise hDecomp
     hErrorPointwise
 
+/-- Fixed-interval phase primitive, normalized to vanish at `x = 2`.  Dunster's
+phase differs from this primitive by an additive constant on `[2,3]`. -/
+noncomputable def prolateFixedPhase (a x : ℝ) : ℝ :=
+  ∫ t in (2 : ℝ)..x, prolateFixedPhaseSlope a t
+
+lemma prolateFixedPhaseSlopeContinuousAt
+    (a x : ℝ)
+    (hDenominator : x ^ 2 - 1 ≠ 0) :
+    ContinuousAt (prolateFixedPhaseSlope a) x := by
+  have hNumerator : ContinuousAt (fun y : ℝ => y ^ 2 - a) x := by
+    fun_prop
+  have hDenominatorContinuous :
+      ContinuousAt (fun y : ℝ => y ^ 2 - 1) x := by
+    fun_prop
+  unfold prolateFixedPhaseSlope
+  exact (hNumerator.div hDenominatorContinuous hDenominator).sqrt
+
+lemma prolateFixedPhase_hasDerivAt
+    (a x : ℝ)
+    (hxLower : 2 ≤ x)
+    (hxUpper : x ≤ 3) :
+    HasDerivAt (prolateFixedPhase a) (prolateFixedPhaseSlope a x) x := by
+  have hxMember : x ∈ uIcc (2 : ℝ) 3 := by
+    simpa [uIcc_of_le (by norm_num : (2 : ℝ) ≤ 3)] using
+      (show x ∈ Icc (2 : ℝ) 3 from ⟨hxLower, hxUpper⟩)
+  have hTwoMember : (2 : ℝ) ∈ uIcc (2 : ℝ) 3 := by
+    rw [uIcc_of_le (by norm_num : (2 : ℝ) ≤ 3)]
+    exact ⟨le_rfl, by norm_num⟩
+  have hIntegrable :
+      IntervalIntegrable (prolateFixedPhaseSlope a) volume 2 x :=
+    (prolateFixedPhaseSlopeIntervalIntegrableOnTwoThree a).mono_set
+      (Set.uIcc_subset_uIcc hTwoMember hxMember)
+  have hxSquareLower : 4 ≤ x ^ 2 := by nlinarith
+  have hDenominator : x ^ 2 - 1 ≠ 0 := by nlinarith
+  have hContinuousAt :=
+    prolateFixedPhaseSlopeContinuousAt a x hDenominator
+  have hStronglyMeasurable :
+      StronglyMeasurable (prolateFixedPhaseSlope a) := by
+    unfold prolateFixedPhaseSlope
+    exact (by fun_prop :
+      Measurable (fun y : ℝ => sqrt ((y ^ 2 - a) / (y ^ 2 - 1)))).stronglyMeasurable
+  unfold prolateFixedPhase
+  exact intervalIntegral.integral_hasDerivAt_right hIntegrable
+    hStronglyMeasurable.stronglyMeasurableAtFilter hContinuousAt
+
+/-- Closed phase-primitive version of the leading fixed-interval lower bound. -/
+theorem prolateFixedPhaseWeightedCosSqLower
+    (a c offset : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2)
+    (hc : 33 ≤ c) :
+    (1 / 36 : ℝ) ≤
+      ∫ x in (2 : ℝ)..3,
+        prolateFixedWeight a x *
+          cos (c * prolateFixedPhase a x + offset) ^ 2 := by
+  apply prolateFixedIntervalWeightedCosSqLower
+    a c offset (prolateFixedPhase a) haNonneg haUpper hc
+  intro x hx
+  have hx' : x ∈ Icc (2 : ℝ) 3 := by
+    simpa [uIcc_of_le (by norm_num : (2 : ℝ) ≤ 3)] using hx
+  exact prolateFixedPhase_hasDerivAt a x hx'.1 hx'.2
+
+/-- Closed phase-primitive version of the fixed-index `K / c` error budget. -/
+theorem prolateFixedPhaseActualMassLowerOfInvFrequencyError
+    (actual reference error : ℝ → ℝ)
+    (a c offset amplitude K : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2)
+    (hc : 33 ≤ c)
+    (hAmplitudeNonneg : 0 ≤ amplitude)
+    (hFrequencyThreshold : 48 * K ^ 2 ≤ c ^ 2)
+    (hActualSqIntegrable :
+      IntervalIntegrable (fun x => actual x ^ 2) volume 2 3)
+    (hReferenceSqIntegrable :
+      IntervalIntegrable (fun x => reference x ^ 2) volume 2 3)
+    (hErrorSqIntegrable :
+      IntervalIntegrable (fun x => error x ^ 2) volume 2 3)
+    (hReferencePointwise :
+      ∀ x ∈ uIcc (2 : ℝ) 3,
+        reference x ^ 2 =
+          amplitude *
+            (prolateFixedWeight a x *
+              cos (c * prolateFixedPhase a x + offset) ^ 2))
+    (hDecomp :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        reference x = actual x + error x)
+    (hErrorPointwise :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        error x ^ 2 ≤
+          (K ^ 2 / c ^ 2) * amplitude * prolateFixedWeight a x) :
+    (1 / 144 : ℝ) * amplitude ≤
+      ∫ x in (2 : ℝ)..3, actual x ^ 2 := by
+  apply prolateFixedIntervalActualMassLowerOfInvFrequencyError
+    actual reference error (prolateFixedPhase a) a c offset amplitude K
+    haNonneg haUpper hc hAmplitudeNonneg hFrequencyThreshold
+    (fun x hx => by
+      have hx' : x ∈ Icc (2 : ℝ) 3 := by
+        simpa [uIcc_of_le (by norm_num : (2 : ℝ) ≤ 3)] using hx
+      exact prolateFixedPhase_hasDerivAt a x hx'.1 hx'.2)
+    hActualSqIntegrable hReferenceSqIntegrable hErrorSqIntegrable
+    hReferencePointwise hDecomp hErrorPointwise
+
 end ProlateFixedIntervalWeight
 
 section HyperbolicEnvelope
