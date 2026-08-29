@@ -52,10 +52,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          lake env lean RiemannCvs/ZeroModeCorrection.lean
           lake build RiemannCvs.ZeroModeCorrection
-          lake env lean RiemannCvs/V22ZeroModeMainline.lean
+          lake env lean RiemannCvs/ZeroModeCorrection.lean
           lake build RiemannCvs.V22ZeroModeMainline
+          lake env lean RiemannCvs/V22ZeroModeMainline.lean
 
       - name: Reject placeholders and audit theorem axioms
         working-directory: research/riemann-cvs-lean
@@ -74,7 +74,7 @@ jobs:
             echo 'user axiom or constant detected' >&2
             exit 1
           fi
-          cat > /tmp/V22ZeroModeAxioms.lean <<'LEAN'
+          cat > V22ZeroModeAxioms.lean <<'LEAN'
           import RiemannCvs.V22ZeroModeMainline
           #print axioms RiemannCvs.ZeroModeCorrection.g1Partial_pos
           #print axioms RiemannCvs.ZeroModeCorrection.g2Partial_pos
@@ -87,9 +87,9 @@ jobs:
           #print axioms RiemannCvs.ZeroModeCorrection.correctedQuadratic_lt
           #print axioms RiemannCvs.ZeroModeCorrection.zeroCoordinateSector_invisible
           LEAN
-          lake env lean /tmp/V22ZeroModeAxioms.lean | tee /tmp/v22-zero-mode-axioms.txt
+          lake env lean V22ZeroModeAxioms.lean | tee v22-zero-mode-axioms.txt
           if grep -vE 'propext|Classical.choice|Quot.sound|depends on axioms|^$' \
-              /tmp/v22-zero-mode-axioms.txt | grep -E 'axiom'; then
+              v22-zero-mode-axioms.txt | grep -E 'axiom'; then
             echo 'unexpected axiom detected' >&2
             exit 1
           fi
@@ -99,7 +99,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: riemann-cvs-v22-zero-mode-axioms
-          path: /tmp/v22-zero-mode-axioms.txt
+          path: research/riemann-cvs-lean/v22-zero-mode-axioms.txt
           if-no-files-found: warn
 
   numeric:
