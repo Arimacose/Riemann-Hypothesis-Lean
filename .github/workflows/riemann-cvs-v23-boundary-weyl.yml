@@ -1,1 +1,167 @@
-# V23 boundary-Weyl workflow baseline
+name: Riemann CvS V23 boundary-Weyl reduction
+
+on:
+  push:
+    branches:
+      - main
+      - research/cvs-boundary-weyl-v23
+    paths:
+      - 'research/riemann-cvs-lean/RiemannCvs/BoundaryGapNoCrossing.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/BoundaryWeylCumulative.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/V23BoundaryWeylMainline.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/V22ZeroModeMainline.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/ZeroModeCorrection.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/SylvesterNoCrossing.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/ParityOrderContinuation.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/PiecewiseParityContinuation.lean'
+      - 'research/riemann-cvs-numerics/audit_zero_mode_correction.py'
+      - 'research/riemann-cvs-numerics/certify_parity_gap.py'
+      - 'research/riemann-cvs-notes/V23_BOUNDARY_WEYL_CUMULATIVE.md'
+      - '.github/workflows/riemann-cvs-v23-boundary-weyl.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'research/riemann-cvs-lean/RiemannCvs/BoundaryGapNoCrossing.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/BoundaryWeylCumulative.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/V23BoundaryWeylMainline.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/V22ZeroModeMainline.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/ZeroModeCorrection.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/SylvesterNoCrossing.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/ParityOrderContinuation.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/PiecewiseParityContinuation.lean'
+      - 'research/riemann-cvs-numerics/audit_zero_mode_correction.py'
+      - 'research/riemann-cvs-numerics/certify_parity_gap.py'
+      - 'research/riemann-cvs-notes/V23_BOUNDARY_WEYL_CUMULATIVE.md'
+      - '.github/workflows/riemann-cvs-v23-boundary-weyl.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lean:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: leanprover/lean-action@6835ef47e8423fa9e9eacfcbb8fdf83fae42c820
+        with:
+          lake-package-directory: research/riemann-cvs-lean
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: true
+
+      - name: Build the repaired boundary-gap module
+        working-directory: research/riemann-cvs-lean
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake build RiemannCvs.BoundaryGapNoCrossing
+          lake env lean RiemannCvs/BoundaryGapNoCrossing.lean
+
+      - name: Build the V23 cumulative-residue surface
+        working-directory: research/riemann-cvs-lean
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake build RiemannCvs.BoundaryWeylCumulative
+          lake env lean RiemannCvs/BoundaryWeylCumulative.lean
+          lake build RiemannCvs.V23BoundaryWeylMainline
+          lake env lean RiemannCvs/V23BoundaryWeylMainline.lean
+
+      - name: Reject placeholders and audit theorem axioms
+        working-directory: research/riemann-cvs-lean
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=(
+            RiemannCvs/BoundaryGapNoCrossing.lean
+            RiemannCvs/BoundaryWeylCumulative.lean
+            RiemannCvs/V23BoundaryWeylMainline.lean
+          )
+          if grep -nE '(^|[^[:alnum:]_])(sorry|admit)([^[:alnum:]_]|$)' "${files[@]}"; then
+            echo 'proof placeholder detected' >&2
+            exit 1
+          fi
+          if grep -nE '^[[:space:]]*(axiom|constant)[[:space:]]' "${files[@]}"; then
+            echo 'user axiom or constant detected' >&2
+            exit 1
+          fi
+          cat > V23BoundaryWeylAxioms.lean <<'LEAN'
+          import RiemannCvs.V23BoundaryWeylMainline
+          #print axioms RiemannCvs.BoundaryGapNoCrossing.boundaryValueNonzeroOfStrictConstraintGap
+          #print axioms RiemannCvs.BoundaryGapNoCrossing.noCommonEigenvalueFromConstraintGaps
+          #print axioms RiemannCvs.BoundaryWeylCumulative.finiteAbelSummation
+          #print axioms RiemannCvs.BoundaryWeylCumulative.weightedSum_posOfCumulative
+          #print axioms RiemannCvs.BoundaryWeylCumulative.finiteBoundaryWeyl_pos_beforeFirstPole
+          #print axioms RiemannCvs.BoundaryWeylCumulative.finiteBoundaryWeyl_ne_zero_beforeFirstPole
+          #print axioms RiemannCvs.BoundaryWeylCumulative.factorizedNumerator_ne_zero_beforeFirstPole
+          #print axioms RiemannCvs.BoundaryWeylCumulative.rankOneCorrectedWeyl_pos
+          #print axioms RiemannCvs.BoundaryWeylCumulative.rankOneCorrectedBoundaryWeyl_pos_beforeFirstPole
+          LEAN
+          lake env lean V23BoundaryWeylAxioms.lean | tee v23-boundary-weyl-axioms.txt
+          if grep -vE 'propext|Classical.choice|Quot.sound|depends on axioms|^$' \
+              v23-boundary-weyl-axioms.txt | grep -E 'axiom'; then
+            echo 'unexpected axiom detected' >&2
+            exit 1
+          fi
+
+      - name: Upload axiom transcript
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: riemann-cvs-v23-boundary-weyl-axioms
+          path: research/riemann-cvs-lean/v23-boundary-weyl-axioms.txt
+          if-no-files-found: warn
+
+  numeric-regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install pinned numerical dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install \
+            mpmath==1.3.0 \
+            numpy==2.3.3 \
+            python-flint==0.8.0
+
+      - name: Replay the V22 normalization audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p research/riemann-cvs-numerics/artifacts
+          python research/riemann-cvs-numerics/audit_zero_mode_correction.py \
+            --c 13 \
+            --dps 120 \
+            --json-out research/riemann-cvs-numerics/artifacts/v23_v22_zero_mode_c13.json
+
+      - name: Replay the corrected finite Arb parity certificate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python research/riemann-cvs-numerics/certify_parity_gap.py \
+            --c 13 \
+            --N 20 \
+            --prec 900 \
+            --threshold 1e-38 \
+            --json-out research/riemann-cvs-numerics/artifacts/v23_c13_N20_parity_gap.json
+
+      - name: Upload V23 regression artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: riemann-cvs-v23-v22-regression
+          path: |
+            research/riemann-cvs-numerics/artifacts/v23_v22_zero_mode_c13.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_N20_parity_gap.json
+          if-no-files-found: error
