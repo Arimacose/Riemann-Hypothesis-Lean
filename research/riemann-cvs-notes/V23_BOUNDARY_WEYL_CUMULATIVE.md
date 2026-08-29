@@ -80,7 +80,57 @@ Linear functionals in the Sylvester specialization coerce to this function
 type.  The module now builds independently, and its theorem again composes
 with the existing rank-one Sylvester obstruction.
 
-## 4. What this closes
+## 4. Concrete displacement and determinant bridges
+
+`CvSParityDisplacement.lean` now proves the source entry identity
+
+```text
+(p-q) A(p,q) + (p+q) A(p,-q) = 2p A(p,0)
+```
+
+separately for every odd-symbol Loewner difference quotient and for the
+rational pole kernel.  The law is closed under addition and scalar
+multiplication, so it applies term-by-term to the finite CvS kernel.
+
+With the zero mode represented by `none`, positive frequencies by `some j`,
+and
+
+```text
+D[i,none]   = 0,
+D[i,some j] = frequency_i delta_ij,
+eta         = (1, sqrt(2), ..., sqrt(2)),
+beta_i      = sqrt(2) frequency_i A(frequency_i,0),
+```
+
+Lean derives both the matrix identity
+
+```text
+D E - O D = beta etaᵀ
+```
+
+and its vector/linear-map form consumed directly by `SylvesterNoCrossing`.
+It also proves that `ker D` is exactly the central cosine line and that `D`
+annihilates the central-central rank-one matrix.  Hence the repaired V22
+zero-mode term preserves this displacement relation exactly.
+
+`ObliqueWeylDeterminant.lean` proves the finite Lagrange identity
+
+```text
+P(x) / product_i (x-lambda_i)
+  = sum_i r_i / (x-lambda_i),
+r_i = P(lambda_i) / product_(j != i) (lambda_i-lambda_j).
+```
+
+For a monic degree-`N` odd characteristic product over a monic degree-`N+1`
+even product, it additionally proves `sum_i r_i = 1`, the global sign change
+for denominators `lambda_i-x`, and the actual matrix determinant-ratio form
+after identifying the two block characteristic polynomials with the enumerated
+spectral products.  Thus the sign and normalization consumed by
+`finiteBoundaryWeyl` are no longer note-only assumptions: the multiplicative
+form has exactly `scale = -1` in the factorization theorem used by the
+no-zero layer.
+
+## 5. What this closes
 
 The finite logical chain is now explicit:
 
@@ -97,7 +147,7 @@ events lower the even branch while leaving the odd branch fixed.  The V23
 umbrella imports those continuation and event-gluing theorems so the remaining
 inputs are visible at one proof boundary rather than scattered across notes.
 
-## 5. Rigorous finite Arb certificate
+## 6. Rigorous finite Arb certificate
 
 `certify_boundary_weyl_cumulative.py` now constructs the corrected CvS matrix
 as Arb balls, takes its exact reflection-symmetric even and odd blocks, and
@@ -140,34 +190,37 @@ hashes, every eigenvalue enclosure, every residue enclosure, and every
 cumulative enclosure.  A run exits successfully only when all prefixes are
 strictly positive.
 
-## 6. What remains open
+## 7. What remains open
 
 The following are still explicit proof obligations:
 
-1. derive the concrete rectangular displacement relation for the corrected
-   CvS even and odd blocks;
-2. derive its determinant/resolvent factorization with the same sign and
-   normalization used by `finiteBoundaryWeyl`;
-3. extend the new single-case cumulative-residue certificate to a theorem
+1. instantiate the characteristic-polynomial identification for the concrete
+   self-adjoint CvS blocks from a Lean-side ordered eigenvalue enumeration;
+2. extend the new single-case cumulative-residue certificate to a theorem
    uniform in the Galerkin cutoff and along the continuous cutoff parameter;
-4. keep the V22 central-mode functional distinct from the Sylvester boundary
+3. keep the V22 central-mode functional distinct from the Sylvester boundary
    functional until a source-level identification is proved;
-5. construct the limiting self-adjoint branches and transfer finite
+4. construct the limiting self-adjoint branches and transfer finite
    no-crossing through the compactness/resolvent limit;
-6. close the source-specific PSWF-to-Bessel exterior remainder used by the
+5. close the source-specific PSWF-to-Bessel exterior remainder used by the
    stationary-phase route.
 
 The new certificate closes the finite `(13,20)` numerical hypothesis consumed
-by the Lean theorem.  It does not by itself supply the determinant identity or
-the uniform/continuum transfer listed above.
+by the Lean theorem.  The exact finite displacement, characteristic-product,
+residue-normalization, and determinant-ratio adapters are now formalized; the
+uniform/continuum transfer listed above remains the dominant proof boundary.
 
-## 7. Local Lean replay
+## 8. Local Lean replay
 
 From `research/riemann-cvs-lean`:
 
 ```powershell
 lake build RiemannCvs.BoundaryGapNoCrossing
 lake env lean RiemannCvs/BoundaryGapNoCrossing.lean
+lake build RiemannCvs.CvSParityDisplacement
+lake env lean RiemannCvs/CvSParityDisplacement.lean
+lake build RiemannCvs.ObliqueWeylDeterminant
+lake env lean RiemannCvs/ObliqueWeylDeterminant.lean
 lake build RiemannCvs.BoundaryWeylCumulative
 lake env lean RiemannCvs/BoundaryWeylCumulative.lean
 lake build RiemannCvs.V23BoundaryWeylMainline

@@ -19,9 +19,11 @@ need not be positive.
 
 This module proves the finite algebra and the resulting scalar no-zero
 criterion.  It also records that the positive scalar denominator arising from
-a negative rank-one update preserves that sign.  Identifying a concrete CvS
-matrix ratio with this abstract Weyl sum, and obtaining bounds uniform in the
-cutoff, remain separate analytic obligations.
+a negative rank-one update preserves that sign.  The companion
+`ObliqueWeylDeterminant` module now supplies the exact characteristic-product
+and matrix-determinant adapters.  Instantiating their ordered spectral data for
+the concrete CvS blocks, and obtaining bounds uniform in the cutoff, remain
+separate obligations.
 -/
 
 namespace RiemannCvs.BoundaryWeylCumulative
@@ -157,8 +159,8 @@ theorem finiteBoundaryWeyl_ne_zero_beforeFirstPole
   ne_of_gt (finiteBoundaryWeyl_pos_beforeFirstPole
     poles residues N x hPoles hBefore hProperPrefix hFinalPrefix)
 
-/-- Algebraic characteristic-factor consequence.  Once a concrete rectangular
-displacement identity supplies
+/-- Algebraic characteristic-factor consequence.  Once a concrete spectral
+identification supplies
 
 `oddCharacteristic = scale * finiteBoundaryWeyl * evenCharacteristic`,
 

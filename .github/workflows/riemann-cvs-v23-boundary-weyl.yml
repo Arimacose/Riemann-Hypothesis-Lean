@@ -8,6 +8,8 @@ on:
     paths:
       - 'research/riemann-cvs-lean/RiemannCvs/BoundaryGapNoCrossing.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/BoundaryWeylCumulative.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/CvSParityDisplacement.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V23BoundaryWeylMainline.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V22ZeroModeMainline.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ZeroModeCorrection.lean'
@@ -25,6 +27,8 @@ on:
     paths:
       - 'research/riemann-cvs-lean/RiemannCvs/BoundaryGapNoCrossing.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/BoundaryWeylCumulative.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/CvSParityDisplacement.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V23BoundaryWeylMainline.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V22ZeroModeMainline.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ZeroModeCorrection.lean'
@@ -64,6 +68,16 @@ jobs:
           lake build RiemannCvs.BoundaryGapNoCrossing
           lake env lean RiemannCvs/BoundaryGapNoCrossing.lean
 
+      - name: Build the concrete displacement and determinant bridges
+        working-directory: research/riemann-cvs-lean
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake build RiemannCvs.CvSParityDisplacement
+          lake env lean RiemannCvs/CvSParityDisplacement.lean
+          lake build RiemannCvs.ObliqueWeylDeterminant
+          lake env lean RiemannCvs/ObliqueWeylDeterminant.lean
+
       - name: Build the V23 cumulative-residue surface
         working-directory: research/riemann-cvs-lean
         shell: bash
@@ -82,6 +96,8 @@ jobs:
           files=(
             RiemannCvs/BoundaryGapNoCrossing.lean
             RiemannCvs/BoundaryWeylCumulative.lean
+            RiemannCvs/CvSParityDisplacement.lean
+            RiemannCvs/ObliqueWeylDeterminant.lean
             RiemannCvs/V23BoundaryWeylMainline.lean
           )
           if grep -nE '(^|[^[:alnum:]_])(sorry|admit)([^[:alnum:]_]|$)' "${files[@]}"; then
@@ -96,6 +112,20 @@ jobs:
           import RiemannCvs.V23BoundaryWeylMainline
           #print axioms RiemannCvs.BoundaryGapNoCrossing.boundaryValueNonzeroOfStrictConstraintGap
           #print axioms RiemannCvs.BoundaryGapNoCrossing.noCommonEigenvalueFromConstraintGaps
+          #print axioms RiemannCvs.CvSParityDisplacement.oddDifferenceKernel_displacement
+          #print axioms RiemannCvs.CvSParityDisplacement.poleKernel_displacement
+          #print axioms RiemannCvs.CvSParityDisplacement.parityMatrix_displacement
+          #print axioms RiemannCvs.CvSParityDisplacement.parityMatrix_displacement_centralCorrected
+          #print axioms RiemannCvs.CvSParityDisplacement.parityMulVec_displacement
+          #print axioms RiemannCvs.CvSParityDisplacement.concreteSylvesterRelation
+          #print axioms RiemannCvs.CvSParityDisplacement.eq_central_smul_of_derivative_mulVec_eq_zero
+          #print axioms RiemannCvs.ObliqueWeylDeterminant.polynomialRatio_eq_residueSum
+          #print axioms RiemannCvs.ObliqueWeylDeterminant.sum_interpolationResidue_eq_coeff
+          #print axioms RiemannCvs.ObliqueWeylDeterminant.characteristicRatio_eq_residueSum
+          #print axioms RiemannCvs.ObliqueWeylDeterminant.sum_characteristicResidue_eq_one
+          #print axioms RiemannCvs.ObliqueWeylDeterminant.neg_characteristicRatio_eq_boundaryWeylSum
+          #print axioms RiemannCvs.ObliqueWeylDeterminant.neg_determinantRatio_eq_boundaryWeylSum
+          #print axioms RiemannCvs.ObliqueWeylDeterminant.determinantFactorization_eq_neg_boundaryWeylSum
           #print axioms RiemannCvs.BoundaryWeylCumulative.finiteAbelSummation
           #print axioms RiemannCvs.BoundaryWeylCumulative.weightedSum_posOfCumulative
           #print axioms RiemannCvs.BoundaryWeylCumulative.finiteBoundaryWeyl_pos_beforeFirstPole

@@ -1,4 +1,6 @@
 import RiemannCvs.V22ZeroModeMainline
+import RiemannCvs.CvSParityDisplacement
+import RiemannCvs.ObliqueWeylDeterminant
 import RiemannCvs.BoundaryWeylCumulative
 import RiemannCvs.BoundaryGapNoCrossing
 import RiemannCvs.ParityOrderContinuation
@@ -12,24 +14,33 @@ boundary-Weyl layer recovered from the subsequent research argument.
 
 The new kernel-checked chain contains:
 
-1. finite Abel summation for a residue sequence and decreasing weights;
-2. strict positivity from nonnegative proper cumulative residues and a
+1. the exact source-kernel identity for odd Loewner quotients and the rational
+   pole term;
+2. its cosine/sine compression to the concrete rectangular relation
+   `D E - O D = beta etaᵀ`, including preservation under the V22 central-mode
+   correction and a typed linear-map adapter for `SylvesterNoCrossing`;
+3. the Lagrange characteristic-product expansion, total-residue normalization
+   `sum r_i = 1`, and its signed matrix-determinant ratio form;
+4. finite Abel summation for a residue sequence and decreasing weights;
+5. strict positivity from nonnegative proper cumulative residues and a
    strictly positive final cumulative residue;
-3. positivity and nonvanishing of the boundary-Weyl function everywhere
+6. positivity and nonvanishing of the boundary-Weyl function everywhere
    before its first pole;
-4. exclusion of a factorized numerator root in that region;
-5. preservation of the scalar sign through the V22 negative rank-one
+7. exclusion of a factorized numerator root in that region;
+8. preservation of the scalar sign through the V22 negative rank-one
    correction denominator;
-6. the repaired boundary-gap obstruction, continuous no-crossing propagation,
+9. the repaired boundary-gap obstruction, continuous no-crossing propagation,
    and order preservation across rank-one prime events.
 
 The companion Arb audit certifies the cumulative-residue hypotheses for the
 corrected finite `(c,N) = (13,20)` parity blocks, including several negative
 individual residues whose prefixes nevertheless stay strictly positive.
 
-This is a reduction layer, not a hidden continuum estimate.  Applying it to
-the full CvS family still requires a concrete displacement/determinant
-identity, rigorous cumulative-residue bounds uniform in the cutoff, spectral
-continuity and compactness, and the remaining source-specific exterior
-remainder estimate.
+This is a finite reduction layer, not a hidden continuum estimate.  The
+concrete displacement and signed determinant/residue identities are now
+checked.  Applying them to the full CvS family still requires rigorous
+cumulative-residue bounds uniform in the cutoff and continuous parameter,
+the source-specific identification of the enumerated characteristic products,
+spectral continuity and compactness, and the remaining exterior remainder
+estimate.
 -/
