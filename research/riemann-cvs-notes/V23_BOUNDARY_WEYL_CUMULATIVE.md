@@ -371,6 +371,42 @@ actual CvS/Weil boundary resolvent.  The workflow records this audit in
 `v23_c13_log_tail_schur_budget.json` so future constants can be compared
 against the same Lean acceptance inequality.
 
+`BoundaryWeylSchurTail.lean` now contains that weighted-boundary target as an
+actual source-level API rather than a prose escape hatch.  For each compact
+spectral domain, the adapter may choose an `errorSpace x` containing the
+coupling-generated error `u(x)-u0(x)` and prove only
+
+```text
+||u0(x)|| <= sourceWeight,
+|<eta,w>| <= observationWeight ||w||  for w in errorSpace(x).
+```
+
+The resulting checked estimate is
+
+```text
+|<eta,u(x)>-<eta,u0(x)>|
+  <= observationWeight * sourceWeight * epsilon²
+     / (lowGap*highGap-epsilon²),
+```
+
+with the division-free acceptance budget
+
+```text
+observationWeight * sourceWeight * epsilon²
+  <= margin * (lowGap*highGap-epsilon²).
+```
+
+Thus the new numerator need not contain the global Euclidean mass
+`||eta_M||²=2M+1`.  The theorem
+`weightedSchurBudget_of_upperBounds` also accepts separate interval-certified
+upper bounds for `observationWeight*sourceWeight` and `epsilon²`, while the
+uniform positivity wrapper feeds the estimate directly into the already
+formalized compact finite-margin transfer.  The remaining analytic obligation
+is now precise: identify the actual CvS Schur-error range and derive a
+cutoff-uniform restricted boundary norm (or enough cutoff decay in its product
+with the finite-source norm).  The pure prolate `O(lambda^-7)` estimate becomes
+relevant only after proving that range identification.
+
 `BoundaryWeylFarLeft.lean` closes the algebraic part of the exterior
 normalization.  If all finite poles are nonnegative, the total residue is one,
 and
@@ -480,10 +516,11 @@ The following are still explicit proof obligations:
 
 1. instantiate the characteristic-polynomial identification for the concrete
    self-adjoint CvS blocks from a Lean-side ordered eigenvalue enumeration;
-2. instantiate the new Schur inputs `a`, `gamma`, and `epsilon`, prove their
-   product budget on each compact domain with right endpoint `< 0`, and make
-   the constants uniform in the Galerkin cutoff and continuous cutoff
-   parameter;
+2. instantiate the Schur inputs `a`, `gamma`, and `epsilon` on each compact
+   domain with right endpoint `< 0`; then either prove cutoff decay strong
+   enough for the unweighted product budget or identify the coupling-generated
+   `errorSpace` and bound `sourceWeight * observationWeight` uniformly for the
+   new weighted budget;
 3. prove a cutoff-uniform upper bound for the absolute first spectral moment
    consumed by the new far-left theorem;
 4. keep the V22 central-mode functional distinct from the Sylvester boundary

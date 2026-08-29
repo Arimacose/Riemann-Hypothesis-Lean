@@ -42,6 +42,9 @@ The new kernel-checked chain contains:
     boundary-Weyl tail error; the concrete CvS origin-evaluation vector is now
     identified with the Euclidean Riesz vector, with
     `‖eta‖² = 2 * card ι + 1` and the current `N = 20` value exactly `41`;
+    the same module now also exposes a weighted-boundary replacement whose
+    numerator is `observationWeight * sourceWeight * epsilon²`, where the
+    observation norm is required only on the actual Schur-error subspace;
 11. a normalized far-left estimate
     `|G_N(-t) - 1/t| <= moment/t²`, derived from total residue one and a first
     absolute spectral-moment budget;
@@ -70,6 +73,7 @@ leaving “resolvent tail” and “far-left asymptotic” as opaque hypotheses.
 The concrete identity `‖eta_M‖² = 2M+1` also exposes a structural obstruction:
 a dimension-independent coupling bound together with only logarithmic
 high-gap growth does not satisfy the synchronized Weyl Schur budget.  The next
-source estimate must therefore gain cutoff decay in the coupling or replace
-the unweighted boundary norm by a sharper weighted resolvent estimate.
+source estimate must therefore gain cutoff decay in the coupling or discharge
+the new weighted interface by bounding the finite source and the boundary
+functional on the coupling-generated Schur-error subspace.
 -/

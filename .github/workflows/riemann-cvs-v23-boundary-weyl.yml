@@ -178,10 +178,15 @@ jobs:
           #print axioms RiemannCvs.BoundaryWeylSchurTail.boundaryWeylError_le_of_blockSchur
           #print axioms RiemannCvs.BoundaryWeylSchurTail.schurProductBudget_of_highGapBudget
           #print axioms RiemannCvs.BoundaryWeylSchurTail.highGapBudget_false_of_linearBoundaryGrowth
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.boundaryWeylError_le_of_weightedBlockSchur
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.boundaryWeylError_le_margin_of_weightedBlockSchur
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.weightedSchurBudget_of_upperBounds
           #print axioms RiemannCvs.BoundaryWeylSchurTail.boundaryWeylError_le_margin_of_blockSchur
           #print axioms RiemannCvs.BoundaryWeylSchurTail.boundaryWeylError_le_margin_of_blockSchur_highGapBudget
           #print axioms RiemannCvs.BoundaryWeylSchurTail.boundaryWeylErrorOn_le_margin_of_blockSchur
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.boundaryWeylErrorOn_le_margin_of_weightedBlockSchur
           #print axioms RiemannCvs.BoundaryWeylSchurTail.positiveOn_of_finiteMargin_and_blockSchur
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.positiveOn_of_finiteMargin_and_weightedBlockSchur
           #print axioms RiemannCvs.BoundaryWeylFarLeft.finiteBoundaryWeyl_sub_oneDiv_abs_le
           #print axioms RiemannCvs.BoundaryWeylFarLeft.finiteBoundaryWeyl_ge_farLeftMargin
           #print axioms RiemannCvs.BoundaryWeylFarLeft.boundaryWeylLimit_pos_of_uniformFarLeftMoment

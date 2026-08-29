@@ -233,6 +233,134 @@ theorem highGapBudget_false_of_linearBoundaryGrowth
     sub_pos.mpr hIntercept
   nlinarith [mul_nonneg (le_of_lt hSlopePos) hCutoff]
 
+/-- Replace the raw Euclidean boundary mass by two source-specific weights.
+
+`sourceWeight` controls the actual finite resolvent solution `u0`, while
+`observationWeight` controls the boundary functional only on the subspace that
+contains the Schur error `u - u0`.  This is the interface needed by a weighted
+boundary or prolate-tail estimate: neither weight has to be the global norm
+`‖eta‖`, whose square grows linearly with the retained cutoff in the concrete
+CvS boundary vector. -/
+theorem boundaryWeylError_le_of_weightedBlockSchur
+    (lowForm : E →ₗ[ℝ] E →ₗ[ℝ] ℝ)
+    (highForm : H →ₗ[ℝ] H →ₗ[ℝ] ℝ)
+    (coupling : E →ₗ[ℝ] H →ₗ[ℝ] ℝ)
+    (errorSpace : Set E)
+    (eta u0 u : E) (v : H)
+    (lowGap highGap epsilon sourceWeight observationWeight : ℝ)
+    (hLowGap : 0 < lowGap)
+    (hHighGap : 0 < highGap)
+    (hEpsilon : 0 ≤ epsilon)
+    (hObservationWeight : 0 ≤ observationWeight)
+    (hSmall : epsilon ^ 2 < lowGap * highGap)
+    (hLowCoercive : ∀ w, lowGap * ‖w‖ ^ 2 ≤ lowForm w w)
+    (hHighCoercive : ∀ z, highGap * ‖z‖ ^ 2 ≤ highForm z z)
+    (hCoupling : ∀ w z, |coupling w z| ≤ epsilon * ‖w‖ * ‖z‖)
+    (hLowEquation : ∀ w, lowForm (u - u0) w + coupling w v = 0)
+    (hHighEquation : ∀ z, highForm v z + coupling u z = 0)
+    (hSource : ‖u0‖ ≤ sourceWeight)
+    (hErrorMem : u - u0 ∈ errorSpace)
+    (hObservation : ∀ w ∈ errorSpace,
+      |⟪eta, w⟫_ℝ| ≤ observationWeight * ‖w‖) :
+    |⟪eta, u⟫_ℝ - ⟪eta, u0⟫_ℝ| ≤
+      observationWeight * sourceWeight * epsilon ^ 2 /
+        (lowGap * highGap - epsilon ^ 2) := by
+  have hError := lowComponentError_norm_le
+    lowForm highForm coupling u0 u v
+    lowGap highGap epsilon hLowGap hHighGap hEpsilon hSmall
+    hLowCoercive hHighCoercive hCoupling hLowEquation hHighEquation
+  have hResponse :
+      |⟪eta, u⟫_ℝ - ⟪eta, u0⟫_ℝ| ≤
+        observationWeight * ‖u - u0‖ := by
+    rw [← inner_sub_right]
+    exact hObservation (u - u0) hErrorMem
+  have hDenomPos : 0 < lowGap * highGap - epsilon ^ 2 :=
+    sub_pos.mpr hSmall
+  have hFactor :
+      0 ≤ epsilon ^ 2 / (lowGap * highGap - epsilon ^ 2) := by
+    positivity
+  have hErrorScaled :=
+    mul_le_mul_of_nonneg_left hError hObservationWeight
+  have hSourceScaled := mul_le_mul_of_nonneg_left hSource hFactor
+  have hSourceObserved :=
+    mul_le_mul_of_nonneg_left hSourceScaled hObservationWeight
+  calc
+    |⟪eta, u⟫_ℝ - ⟪eta, u0⟫_ℝ| ≤
+        observationWeight * ‖u - u0‖ := hResponse
+    _ ≤ observationWeight *
+        ((epsilon ^ 2 / (lowGap * highGap - epsilon ^ 2)) * ‖u0‖) :=
+      hErrorScaled
+    _ ≤ observationWeight *
+        ((epsilon ^ 2 / (lowGap * highGap - epsilon ^ 2)) * sourceWeight) :=
+      hSourceObserved
+    _ = observationWeight * sourceWeight * epsilon ^ 2 /
+        (lowGap * highGap - epsilon ^ 2) := by ring
+
+/-- Division-free weighted-boundary Schur budget.  Compared with the global
+Euclidean estimate, the numerator is `observationWeight * sourceWeight` rather
+than `‖eta‖²`. -/
+theorem boundaryWeylError_le_margin_of_weightedBlockSchur
+    (lowForm : E →ₗ[ℝ] E →ₗ[ℝ] ℝ)
+    (highForm : H →ₗ[ℝ] H →ₗ[ℝ] ℝ)
+    (coupling : E →ₗ[ℝ] H →ₗ[ℝ] ℝ)
+    (errorSpace : Set E)
+    (eta u0 u : E) (v : H)
+    (lowGap highGap epsilon sourceWeight observationWeight margin : ℝ)
+    (hLowGap : 0 < lowGap)
+    (hHighGap : 0 < highGap)
+    (hEpsilon : 0 ≤ epsilon)
+    (hObservationWeight : 0 ≤ observationWeight)
+    (hSmall : epsilon ^ 2 < lowGap * highGap)
+    (hLowCoercive : ∀ w, lowGap * ‖w‖ ^ 2 ≤ lowForm w w)
+    (hHighCoercive : ∀ z, highGap * ‖z‖ ^ 2 ≤ highForm z z)
+    (hCoupling : ∀ w z, |coupling w z| ≤ epsilon * ‖w‖ * ‖z‖)
+    (hLowEquation : ∀ w, lowForm (u - u0) w + coupling w v = 0)
+    (hHighEquation : ∀ z, highForm v z + coupling u z = 0)
+    (hSource : ‖u0‖ ≤ sourceWeight)
+    (hErrorMem : u - u0 ∈ errorSpace)
+    (hObservation : ∀ w ∈ errorSpace,
+      |⟪eta, w⟫_ℝ| ≤ observationWeight * ‖w‖)
+    (hBudget :
+      observationWeight * sourceWeight * epsilon ^ 2 ≤
+        margin * (lowGap * highGap - epsilon ^ 2)) :
+    |⟪eta, u⟫_ℝ - ⟪eta, u0⟫_ℝ| ≤ margin := by
+  have hRaw := boundaryWeylError_le_of_weightedBlockSchur
+    lowForm highForm coupling errorSpace eta u0 u v
+    lowGap highGap epsilon sourceWeight observationWeight
+    hLowGap hHighGap hEpsilon hObservationWeight hSmall
+    hLowCoercive hHighCoercive hCoupling hLowEquation hHighEquation
+    hSource hErrorMem hObservation
+  have hDenomPos : 0 < lowGap * highGap - epsilon ^ 2 :=
+    sub_pos.mpr hSmall
+  exact hRaw.trans ((div_le_iff₀ hDenomPos).2 hBudget)
+
+/-- Monotone interval-certificate adapter for the weighted budget.  A certified
+upper bound on the source/observation product and on `epsilon²` can be checked
+without division. -/
+theorem weightedSchurBudget_of_upperBounds
+    (sourceWeight observationWeight boundaryProduct
+      lowGap highGap epsilon couplingSq margin : ℝ)
+    (hBoundaryProduct : 0 ≤ boundaryProduct)
+    (hMargin : 0 ≤ margin)
+    (hWeightProduct :
+      observationWeight * sourceWeight ≤ boundaryProduct)
+    (hCouplingSq : epsilon ^ 2 ≤ couplingSq)
+    (hUpperBudget :
+      boundaryProduct * couplingSq ≤
+        margin * (lowGap * highGap - couplingSq)) :
+    observationWeight * sourceWeight * epsilon ^ 2 ≤
+      margin * (lowGap * highGap - epsilon ^ 2) := by
+  have hWeightScaled :=
+    mul_le_mul_of_nonneg_right hWeightProduct (sq_nonneg epsilon)
+  have hCouplingScaled :=
+    mul_le_mul_of_nonneg_left hCouplingSq hBoundaryProduct
+  have hDenomMonotone :
+      margin * (lowGap * highGap - couplingSq) ≤
+        margin * (lowGap * highGap - epsilon ^ 2) :=
+    mul_le_mul_of_nonneg_left (by linarith) hMargin
+  exact hWeightScaled.trans
+    (hCouplingScaled.trans (hUpperBudget.trans hDenomMonotone))
+
 
 /-- Division-free budget form of `boundaryWeylError_le_of_blockSchur`.  This is
 suited to interval certificates: only products of certified lower and upper
@@ -346,6 +474,53 @@ theorem boundaryWeylErrorOn_le_margin_of_blockSchur
     (hCoupling x hx) (hFiniteEquation x hx)
     (hLowEquation x hx) (hHighEquation x hx) hBudget
 
+/-- Compact/domain-uniform weighted-boundary Schur estimate.  The analytic
+adapter supplies, for every spectral parameter, a subspace containing the
+actual low-block error together with a boundary-functional norm on that
+subspace and a direct bound on the finite resolvent source. -/
+theorem boundaryWeylErrorOn_le_margin_of_weightedBlockSchur
+    (domain : Set X)
+    (lowForm : X → E →ₗ[ℝ] E →ₗ[ℝ] ℝ)
+    (highForm : X → H →ₗ[ℝ] H →ₗ[ℝ] ℝ)
+    (coupling : X → E →ₗ[ℝ] H →ₗ[ℝ] ℝ)
+    (errorSpace : X → Set E)
+    (eta : E) (u0 u : X → E) (v : X → H)
+    (lowGap highGap epsilon sourceWeight observationWeight margin : ℝ)
+    (hLowGap : 0 < lowGap)
+    (hHighGap : 0 < highGap)
+    (hEpsilon : 0 ≤ epsilon)
+    (hObservationWeight : 0 ≤ observationWeight)
+    (hSmall : epsilon ^ 2 < lowGap * highGap)
+    (hLowCoercive : ∀ x ∈ domain, ∀ w,
+      lowGap * ‖w‖ ^ 2 ≤ lowForm x w w)
+    (hHighCoercive : ∀ x ∈ domain, ∀ z,
+      highGap * ‖z‖ ^ 2 ≤ highForm x z z)
+    (hCoupling : ∀ x ∈ domain, ∀ w z,
+      |coupling x w z| ≤ epsilon * ‖w‖ * ‖z‖)
+    (hLowEquation : ∀ x ∈ domain, ∀ w,
+      lowForm x (u x - u0 x) w + coupling x w (v x) = 0)
+    (hHighEquation : ∀ x ∈ domain, ∀ z,
+      highForm x (v x) z + coupling x (u x) z = 0)
+    (hSource : ∀ x ∈ domain, ‖u0 x‖ ≤ sourceWeight)
+    (hErrorMem : ∀ x ∈ domain, u x - u0 x ∈ errorSpace x)
+    (hObservation : ∀ x ∈ domain, ∀ w ∈ errorSpace x,
+      |⟪eta, w⟫_ℝ| ≤ observationWeight * ‖w‖)
+    (hBudget :
+      observationWeight * sourceWeight * epsilon ^ 2 ≤
+        margin * (lowGap * highGap - epsilon ^ 2)) :
+    ∀ x ∈ domain,
+      |⟪eta, u0 x⟫_ℝ - ⟪eta, u x⟫_ℝ| ≤ margin := by
+  intro x hx
+  rw [abs_sub_comm]
+  exact boundaryWeylError_le_margin_of_weightedBlockSchur
+    (lowForm x) (highForm x) (coupling x) (errorSpace x)
+    eta (u0 x) (u x) (v x)
+    lowGap highGap epsilon sourceWeight observationWeight margin
+    hLowGap hHighGap hEpsilon hObservationWeight hSmall
+    (hLowCoercive x hx) (hHighCoercive x hx) (hCoupling x hx)
+    (hLowEquation x hx) (hHighEquation x hx)
+    (hSource x hx) (hErrorMem x hx) (hObservation x hx) hBudget
+
 /-- Direct positivity bridge: a finite boundary response of at least twice the
 margin stays positive for the full response once the block-Schur product
 budget fits inside one margin. -/
@@ -387,6 +562,53 @@ theorem positiveOn_of_finiteMargin_and_blockSchur
     hLowGap hHighGap hEpsilon hSmall
     hLowCoercive hHighCoercive hCoupling
     hFiniteEquation hLowEquation hHighEquation hBudget
+
+/-- Positivity bridge for the weighted-boundary interface.  This is the final
+compact-window API expected from a concrete CvS/prolate adapter: a finite
+margin, uniform block equations, a restricted boundary observation bound, and
+the weighted product budget imply positivity of the full boundary response. -/
+theorem positiveOn_of_finiteMargin_and_weightedBlockSchur
+    (domain : Set X)
+    (lowForm : X → E →ₗ[ℝ] E →ₗ[ℝ] ℝ)
+    (highForm : X → H →ₗ[ℝ] H →ₗ[ℝ] ℝ)
+    (coupling : X → E →ₗ[ℝ] H →ₗ[ℝ] ℝ)
+    (errorSpace : X → Set E)
+    (eta : E) (u0 u : X → E) (v : X → H)
+    (lowGap highGap epsilon sourceWeight observationWeight margin : ℝ)
+    (hMargin : 0 < margin)
+    (hLowGap : 0 < lowGap)
+    (hHighGap : 0 < highGap)
+    (hEpsilon : 0 ≤ epsilon)
+    (hObservationWeight : 0 ≤ observationWeight)
+    (hSmall : epsilon ^ 2 < lowGap * highGap)
+    (hFiniteMargin : ∀ x ∈ domain, 2 * margin ≤ ⟪eta, u0 x⟫_ℝ)
+    (hLowCoercive : ∀ x ∈ domain, ∀ w,
+      lowGap * ‖w‖ ^ 2 ≤ lowForm x w w)
+    (hHighCoercive : ∀ x ∈ domain, ∀ z,
+      highGap * ‖z‖ ^ 2 ≤ highForm x z z)
+    (hCoupling : ∀ x ∈ domain, ∀ w z,
+      |coupling x w z| ≤ epsilon * ‖w‖ * ‖z‖)
+    (hLowEquation : ∀ x ∈ domain, ∀ w,
+      lowForm x (u x - u0 x) w + coupling x w (v x) = 0)
+    (hHighEquation : ∀ x ∈ domain, ∀ z,
+      highForm x (v x) z + coupling x (u x) z = 0)
+    (hSource : ∀ x ∈ domain, ‖u0 x‖ ≤ sourceWeight)
+    (hErrorMem : ∀ x ∈ domain, u x - u0 x ∈ errorSpace x)
+    (hObservation : ∀ x ∈ domain, ∀ w ∈ errorSpace x,
+      |⟪eta, w⟫_ℝ| ≤ observationWeight * ‖w‖)
+    (hBudget :
+      observationWeight * sourceWeight * epsilon ^ 2 ≤
+        margin * (lowGap * highGap - epsilon ^ 2)) :
+    ∀ x ∈ domain, 0 < ⟪eta, u x⟫_ℝ := by
+  apply RiemannCvs.BoundaryWeylUniformLimit.positiveOn_of_finiteMargin_and_uniformError
+    (fun x => ⟪eta, u0 x⟫_ℝ) (fun x => ⟪eta, u x⟫_ℝ)
+    domain margin hMargin hFiniteMargin
+  exact boundaryWeylErrorOn_le_margin_of_weightedBlockSchur
+    domain lowForm highForm coupling errorSpace eta u0 u v
+    lowGap highGap epsilon sourceWeight observationWeight margin
+    hLowGap hHighGap hEpsilon hObservationWeight hSmall
+    hLowCoercive hHighCoercive hCoupling hLowEquation hHighEquation
+    hSource hErrorMem hObservation hBudget
 
 end UniformDomain
 
