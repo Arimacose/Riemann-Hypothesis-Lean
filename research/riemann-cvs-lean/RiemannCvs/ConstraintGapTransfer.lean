@@ -55,7 +55,7 @@ theorem eighthPowerGapTransfer
   have hScaled :
       lambda ^ 8 * qLow < lambda ^ 8 * nuConstraint := by
     nlinarith
-  exact (mul_lt_mul_left hLambdaEight).mp hScaled
+  exact lt_of_mul_lt_mul_left hScaled (le_of_lt hLambdaEight)
 
 /-- Common leading coefficients with asymmetric errors give the one-sided
 bounds needed by `eighthPowerGapTransfer`. -/
