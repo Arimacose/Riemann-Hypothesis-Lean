@@ -705,6 +705,27 @@ whenever \(48\kappa\le1\).  Its fixed-index specialization
 \(\kappa=K^2/c^2\), so the explicit absorption threshold is
 \(48K^2\le c^2\).
 
+The source asymptotics naturally arrive in two stages rather than as one
+pre-combined error: Dunster's uniform PSWF-to-Bessel remainder, followed by the
+large-argument Bessel-to-cosine remainder.  Lean now mirrors that structure.
+The scalar lemma `sq_add_le_two_invFrequencyErrorBudget` proves
+
+\[
+|e_D+e_B|^2
+\le
+\frac{2(K_D^2+K_B^2)}{c^2}\,\mathcal A\,w_a
+\]
+
+from the two separate pointwise squared estimates.  The theorem
+`prolateFixedPhaseActualMassLowerOfSeparatedErrors` constructs the combined
+error and its interval integrability internally, composes the two functional
+identities through the intermediate Bessel term, and retains
+\(\mathcal A/144\) whenever
+
+\[
+96(K_D^2+K_B^2)\le c^2.
+\]
+
 The fixed-interval estimate is now composed with the exterior envelope as
 well.  If the `[2,3]` mass is bounded above by the positive exterior mass and
 the hyperbolic density satisfies the established `sech` envelope with
@@ -720,14 +741,21 @@ The constant is exactly \(2\,\mathrm{upper}/(1/144)=288\,\mathrm{upper}\).
 This is the conductor-ready composition that the earlier reduction left as a
 manual chain of inequalities.
 
+The parallel theorem
+`dilationLogMomentBoundsOfSeparatedDunsterBesselErrors` exposes the two source
+remainders independently and reaches the same conductor bounds directly.  No
+manual construction of a single opaque `error` function or a square-root
+combined constant is needed at the source-adapter boundary.
+
 The remaining source-specific fixed-interval obligation is now narrower:
-state Dunster's uniform error estimate with the repository's normalization,
-identify the normalized reference, actual, and error functions, verify its
-parameter range \(0\le a\le1/2\), match its phase to the explicit primitive up
-to an additive constant, and supply the resulting pointwise \(K/c\) hypothesis.
+state Dunster's uniform PSWF-to-Bessel error and the Bessel-to-cosine error with
+the repository's normalization, identify the normalized actual, intermediate,
+and reference functions, verify the parameter range \(0\le a\le1/2\), match
+the source phase to the explicit primitive up to an additive constant, and
+supply the two pointwise \(K_D/c\) and \(K_B/c\) hypotheses.
 The explicit phase primitive, leading weight and mass, every required
 derivative and variation constant, nonlinear integration by parts, the leading
-\(1/36\) lower bound, the complete \(K/c\) error absorption to
+\(1/36\) lower bound, the complete one-error and separated two-error absorption to
 \(\mathcal A/144\), defect normalization, and logarithmic-moment algebra are
 already in Lean, including their final common-scale composition.
 

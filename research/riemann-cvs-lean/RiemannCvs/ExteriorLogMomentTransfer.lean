@@ -1420,6 +1420,25 @@ lemma prolateFixedWeightMassUpperOnTwoThree
       exact (prolateFixedWeightBounds a x haNonneg haUpper hx.1 hx.2).2
     _ = 1 / 3 := by norm_num
 
+/-- Two independent `1 / c` errors add with the explicit squared coefficient
+`2 * (K₁² + K₂²) / c²`.  This is the scalar interface between Dunster's
+uniform remainder and the separate Bessel-to-cosine asymptotic remainder. -/
+lemma sq_add_le_two_invFrequencyErrorBudget
+    (error₁ error₂ c amplitude weight K₁ K₂ : ℝ)
+    (hError₁ : error₁ ^ 2 ≤ (K₁ ^ 2 / c ^ 2) * amplitude * weight)
+    (hError₂ : error₂ ^ 2 ≤ (K₂ ^ 2 / c ^ 2) * amplitude * weight) :
+    (error₁ + error₂) ^ 2 ≤
+      (2 * (K₁ ^ 2 + K₂ ^ 2) / c ^ 2) * amplitude * weight := by
+  calc
+    (error₁ + error₂) ^ 2 ≤ 2 * error₁ ^ 2 + 2 * error₂ ^ 2 := by
+      nlinarith [sq_nonneg (error₁ - error₂)]
+    _ ≤ 2 * ((K₁ ^ 2 / c ^ 2) * amplitude * weight) +
+        2 * ((K₂ ^ 2 / c ^ 2) * amplitude * weight) :=
+      add_le_add (mul_le_mul_of_nonneg_left hError₁ (by norm_num))
+        (mul_le_mul_of_nonneg_left hError₂ (by norm_num))
+    _ = (2 * (K₁ ^ 2 + K₂ ^ 2) / c ^ 2) * amplitude * weight := by
+      ring
+
 /-- Integrating `(actual + error)² ≤ 2 actual² + 2 error²` supplies the scalar
 reference-splitting hypothesis used by the remainder budget. -/
 lemma intervalSqReferenceSplit
@@ -1718,6 +1737,90 @@ theorem prolateFixedPhaseActualMassLowerOfInvFrequencyError
       exact prolateFixedPhase_hasDerivAt a x hx'.1 hx'.2)
     hActualSqIntegrable hReferenceSqIntegrable hErrorSqIntegrable
     hReferencePointwise hDecomp hErrorPointwise
+
+/-- Source-shaped form of the fixed-interval lower bound: a Dunster remainder
+and a Bessel-to-cosine remainder may be proved separately.  Their sum is
+absorbed once `96 * (K_d² + K_b²) ≤ c²`; Lean constructs the combined error,
+its interval integrability, and the required decomposition internally. -/
+theorem prolateFixedPhaseActualMassLowerOfSeparatedErrors
+    (actual intermediate reference dunsterError besselError : ℝ → ℝ)
+    (a c offset amplitude dunsterK besselK : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2)
+    (hc : 33 ≤ c)
+    (hAmplitudeNonneg : 0 ≤ amplitude)
+    (hFrequencyThreshold :
+      96 * (dunsterK ^ 2 + besselK ^ 2) ≤ c ^ 2)
+    (hActualSqIntegrable :
+      IntervalIntegrable (fun x => actual x ^ 2) volume 2 3)
+    (hReferenceSqIntegrable :
+      IntervalIntegrable (fun x => reference x ^ 2) volume 2 3)
+    (hDunsterErrorContinuous :
+      ContinuousOn dunsterError (uIcc (2 : ℝ) 3))
+    (hBesselErrorContinuous :
+      ContinuousOn besselError (uIcc (2 : ℝ) 3))
+    (hReferencePointwise :
+      ∀ x ∈ uIcc (2 : ℝ) 3,
+        reference x ^ 2 =
+          amplitude *
+            (prolateFixedWeight a x *
+              cos (c * prolateFixedPhase a x + offset) ^ 2))
+    (hDunsterStep :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        intermediate x = actual x + dunsterError x)
+    (hBesselStep :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        reference x = intermediate x + besselError x)
+    (hDunsterErrorPointwise :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        dunsterError x ^ 2 ≤
+          (dunsterK ^ 2 / c ^ 2) * amplitude * prolateFixedWeight a x)
+    (hBesselErrorPointwise :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        besselError x ^ 2 ≤
+          (besselK ^ 2 / c ^ 2) * amplitude * prolateFixedWeight a x) :
+    (1 / 144 : ℝ) * amplitude ≤
+      ∫ x in (2 : ℝ)..3, actual x ^ 2 := by
+  let coefficient : ℝ :=
+    2 * (dunsterK ^ 2 + besselK ^ 2) / c ^ 2
+  have hcPos : 0 < c := by linarith
+  have hcSquarePos : 0 < c ^ 2 := sq_pos_of_pos hcPos
+  have hCoefficientNonneg : 0 ≤ coefficient := by
+    dsimp [coefficient]
+    exact div_nonneg
+      (mul_nonneg (by norm_num) (add_nonneg (sq_nonneg _) (sq_nonneg _)))
+      (sq_nonneg c)
+  have hCoefficientThreshold : 48 * coefficient ≤ 1 := by
+    dsimp [coefficient]
+    rw [show
+      48 * (2 * (dunsterK ^ 2 + besselK ^ 2) / c ^ 2) =
+        (96 * (dunsterK ^ 2 + besselK ^ 2)) / c ^ 2 by ring]
+    exact (div_le_iff₀ hcSquarePos).2 (by simpa using hFrequencyThreshold)
+  have hCombinedErrorSqIntegrable :
+      IntervalIntegrable
+        (fun x => (dunsterError x + besselError x) ^ 2) volume 2 3 :=
+    ((hDunsterErrorContinuous.add hBesselErrorContinuous).pow 2).intervalIntegrable
+  apply prolateFixedIntervalActualMassLowerOfErrorBudget
+    actual reference (fun x => dunsterError x + besselError x)
+    (prolateFixedPhase a) a c offset amplitude coefficient
+    haNonneg haUpper hc hAmplitudeNonneg hCoefficientNonneg
+    hCoefficientThreshold
+  · intro x hx
+    have hx' : x ∈ Icc (2 : ℝ) 3 := by
+      simpa [uIcc_of_le (by norm_num : (2 : ℝ) ≤ 3)] using hx
+    exact prolateFixedPhase_hasDerivAt a x hx'.1 hx'.2
+  · exact hActualSqIntegrable
+  · exact hReferenceSqIntegrable
+  · exact hCombinedErrorSqIntegrable
+  · exact hReferencePointwise
+  · intro x hx
+    rw [hBesselStep x hx, hDunsterStep x hx]
+    ring
+  · intro x hx
+    exact sq_add_le_two_invFrequencyErrorBudget
+      (dunsterError x) (besselError x) c amplitude
+      (prolateFixedWeight a x) dunsterK besselK
+      (hDunsterErrorPointwise x hx) (hBesselErrorPointwise x hx)
 
 end ProlateFixedIntervalWeight
 
@@ -2063,6 +2166,84 @@ theorem dilationLogMomentBoundsOfProlateFixedPhaseApproximation
       hAmplitudeNonneg hFrequencyThreshold hActualSqIntegrable
       hReferenceSqIntegrable hErrorSqIntegrable hReferencePointwise hDecomp
       hErrorPointwise
+  have hMassLower : (1 / 144 : ℝ) * amplitude ≤ mass :=
+    hFixedLower.trans hFixedMassToExterior
+  have hBounds := dilationLogMomentBoundsOfSechEnvelope
+    density physical residual mass amplitude logScale upper (1 / 144 : ℝ)
+    hMassPos hAmplitudeNonneg hUpperNonneg (by norm_num)
+    hDensityMeasurable hDensityNonneg hEnvelope hMassLower hResidual hIdentity
+  have hCoefficient : (2 * upper) / (1 / 144 : ℝ) = 288 * upper := by
+    norm_num [div_eq_mul_inv]
+    ring
+  constructor
+  · exact hBounds.1
+  · rw [hCoefficient] at hBounds
+    exact hBounds.2
+
+/-- Conductor-ready source adapter with Dunster and Bessel errors kept as
+separate functions.  The threshold `96 * (K_d² + K_b²) ≤ c²` closes their
+combined fixed-interval budget before applying the exterior `sech` envelope. -/
+theorem dilationLogMomentBoundsOfSeparatedDunsterBesselErrors
+    (density actual intermediate reference dunsterError besselError : ℝ → ℝ)
+    (a c offset amplitude dunsterK besselK
+      physical residual mass logScale upper : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2)
+    (hc : 33 ≤ c)
+    (hAmplitudeNonneg : 0 ≤ amplitude)
+    (hFrequencyThreshold :
+      96 * (dunsterK ^ 2 + besselK ^ 2) ≤ c ^ 2)
+    (hMassPos : 0 < mass)
+    (hUpperNonneg : 0 ≤ upper)
+    (hActualSqIntegrable :
+      IntervalIntegrable (fun x => actual x ^ 2) volume 2 3)
+    (hReferenceSqIntegrable :
+      IntervalIntegrable (fun x => reference x ^ 2) volume 2 3)
+    (hDunsterErrorContinuous :
+      ContinuousOn dunsterError (uIcc (2 : ℝ) 3))
+    (hBesselErrorContinuous :
+      ContinuousOn besselError (uIcc (2 : ℝ) 3))
+    (hReferencePointwise :
+      ∀ x ∈ uIcc (2 : ℝ) 3,
+        reference x ^ 2 =
+          amplitude *
+            (prolateFixedWeight a x *
+              cos (c * prolateFixedPhase a x + offset) ^ 2))
+    (hDunsterStep :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        intermediate x = actual x + dunsterError x)
+    (hBesselStep :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        reference x = intermediate x + besselError x)
+    (hDunsterErrorPointwise :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        dunsterError x ^ 2 ≤
+          (dunsterK ^ 2 / c ^ 2) * amplitude * prolateFixedWeight a x)
+    (hBesselErrorPointwise :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        besselError x ^ 2 ≤
+          (besselK ^ 2 / c ^ 2) * amplitude * prolateFixedWeight a x)
+    (hFixedMassToExterior :
+      (∫ x in (2 : ℝ)..3, actual x ^ 2) ≤ mass)
+    (hDensityMeasurable :
+      AEStronglyMeasurable density (volume.restrict (Ioi 0)))
+    (hDensityNonneg : ∀ u ∈ Ioi (0 : ℝ), 0 ≤ density u)
+    (hEnvelope :
+      ∀ u ∈ Ioi (0 : ℝ),
+        density u ≤ (upper * amplitude) / cosh u)
+    (hResidual :
+      residual = ∫ u in Ioi 0, log (cosh u) * density u)
+    (hIdentity : physical = logScale * mass + residual) :
+    logScale * mass ≤ physical ∧
+      physical ≤ (logScale + 288 * upper) * mass := by
+  have hFixedLower :=
+    prolateFixedPhaseActualMassLowerOfSeparatedErrors
+      actual intermediate reference dunsterError besselError
+      a c offset amplitude dunsterK besselK haNonneg haUpper hc
+      hAmplitudeNonneg hFrequencyThreshold hActualSqIntegrable
+      hReferenceSqIntegrable hDunsterErrorContinuous
+      hBesselErrorContinuous hReferencePointwise hDunsterStep hBesselStep
+      hDunsterErrorPointwise hBesselErrorPointwise
   have hMassLower : (1 / 144 : ℝ) * amplitude ≤ mass :=
     hFixedLower.trans hFixedMassToExterior
   have hBounds := dilationLogMomentBoundsOfSechEnvelope
