@@ -21,6 +21,15 @@ The division-free product budget and domain-uniform positivity theorem are
 designed to accept interval-certified constants.  No CvS coercivity or
 coupling estimate is postulated inside the module; each remains an explicit
 hypothesis to be discharged by the log-tail or sharper prolate analysis.
+
+The module also contains a stronger energy-normalized route.  If
+
+`coupling(w,z)² <= q * lowForm(w,w) * highForm(z,z)` with `q < 1`,
+
+then low-form symmetry and the two weak equations imply that adjoining the
+high block can only increase the boundary response.  This conclusion has no
+Euclidean `‖eta‖²` loss and is the preferred interface for a relative-form
+tail certificate.
 -/
 
 namespace RiemannCvs.BoundaryWeylSchurTail
@@ -232,6 +241,284 @@ theorem highGapBudget_false_of_linearBoundaryGrowth
   have hInterceptPos : 0 < epsilon ^ 2 - scale * shift :=
     sub_pos.mpr hIntercept
   nlinarith [mul_nonneg (le_of_lt hSlopePos) hCutoff]
+
+/-- A squared relative coupling bound forces the low error energy below a
+`q`-fraction of the high energy.  This cancellation is the scalar core of the
+energy-normalized Schur route. -/
+theorem lowEnergy_le_relativeHighEnergy
+    (lowEnergy highEnergy q : ℝ)
+    (hLowEnergy : 0 ≤ lowEnergy)
+    (hHighEnergy : 0 ≤ highEnergy)
+    (hq : 0 ≤ q)
+    (hRelative :
+      lowEnergy ^ 2 ≤ q * lowEnergy * highEnergy) :
+    lowEnergy ≤ q * highEnergy := by
+  by_cases hLowZero : lowEnergy = 0
+  · rw [hLowZero]
+    exact mul_nonneg hq hHighEnergy
+  · have hLowPos : 0 < lowEnergy :=
+      lt_of_le_of_ne hLowEnergy (Ne.symm hLowZero)
+    have hMul :
+        lowEnergy * lowEnergy ≤ lowEnergy * (q * highEnergy) := by
+      nlinarith [hRelative]
+    exact le_of_mul_le_mul_left hMul hLowPos
+
+/-- If `q < 1`, the high energy dominates the low Schur-error energy. -/
+theorem relativeSchurResponseNonnegative
+    (lowEnergy highEnergy q : ℝ)
+    (hLowEnergy : 0 ≤ lowEnergy)
+    (hHighEnergy : 0 ≤ highEnergy)
+    (hq : 0 ≤ q)
+    (hqLt : q < 1)
+    (hRelative :
+      lowEnergy ^ 2 ≤ q * lowEnergy * highEnergy) :
+    0 ≤ highEnergy - lowEnergy := by
+  have hLowRelative := lowEnergy_le_relativeHighEnergy
+    lowEnergy highEnergy q hLowEnergy hHighEnergy hq hRelative
+  have hRelativeHigh : q * highEnergy ≤ highEnergy := by
+    have := mul_le_mul_of_nonneg_right (le_of_lt hqLt) hHighEnergy
+    simpa using this
+  linarith
+
+/-- Multiplication-only error budget for the energy-normalized Schur system.
+
+Here `lowEnergy` is the energy of the low-component error, `highEnergy` is the
+high-component energy, `sourceEnergy` is the finite resolvent energy, and
+`cross = lowEnergy - highEnergy` is the source/high cross term forced by the
+two block equations. -/
+theorem relativeSchurResponseBudget
+    (lowEnergy highEnergy sourceEnergy q cross : ℝ)
+    (hLowEnergy : 0 ≤ lowEnergy)
+    (hHighEnergy : 0 ≤ highEnergy)
+    (hSourceEnergy : 0 ≤ sourceEnergy)
+    (hq : 0 ≤ q)
+    (hqLt : q < 1)
+    (hCross : cross = lowEnergy - highEnergy)
+    (hRelativeLow :
+      lowEnergy ^ 2 ≤ q * lowEnergy * highEnergy)
+    (hRelativeSource :
+      cross ^ 2 ≤ q * sourceEnergy * highEnergy) :
+    (1 - q) * |cross| ≤ q * sourceEnergy := by
+  have hLowRelative := lowEnergy_le_relativeHighEnergy
+    lowEnergy highEnergy q
+    hLowEnergy hHighEnergy hq hRelativeLow
+  have hRelativeHigh : q * highEnergy ≤ highEnergy := by
+    have := mul_le_mul_of_nonneg_right (le_of_lt hqLt) hHighEnergy
+    simpa using this
+  have hCrossNonpos : cross ≤ 0 := by
+    rw [hCross]
+    linarith
+  have hAbsCross : |cross| = highEnergy - lowEnergy := by
+    rw [abs_of_nonpos hCrossNonpos, hCross]
+    ring
+  rw [hAbsCross]
+  have hResponseNonneg : 0 ≤ highEnergy - lowEnergy := by
+    linarith
+  by_cases hResponseZero : highEnergy - lowEnergy = 0
+  · rw [hResponseZero]
+    simpa using mul_nonneg hq hSourceEnergy
+  · have hResponsePos : 0 < highEnergy - lowEnergy :=
+      lt_of_le_of_ne hResponseNonneg (Ne.symm hResponseZero)
+    have hOneMinusQ : 0 < 1 - q := sub_pos.mpr hqLt
+    have hRelativeResponse :
+        (highEnergy - lowEnergy) ^ 2 ≤
+          q * sourceEnergy * highEnergy := by
+      rw [hCross] at hRelativeSource
+      nlinarith [hRelativeSource]
+    have hHighToResponse :
+        (1 - q) * highEnergy ≤ highEnergy - lowEnergy := by
+      nlinarith [hLowRelative]
+    have hRelativeScaled := mul_le_mul_of_nonneg_left
+      hRelativeResponse (le_of_lt hOneMinusQ)
+    have hHighScaled := mul_le_mul_of_nonneg_left
+      hHighToResponse (mul_nonneg hq hSourceEnergy)
+    have hProduct :
+        ((1 - q) * (highEnergy - lowEnergy)) *
+            (highEnergy - lowEnergy) ≤
+          (q * sourceEnergy) * (highEnergy - lowEnergy) := by
+      calc
+        ((1 - q) * (highEnergy - lowEnergy)) *
+              (highEnergy - lowEnergy)
+            = (1 - q) * (highEnergy - lowEnergy) ^ 2 := by ring
+        _ ≤ (1 - q) * (q * sourceEnergy * highEnergy) :=
+          hRelativeScaled
+        _ = (q * sourceEnergy) * ((1 - q) * highEnergy) := by ring
+        _ ≤ (q * sourceEnergy) * (highEnergy - lowEnergy) :=
+          hHighScaled
+    exact le_of_mul_le_mul_right hProduct hResponsePos
+
+/-- A relative coupling certificate at one pair of nonnegative forms remains
+valid after both forms grow.  For the CvS resolvent this propagates a right
+endpoint certificate to every more negative spectral parameter, since both
+diagonal blocks gain the same positive shift. -/
+theorem relativeCoupling_of_formGrowth
+    (couplingSq q low₀ low high₀ high : ℝ)
+    (hq : 0 ≤ q)
+    (hLow₀ : 0 ≤ low₀)
+    (hHigh₀ : 0 ≤ high₀)
+    (hLowGrowth : low₀ ≤ low)
+    (hHighGrowth : high₀ ≤ high)
+    (hRelative : couplingSq ≤ q * low₀ * high₀) :
+    couplingSq ≤ q * low * high := by
+  have hLowNonneg : 0 ≤ low := hLow₀.trans hLowGrowth
+  have hLowProduct : low₀ * high₀ ≤ low * high₀ :=
+    mul_le_mul_of_nonneg_right hLowGrowth hHigh₀
+  have hHighProduct : low * high₀ ≤ low * high :=
+    mul_le_mul_of_nonneg_left hHighGrowth hLowNonneg
+  have hProduct := hLowProduct.trans hHighProduct
+  have hScaled := mul_le_mul_of_nonneg_left hProduct hq
+  calc
+    couplingSq ≤ q * low₀ * high₀ := hRelative
+    _ = q * (low₀ * high₀) := by ring
+    _ ≤ q * (low * high) := hScaled
+    _ = q * low * high := by ring
+
+/-- Relative-energy boundary-Weyl error estimate.
+
+Unlike the Euclidean Schur estimate, this bound contains neither `‖eta‖²` nor
+a raw source norm.  Symmetry and the two weak block equations identify the
+response error with the source/high cross term. -/
+theorem boundaryWeylRelativeEnergyBudget
+    (lowForm : E →ₗ[ℝ] E →ₗ[ℝ] ℝ)
+    (highForm : H →ₗ[ℝ] H →ₗ[ℝ] ℝ)
+    (coupling : E →ₗ[ℝ] H →ₗ[ℝ] ℝ)
+    (eta u0 u : E) (v : H) (q : ℝ)
+    (hq : 0 ≤ q)
+    (hqLt : q < 1)
+    (hLowSymm : ∀ w₁ w₂, lowForm w₁ w₂ = lowForm w₂ w₁)
+    (hLowNonneg : ∀ w, 0 ≤ lowForm w w)
+    (hHighNonneg : ∀ z, 0 ≤ highForm z z)
+    (hRelative : ∀ w z,
+      (coupling w z) ^ 2 ≤
+        q * lowForm w w * highForm z z)
+    (hFiniteEquation : ∀ w, lowForm u0 w = ⟪eta, w⟫_ℝ)
+    (hLowEquation : ∀ w,
+      lowForm (u - u0) w + coupling w v = 0)
+    (hHighEquation : ∀ z,
+      highForm v z + coupling u z = 0) :
+    (1 - q) * |⟪eta, u⟫_ℝ - ⟪eta, u0⟫_ℝ| ≤
+      q * ⟪eta, u0⟫_ℝ := by
+  let d : E := u - u0
+  have hU : u = d + u0 := by
+    simp [d]
+  have hLowAtD : lowForm d d + coupling d v = 0 := by
+    simpa [d] using hLowEquation d
+  have hHighAtV :
+      highForm v v + (coupling d v + coupling u0 v) = 0 := by
+    have h := hHighEquation v
+    rw [hU] at h
+    simpa only [map_add, LinearMap.add_apply] using h
+  have hCouplingRelation :
+      coupling u0 v = lowForm d d - highForm v v := by
+    linarith
+  have hCouplingD : coupling d v = -lowForm d d := by
+    linarith
+  have hRelativeD := hRelative d v
+  rw [hCouplingD] at hRelativeD
+  have hLowSquare :
+      (lowForm d d) ^ 2 ≤
+        q * lowForm d d * highForm v v := by
+    simpa using hRelativeD
+  have hScalar := relativeSchurResponseBudget
+    (lowForm d d) (highForm v v) (lowForm u0 u0) q (coupling u0 v)
+    (hLowNonneg d) (hHighNonneg v) (hLowNonneg u0)
+    hq hqLt hCouplingRelation hLowSquare (hRelative u0 v)
+  have hResponse :
+      ⟪eta, u⟫_ℝ - ⟪eta, u0⟫_ℝ = -coupling u0 v := by
+    rw [← inner_sub_right]
+    change ⟪eta, d⟫_ℝ = -coupling u0 v
+    rw [← hFiniteEquation d, hLowSymm u0 d]
+    linarith [hLowEquation u0]
+  calc
+    (1 - q) * |⟪eta, u⟫_ℝ - ⟪eta, u0⟫_ℝ|
+        = (1 - q) * |coupling u0 v| := by rw [hResponse, abs_neg]
+    _ ≤ q * lowForm u0 u0 := hScalar
+    _ = q * ⟪eta, u0⟫_ℝ := by rw [hFiniteEquation u0]
+
+/-- Energy-normalized Schur monotonicity: adjoining a high block whose
+relative coupling satisfies `q < 1` can only increase the boundary resolvent
+response.  This is the key route around the linearly growing Euclidean
+boundary-vector mass. -/
+theorem boundaryWeyl_mono_of_relativeEnergyCoupling
+    (lowForm : E →ₗ[ℝ] E →ₗ[ℝ] ℝ)
+    (highForm : H →ₗ[ℝ] H →ₗ[ℝ] ℝ)
+    (coupling : E →ₗ[ℝ] H →ₗ[ℝ] ℝ)
+    (eta u0 u : E) (v : H) (q : ℝ)
+    (hq : 0 ≤ q)
+    (hqLt : q < 1)
+    (hLowSymm : ∀ w₁ w₂, lowForm w₁ w₂ = lowForm w₂ w₁)
+    (hLowNonneg : ∀ w, 0 ≤ lowForm w w)
+    (hHighNonneg : ∀ z, 0 ≤ highForm z z)
+    (hRelative : ∀ w z,
+      (coupling w z) ^ 2 ≤
+        q * lowForm w w * highForm z z)
+    (hFiniteEquation : ∀ w, lowForm u0 w = ⟪eta, w⟫_ℝ)
+    (hLowEquation : ∀ w,
+      lowForm (u - u0) w + coupling w v = 0)
+    (hHighEquation : ∀ z,
+      highForm v z + coupling u z = 0) :
+    ⟪eta, u0⟫_ℝ ≤ ⟪eta, u⟫_ℝ := by
+  let d : E := u - u0
+  have hLowAtD : lowForm d d + coupling d v = 0 := by
+    simpa [d] using hLowEquation d
+  have hCouplingD : coupling d v = -lowForm d d := by
+    linarith
+  have hRelativeD := hRelative d v
+  rw [hCouplingD] at hRelativeD
+  have hLowSquare :
+      (lowForm d d) ^ 2 ≤
+        q * lowForm d d * highForm v v := by
+    simpa using hRelativeD
+  have hResponseNonneg :
+      0 ≤ highForm v v - lowForm d d :=
+    relativeSchurResponseNonnegative
+      (lowForm d d) (highForm v v) q
+      (hLowNonneg d) (hHighNonneg v) hq hqLt hLowSquare
+  have hU : u = d + u0 := by
+    simp [d]
+  have hHighAtV :
+      highForm v v + (coupling d v + coupling u0 v) = 0 := by
+    have h := hHighEquation v
+    rw [hU] at h
+    simpa only [map_add, LinearMap.add_apply] using h
+  have hCouplingRelation :
+      coupling u0 v = lowForm d d - highForm v v := by
+    linarith
+  have hResponse :
+      ⟪eta, u⟫_ℝ - ⟪eta, u0⟫_ℝ = -coupling u0 v := by
+    rw [← inner_sub_right]
+    change ⟪eta, d⟫_ℝ = -coupling u0 v
+    rw [← hFiniteEquation d, hLowSymm u0 d]
+    linarith [hLowEquation u0]
+  linarith
+
+/-- Strict finite positivity transfers through the energy-normalized Schur
+system as soon as its relative coupling coefficient is below one. -/
+theorem boundaryWeyl_pos_of_relativeEnergyCoupling
+    (lowForm : E →ₗ[ℝ] E →ₗ[ℝ] ℝ)
+    (highForm : H →ₗ[ℝ] H →ₗ[ℝ] ℝ)
+    (coupling : E →ₗ[ℝ] H →ₗ[ℝ] ℝ)
+    (eta u0 u : E) (v : H) (q : ℝ)
+    (hq : 0 ≤ q)
+    (hqLt : q < 1)
+    (hFinitePos : 0 < ⟪eta, u0⟫_ℝ)
+    (hLowSymm : ∀ w₁ w₂, lowForm w₁ w₂ = lowForm w₂ w₁)
+    (hLowNonneg : ∀ w, 0 ≤ lowForm w w)
+    (hHighNonneg : ∀ z, 0 ≤ highForm z z)
+    (hRelative : ∀ w z,
+      (coupling w z) ^ 2 ≤
+        q * lowForm w w * highForm z z)
+    (hFiniteEquation : ∀ w, lowForm u0 w = ⟪eta, w⟫_ℝ)
+    (hLowEquation : ∀ w,
+      lowForm (u - u0) w + coupling w v = 0)
+    (hHighEquation : ∀ z,
+      highForm v z + coupling u z = 0) :
+    0 < ⟪eta, u⟫_ℝ := by
+  exact hFinitePos.trans_le
+    (boundaryWeyl_mono_of_relativeEnergyCoupling
+      lowForm highForm coupling eta u0 u v q
+      hq hqLt hLowSymm hLowNonneg hHighNonneg hRelative
+      hFiniteEquation hLowEquation hHighEquation)
 
 /-- Replace the raw Euclidean boundary mass by two source-specific weights.
 
@@ -520,6 +807,76 @@ theorem boundaryWeylErrorOn_le_margin_of_weightedBlockSchur
     (hLowCoercive x hx) (hHighCoercive x hx) (hCoupling x hx)
     (hLowEquation x hx) (hHighEquation x hx)
     (hSource x hx) (hErrorMem x hx) (hObservation x hx) hBudget
+
+/-- Domain-uniform energy-normalized Schur monotonicity.  A common `q < 1`
+certificate makes every full boundary response dominate its finite retained
+response on the domain. -/
+theorem boundaryWeyl_monoOn_of_relativeEnergyCoupling
+    (domain : Set X)
+    (lowForm : X → E →ₗ[ℝ] E →ₗ[ℝ] ℝ)
+    (highForm : X → H →ₗ[ℝ] H →ₗ[ℝ] ℝ)
+    (coupling : X → E →ₗ[ℝ] H →ₗ[ℝ] ℝ)
+    (eta : E) (u0 u : X → E) (v : X → H) (q : ℝ)
+    (hq : 0 ≤ q)
+    (hqLt : q < 1)
+    (hLowSymm : ∀ x ∈ domain, ∀ w₁ w₂,
+      lowForm x w₁ w₂ = lowForm x w₂ w₁)
+    (hLowNonneg : ∀ x ∈ domain, ∀ w,
+      0 ≤ lowForm x w w)
+    (hHighNonneg : ∀ x ∈ domain, ∀ z,
+      0 ≤ highForm x z z)
+    (hRelative : ∀ x ∈ domain, ∀ w z,
+      (coupling x w z) ^ 2 ≤
+        q * lowForm x w w * highForm x z z)
+    (hFiniteEquation : ∀ x ∈ domain, ∀ w,
+      lowForm x (u0 x) w = ⟪eta, w⟫_ℝ)
+    (hLowEquation : ∀ x ∈ domain, ∀ w,
+      lowForm x (u x - u0 x) w + coupling x w (v x) = 0)
+    (hHighEquation : ∀ x ∈ domain, ∀ z,
+      highForm x (v x) z + coupling x (u x) z = 0) :
+    ∀ x ∈ domain,
+      ⟪eta, u0 x⟫_ℝ ≤ ⟪eta, u x⟫_ℝ := by
+  intro x hx
+  exact boundaryWeyl_mono_of_relativeEnergyCoupling
+    (lowForm x) (highForm x) (coupling x)
+    eta (u0 x) (u x) (v x) q hq hqLt
+    (hLowSymm x hx) (hLowNonneg x hx) (hHighNonneg x hx)
+    (hRelative x hx) (hFiniteEquation x hx)
+    (hLowEquation x hx) (hHighEquation x hx)
+
+/-- Pointwise finite positivity transfers to the full response throughout a
+domain once the common relative-energy coupling coefficient is below one. -/
+theorem positiveOn_of_relativeEnergyCoupling
+    (domain : Set X)
+    (lowForm : X → E →ₗ[ℝ] E →ₗ[ℝ] ℝ)
+    (highForm : X → H →ₗ[ℝ] H →ₗ[ℝ] ℝ)
+    (coupling : X → E →ₗ[ℝ] H →ₗ[ℝ] ℝ)
+    (eta : E) (u0 u : X → E) (v : X → H) (q : ℝ)
+    (hq : 0 ≤ q)
+    (hqLt : q < 1)
+    (hFinitePos : ∀ x ∈ domain, 0 < ⟪eta, u0 x⟫_ℝ)
+    (hLowSymm : ∀ x ∈ domain, ∀ w₁ w₂,
+      lowForm x w₁ w₂ = lowForm x w₂ w₁)
+    (hLowNonneg : ∀ x ∈ domain, ∀ w,
+      0 ≤ lowForm x w w)
+    (hHighNonneg : ∀ x ∈ domain, ∀ z,
+      0 ≤ highForm x z z)
+    (hRelative : ∀ x ∈ domain, ∀ w z,
+      (coupling x w z) ^ 2 ≤
+        q * lowForm x w w * highForm x z z)
+    (hFiniteEquation : ∀ x ∈ domain, ∀ w,
+      lowForm x (u0 x) w = ⟪eta, w⟫_ℝ)
+    (hLowEquation : ∀ x ∈ domain, ∀ w,
+      lowForm x (u x - u0 x) w + coupling x w (v x) = 0)
+    (hHighEquation : ∀ x ∈ domain, ∀ z,
+      highForm x (v x) z + coupling x (u x) z = 0) :
+    ∀ x ∈ domain, 0 < ⟪eta, u x⟫_ℝ := by
+  have hMono := boundaryWeyl_monoOn_of_relativeEnergyCoupling
+    domain lowForm highForm coupling eta u0 u v q hq hqLt
+    hLowSymm hLowNonneg hHighNonneg hRelative
+    hFiniteEquation hLowEquation hHighEquation
+  intro x hx
+  exact (hFinitePos x hx).trans_le (hMono x hx)
 
 /-- Direct positivity bridge: a finite boundary response of at least twice the
 margin stays positive for the full response once the block-Schur product

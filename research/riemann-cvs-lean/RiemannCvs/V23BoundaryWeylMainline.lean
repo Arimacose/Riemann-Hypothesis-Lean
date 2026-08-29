@@ -45,16 +45,26 @@ The new kernel-checked chain contains:
     the same module now also exposes a weighted-boundary replacement whose
     numerator is `observationWeight * sourceWeight * epsilon²`, where the
     observation norm is required only on the actual Schur-error subspace;
-11. a normalized far-left estimate
+11. a stronger energy-normalized Schur route: if
+    `coupling(w,z)² <= q * lowForm(w,w) * highForm(z,z)` with `q < 1`, the weak
+    block equations and low-form symmetry imply
+    `<eta,u0> <= <eta,u>` directly, so finite positivity transfers without any
+    Euclidean boundary-mass or additive tail-margin loss;
+12. a normalized far-left estimate
     `|G_N(-t) - 1/t| <= moment/t²`, derived from total residue one and a first
     absolute spectral-moment budget;
-12. the repaired boundary-gap obstruction, continuous no-crossing propagation,
+13. the repaired boundary-gap obstruction, continuous no-crossing propagation,
    and order preservation across rank-one prime events.
 
 The companion Arb audit certifies the cumulative-residue hypotheses for the
 corrected finite `(c,N) = (13,20)` parity blocks, including several negative
 individual residues whose prefixes nevertheless stay strictly positive.  It
 also certifies a `k = 11` Abel-prefix lower margin on `-100 ≤ x ≤ 0`.  The
+relative-energy companion certificate proves, by 2000-bit interval LDL, that
+the concrete nested split `N = 20` inside `N = 120` satisfies `q < 999/1000`
+in both parity sectors at `x = -1/1024`; positive diagonal growth extends that
+finite certificate to every `x ≤ -1/1024`.  This is evidence for the new
+all-cutoff target, not a replacement for its operator proof.  The
 finite certificate is valid at the endpoint, but the real-valued
 finite-to-limit resolvent comparison must be applied on compact subintervals
 whose right endpoint is strictly negative: the certified lowest even pole
@@ -73,7 +83,9 @@ leaving “resolvent tail” and “far-left asymptotic” as opaque hypotheses.
 The concrete identity `‖eta_M‖² = 2M+1` also exposes a structural obstruction:
 a dimension-independent coupling bound together with only logarithmic
 high-gap growth does not satisfy the synchronized Weyl Schur budget.  The next
-source estimate must therefore gain cutoff decay in the coupling or discharge
-the new weighted interface by bounding the finite source and the boundary
-functional on the coupling-generated Schur-error subspace.
+source estimate may instead prove the dimensionless relative-energy inequality
+with some `q < 1`: this removes the boundary vector entirely and is now the
+preferred target.  The finite `N = 120` certificate supplies a concrete
+`q = 999/1000` benchmark, while the remaining proof obligation is uniformity
+over every larger cutoff and passage to the closed tail operator.
 -/

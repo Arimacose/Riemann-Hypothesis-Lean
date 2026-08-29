@@ -407,6 +407,92 @@ cutoff-uniform restricted boundary norm (or enough cutoff decay in its product
 with the finite-source norm).  The pure prolate `O(lambda^-7)` estimate becomes
 relevant only after proving that range identification.
 
+There is now a stronger route that removes the boundary functional from the
+tail budget altogether.  Write the shifted low/high form as
+
+```text
+L(w,w) + 2 B(w,z) + H(z,z)
+```
+
+and suppose its dimensionless coupling satisfies
+
+```text
+B(w,z)² <= q * L(w,w) * H(z,z),    0 <= q < 1.
+```
+
+For the finite low solution `u0`, full low component `u`, high component `v`,
+and `d=u-u0`, the weak equations give
+
+```text
+L(d,d) + B(d,v) = 0,
+H(v,v) + B(u,v) = 0.
+```
+
+The relative bound applied to `(d,v)` yields
+
+```text
+L(d,d) <= q * H(v,v) < H(v,v).
+```
+
+Low-form symmetry and the finite source equation then identify the boundary
+response difference exactly:
+
+```text
+<eta,u>-<eta,u0>
+  = -B(u0,v)
+  = H(v,v)-L(d,d)
+  >= 0.
+```
+
+Lean now proves both this monotonicity and the quantitative companion
+
+```text
+(1-q) * |<eta,u>-<eta,u0>| <= q * <eta,u0>.
+```
+
+Consequently, finite boundary-Weyl positivity transfers directly to the full
+block response under a relative-energy certificate with `q<1`; neither
+`||eta_M||²`, `sourceWeight`, nor an additive finite-to-tail margin appears in
+the positivity conclusion.  The theorem
+`relativeCoupling_of_formGrowth` propagates a certificate when both diagonal
+forms grow, matching the fact that moving left from `x=-delta` adds a positive
+shift to both CvS blocks.
+
+The new script `certify_relative_energy_coupling.py` gives the first rigorous
+finite instance.  At
+
+```text
+c = 13,
+retained cutoff = 20,
+full cutoff = 120,
+x = -1/1024,
+q = 999/1000,
+precision = 2000 bits,
+```
+
+it assembles the exact Arb enclosure of
+
+```text
+[[q L, B], [B^T, H]]
+```
+
+and certifies every unpivoted interval-LDL pivot strictly positive:
+
+```text
+even: 121 / 121 positive pivots,
+      transcript 15adbfc971c8828991b06f87a5e3803d2eae829ad191460c2de73febf96a7e45,
+odd:  120 / 120 positive pivots,
+      transcript 4b8fb0e5fb931844e2a7282fb51f77c1f783044b2f1288db2c81fd1c77e5fe94.
+```
+
+Positive diagonal growth extends this finite certificate to every
+`x <= -1/1024`.  It is still a nested finite-cutoff theorem: the next analytic
+target is to prove the same relative form inequality for the closed complement
+beyond every retained cutoff, or to give an all-cutoff tail majorant whose
+limit stays strictly below one.  The finite result is materially stronger than
+the earlier raw `B_L` probe because it succeeds at `N=120` with a rigorous
+dimensionless constant while the Euclidean budget was structurally excluded.
+
 `BoundaryWeylFarLeft.lean` closes the algebraic part of the exterior
 normalization.  If all finite poles are nonnegative, the total residue is one,
 and
@@ -516,11 +602,11 @@ The following are still explicit proof obligations:
 
 1. instantiate the characteristic-polynomial identification for the concrete
    self-adjoint CvS blocks from a Lean-side ordered eigenvalue enumeration;
-2. instantiate the Schur inputs `a`, `gamma`, and `epsilon` on each compact
-   domain with right endpoint `< 0`; then either prove cutoff decay strong
-   enough for the unweighted product budget or identify the coupling-generated
-   `errorSpace` and bound `sourceWeight * observationWeight` uniformly for the
-   new weighted budget;
+2. upgrade the finite `N=20 -> 120`, `q<999/1000` relative-energy certificate
+   to the closed high complement for every larger cutoff, uniformly on compact
+   domains with right endpoint `< 0`; the older `a/gamma/epsilon` and restricted
+   `errorSpace` budgets remain fallback interfaces, while the relative form
+   inequality is now the preferred positivity route;
 3. prove a cutoff-uniform upper bound for the absolute first spectral moment
    consumed by the new far-left theorem;
 4. keep the V22 central-mode functional distinct from the Sylvester boundary
@@ -530,12 +616,14 @@ The following are still explicit proof obligations:
 6. close the source-specific PSWF-to-Bessel exterior remainder used by the
    stationary-phase route.
 
-The new certificate closes the finite `(13,20)` numerical hypothesis consumed
-by the Lean theorem.  The exact finite displacement, characteristic-product,
-residue-normalization, determinant-ratio, quantitative Abel, and logical
-finite-to-limit adapters are now formalized.  The source-specific uniform
-margin and convergence estimates listed above remain the dominant proof
-boundary.
+The cumulative certificate closes the finite `(13,20)` numerical hypothesis,
+and the new relative-energy certificate extends the checked Schur comparison
+to the concrete nested cutoff `20 -> 120` throughout `x <= -1/1024`.  The exact
+finite displacement, characteristic-product, residue-normalization,
+determinant-ratio, quantitative Abel, energy-normalized monotonicity, and
+logical finite-to-limit adapters are now formalized.  The all-cutoff relative
+tail inequality, uniform moment bound, and limiting resolvent construction
+remain the dominant proof boundary.
 
 ## 10. Local Lean replay
 

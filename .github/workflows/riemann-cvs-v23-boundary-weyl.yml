@@ -21,6 +21,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/PiecewiseParityContinuation.lean'
       - 'research/riemann-cvs-numerics/audit_zero_mode_correction.py'
       - 'research/riemann-cvs-numerics/audit_log_tail_structure.py'
+      - 'research/riemann-cvs-numerics/certify_relative_energy_coupling.py'
       - 'research/riemann-cvs-numerics/certify_boundary_weyl_cumulative.py'
       - 'research/riemann-cvs-numerics/certify_parity_gap.py'
       - 'research/riemann-cvs-notes/V23_BOUNDARY_WEYL_CUMULATIVE.md'
@@ -44,6 +45,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/PiecewiseParityContinuation.lean'
       - 'research/riemann-cvs-numerics/audit_zero_mode_correction.py'
       - 'research/riemann-cvs-numerics/audit_log_tail_structure.py'
+      - 'research/riemann-cvs-numerics/certify_relative_energy_coupling.py'
       - 'research/riemann-cvs-numerics/certify_boundary_weyl_cumulative.py'
       - 'research/riemann-cvs-numerics/certify_parity_gap.py'
       - 'research/riemann-cvs-notes/V23_BOUNDARY_WEYL_CUMULATIVE.md'
@@ -178,6 +180,13 @@ jobs:
           #print axioms RiemannCvs.BoundaryWeylSchurTail.boundaryWeylError_le_of_blockSchur
           #print axioms RiemannCvs.BoundaryWeylSchurTail.schurProductBudget_of_highGapBudget
           #print axioms RiemannCvs.BoundaryWeylSchurTail.highGapBudget_false_of_linearBoundaryGrowth
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.lowEnergy_le_relativeHighEnergy
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeSchurResponseNonnegative
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeSchurResponseBudget
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCoupling_of_formGrowth
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.boundaryWeylRelativeEnergyBudget
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.boundaryWeyl_mono_of_relativeEnergyCoupling
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.boundaryWeyl_pos_of_relativeEnergyCoupling
           #print axioms RiemannCvs.BoundaryWeylSchurTail.boundaryWeylError_le_of_weightedBlockSchur
           #print axioms RiemannCvs.BoundaryWeylSchurTail.boundaryWeylError_le_margin_of_weightedBlockSchur
           #print axioms RiemannCvs.BoundaryWeylSchurTail.weightedSchurBudget_of_upperBounds
@@ -185,6 +194,8 @@ jobs:
           #print axioms RiemannCvs.BoundaryWeylSchurTail.boundaryWeylError_le_margin_of_blockSchur_highGapBudget
           #print axioms RiemannCvs.BoundaryWeylSchurTail.boundaryWeylErrorOn_le_margin_of_blockSchur
           #print axioms RiemannCvs.BoundaryWeylSchurTail.boundaryWeylErrorOn_le_margin_of_weightedBlockSchur
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.boundaryWeyl_monoOn_of_relativeEnergyCoupling
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.positiveOn_of_relativeEnergyCoupling
           #print axioms RiemannCvs.BoundaryWeylSchurTail.positiveOn_of_finiteMargin_and_blockSchur
           #print axioms RiemannCvs.BoundaryWeylSchurTail.positiveOn_of_finiteMargin_and_weightedBlockSchur
           #print axioms RiemannCvs.BoundaryWeylFarLeft.finiteBoundaryWeyl_sub_oneDiv_abs_le
@@ -249,6 +260,19 @@ jobs:
             --schur-eta-norm-sq 41 \
             --json-out research/riemann-cvs-numerics/artifacts/v23_c13_log_tail_schur_budget.json
 
+      - name: Certify the finite V23 relative-energy coupling route
+        shell: bash
+        run: |
+          set -euo pipefail
+          python research/riemann-cvs-numerics/certify_relative_energy_coupling.py \
+            --c 13 \
+            --low-cutoff 20 \
+            --big-cutoff 120 \
+            --prec 2000 \
+            --shift-gain 1/1024 \
+            --q-upper 999/1000 \
+            --json-out research/riemann-cvs-numerics/artifacts/v23_c13_N20_to_N120_relative_energy.json
+
       - name: Replay the corrected finite Arb parity certificate
         shell: bash
         run: |
@@ -302,6 +326,7 @@ jobs:
           path: |
             research/riemann-cvs-numerics/artifacts/v23_v22_zero_mode_c13.json
             research/riemann-cvs-numerics/artifacts/v23_c13_log_tail_schur_budget.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_N20_to_N120_relative_energy.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N20_parity_gap.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N20_boundary_weyl_cumulative.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N12_boundary_weyl_compact_margin.json
