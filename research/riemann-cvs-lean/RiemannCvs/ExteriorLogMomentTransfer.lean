@@ -1,5 +1,5 @@
 import Mathlib
-import RiemannCvs.BesselJ0Series
+import RiemannCvs.BesselJ0Dlmf
 
 /-!
 # Scalar and hyperbolic-envelope transfer for an exterior logarithmic moment
@@ -2011,6 +2011,15 @@ noncomputable def prolateFixedDunsterPrefactor
 noncomputable def besselJ0LeadingScale (c phase : ℝ) : ℝ :=
   sqrt (2 / (π * c * phase))
 
+/-- The source-layer scale is definitionally the DLMF scale at `z = c * phase`,
+up to reassociation of multiplication. -/
+lemma besselJ0LeadingScale_eq_dlmfLeadingScale (c phase : ℝ) :
+    besselJ0LeadingScale c phase =
+      BesselJ0Dlmf.leadingScale (c * phase) := by
+  unfold besselJ0LeadingScale BesselJ0Dlmf.leadingScale
+  congr 2
+  ring
+
 /-- Common squared radial amplitude left after cancelling the source phase
 between the Dunster prefactor and the leading Bessel scale. -/
 noncomputable def prolateFixedDunsterAmplitude (normalization c : ℝ) : ℝ :=
@@ -2557,6 +2566,36 @@ theorem prolateFixedSourceActualMassLowerOfDlmfDunsterErrors
       hSourceBase hSourceDeriv hx.1 hx.2)
     (hDlmfAbsoluteErrorPointwise x hx)
 
+/-- A global positive-real-axis DLMF bound specializes automatically to the
+source interval because `c ≥ 33` and the source phase is at least one. -/
+lemma concreteJ0DlmfAbsoluteErrorPointwiseOfGlobal
+    (sourcePhase : ℝ → ℝ) (a c : ℝ)
+    (hc : 33 ≤ c)
+    (hSourceBase : 1 ≤ sourcePhase 2)
+    (hSourceDeriv :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        HasDerivAt sourcePhase (prolateFixedPhaseSlope a x) x)
+    (hDlmf : BesselJ0Dlmf.HasFirstDlmfRemainderBound) :
+    ∀ x ∈ Icc (2 : ℝ) 3,
+      |besselJ0LeadingScale c (sourcePhase x) *
+          cos (c * sourcePhase x - π / 4) -
+        BesselJ0Series.besselJ0 (c * sourcePhase x)| ≤
+          besselJ0LeadingScale c (sourcePhase x) *
+            (1 / (8 * (c * sourcePhase x)) +
+              9 / (128 * (c * sourcePhase x) ^ 2) +
+              75 / (1024 * (c * sourcePhase x) ^ 3)) := by
+  intro x hx
+  have hcPos : 0 < c := by linarith
+  have hPhaseOne : 1 ≤ sourcePhase x :=
+    sourcePhase_one_le_onTwoThree sourcePhase a x
+      hSourceBase hSourceDeriv hx.1 hx.2
+  have hPhasePos : 0 < sourcePhase x := by linarith
+  have hzPos : 0 < c * sourcePhase x := mul_pos hcPos hPhasePos
+  have h := hDlmf (c * sourcePhase x) hzPos
+  rw [BesselJ0Dlmf.leadingCosine,
+    BesselJ0Dlmf.firstRemainderEnvelope,
+    ← besselJ0LeadingScale_eq_dlmfLeadingScale c (sourcePhase x)] at h
+  exact h
 /-- Concrete-`J₀` specialization of the Dunster/DLMF fixed-interval mass
 theorem.  The Bessel function and its continuity proof are now supplied by
 `BesselJ0Series`; the remaining DLMF input is stated directly about that
@@ -2600,6 +2639,39 @@ theorem prolateFixedSourceActualMassLowerOfConcreteJ0DlmfDunsterErrors
     hFrequencyThreshold hDunsterErrorPointwise hDlmfAbsoluteErrorPointwise
 
 
+/-- Fixed-interval concrete-`J₀` mass theorem with the DLMF input exposed as
+one global positive-real-axis predicate rather than a source-dependent
+pointwise hypothesis. -/
+theorem prolateFixedSourceActualMassLowerOfConcreteJ0GlobalDlmf
+    (actual sourcePhase : ℝ → ℝ)
+    (a c normalization dunsterK : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2)
+    (hc : 33 ≤ c)
+    (hSourceBase : 1 ≤ sourcePhase 2)
+    (hSourceDeriv :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        HasDerivAt sourcePhase (prolateFixedPhaseSlope a x) x)
+    (hActualContinuous : ContinuousOn actual (uIcc (2 : ℝ) 3))
+    (hFrequencyThreshold :
+      96 * (dunsterK ^ 2 + (275 / 1024 : ℝ) ^ 2) ≤ c ^ 2)
+    (hDunsterErrorPointwise :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        (prolateFixedBesselIntermediate
+            BesselJ0Series.besselJ0 sourcePhase a c normalization x -
+          actual x) ^ 2 ≤
+            (dunsterK ^ 2 / c ^ 2) *
+              prolateFixedDunsterAmplitude normalization c *
+                prolateFixedWeight a x)
+    (hDlmf : BesselJ0Dlmf.HasFirstDlmfRemainderBound) :
+    (1 / 144 : ℝ) * prolateFixedDunsterAmplitude normalization c ≤
+      ∫ x in (2 : ℝ)..3, actual x ^ 2 := by
+  exact prolateFixedSourceActualMassLowerOfConcreteJ0DlmfDunsterErrors
+    actual sourcePhase a c normalization dunsterK
+    haNonneg haUpper hc hSourceBase hSourceDeriv hActualContinuous
+    hFrequencyThreshold hDunsterErrorPointwise
+    (concreteJ0DlmfAbsoluteErrorPointwiseOfGlobal
+      sourcePhase a c hc hSourceBase hSourceDeriv hDlmf)
 end ProlateFixedIntervalWeight
 
 section HyperbolicEnvelope
@@ -3243,6 +3315,58 @@ theorem dilationLogMomentBoundsOfConcreteJ0DunsterSource
     hResidual hIdentity
 
 
+/-- Concrete-`J₀` conductor wrapper whose only Bessel asymptotic input is the
+single global DLMF predicate `HasFirstDlmfRemainderBound`. -/
+theorem dilationLogMomentBoundsOfConcreteJ0GlobalDlmfSource
+    (density actual sourcePhase : ℝ → ℝ)
+    (a c normalization parameterK dunsterK
+      physical residual mass logScale upper : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haInvFrequency : a ≤ parameterK / c)
+    (hParameterThreshold : 2 * parameterK ≤ c)
+    (hc : 33 ≤ c)
+    (hSourceBase : 1 ≤ sourcePhase 2)
+    (hSourceDeriv :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        HasDerivAt sourcePhase (prolateFixedPhaseSlope a x) x)
+    (hActualContinuous : ContinuousOn actual (uIcc (2 : ℝ) 3))
+    (hFrequencyThreshold :
+      96 * (dunsterK ^ 2 + (275 / 1024 : ℝ) ^ 2) ≤ c ^ 2)
+    (hMassPos : 0 < mass)
+    (hUpperNonneg : 0 ≤ upper)
+    (hDunsterErrorPointwise :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        (prolateFixedBesselIntermediate
+            BesselJ0Series.besselJ0 sourcePhase a c normalization x -
+          actual x) ^ 2 ≤
+            (dunsterK ^ 2 / c ^ 2) *
+              prolateFixedDunsterAmplitude normalization c *
+                prolateFixedWeight a x)
+    (hDlmf : BesselJ0Dlmf.HasFirstDlmfRemainderBound)
+    (hFixedMassToExterior :
+      (∫ x in (2 : ℝ)..3, actual x ^ 2) ≤ mass)
+    (hDensityMeasurable :
+      AEStronglyMeasurable density (volume.restrict (Ioi 0)))
+    (hDensityNonneg : ∀ u ∈ Ioi (0 : ℝ), 0 ≤ density u)
+    (hEnvelope :
+      ∀ u ∈ Ioi (0 : ℝ),
+        density u ≤
+          (upper * prolateFixedDunsterAmplitude normalization c) / cosh u)
+    (hResidual :
+      residual = ∫ u in Ioi 0, log (cosh u) * density u)
+    (hIdentity : physical = logScale * mass + residual) :
+    logScale * mass ≤ physical ∧
+      physical ≤ (logScale + 288 * upper) * mass := by
+  exact dilationLogMomentBoundsOfConcreteJ0DunsterSource
+    density actual sourcePhase
+    a c normalization parameterK dunsterK physical residual mass logScale upper
+    haNonneg haInvFrequency hParameterThreshold hc hSourceBase hSourceDeriv
+    hActualContinuous hFrequencyThreshold hMassPos hUpperNonneg
+    hDunsterErrorPointwise
+    (concreteJ0DlmfAbsoluteErrorPointwiseOfGlobal
+      sourcePhase a c hc hSourceBase hSourceDeriv hDlmf)
+    hFixedMassToExterior hDensityMeasurable hDensityNonneg hEnvelope
+    hResidual hIdentity
 end HyperbolicEnvelope
 
 end RiemannCvs.ExteriorLogMomentTransfer

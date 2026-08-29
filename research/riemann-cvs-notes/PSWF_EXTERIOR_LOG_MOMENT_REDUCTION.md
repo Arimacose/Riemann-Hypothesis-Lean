@@ -898,12 +898,47 @@ The specializations
 the abstract Bessel function and its continuity hypothesis from the fixed-mass
 and conductor interfaces.
 
+The next DLMF layer is now explicit as well.  Following
+[NIST DLMF 10.17.1 and 10.17.3](https://dlmf.nist.gov/10.17),
+`BesselJ0Dlmf.orderZeroCoefficient` specializes the Hankel coefficients at
+order zero and Lean proves
+
+\[
+a_0=1,\qquad a_1=-\frac18,\qquad
+a_2=\frac9{128},\qquad a_3=-\frac{75}{1024}.
+\]
+
+For positive real argument, the DLMF real-axis rule bounds the even-series
+remainder after (a_0) by (9/(128z^2)), and the odd-series remainder after
+(a_1/z) by (75/(1024z^3)).  The proof-complete theorem
+`leadingCosine_error_of_separated_remainders` now combines exactly those two
+bounds, using only the triangle inequality and the unit bounds for sine and
+cosine, into
+
+\[
+\left|\sqrt{\frac2{\pi z}}\cos\left(z-\frac\pi4\right)-J_0(z)\right|
+\le
+\sqrt{\frac2{\pi z}}
+\left(\frac1{8z}+\frac9{128z^2}+\frac{75}{1024z^3}\right).
+\]
+
+`BesselJ0Dlmf.HasFirstDlmfRemainderBound` names the remaining global analytic
+statement.  `concreteJ0DlmfAbsoluteErrorPointwiseOfGlobal` proves that this one
+positive-axis predicate automatically supplies the old pointwise hypothesis on
+([2,3]): (c\ge33) and the source-phase derivative imply
+(c\,\xi(x)>0).  The new wrappers
+`prolateFixedSourceActualMassLowerOfConcreteJ0GlobalDlmf` and
+`dilationLogMomentBoundsOfConcreteJ0GlobalDlmfSource` therefore accept the
+single global predicate directly.
+
 The remaining source-specific fixed-interval obligation is now narrower:
-prove the stated DLMF real-argument remainder bound for the concrete series;
-state Dunster's uniform PSWF-to-Bessel error in the exact normalized prefactor
-above; and supply a concrete \(a\le K_a/c\) estimate, its eventual threshold,
-and the source-phase derivative.  The Bessel function, its global convergence
-and continuity, the coefficient arithmetic, source function definitions,
+construct the even and odd DLMF remainders for the concrete series and prove
+their first-neglected-term bounds; state Dunster's uniform PSWF-to-Bessel error
+in the exact normalized prefactor above; and supply a concrete
+(a\le K_a/c\) estimate, its eventual threshold, and the source-phase
+derivative.  The Bessel function, its global convergence and continuity, the
+first DLMF coefficient specialization, separated-remainder combination,
+source-interval transport, source function definitions,
 phase-base conversion, error construction, leading weight and mass, every
 required derivative and variation constant, nonlinear integration by parts,
 the leading \(1/36\) lower bound, complete two-error absorption to

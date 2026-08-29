@@ -12,6 +12,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/SymmetrizedProlateGap.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ProlateConductorIdentity.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/BesselJ0Series.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/BesselJ0Dlmf.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ExteriorLogMomentTransfer.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ConductorDefectCoercivity.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/NormalizedSymmetrizedConductor.lean'
@@ -25,6 +26,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/SymmetrizedProlateGap.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ProlateConductorIdentity.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/BesselJ0Series.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/BesselJ0Dlmf.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ExteriorLogMomentTransfer.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ConductorDefectCoercivity.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/NormalizedSymmetrizedConductor.lean'
@@ -64,6 +66,7 @@ jobs:
             RiemannCvs/SymmetrizedProlateGap.lean
             RiemannCvs/ProlateConductorIdentity.lean
             RiemannCvs/BesselJ0Series.lean
+            RiemannCvs/BesselJ0Dlmf.lean
             RiemannCvs/ExteriorLogMomentTransfer.lean
             RiemannCvs/ConductorDefectCoercivity.lean
             RiemannCvs/NormalizedSymmetrizedConductor.lean
@@ -86,6 +89,9 @@ jobs:
           #print axioms RiemannCvs.BesselJ0Series.besselJ0_zero
           #print axioms RiemannCvs.BesselJ0Series.besselJ0_neg
           #print axioms RiemannCvs.BesselJ0Series.besselJ0Term_succ
+          #print axioms RiemannCvs.BesselJ0Dlmf.orderZeroCoefficient_three
+          #print axioms RiemannCvs.BesselJ0Dlmf.firstRemainderEnvelope_nonneg
+          #print axioms RiemannCvs.BesselJ0Dlmf.leadingCosine_error_of_separated_remainders
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfCommonScale
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.weightedCosSqIntegralLower
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.linearPhaseOscillatoryIntegralBoundByVariation
@@ -111,11 +117,14 @@ jobs:
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.prolateFixedSourceActualMassLowerOfRawDunsterBesselErrors
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.prolateFixedSourceActualMassLowerOfDlmfDunsterErrors
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.prolateFixedSourceActualMassLowerOfConcreteJ0DlmfDunsterErrors
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.concreteJ0DlmfAbsoluteErrorPointwiseOfGlobal
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.prolateFixedSourceActualMassLowerOfConcreteJ0GlobalDlmf
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfProlateFixedPhaseApproximation
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfSeparatedDunsterBesselErrors
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfCanonicalReferenceAndSeparatedErrors
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfDlmfDunsterSource
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfConcreteJ0DunsterSource
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfConcreteJ0GlobalDlmfSource
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.massLowerOfReferenceAndQuarterError
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.exteriorEnvelopeLogMomentBound
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfSechEnvelope

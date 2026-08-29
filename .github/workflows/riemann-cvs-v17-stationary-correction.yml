@@ -10,6 +10,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/ProlateDilationConvexityCore.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ProlateDilationStationaryPoint.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/BesselJ0Series.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/BesselJ0Dlmf.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ExteriorLogMomentTransfer.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeStationaryBudget.lean'
       - '.github/workflows/riemann-cvs-v17-stationary-correction.yml'
@@ -39,6 +40,7 @@ jobs:
             RiemannCvs.ProlateDilationConvexityCore \
             RiemannCvs.ProlateDilationStationaryPoint \
             RiemannCvs.BesselJ0Series \
+            RiemannCvs.BesselJ0Dlmf \
             RiemannCvs.ExteriorLogMomentTransfer \
             RiemannCvs.PrimeStationaryBudget
       - name: Reject placeholders and print axioms
@@ -52,6 +54,7 @@ jobs:
             RiemannCvs/ProlateDilationConvexityCore.lean \
             RiemannCvs/ProlateDilationStationaryPoint.lean \
             RiemannCvs/BesselJ0Series.lean \
+            RiemannCvs/BesselJ0Dlmf.lean \
             RiemannCvs/ExteriorLogMomentTransfer.lean \
             RiemannCvs/PrimeStationaryBudget.lean; do
             if grep -nE '(^|[^[:alnum:]_])(sorry|admit)([^[:alnum:]_]|$)' "$f"; then
@@ -64,6 +67,7 @@ jobs:
           import RiemannCvs.ProlateDilationConvexityCore
           import RiemannCvs.ProlateDilationStationaryPoint
           import RiemannCvs.BesselJ0Series
+          import RiemannCvs.BesselJ0Dlmf
           import RiemannCvs.ExteriorLogMomentTransfer
           import RiemannCvs.PrimeStationaryBudget
           #print axioms RiemannCvs.ProlateCrossDilationStationaryPoint.scaledRootLayer
@@ -79,6 +83,9 @@ jobs:
           #print axioms RiemannCvs.BesselJ0Series.besselJ0_zero
           #print axioms RiemannCvs.BesselJ0Series.besselJ0_neg
           #print axioms RiemannCvs.BesselJ0Series.besselJ0Term_succ
+          #print axioms RiemannCvs.BesselJ0Dlmf.orderZeroCoefficient_three
+          #print axioms RiemannCvs.BesselJ0Dlmf.firstRemainderEnvelope_nonneg
+          #print axioms RiemannCvs.BesselJ0Dlmf.leadingCosine_error_of_separated_remainders
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.normalizedWeightedMomentBound
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBounds
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfCommonScale
@@ -106,11 +113,14 @@ jobs:
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.prolateFixedSourceActualMassLowerOfRawDunsterBesselErrors
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.prolateFixedSourceActualMassLowerOfDlmfDunsterErrors
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.prolateFixedSourceActualMassLowerOfConcreteJ0DlmfDunsterErrors
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.concreteJ0DlmfAbsoluteErrorPointwiseOfGlobal
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.prolateFixedSourceActualMassLowerOfConcreteJ0GlobalDlmf
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfProlateFixedPhaseApproximation
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfSeparatedDunsterBesselErrors
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfCanonicalReferenceAndSeparatedErrors
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfDlmfDunsterSource
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfConcreteJ0DunsterSource
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfConcreteJ0GlobalDlmfSource
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.massLowerOfReferenceAndQuarterError
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.exteriorEnvelopeLogMomentBound
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfSechEnvelope

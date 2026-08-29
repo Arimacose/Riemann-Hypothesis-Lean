@@ -5,7 +5,7 @@ import RiemannCvs.SymmetrizedProlateSecular
 import RiemannCvs.SymmetrizedProlateGap
 import RiemannCvs.ProlateDilationStationaryPoint
 import RiemannCvs.ProlateConductorIdentity
-import RiemannCvs.BesselJ0Series
+import RiemannCvs.BesselJ0Dlmf
 import RiemannCvs.ExteriorLogMomentTransfer
 import RiemannCvs.ConductorDefectCoercivity
 import RiemannCvs.NormalizedSymmetrizedConductor
@@ -37,8 +37,12 @@ the revised main line:
    Bessel coefficient recurrence.  Source-phase positivity and all
    continuity/integrability adapters are discharged from the phase derivative,
    `sourcePhase 2 ≥ 1`, continuity of `J₀`, and continuity of the actual radial
-   mode.  The first DLMF remainder coefficients are combined into the explicit
-   Bessel constant `275 / 1024`.  These feed the conductor-ready
+   mode.  DLMF 10.17.1 is specialized internally at order zero, proving
+   `a₀ = 1`, `a₁ = -1/8`, `a₂ = 9/128`, and `a₃ = -75/1024`; the separate
+   first-neglected even/odd remainder bounds are combined into the exact
+   three-term absolute-error envelope and then lifted automatically from a
+   single global positive-axis DLMF predicate to the source interval.  These
+   feed the conductor-ready
    `288 * upper` logarithmic-moment compositions,
    weighted oscillatory-average and `L²` remainder budgets, explicit
    hyperbolic-envelope integration, exact one-sided DLMF concentration
@@ -48,9 +52,11 @@ the revised main line:
 
 The source-specific analytic inputs still to be supplied are Dunster's uniform
 PSWF-to-Bessel remainder in the repository normalization, a concrete
-`a ≤ parameterK / c` constant and eventual threshold, and a proof of the
-real-argument DLMF remainder statement for the concrete repository `J₀`
-series through the now-explicit three-term absolute-error interface.  The
+`a ≤ parameterK / c` constant and eventual threshold, and the analytic
+construction of the even and odd real-argument DLMF remainders for the concrete
+repository `J₀` series.  Their coefficient specialization, first-neglected-term
+combination, source-interval specialization, and conductor adapters are now
+formalized.  The
 closed-form radical extension, prime
 oscillatory bound, and actual odd-sector spectral gap are also not asserted by
 this module.
