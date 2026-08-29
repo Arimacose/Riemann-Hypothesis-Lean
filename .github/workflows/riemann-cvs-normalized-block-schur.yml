@@ -53,9 +53,13 @@ jobs:
           import RiemannCvs.NormalizedBlockSchur
           #print axioms RiemannCvs.SchurQuadraticForm.squareCompletion
           #print axioms RiemannCvs.SchurQuadraticForm.schurFormLowerBound
+          #print axioms RiemannCvs.NormalizedBlockSchur.blockLowerBound
+          #print axioms RiemannCvs.NormalizedBlockSchur.blockTargetOfProductBudgets
           #print axioms RiemannCvs.NormalizedBlockSchur.normalizedBlockLowerBound
           #print axioms RiemannCvs.NormalizedBlockSchur.normalizedBlockSchurBound
           #print axioms RiemannCvs.NormalizedBlockSchur.normalizedBlockTargetOfProductBudgets
+          #print axioms RiemannCvs.NormalizedBlockSchur.bilinearBlockTargetOfProductBudgets
+          #print axioms RiemannCvs.NormalizedBlockSchur.bilinearBlockTargetOfOrthogonalBudgets
           EOF
           lake env lean /tmp/NormalizedBlockSchurAxioms.lean | tee normalized-block-schur-axioms.txt
           if grep -E 'sorryAx' normalized-block-schur-axioms.txt; then
