@@ -603,35 +603,83 @@ performs integration by parts directly in the original `x` variable and gives
 the same endpoint-plus-variation bound.
 
 The source relation for the positive radial slope has now also been reduced to
-an explicit Lean lemma.  `ProlateDilationStationaryPoint.prolateSlopeBoundsOnTwoThree`
-proves
+explicit Lean functions and derivative formulas.  The earlier algebraic lemma
+`ProlateDilationStationaryPoint.prolateSlopeBoundsOnTwoThree` proves
 
 \[
 1\le \xi'(x)\le 2,\qquad 2\le x\le3,
 \]
 
 from \(0\le s^2\le1/2\) and the cleared identity
-\((x^2-1)\xi'(x)^2=x^2-s^2\).  Hence the denominator in
-\(W=w_{n,c}/\xi'\) is uniformly nonzero.  Theorems
-`reducedWeightDerivative` and `reducedWeightFactorization` provide the quotient
-rule and the required factorization, while
-`intervalVariationBoundOnTwoThree` turns a uniform pointwise bound on \(|W'|\)
-into a total-variation bound.  Finally,
-`nonlinearPhaseWeightedCosSqLowerOfUniformBudget` packages the endpoint,
-variation, mass, and frequency inequalities into the one-quarter mean-square
-lower bound.
+\((x^2-1)\xi'(x)^2=x^2-s^2\).  The new definition
+`prolateFixedPhaseSlope` is the positive square root
 
-Theorems
-`massLowerOfReferenceAndErrorBudget` and
-`massLowerOfReferenceAndQuarterError` then absorb Dunster's explicit
-remainder into the actual radial mass.  The remaining source-specific
-formalization boundary is therefore source-specific: differentiate the now
-explicit weight, instantiate the radial second derivative in the quotient-rule
-formula, and prove the resulting uniform pointwise \(|W'|\) constant, together
-with the explicit Dunster remainder budget.  The fixed-interval weight and mass
-lower bound, phase-slope bounds, reduced-weight factorization, nonlinear-phase
-integration-by-parts, variation integration, remainder absorption, defect
-normalization, and logarithmic-moment algebra are already in Lean.
+\[
+p_a(x)=\sqrt{\frac{x^2-a}{x^2-1}},
+\]
+
+and `prolateFixedPhaseSlope_hasDerivAt` verifies the source-specific formula
+
+\[
+p_a'(x)=\frac{x(a-1)}{p_a(x)(x^2-1)^2}.
+\]
+
+On the same parameter rectangle Lean now proves all of the crude constants
+needed by integration by parts:
+
+\[
+1\le p_a\le2,
+\qquad |p_a'|\le\frac13,
+\qquad |w_a'|\le2.
+\]
+
+Here `prolateFixedWeight_hasDerivAt` checks the exact derivative
+
+\[
+w_a'(x)=
+-\frac{x(2x^2-a-1)}{\bigl(\sqrt{(x^2-1)(x^2-a)}\bigr)^3}.
+\]
+
+For the reduced weight \(W_a=w_a/p_a\), the definitions
+`prolateFixedReducedWeight` and `prolateFixedReducedWeightDerivative` instantiate
+the quotient rule.  Theorems
+`prolateFixedReducedWeight_abs_le_one_third` and
+`prolateFixedReducedWeightDerivative_abs_le_three` give
+
+\[
+|W_a|\le\frac13,
+\qquad |W_a'|\le3.
+\]
+
+Continuity and interval integrability of the explicit slope and reduced-weight
+derivative are also formalized, so `intervalVariationBoundOnTwoThree` gives
+\(\int_2^3|W_a'|\le3\).  Combining endpoint bound \(1/3\), variation bound
+\(3\), weight mass \(1/9\), and doubled oscillatory frequency \(2c\), the
+uniform-budget inequality is valid for \(c\ge33\).  The theorem
+`prolateFixedIntervalWeightedCosSqLower` therefore proves, for every phase with
+derivative \(p_a\) on `[2,3]` and every offset \(\theta\),
+
+\[
+\frac1{36}\le
+\int_2^3 w_a(x)\cos^2\!\bigl(c\xi(x)+\theta\bigr)\,dx,
+\qquad c\ge33.
+\]
+
+Thus the leading fixed-interval oscillatory lower bound is no longer an open
+calculus or variation obligation in the Lean development.
+
+Theorems `massLowerOfReferenceAndErrorBudget` and
+`massLowerOfReferenceAndQuarterError` provide the final abstract step for
+absorbing Dunster's remainder into the actual radial mass.  The remaining
+source-specific fixed-interval obligation is now narrower: state Dunster's
+uniform error estimate with the repository's normalization, connect its
+parameter and phase to \(0\le a\le1/2\) and the derivative \(p_a\) (an additive
+phase constant is absorbed by the offset), and prove that its cross and
+squared-error mass meet the quarter-error threshold.  The explicit leading
+weight, its mass, every required derivative and variation constant, the
+nonlinear integration by parts, the leading \(1/36\) lower bound, abstract
+remainder absorption, defect normalization, and logarithmic-moment algebra are
+already in Lean.
 
 The displayed radial theorem does not itself state the derivative bound needed
 for the separate prime-dilation overlap.  That bound must be extracted from the

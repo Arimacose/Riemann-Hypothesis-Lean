@@ -894,6 +894,514 @@ theorem prolateFixedWeightMassLowerOnTwoThree
       intro x hx
       exact (prolateFixedWeightBounds a x haNonneg haUpper hx.1 hx.2).1
 
+/-- Explicit derivative of the unscaled Dunster fixed-interval weight. -/
+noncomputable def prolateFixedWeightDerivative (a x : ℝ) : ℝ :=
+  -(x * (2 * x ^ 2 - a - 1)) /
+    sqrt (prolateFixedWeightRadicand a x) ^ 3
+
+lemma prolateFixedWeightRadicand_hasDerivAt (a x : ℝ) :
+    HasDerivAt (prolateFixedWeightRadicand a)
+      (2 * x * (2 * x ^ 2 - a - 1)) x := by
+  have hFirst : HasDerivAt (fun y : ℝ => y ^ 2 - 1) (2 * x) x := by
+    exact ((hasDerivAt_pow 2 x).sub_const 1).congr_deriv (by norm_num)
+  have hSecond : HasDerivAt (fun y : ℝ => y ^ 2 - a) (2 * x) x := by
+    exact ((hasDerivAt_pow 2 x).sub_const a).congr_deriv (by norm_num)
+  change HasDerivAt (fun y : ℝ => (y ^ 2 - 1) * (y ^ 2 - a))
+    (2 * x * (2 * x ^ 2 - a - 1)) x
+  have hCoeff :
+      2 * x * (2 * x ^ 2 - a - 1) =
+        2 * x * (x ^ 2 - a) + (x ^ 2 - 1) * (2 * x) := by
+    ring
+  rw [hCoeff]
+  exact hFirst.mul hSecond
+
+lemma prolateFixedWeight_hasDerivAt
+    (a x : ℝ)
+    (hRadicandPos : 0 < prolateFixedWeightRadicand a x) :
+    HasDerivAt (prolateFixedWeight a)
+      (prolateFixedWeightDerivative a x) x := by
+  have hRad := prolateFixedWeightRadicand_hasDerivAt a x
+  have hSqrt := hRad.sqrt (ne_of_gt hRadicandPos)
+  have hSqrtNe : sqrt (prolateFixedWeightRadicand a x) ≠ 0 :=
+    Real.sqrt_ne_zero'.mpr hRadicandPos
+  have hOne : HasDerivAt (fun _y : ℝ => (1 : ℝ)) 0 x :=
+    hasDerivAt_const x 1
+  have hDiv := hOne.div hSqrt hSqrtNe
+  have hCoeff :
+      (0 * sqrt (prolateFixedWeightRadicand a x) -
+          1 * (2 * x * (2 * x ^ 2 - a - 1) /
+            (2 * sqrt (prolateFixedWeightRadicand a x)))) /
+          sqrt (prolateFixedWeightRadicand a x) ^ 2 =
+        prolateFixedWeightDerivative a x := by
+    unfold prolateFixedWeightDerivative
+    field_simp
+    ring
+  rw [hCoeff] at hDiv
+  change HasDerivAt (fun y => 1 / sqrt (prolateFixedWeightRadicand a y))
+    (prolateFixedWeightDerivative a x) x at hDiv
+  change HasDerivAt (fun y => 1 / sqrt (prolateFixedWeightRadicand a y))
+    (prolateFixedWeightDerivative a x) x
+  exact hDiv
+
+lemma prolateFixedWeightDerivative_abs_le_two
+    (a x : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2)
+    (hxLower : 2 ≤ x)
+    (hxUpper : x ≤ 3) :
+    |prolateFixedWeightDerivative a x| ≤ 2 := by
+  have hRadicand := prolateFixedWeightRadicandBounds
+    a x haNonneg haUpper hxLower hxUpper
+  have hRadicandNonneg : 0 ≤ prolateFixedWeightRadicand a x := by
+    linarith [hRadicand.1]
+  have hSqrtNonneg : 0 ≤ sqrt (prolateFixedWeightRadicand a x) :=
+    Real.sqrt_nonneg _
+  have hSqrtSquare := Real.sq_sqrt hRadicandNonneg
+  have hSqrtLower : 3 ≤ sqrt (prolateFixedWeightRadicand a x) := by
+    nlinarith [hRadicand.1]
+  have hDenLower :
+      27 ≤ sqrt (prolateFixedWeightRadicand a x) ^ 3 := by
+    nlinarith [sq_nonneg (sqrt (prolateFixedWeightRadicand a x) - 3)]
+  have hDenPos : 0 < sqrt (prolateFixedWeightRadicand a x) ^ 3 := by
+    linarith
+  have hxNonneg : 0 ≤ x := by linarith
+  have hFactorNonneg : 0 ≤ 2 * x ^ 2 - a - 1 := by
+    have hxSquareLower : 4 ≤ x ^ 2 := by nlinarith
+    linarith
+  have hFactorUpper : 2 * x ^ 2 - a - 1 ≤ 17 := by
+    have hxSquareUpper : x ^ 2 ≤ 9 := by nlinarith
+    linarith
+  have hNumeratorUpper : x * (2 * x ^ 2 - a - 1) ≤ 51 := by
+    have hRaw := mul_le_mul hxUpper hFactorUpper hFactorNonneg
+      (by norm_num : (0 : ℝ) ≤ 3)
+    norm_num at hRaw
+    exact hRaw
+  unfold prolateFixedWeightDerivative
+  rw [abs_div, abs_neg, abs_mul, abs_of_nonneg hxNonneg,
+    abs_of_nonneg hFactorNonneg, abs_of_nonneg (pow_nonneg hSqrtNonneg 3)]
+  apply (div_le_iff₀ hDenPos).2
+  nlinarith
+
+noncomputable def prolateFixedPhaseSlope (a x : ℝ) : ℝ :=
+  sqrt ((x ^ 2 - a) / (x ^ 2 - 1))
+
+noncomputable def prolateFixedPhaseSecond (a x : ℝ) : ℝ :=
+  x * (a - 1) /
+    (prolateFixedPhaseSlope a x * (x ^ 2 - 1) ^ 2)
+
+lemma prolateFixedPhaseSlope_hasDerivAt
+    (a x : ℝ)
+    (_haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2)
+    (hxLower : 2 ≤ x)
+    (_hxUpper : x ≤ 3) :
+    HasDerivAt (prolateFixedPhaseSlope a)
+      (prolateFixedPhaseSecond a x) x := by
+  have hxSquareLower : 4 ≤ x ^ 2 := by nlinarith
+  have hDenPos : 0 < x ^ 2 - 1 := by nlinarith
+  have hNumPos : 0 < x ^ 2 - a := by linarith
+  have hRatioPos : 0 < (x ^ 2 - a) / (x ^ 2 - 1) :=
+    div_pos hNumPos hDenPos
+  have hNum : HasDerivAt (fun y : ℝ => y ^ 2 - a) (2 * x) x :=
+    ((hasDerivAt_pow 2 x).sub_const a).congr_deriv (by norm_num)
+  have hDen : HasDerivAt (fun y : ℝ => y ^ 2 - 1) (2 * x) x :=
+    ((hasDerivAt_pow 2 x).sub_const 1).congr_deriv (by norm_num)
+  have hRatio := hNum.div hDen (ne_of_gt hDenPos)
+  change HasDerivAt (fun y : ℝ => (y ^ 2 - a) / (y ^ 2 - 1))
+    (((2 * x) * (x ^ 2 - 1) - (x ^ 2 - a) * (2 * x)) /
+      (x ^ 2 - 1) ^ 2) x at hRatio
+  have hSqrt := hRatio.sqrt (ne_of_gt hRatioPos)
+  have hCoeff :
+      (((2 * x) * (x ^ 2 - 1) - (x ^ 2 - a) * (2 * x)) /
+          (x ^ 2 - 1) ^ 2) /
+          (2 * sqrt ((x ^ 2 - a) / (x ^ 2 - 1))) =
+        prolateFixedPhaseSecond a x := by
+    unfold prolateFixedPhaseSecond prolateFixedPhaseSlope
+    field_simp
+    ring
+  rw [hCoeff] at hSqrt
+  change HasDerivAt
+    (fun y : ℝ => sqrt ((y ^ 2 - a) / (y ^ 2 - 1)))
+    (prolateFixedPhaseSecond a x) x
+  exact hSqrt
+
+lemma prolateFixedPhaseSlope_bounds
+    (a x : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2)
+    (hxLower : 2 ≤ x)
+    (_hxUpper : x ≤ 3) :
+    1 ≤ prolateFixedPhaseSlope a x ∧
+      prolateFixedPhaseSlope a x ≤ 2 := by
+  have hxSquareLower : 4 ≤ x ^ 2 := by nlinarith
+  have hDenPos : 0 < x ^ 2 - 1 := by nlinarith
+  have hNumPos : 0 < x ^ 2 - a := by linarith
+  have hRatioNonneg : 0 ≤ (x ^ 2 - a) / (x ^ 2 - 1) :=
+    le_of_lt (div_pos hNumPos hDenPos)
+  have hSlopeNonneg : 0 ≤ prolateFixedPhaseSlope a x := by
+    exact Real.sqrt_nonneg _
+  have hSlopeSquare :
+      (x ^ 2 - 1) * prolateFixedPhaseSlope a x ^ 2 = x ^ 2 - a := by
+    unfold prolateFixedPhaseSlope
+    rw [Real.sq_sqrt hRatioNonneg]
+    field_simp
+  constructor
+  · by_contra hnot
+    have hSlopeLt : prolateFixedPhaseSlope a x < 1 := lt_of_not_ge hnot
+    have hSlopeSquareLt : prolateFixedPhaseSlope a x ^ 2 < 1 := by
+      nlinarith
+    have hScaledLt := mul_lt_mul_of_pos_left hSlopeSquareLt hDenPos
+    nlinarith
+  · by_contra hnot
+    have hSlopeGt : 2 < prolateFixedPhaseSlope a x := lt_of_not_ge hnot
+    have hSlopeSquareGt : 4 < prolateFixedPhaseSlope a x ^ 2 := by
+      nlinarith
+    have hScaledGt := mul_lt_mul_of_pos_left hSlopeSquareGt hDenPos
+    nlinarith
+
+lemma prolateFixedPhaseSecond_abs_le_one_third
+    (a x : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2)
+    (hxLower : 2 ≤ x)
+    (hxUpper : x ≤ 3) :
+    |prolateFixedPhaseSecond a x| ≤ 1 / 3 := by
+  have hSlopeBounds := prolateFixedPhaseSlope_bounds
+    a x haNonneg haUpper hxLower hxUpper
+  have hxNonneg : 0 ≤ x := by linarith
+  have hGapNonneg : 0 ≤ 1 - a := by linarith
+  have hGapUpper : 1 - a ≤ 1 := by linarith
+  have hBaseLower : 3 ≤ x ^ 2 - 1 := by nlinarith
+  have hBaseNonneg : 0 ≤ x ^ 2 - 1 := by linarith
+  have hSquareLower : 9 ≤ (x ^ 2 - 1) ^ 2 := by nlinarith
+  have hDenLower :
+      9 ≤ prolateFixedPhaseSlope a x * (x ^ 2 - 1) ^ 2 := by
+    have h := mul_le_mul hSlopeBounds.1 hSquareLower
+      (by norm_num : (0 : ℝ) ≤ 9)
+      (by linarith [hSlopeBounds.1] : 0 ≤ prolateFixedPhaseSlope a x)
+    norm_num at h
+    exact h
+  have hDenPos :
+      0 < prolateFixedPhaseSlope a x * (x ^ 2 - 1) ^ 2 := by
+    linarith
+  have hNumeratorUpper : x * (1 - a) ≤ 3 := by
+    have h := mul_le_mul hxUpper hGapUpper hGapNonneg
+      (by norm_num : (0 : ℝ) ≤ 3)
+    norm_num at h
+    exact h
+  unfold prolateFixedPhaseSecond
+  rw [abs_div, abs_mul, abs_of_nonneg hxNonneg,
+    abs_of_nonpos (by linarith : a - 1 ≤ 0),
+    abs_of_pos hDenPos]
+  apply (div_le_iff₀ hDenPos).2
+  nlinarith
+
+noncomputable def prolateFixedReducedWeight (a x : ℝ) : ℝ :=
+  prolateFixedWeight a x / prolateFixedPhaseSlope a x
+
+noncomputable def prolateFixedReducedWeightDerivative (a x : ℝ) : ℝ :=
+  (prolateFixedWeightDerivative a x * prolateFixedPhaseSlope a x -
+      prolateFixedWeight a x * prolateFixedPhaseSecond a x) /
+    prolateFixedPhaseSlope a x ^ 2
+
+lemma prolateFixedReducedWeight_hasDerivAt
+    (a x : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2)
+    (hxLower : 2 ≤ x)
+    (hxUpper : x ≤ 3) :
+    HasDerivAt (prolateFixedReducedWeight a)
+      (prolateFixedReducedWeightDerivative a x) x := by
+  have hRadicand := prolateFixedWeightRadicandBounds
+    a x haNonneg haUpper hxLower hxUpper
+  have hWeight := prolateFixedWeight_hasDerivAt a x (by linarith [hRadicand.1])
+  have hSlope := prolateFixedPhaseSlope_hasDerivAt
+    a x haNonneg haUpper hxLower hxUpper
+  have hSlopePos : 0 < prolateFixedPhaseSlope a x := by
+    linarith [(prolateFixedPhaseSlope_bounds
+      a x haNonneg haUpper hxLower hxUpper).1]
+  have h := reducedWeightDerivative
+    (prolateFixedWeight a) (prolateFixedWeightDerivative a)
+    (prolateFixedPhaseSlope a) (prolateFixedPhaseSecond a) x
+    hWeight hSlope (ne_of_gt hSlopePos)
+  change HasDerivAt
+    (fun y => prolateFixedWeight a y / prolateFixedPhaseSlope a y)
+    (prolateFixedReducedWeightDerivative a x) x
+  exact h
+
+lemma prolateFixedReducedWeight_abs_le_one_third
+    (a x : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2)
+    (hxLower : 2 ≤ x)
+    (hxUpper : x ≤ 3) :
+    |prolateFixedReducedWeight a x| ≤ 1 / 3 := by
+  have hWeightBounds := prolateFixedWeightBounds
+    a x haNonneg haUpper hxLower hxUpper
+  have hSlopeBounds := prolateFixedPhaseSlope_bounds
+    a x haNonneg haUpper hxLower hxUpper
+  have hWeightNonneg : 0 ≤ prolateFixedWeight a x := by
+    linarith [hWeightBounds.1]
+  have hSlopePos : 0 < prolateFixedPhaseSlope a x := by
+    linarith [hSlopeBounds.1]
+  unfold prolateFixedReducedWeight
+  rw [abs_div, abs_of_nonneg hWeightNonneg, abs_of_pos hSlopePos]
+  apply (div_le_iff₀ hSlopePos).2
+  nlinarith
+
+lemma prolateFixedReducedWeightDerivative_abs_le_three
+    (a x : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2)
+    (hxLower : 2 ≤ x)
+    (hxUpper : x ≤ 3) :
+    |prolateFixedReducedWeightDerivative a x| ≤ 3 := by
+  have hWeightBounds := prolateFixedWeightBounds
+    a x haNonneg haUpper hxLower hxUpper
+  have hWeightNonneg : 0 ≤ prolateFixedWeight a x := by
+    linarith [hWeightBounds.1]
+  have hWeightAbs : |prolateFixedWeight a x| ≤ 1 / 3 := by
+    rw [abs_of_nonneg hWeightNonneg]
+    exact hWeightBounds.2
+  have hWeightDerivative := prolateFixedWeightDerivative_abs_le_two
+    a x haNonneg haUpper hxLower hxUpper
+  have hSlopeBounds := prolateFixedPhaseSlope_bounds
+    a x haNonneg haUpper hxLower hxUpper
+  have hSlopePos : 0 < prolateFixedPhaseSlope a x := by
+    linarith [hSlopeBounds.1]
+  have hSlopeAbs : |prolateFixedPhaseSlope a x| =
+      prolateFixedPhaseSlope a x := abs_of_pos hSlopePos
+  have hSecond := prolateFixedPhaseSecond_abs_le_one_third
+    a x haNonneg haUpper hxLower hxUpper
+  have hFirstTerm :
+      |prolateFixedWeightDerivative a x /
+          prolateFixedPhaseSlope a x| ≤ 2 := by
+    rw [abs_div, hSlopeAbs]
+    apply (div_le_iff₀ hSlopePos).2
+    nlinarith
+  have hSlopeSquarePos : 0 < prolateFixedPhaseSlope a x ^ 2 :=
+    sq_pos_of_pos hSlopePos
+  have hSlopeSquareLower : 1 ≤ prolateFixedPhaseSlope a x ^ 2 := by
+    nlinarith [hSlopeBounds.1]
+  have hProductAbs :
+      |prolateFixedWeight a x * prolateFixedPhaseSecond a x| ≤ 1 / 9 := by
+    rw [abs_mul]
+    have h := mul_le_mul hWeightAbs hSecond (abs_nonneg _)
+      (by norm_num : (0 : ℝ) ≤ 1 / 3)
+    norm_num at h ⊢
+    exact h
+  have hSecondTerm :
+      |prolateFixedWeight a x * prolateFixedPhaseSecond a x /
+          prolateFixedPhaseSlope a x ^ 2| ≤ 1 / 9 := by
+    rw [abs_div, abs_of_pos hSlopeSquarePos]
+    apply (div_le_iff₀ hSlopeSquarePos).2
+    nlinarith
+  have hRewrite :
+      prolateFixedReducedWeightDerivative a x =
+        prolateFixedWeightDerivative a x / prolateFixedPhaseSlope a x -
+          prolateFixedWeight a x * prolateFixedPhaseSecond a x /
+            prolateFixedPhaseSlope a x ^ 2 := by
+    unfold prolateFixedReducedWeightDerivative
+    field_simp
+  rw [hRewrite]
+  calc
+    |prolateFixedWeightDerivative a x / prolateFixedPhaseSlope a x -
+        prolateFixedWeight a x * prolateFixedPhaseSecond a x /
+          prolateFixedPhaseSlope a x ^ 2| ≤
+        |prolateFixedWeightDerivative a x / prolateFixedPhaseSlope a x| +
+          |prolateFixedWeight a x * prolateFixedPhaseSecond a x /
+            prolateFixedPhaseSlope a x ^ 2| := abs_sub _ _
+    _ ≤ 3 := by linarith
+
+lemma prolateFixedPhaseSlopeContinuousOnTwoThree
+    (a : ℝ) :
+    ContinuousOn (prolateFixedPhaseSlope a) (uIcc (2 : ℝ) 3) := by
+  have hNum : Continuous (fun x : ℝ => x ^ 2 - a) := by fun_prop
+  have hDen : Continuous (fun x : ℝ => x ^ 2 - 1) := by fun_prop
+  have hRatio :
+      ContinuousOn (fun x : ℝ => (x ^ 2 - a) / (x ^ 2 - 1))
+        (uIcc (2 : ℝ) 3) := by
+    apply hNum.continuousOn.div hDen.continuousOn
+    intro x hx
+    have hx' : x ∈ Icc (2 : ℝ) 3 := by
+      simpa [uIcc_of_le (by norm_num : (2 : ℝ) ≤ 3)] using hx
+    have hxSquareLower : 4 ≤ x ^ 2 := by nlinarith [hx'.1]
+    nlinarith
+  unfold prolateFixedPhaseSlope
+  exact hRatio.sqrt
+
+lemma prolateFixedWeightDerivativeContinuousOnTwoThree
+    (a : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2) :
+    ContinuousOn (prolateFixedWeightDerivative a) (uIcc (2 : ℝ) 3) := by
+  have hNumerator :
+      Continuous (fun x : ℝ => -(x * (2 * x ^ 2 - a - 1))) := by
+    fun_prop
+  have hRadicandContinuous : Continuous (prolateFixedWeightRadicand a) := by
+    unfold prolateFixedWeightRadicand
+    fun_prop
+  have hDenominator :
+      Continuous (fun x : ℝ => sqrt (prolateFixedWeightRadicand a x) ^ 3) := by
+    fun_prop
+  unfold prolateFixedWeightDerivative
+  apply hNumerator.continuousOn.div hDenominator.continuousOn
+  intro x hx
+  have hx' : x ∈ Icc (2 : ℝ) 3 := by
+    simpa [uIcc_of_le (by norm_num : (2 : ℝ) ≤ 3)] using hx
+  have hRadicand := prolateFixedWeightRadicandBounds
+    a x haNonneg haUpper hx'.1 hx'.2
+  have hSqrtPos : 0 < sqrt (prolateFixedWeightRadicand a x) := by
+    have hSqrtNonneg := Real.sqrt_nonneg (prolateFixedWeightRadicand a x)
+    have hSqrtSquare := Real.sq_sqrt (by linarith [hRadicand.1] :
+      0 ≤ prolateFixedWeightRadicand a x)
+    nlinarith [hRadicand.1]
+  exact pow_ne_zero 3 (ne_of_gt hSqrtPos)
+
+lemma prolateFixedPhaseSecondContinuousOnTwoThree
+    (a : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2) :
+    ContinuousOn (prolateFixedPhaseSecond a) (uIcc (2 : ℝ) 3) := by
+  have hNumerator : Continuous (fun x : ℝ => x * (a - 1)) := by fun_prop
+  have hSlope := prolateFixedPhaseSlopeContinuousOnTwoThree a
+  have hPolynomial : Continuous (fun x : ℝ => (x ^ 2 - 1) ^ 2) := by fun_prop
+  unfold prolateFixedPhaseSecond
+  apply hNumerator.continuousOn.div (hSlope.mul hPolynomial.continuousOn)
+  intro x hx
+  have hx' : x ∈ Icc (2 : ℝ) 3 := by
+    simpa [uIcc_of_le (by norm_num : (2 : ℝ) ≤ 3)] using hx
+  have hSlopePos : 0 < prolateFixedPhaseSlope a x := by
+    linarith [(prolateFixedPhaseSlope_bounds
+      a x haNonneg haUpper hx'.1 hx'.2).1]
+  have hBasePos : 0 < x ^ 2 - 1 := by nlinarith [hx'.1]
+  exact mul_ne_zero (ne_of_gt hSlopePos) (pow_ne_zero 2 (ne_of_gt hBasePos))
+
+lemma prolateFixedReducedWeightDerivativeContinuousOnTwoThree
+    (a : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2) :
+    ContinuousOn (prolateFixedReducedWeightDerivative a)
+      (uIcc (2 : ℝ) 3) := by
+  have hWeight := prolateFixedWeightContinuousOnTwoThree a haNonneg haUpper
+  have hWeightDerivative :=
+    prolateFixedWeightDerivativeContinuousOnTwoThree a haNonneg haUpper
+  have hSlope := prolateFixedPhaseSlopeContinuousOnTwoThree a
+  have hSecond :=
+    prolateFixedPhaseSecondContinuousOnTwoThree a haNonneg haUpper
+  unfold prolateFixedReducedWeightDerivative
+  apply (hWeightDerivative.mul hSlope).sub (hWeight.mul hSecond) |>.div
+    (hSlope.pow 2)
+  intro x hx
+  have hx' : x ∈ Icc (2 : ℝ) 3 := by
+    simpa [uIcc_of_le (by norm_num : (2 : ℝ) ≤ 3)] using hx
+  have hSlopePos : 0 < prolateFixedPhaseSlope a x := by
+    linarith [(prolateFixedPhaseSlope_bounds
+      a x haNonneg haUpper hx'.1 hx'.2).1]
+  exact pow_ne_zero 2 (ne_of_gt hSlopePos)
+
+lemma prolateFixedPhaseSlopeIntervalIntegrableOnTwoThree
+    (a : ℝ) :
+    IntervalIntegrable (prolateFixedPhaseSlope a) volume 2 3 :=
+  (prolateFixedPhaseSlopeContinuousOnTwoThree a).intervalIntegrable
+
+lemma prolateFixedReducedWeightDerivativeIntervalIntegrableOnTwoThree
+    (a : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2) :
+    IntervalIntegrable (prolateFixedReducedWeightDerivative a) volume 2 3 :=
+  (prolateFixedReducedWeightDerivativeContinuousOnTwoThree
+    a haNonneg haUpper).intervalIntegrable
+
+/-- The explicit Dunster leading term keeps a uniform amount of weighted
+`cos²` mass on `[2,3]` once the radial frequency is at least `33`. -/
+theorem prolateFixedIntervalWeightedCosSqLower
+    (a c offset : ℝ)
+    (phase : ℝ → ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2)
+    (hc : 33 ≤ c)
+    (hPhaseDeriv :
+      ∀ x ∈ uIcc (2 : ℝ) 3,
+        HasDerivAt phase (prolateFixedPhaseSlope a x) x) :
+    (1 / 36 : ℝ) ≤
+      ∫ x in (2 : ℝ)..3,
+        prolateFixedWeight a x * cos (c * phase x + offset) ^ 2 := by
+  have hFrequency : 0 < 2 * c := by linarith
+  have hWeight :=
+    prolateFixedWeightIntervalIntegrableOnTwoThree a haNonneg haUpper
+  have hSlopeIntegrable :=
+    prolateFixedPhaseSlopeIntervalIntegrableOnTwoThree a
+  have hReducedDerivativeIntegrable :=
+    prolateFixedReducedWeightDerivativeIntervalIntegrableOnTwoThree
+      a haNonneg haUpper
+  have hReducedDeriv :
+      ∀ x ∈ uIcc (2 : ℝ) 3,
+        HasDerivAt (prolateFixedReducedWeight a)
+          (prolateFixedReducedWeightDerivative a x) x := by
+    intro x hx
+    have hx' : x ∈ Icc (2 : ℝ) 3 := by
+      simpa [uIcc_of_le (by norm_num : (2 : ℝ) ≤ 3)] using hx
+    exact prolateFixedReducedWeight_hasDerivAt
+      a x haNonneg haUpper hx'.1 hx'.2
+  have hFactor :
+      ∀ x ∈ uIcc (2 : ℝ) 3,
+        prolateFixedWeight a x =
+          prolateFixedReducedWeight a x * prolateFixedPhaseSlope a x := by
+    intro x hx
+    have hx' : x ∈ Icc (2 : ℝ) 3 := by
+      simpa [uIcc_of_le (by norm_num : (2 : ℝ) ≤ 3)] using hx
+    have hSlopePos : 0 < prolateFixedPhaseSlope a x := by
+      linarith [(prolateFixedPhaseSlope_bounds
+        a x haNonneg haUpper hx'.1 hx'.2).1]
+    unfold prolateFixedReducedWeight
+    exact reducedWeightFactorization
+      (prolateFixedWeight a) (prolateFixedPhaseSlope a) x
+      (ne_of_gt hSlopePos)
+  have hEndpointA :
+      |prolateFixedReducedWeight a 2| ≤ (1 / 3 : ℝ) :=
+    prolateFixedReducedWeight_abs_le_one_third
+      a 2 haNonneg haUpper (by norm_num) (by norm_num)
+  have hEndpointB :
+      |prolateFixedReducedWeight a 3| ≤ (1 / 3 : ℝ) :=
+    prolateFixedReducedWeight_abs_le_one_third
+      a 3 haNonneg haUpper (by norm_num) (by norm_num)
+  have hVariation :
+      (∫ x in (2 : ℝ)..3,
+        |prolateFixedReducedWeightDerivative a x|) ≤ 3 := by
+    apply intervalVariationBoundOnTwoThree
+      (prolateFixedReducedWeightDerivative a) 3
+      hReducedDerivativeIntegrable
+    intro x hx
+    have hx' : x ∈ Icc (2 : ℝ) 3 := by
+      simpa [uIcc_of_le (by norm_num : (2 : ℝ) ≤ 3)] using hx
+    exact prolateFixedReducedWeightDerivative_abs_le_three
+      a x haNonneg haUpper hx'.1 hx'.2
+  have hMass := prolateFixedWeightMassLowerOnTwoThree
+    a haNonneg haUpper
+  have hThreshold :
+      2 * (2 * (1 / 3 : ℝ) + 3) ≤ (2 * c) * (1 / 9 : ℝ) := by
+    linarith
+  have hLower := nonlinearPhaseWeightedCosSqLowerOfUniformBudget
+    (prolateFixedWeight a) phase (prolateFixedPhaseSlope a)
+    (prolateFixedReducedWeight a) (prolateFixedReducedWeightDerivative a)
+    2 3 (2 * c) (2 * offset) (1 / 3) 3 (1 / 9)
+    (by norm_num) hFrequency hWeight hPhaseDeriv hSlopeIntegrable
+    hReducedDeriv hReducedDerivativeIntegrable hFactor hEndpointA hEndpointB
+    hVariation hMass hThreshold
+  calc
+    (1 / 36 : ℝ) ≤
+        (1 / 4 : ℝ) * (∫ x in (2 : ℝ)..3, prolateFixedWeight a x) := by
+      linarith
+    _ ≤ ∫ x in (2 : ℝ)..3,
+        prolateFixedWeight a x *
+          cos (((2 * c) * phase x + 2 * offset) / 2) ^ 2 := hLower
+    _ = ∫ x in (2 : ℝ)..3,
+        prolateFixedWeight a x * cos (c * phase x + offset) ^ 2 := by
+      apply intervalIntegral.integral_congr
+      intro x _
+      ring_nf
+
 end ProlateFixedIntervalWeight
 
 section HyperbolicEnvelope
