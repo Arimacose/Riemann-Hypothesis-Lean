@@ -182,6 +182,57 @@ theorem boundaryWeylError_le_of_blockSchur
         (lowGap * (lowGap * highGap - epsilon ^ 2)) := by
       field_simp [ne_of_gt hLowGap, ne_of_gt (sub_pos.mpr hSmall)]
 
+omit [InnerProductSpace ℝ E] in
+/-- The Schur product budget solved for the high-gap side.  This form is
+convenient when `‖eta‖²`, `lowGap`, `epsilon`, and `margin` are already
+certified and the remaining task is to make `highGap` sufficiently large. -/
+theorem schurProductBudget_of_highGapBudget
+    (eta : E) (etaNormSq lowGap highGap epsilon margin : ℝ)
+    (hEtaNorm : ‖eta‖ ^ 2 ≤ etaNormSq)
+    (hHighGapBudget :
+      epsilon ^ 2 * (etaNormSq + margin * lowGap) ≤
+        margin * lowGap ^ 2 * highGap) :
+    ‖eta‖ ^ 2 * epsilon ^ 2 ≤
+      margin * lowGap * (lowGap * highGap - epsilon ^ 2) := by
+  have hScaled :=
+    mul_le_mul_of_nonneg_right hEtaNorm (sq_nonneg epsilon)
+  nlinarith [hScaled, hHighGapBudget]
+
+/-- Structural obstruction for a coarse dimension-independent coupling bound.
+If the boundary-vector mass grows at least like `2 * cutoff + 1`, the available
+high gap grows no faster than `cutoff + shift`, and the right-side scale is
+smaller in both slope and intercept than `epsilon²`, then the Schur high-gap
+budget is contradictory.  The logarithmic CvS floor is even smaller than this
+linear majorant, so the theorem cleanly detects when a sharper cutoff-decaying
+coupling estimate is required. -/
+theorem highGapBudget_false_of_linearBoundaryGrowth
+    (cutoff etaNormSq highGap epsilon scale boundaryOffset shift : ℝ)
+    (hCutoff : 0 ≤ cutoff)
+    (hScale : 0 ≤ scale)
+    (hBoundaryOffset : 0 ≤ boundaryOffset)
+    (hEtaGrowth : 2 * cutoff + 1 ≤ etaNormSq)
+    (hHighGrowth : highGap ≤ cutoff + shift)
+    (hSlope : scale < 2 * epsilon ^ 2)
+    (hIntercept : scale * shift < epsilon ^ 2)
+    (hBudget :
+      epsilon ^ 2 * (etaNormSq + boundaryOffset) ≤ scale * highGap) :
+    False := by
+  have hEtaPlus :
+      2 * cutoff + 1 ≤ etaNormSq + boundaryOffset := by
+    linarith
+  have hLeft :=
+    mul_le_mul_of_nonneg_left hEtaPlus (sq_nonneg epsilon)
+  have hRight := mul_le_mul_of_nonneg_left hHighGrowth hScale
+  have hCombined :
+      epsilon ^ 2 * (2 * cutoff + 1) ≤
+        scale * (cutoff + shift) :=
+    hLeft.trans (hBudget.trans hRight)
+  have hSlopePos : 0 < 2 * epsilon ^ 2 - scale :=
+    sub_pos.mpr hSlope
+  have hInterceptPos : 0 < epsilon ^ 2 - scale * shift :=
+    sub_pos.mpr hIntercept
+  nlinarith [mul_nonneg (le_of_lt hSlopePos) hCutoff]
+
 
 /-- Division-free budget form of `boundaryWeylError_le_of_blockSchur`.  This is
 suited to interval certificates: only products of certified lower and upper
@@ -216,6 +267,38 @@ theorem boundaryWeylError_le_margin_of_blockSchur
     mul_pos hLowGap (sub_pos.mpr hSmall)
   exact hRaw.trans ((div_le_iff₀ hDenomPos).2 (by
     simpa [mul_assoc] using hBudget))
+
+/-- High-gap-oriented wrapper of the division-free error theorem. -/
+theorem boundaryWeylError_le_margin_of_blockSchur_highGapBudget
+    (lowForm : E →ₗ[ℝ] E →ₗ[ℝ] ℝ)
+    (highForm : H →ₗ[ℝ] H →ₗ[ℝ] ℝ)
+    (coupling : E →ₗ[ℝ] H →ₗ[ℝ] ℝ)
+    (eta u0 u : E) (v : H)
+    (etaNormSq lowGap highGap epsilon margin : ℝ)
+    (hLowGap : 0 < lowGap)
+    (hHighGap : 0 < highGap)
+    (hEpsilon : 0 ≤ epsilon)
+    (hSmall : epsilon ^ 2 < lowGap * highGap)
+    (hLowCoercive : ∀ w, lowGap * ‖w‖ ^ 2 ≤ lowForm w w)
+    (hHighCoercive : ∀ z, highGap * ‖z‖ ^ 2 ≤ highForm z z)
+    (hCoupling : ∀ w z, |coupling w z| ≤ epsilon * ‖w‖ * ‖z‖)
+    (hFiniteEquation : ∀ w, lowForm u0 w = ⟪eta, w⟫_ℝ)
+    (hLowEquation : ∀ w, lowForm (u - u0) w + coupling w v = 0)
+    (hHighEquation : ∀ z, highForm v z + coupling u z = 0)
+    (hEtaNorm : ‖eta‖ ^ 2 ≤ etaNormSq)
+    (hHighGapBudget :
+      epsilon ^ 2 * (etaNormSq + margin * lowGap) ≤
+        margin * lowGap ^ 2 * highGap) :
+    |⟪eta, u⟫_ℝ - ⟪eta, u0⟫_ℝ| ≤ margin := by
+  apply boundaryWeylError_le_margin_of_blockSchur
+    lowForm highForm coupling eta u0 u v
+    lowGap highGap epsilon margin
+    hLowGap hHighGap hEpsilon hSmall
+    hLowCoercive hHighCoercive hCoupling
+    hFiniteEquation hLowEquation hHighEquation
+  exact schurProductBudget_of_highGapBudget
+    eta etaNormSq lowGap highGap epsilon margin
+    hEtaNorm hHighGapBudget
 
 section UniformDomain
 

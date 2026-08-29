@@ -26,6 +26,8 @@ entry and is therefore annihilated by `D`.
 
 namespace RiemannCvs.CvSParityDisplacement
 
+open scoped InnerProductSpace
+
 /-- Difference-quotient kernel with an arbitrary diagonal value.  The
 diagonal is irrelevant to the displacement identity because its coefficient
 is `p-p = 0`. -/
@@ -361,6 +363,58 @@ noncomputable def boundaryFunctional :
     apply Finset.sum_congr rfl
     intro j _hj
     ring
+
+omit [Fintype ι] [DecidableEq ι] in
+/-- The same origin-evaluation coefficients as a vector in the Euclidean
+cosine-coordinate space used by the quantitative Schur-resolvent layer. -/
+noncomputable def boundaryEuclideanVector :
+    EuclideanSpace ℝ (Option ι) :=
+  WithLp.toLp 2 (boundaryVector : Option ι → ℝ)
+
+omit [Fintype ι] [DecidableEq ι] in
+@[simp]
+theorem boundaryEuclideanVector_apply (j : Option ι) :
+    (boundaryEuclideanVector (ι := ι)).ofLp j = boundaryVector j := rfl
+
+omit [DecidableEq ι] in
+/-- Exact Euclidean size of the CvS boundary vector.  For the `N = 20`
+positive-frequency block this specializes to `‖eta‖² = 41`. -/
+@[simp]
+theorem boundaryEuclideanVector_norm_sq :
+    ‖boundaryEuclideanVector (ι := ι)‖ ^ 2 =
+      2 * Fintype.card ι + 1 := by
+  rw [EuclideanSpace.norm_sq_eq]
+  rw [Fintype.sum_option]
+  simp [boundaryEuclideanVector, boundaryVector]
+  ring
+
+/-- Finite Fourier-cutoff specialization of the boundary-vector norm. -/
+@[simp]
+theorem boundaryEuclideanVector_norm_sq_fin (N : ℕ) :
+    ‖boundaryEuclideanVector (ι := Fin N)‖ ^ 2 =
+      2 * (N : ℝ) + 1 := by
+  simp
+
+/-- Concrete norm entering the current `(c,N) = (13,20)` Schur budget. -/
+@[simp]
+theorem boundaryEuclideanVector_norm_sq_fin_twenty :
+    ‖boundaryEuclideanVector (ι := Fin 20)‖ ^ 2 = 41 := by
+  norm_num
+
+omit [DecidableEq ι] in
+/-- Riesz identification of the Euclidean boundary vector with the existing
+origin-evaluation functional.  This is the concrete `eta` adapter needed by
+`BoundaryWeylSchurTail`. -/
+@[simp]
+theorem boundaryEuclideanVector_inner_eq_boundaryFunctional
+    (x : EuclideanSpace ℝ (Option ι)) :
+    ⟪boundaryEuclideanVector (ι := ι), x⟫_ℝ =
+      boundaryFunctional x.ofLp := by
+  rw [PiLp.inner_apply]
+  apply Finset.sum_congr rfl
+  intro j _hj
+  change x.ofLp j * boundaryVector j = boundaryVector j * x.ofLp j
+  ring
 
 /-- Fully typed concrete instance of the rank-one Sylvester relation.  This
 statement can be passed directly to `SylvesterNoCrossing` without another

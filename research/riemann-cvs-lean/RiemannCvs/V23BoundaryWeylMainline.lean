@@ -39,7 +39,9 @@ The new kernel-checked chain contains:
 10. a variational low/high block theorem that turns low coercivity `a`, high
     coercivity `gamma`, coupling `epsilon`, and the product budget
     `‖eta‖² epsilon² <= margin * a * (a gamma - epsilon²)` into that required
-    boundary-Weyl tail error;
+    boundary-Weyl tail error; the concrete CvS origin-evaluation vector is now
+    identified with the Euclidean Riesz vector, with
+    `‖eta‖² = 2 * card ι + 1` and the current `N = 20` value exactly `41`;
 11. a normalized far-left estimate
     `|G_N(-t) - 1/t| <= moment/t²`, derived from total residue one and a first
     absolute spectral-moment budget;
@@ -65,4 +67,9 @@ continuous-parameter uniformity, plus the concrete spectral enumeration,
 compactness, and remaining exterior remainder estimate.  The two new modules
 now expose the exact inequalities those constants must satisfy instead of
 leaving “resolvent tail” and “far-left asymptotic” as opaque hypotheses.
+The concrete identity `‖eta_M‖² = 2M+1` also exposes a structural obstruction:
+a dimension-independent coupling bound together with only logarithmic
+high-gap growth does not satisfy the synchronized Weyl Schur budget.  The next
+source estimate must therefore gain cutoff decay in the coupling or replace
+the unweighted boundary norm by a sharper weighted resolvent estimate.
 -/

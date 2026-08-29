@@ -165,9 +165,163 @@ def constants(c: int) -> dict[str, object]:
     }
 
 
+def boundary_weyl_schur_probe(
+    *,
+    c: int,
+    fixed_cutoff: int,
+    low_gap_text: str,
+    shift_gain_text: str,
+    margin_text: str,
+    eta_norm_sq_text: str,
+) -> dict[str, object]:
+    """Evaluate the conservative log-tail constants in the V23 Weyl budget.
+
+    The Lean high-gap-oriented sufficient condition is
+
+        epsilon^2 * (etaNormSq + margin * lowGap)
+          <= margin * lowGap^2 * highGap.
+
+    Here ``epsilon`` is instantiated by the elementary bound ``B_L`` and the
+    shifted high gap at a retained cutoff ``M`` is
+
+        log(M+1) - D_L - B_L + shiftGain.
+
+    The audit keeps the retained cutoff and the boundary-vector norm
+    synchronized: ``etaNormSq = 2*M+1``.  It checks the actual fixed cutoff and
+    then verifies a slope/intercept obstruction for every self-consistent
+    larger cutoff under the same dimension-independent coupling bound.  This
+    is a conditional arithmetic audit of the supplied operator bounds; it does
+    not establish the operator inequalities themselves.
+    """
+    mp.mp.dps = 100
+    record = constants(c)
+    D_L = mp.mpf(record["D_L"])
+    B_L = mp.mpf(record["bounded_perturbation_B_L"])
+    low_gap = mp.mpf(low_gap_text)
+    shift_gain = mp.mpf(shift_gain_text)
+    margin = mp.mpf(margin_text)
+    eta_norm_sq = mp.mpf(eta_norm_sq_text)
+    cutoff = mp.mpf(fixed_cutoff)
+    if fixed_cutoff < 0:
+        raise ValueError("Schur fixed cutoff must be nonnegative")
+    if low_gap <= 0 or margin <= 0:
+        raise ValueError("Schur low gap and margin must be positive")
+    if shift_gain < 0 or eta_norm_sq < 0:
+        raise ValueError("Schur shift gain and eta norm square must be nonnegative")
+    expected_eta_norm_sq = 2 * cutoff + 1
+    if eta_norm_sq != expected_eta_norm_sq:
+        raise ValueError(
+            "Schur eta norm square must equal 2 * fixed cutoff + 1"
+        )
+
+    epsilon_sq = B_L**2
+    scale = margin * low_gap**2
+    boundary_offset = margin * low_gap
+    fixed_high_gap = (
+        mp.log(cutoff + 1) - D_L - B_L + shift_gain
+    )
+    fixed_budget_left = epsilon_sq * (
+        eta_norm_sq + boundary_offset
+    )
+    fixed_budget_right = scale * fixed_high_gap
+    fixed_small_coupling_margin = (
+        low_gap * fixed_high_gap - epsilon_sq
+    )
+
+    # For a self-consistent retained cutoff M, etaNormSq = 2*M+1.  Since
+    # log(M+1) <= M and D_L+B_L > 0, the elementary high floor is at most
+    # M+shiftGain.  The Lean no-go theorem applies when the two coefficient
+    # margins below are positive.
+    slope_margin = 2 * epsilon_sq - scale
+    intercept_margin = epsilon_sq - scale * shift_gain
+    self_consistent_no_go = (
+        D_L + B_L > 0
+        and slope_margin > 0
+        and intercept_margin > 0
+    )
+    if not self_consistent_no_go:
+        raise RuntimeError("conservative Schur no-go coefficient check failed")
+
+    def text(x: mp.mpf) -> str:
+        return mp.nstr(x, 70)
+
+    return {
+        "status": "PASS",
+        "scope": (
+            "conditional arithmetic instantiation of the V23 Lean Schur "
+            "budget using the elementary log-tail bounds"
+        ),
+        "inputs": {
+            "c": c,
+            "fixed_retained_cutoff": fixed_cutoff,
+            "low_gap": text(low_gap),
+            "spectral_shift_gain": text(shift_gain),
+            "finite_half_margin": text(margin),
+            "eta_norm_sq": text(eta_norm_sq),
+            "eta_norm_sq_formula": "2 * fixed_retained_cutoff + 1",
+            "epsilon_choice": "B_L",
+        },
+        "constants": {
+            "D_L": text(D_L),
+            "B_L": text(B_L),
+            "B_L_sq": text(epsilon_sq),
+        },
+        "lean_high_gap_budget": (
+            "epsilon^2 * (etaNormSq + margin * lowGap) "
+            "<= margin * lowGap^2 * highGap"
+        ),
+        "fixed_cutoff_probe": {
+            "shifted_high_gap": text(fixed_high_gap),
+            "small_coupling_margin_lowGap_times_highGap_minus_epsilonSq": text(
+                fixed_small_coupling_margin
+            ),
+            "high_gap_budget_left": text(fixed_budget_left),
+            "high_gap_budget_right": text(fixed_budget_right),
+            "high_gap_positive": bool(fixed_high_gap > 0),
+            "small_coupling_condition": bool(
+                fixed_small_coupling_margin > 0
+            ),
+            "high_gap_budget_holds": bool(
+                fixed_budget_left <= fixed_budget_right
+            ),
+        },
+        "self_consistent_cutoff_obstruction": {
+            "boundary_norm_growth": "etaNormSq = 2*M+1",
+            "high_gap_majorant": "highGap <= M + shiftGain",
+            "right_side_scale_margin_times_lowGapSq": text(scale),
+            "slope_margin_2epsilonSq_minus_scale": text(slope_margin),
+            "intercept_margin_epsilonSq_minus_scaleTimesShift": text(
+                intercept_margin
+            ),
+            "lean_theorem": (
+                "RiemannCvs.BoundaryWeylSchurTail."
+                "highGapBudget_false_of_linearBoundaryGrowth"
+            ),
+            "no_cutoff_satisfies_conservative_budget": True,
+        },
+        "interpretation": (
+            "the fixed N=20 complement lacks a positive elementary high "
+            "floor, while increasing the retained cutoff also grows the "
+            "boundary norm linearly; the dimension-independent B_L coupling "
+            "therefore does not close this Weyl budget at any synchronized "
+            "cutoff, so a cutoff-decaying coupling or weighted boundary "
+            "estimate is the quantitative next target"
+        ),
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--json-out", type=Path, required=True)
+    parser.add_argument("--schur-c", type=int, default=13)
+    parser.add_argument("--schur-fixed-cutoff", type=int, default=20)
+    parser.add_argument("--schur-low-gap", default="0.0009765625")
+    parser.add_argument("--schur-shift-gain", default="0.0009765625")
+    parser.add_argument(
+        "--schur-margin",
+        default="0.0175525530977914393795820608",
+    )
+    parser.add_argument("--schur-eta-norm-sq", default="41")
     args = parser.parse_args()
 
     result = {
@@ -179,6 +333,14 @@ def main() -> None:
         "symbolic": symbolic_checks(),
         "translation_max_error": numerical_translation_check(),
         "constants": [constants(c) for c in [5, 13, 29, 100]],
+        "boundary_weyl_schur_probe": boundary_weyl_schur_probe(
+            c=args.schur_c,
+            fixed_cutoff=args.schur_fixed_cutoff,
+            low_gap_text=args.schur_low_gap,
+            shift_gain_text=args.schur_shift_gain,
+            margin_text=args.schur_margin,
+            eta_norm_sq_text=args.schur_eta_norm_sq,
+        ),
     }
     args.json_out.parent.mkdir(parents=True, exist_ok=True)
     args.json_out.write_text(
@@ -190,6 +352,9 @@ def main() -> None:
                 "status": result["status"],
                 "translation_max_error": result[
                     "translation_max_error"
+                ],
+                "boundary_weyl_schur_probe": result[
+                    "boundary_weyl_schur_probe"
                 ],
             },
             indent=2,

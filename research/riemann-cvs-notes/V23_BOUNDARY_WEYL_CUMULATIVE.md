@@ -260,10 +260,116 @@ The division-free acceptance form used by interval arithmetic is
   <= margin * a * (a*gamma-epsilon²).
 ```
 
+The same module now also solves this inequality for the high-gap side.  Given
+an upper certificate `etaNormSq >= ‖eta‖²`, it is enough to verify
+
+```text
+epsilon² * (etaNormSq + margin*a)
+  <= margin * a² * gamma.
+```
+
+This is the form consumed by the current constant audit: all quantities are
+nonnegative products, and `gamma` appears only once on the right.
+
 A domain-uniform theorem composes this inequality directly with the finite
 `2 * margin` Abel certificate.  This is stronger than the previous generic
 `|G_N-G_limit| <= margin` slot: the remaining source work now has named and
 separately measurable inputs `a`, `gamma`, and `epsilon`.
+
+`CvSParityDisplacement.lean` now closes the concrete Riesz adapter for the
+remaining factor `‖eta‖²`.  The coefficient function
+
+```text
+eta = (1, sqrt(2), ..., sqrt(2))
+```
+
+is lifted to `EuclideanSpace Real (Option ι)`, and Lean proves
+
+```text
+<eta,x> = boundaryFunctional(x),
+‖eta‖² = 2 * card(ι) + 1.
+```
+
+For the current `N = 20` finite block this specializes exactly to
+`‖eta‖² = 41`.  Thus the compact Schur budget has only the three analytic
+constants `a`, `gamma`, and `epsilon` left to instantiate.
+
+An exact-dyadic Arb replay on the window
+
+```text
+[-2,-1/1024]
+```
+
+gives the finite prefix margin
+
+```text
+G_20(x) >= 0.03510510619558287875916412165205673...
+```
+
+and therefore the rigorous half-margin target
+
+```text
+margin = 0.0175525530977914393795820608.
+```
+
+The existing elementary log-tail audit at `c = 13` gives
+
+```text
+D_L = 8.133016113590798598418726830596668...
+B_L = 20.728969460745556111615320051159706...
+```
+
+At the actual retained cutoff `M = 20`, the conservative shifted high floor is
+
+```text
+log(21)-D_L-B_L+1/1024
+  = -25.8164865741129317...,
+```
+
+so it does not supply high-block coercivity for a direct `G_20`-to-limit
+Schur comparison.
+
+It is also inconsistent to keep `etaNormSq = 41` while sending the retained
+cutoff `M` to a huge value: the concrete boundary norm changes with that same
+cutoff according to
+
+```text
+etaNormSq(M) = 2M+1.
+```
+
+The repository now proves a structural no-go theorem for this synchronized
+regime.  Put
+
+```text
+scale = margin * a²
+      = 1.6739419076720657e-8,
+epsilon² = B_L²
+         = 429.6901749045219... .
+```
+
+Since the logarithmic high floor is bounded above by `M+1/1024`, while the
+left side of the Schur budget contains `B_L²(2M+1)`, the two certified
+coefficient margins are
+
+```text
+2*B_L²-scale
+  = 859.3803497923044... > 0,
+B_L²-scale/1024
+  = 429.6901749045055... > 0.
+```
+
+Therefore no synchronized retained cutoff can satisfy the current Weyl Schur
+budget with the dimension-independent choice `epsilon = B_L`; logarithmic
+high-gap growth loses to the linear growth of the boundary-vector mass.  This
+is stronger than merely observing an impractically large cutoff.
+
+The next analytic target is selected by this obstruction: obtain either a
+cutoff-decaying low/high coupling or a weighted boundary estimate that removes
+the `2M+1` loss.  The sharper prolate/PSWF tail expected at order `lambda^-7`
+is one existing source route, but it still needs a concrete adapter to the
+actual CvS/Weil boundary resolvent.  The workflow records this audit in
+`v23_c13_log_tail_schur_budget.json` so future constants can be compared
+against the same Lean acceptance inequality.
 
 `BoundaryWeylFarLeft.lean` closes the algebraic part of the exterior
 normalization.  If all finite poles are nonnegative, the total residue is one,
