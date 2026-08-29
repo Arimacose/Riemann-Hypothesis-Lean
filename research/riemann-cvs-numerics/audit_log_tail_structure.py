@@ -122,7 +122,7 @@ def constants(c: int) -> dict[str, object]:
         -2 * mp.log(U + 1)
         + mp.log(U * U + 1)
         + 2 * mp.atan(U)
-        + 2 * mp.log(2)
+        + mp.log(2)
         - mp.pi / 2
     )
     C_psi = mp.euler + mp.mpf(4) / 5 + mp.log(mp.mpf(8) / 5)

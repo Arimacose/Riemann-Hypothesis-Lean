@@ -102,12 +102,13 @@ def closed_forms(N: int, c: float) -> tuple[list[mp.mpf], list[mp.mpf], list[mp.
 
 
 def pole_J(L: mp.mpf) -> mp.mpf:
+    """Exact CvS pole constant, matching the cutoff-free Arb constructor."""
     U = mp.e ** (L / 2)
     return (
         -2 * mp.log(U + 1)
         + mp.log(U * U + 1)
         + 2 * mp.atan(U)
-        + 2 * mp.log(2)
+        + mp.log(2)
         - mp.pi / 2
     )
 
