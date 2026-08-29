@@ -1681,6 +1681,127 @@ lemma prolateFixedPhase_hasDerivAt
   exact intervalIntegral.integral_hasDerivAt_right hIntegrable
     hStronglyMeasurable.stronglyMeasurableAtFilter hContinuousAt
 
+/-- The internally normalized phase primitive is continuous on `[2,3]`. -/
+theorem prolateFixedPhaseContinuousOnTwoThree (a : ℝ) :
+    ContinuousOn (prolateFixedPhase a) (uIcc (2 : ℝ) 3) := by
+  intro x hx
+  have hx' : x ∈ Icc (2 : ℝ) 3 := by
+    simpa [uIcc_of_le (by norm_num : (2 : ℝ) ≤ 3)] using hx
+  exact (prolateFixedPhase_hasDerivAt
+    a x hx'.1 hx'.2).continuousAt.continuousWithinAt
+
+/-- Any source phase with the explicit Dunster slope differs from the
+normalized primitive by its value at the left endpoint. -/
+theorem sourcePhase_eq_prolateFixedPhase_add_base
+    (sourcePhase : ℝ → ℝ) (a : ℝ)
+    (hSourceDeriv :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        HasDerivAt sourcePhase (prolateFixedPhaseSlope a x) x) :
+    ∀ x ∈ Icc (2 : ℝ) 3,
+      sourcePhase x = prolateFixedPhase a x + sourcePhase 2 := by
+  have hSourceContinuous : ContinuousOn sourcePhase (Icc (2 : ℝ) 3) := by
+    intro x hx
+    exact (hSourceDeriv x hx).continuousAt.continuousWithinAt
+  have hFixedContinuous :
+      ContinuousOn (fun x => prolateFixedPhase a x + sourcePhase 2)
+        (Icc (2 : ℝ) 3) := by
+    intro x hx
+    exact ((prolateFixedPhase_hasDerivAt a x hx.1 hx.2).add_const
+      (sourcePhase 2)).continuousAt.continuousWithinAt
+  exact eq_of_has_deriv_right_eq
+    (a := (2 : ℝ)) (b := 3)
+    (f := sourcePhase)
+    (g := fun x => prolateFixedPhase a x + sourcePhase 2)
+    (f' := prolateFixedPhaseSlope a)
+    (fun x hx =>
+      (hSourceDeriv x ⟨hx.1, hx.2.le⟩).hasDerivWithinAt)
+    (fun x hx =>
+      ((prolateFixedPhase_hasDerivAt a x hx.1 hx.2.le).add_const
+        (sourcePhase 2)).hasDerivWithinAt)
+    hSourceContinuous hFixedContinuous (by simp [prolateFixedPhase])
+
+/-- The source-phase oscillation is the normalized primitive with one explicit
+additive offset. -/
+theorem sourcePhaseCosine_eq_prolateFixedPhaseCosine
+    (sourcePhase : ℝ → ℝ) (a c sourceOffset x : ℝ)
+    (hSourceDeriv :
+      ∀ y ∈ Icc (2 : ℝ) 3,
+        HasDerivAt sourcePhase (prolateFixedPhaseSlope a y) y)
+    (hx : x ∈ Icc (2 : ℝ) 3) :
+    cos (c * sourcePhase x + sourceOffset) =
+      cos (c * prolateFixedPhase a x +
+        (c * sourcePhase 2 + sourceOffset)) := by
+  rw [sourcePhase_eq_prolateFixedPhase_add_base sourcePhase a
+    hSourceDeriv x hx]
+  congr 1
+  ring
+
+/-- Canonical fixed-interval cosine reference whose square has exactly the
+Dunster weight-amplitude normalization used by the mass theorem. -/
+noncomputable def prolateFixedCosineReference
+    (a c offset amplitude x : ℝ) : ℝ :=
+  sqrt (amplitude * prolateFixedWeight a x) *
+    cos (c * prolateFixedPhase a x + offset)
+
+lemma prolateFixedCosineReference_sq
+    (a c offset amplitude x : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2)
+    (hAmplitudeNonneg : 0 ≤ amplitude)
+    (hx : x ∈ uIcc (2 : ℝ) 3) :
+    prolateFixedCosineReference a c offset amplitude x ^ 2 =
+      amplitude *
+        (prolateFixedWeight a x *
+          cos (c * prolateFixedPhase a x + offset) ^ 2) := by
+  have hx' : x ∈ Icc (2 : ℝ) 3 := by
+    simpa [uIcc_of_le (by norm_num : (2 : ℝ) ≤ 3)] using hx
+  have hWeightNonneg : 0 ≤ prolateFixedWeight a x := by
+    linarith [(prolateFixedWeightBounds
+      a x haNonneg haUpper hx'.1 hx'.2).1]
+  unfold prolateFixedCosineReference
+  rw [mul_pow, sq_sqrt (mul_nonneg hAmplitudeNonneg hWeightNonneg)]
+  ring
+
+lemma prolateFixedCosineReferenceContinuousOnTwoThree
+    (a c offset amplitude : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2) :
+    ContinuousOn (prolateFixedCosineReference a c offset amplitude)
+      (uIcc (2 : ℝ) 3) := by
+  have hWeight := prolateFixedWeightContinuousOnTwoThree a haNonneg haUpper
+  have hPhase := prolateFixedPhaseContinuousOnTwoThree a
+  have hAmplitudeWeight :
+      ContinuousOn (fun x => amplitude * prolateFixedWeight a x)
+        (uIcc (2 : ℝ) 3) :=
+    continuousOn_const.mul hWeight
+  have hOscillation :
+      ContinuousOn (fun x => cos (c * prolateFixedPhase a x + offset))
+        (uIcc (2 : ℝ) 3) :=
+    Real.continuous_cos.comp_continuousOn
+      ((continuousOn_const.mul hPhase).add continuousOn_const)
+  exact hAmplitudeWeight.sqrt.mul hOscillation
+
+lemma prolateFixedCosineReferenceSqIntervalIntegrable
+    (a c offset amplitude : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2) :
+    IntervalIntegrable
+      (fun x => prolateFixedCosineReference a c offset amplitude x ^ 2)
+      volume 2 3 :=
+  ((prolateFixedCosineReferenceContinuousOnTwoThree
+    a c offset amplitude haNonneg haUpper).pow 2).intervalIntegrable
+
+/-- An explicit `a ≤ parameterK / c` source estimate enters the fixed parameter
+rectangle once `2 * parameterK ≤ c`. -/
+lemma prolateParameter_le_half_of_invFrequency
+    (a c parameterK : ℝ)
+    (hcPos : 0 < c)
+    (haInvFrequency : a ≤ parameterK / c)
+    (hParameterThreshold : 2 * parameterK ≤ c) :
+    a ≤ 1 / 2 := by
+  apply haInvFrequency.trans
+  exact (div_le_iff₀ hcPos).2 (by linarith)
+
 /-- Closed phase-primitive version of the leading fixed-interval lower bound. -/
 theorem prolateFixedPhaseWeightedCosSqLower
     (a c offset : ℝ)
@@ -1821,6 +1942,57 @@ theorem prolateFixedPhaseActualMassLowerOfSeparatedErrors
       (dunsterError x) (besselError x) c amplitude
       (prolateFixedWeight a x) dunsterK besselK
       (hDunsterErrorPointwise x hx) (hBesselErrorPointwise x hx)
+
+/-- Canonical-reference version of the separated Dunster/Bessel mass lower
+bound.  The reference square, its integrability, and `a ≤ 1/2` are discharged
+internally from the inverse-frequency parameter estimate. -/
+theorem prolateFixedPhaseActualMassLowerOfCanonicalReference
+    (actual intermediate dunsterError besselError : ℝ → ℝ)
+    (a c offset amplitude parameterK dunsterK besselK : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haInvFrequency : a ≤ parameterK / c)
+    (hParameterThreshold : 2 * parameterK ≤ c)
+    (hc : 33 ≤ c)
+    (hAmplitudeNonneg : 0 ≤ amplitude)
+    (hFrequencyThreshold :
+      96 * (dunsterK ^ 2 + besselK ^ 2) ≤ c ^ 2)
+    (hActualSqIntegrable :
+      IntervalIntegrable (fun x => actual x ^ 2) volume 2 3)
+    (hDunsterErrorContinuous :
+      ContinuousOn dunsterError (uIcc (2 : ℝ) 3))
+    (hBesselErrorContinuous :
+      ContinuousOn besselError (uIcc (2 : ℝ) 3))
+    (hDunsterStep :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        intermediate x = actual x + dunsterError x)
+    (hBesselStep :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        prolateFixedCosineReference a c offset amplitude x =
+          intermediate x + besselError x)
+    (hDunsterErrorPointwise :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        dunsterError x ^ 2 ≤
+          (dunsterK ^ 2 / c ^ 2) * amplitude * prolateFixedWeight a x)
+    (hBesselErrorPointwise :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        besselError x ^ 2 ≤
+          (besselK ^ 2 / c ^ 2) * amplitude * prolateFixedWeight a x) :
+    (1 / 144 : ℝ) * amplitude ≤
+      ∫ x in (2 : ℝ)..3, actual x ^ 2 := by
+  have hcPos : 0 < c := by linarith
+  have haUpper := prolateParameter_le_half_of_invFrequency
+    a c parameterK hcPos haInvFrequency hParameterThreshold
+  exact prolateFixedPhaseActualMassLowerOfSeparatedErrors
+    actual intermediate (prolateFixedCosineReference a c offset amplitude)
+    dunsterError besselError a c offset amplitude dunsterK besselK
+    haNonneg haUpper hc hAmplitudeNonneg hFrequencyThreshold
+    hActualSqIntegrable
+    (prolateFixedCosineReferenceSqIntervalIntegrable
+      a c offset amplitude haNonneg haUpper)
+    hDunsterErrorContinuous hBesselErrorContinuous
+    (fun x hx => prolateFixedCosineReference_sq
+      a c offset amplitude x haNonneg haUpper hAmplitudeNonneg hx)
+    hDunsterStep hBesselStep hDunsterErrorPointwise hBesselErrorPointwise
 
 end ProlateFixedIntervalWeight
 
@@ -2257,6 +2429,75 @@ theorem dilationLogMomentBoundsOfSeparatedDunsterBesselErrors
   · exact hBounds.1
   · rw [hCoefficient] at hBounds
     exact hBounds.2
+
+/-- Conductor-ready source adapter with the canonical cosine reference and the
+inverse-frequency parameter bound built in.  The source layer only supplies
+the actual/intermediate decompositions and the two pointwise error estimates. -/
+theorem dilationLogMomentBoundsOfCanonicalReferenceAndSeparatedErrors
+    (density actual intermediate dunsterError besselError : ℝ → ℝ)
+    (a c offset amplitude parameterK dunsterK besselK
+      physical residual mass logScale upper : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haInvFrequency : a ≤ parameterK / c)
+    (hParameterThreshold : 2 * parameterK ≤ c)
+    (hc : 33 ≤ c)
+    (hAmplitudeNonneg : 0 ≤ amplitude)
+    (hFrequencyThreshold :
+      96 * (dunsterK ^ 2 + besselK ^ 2) ≤ c ^ 2)
+    (hMassPos : 0 < mass)
+    (hUpperNonneg : 0 ≤ upper)
+    (hActualSqIntegrable :
+      IntervalIntegrable (fun x => actual x ^ 2) volume 2 3)
+    (hDunsterErrorContinuous :
+      ContinuousOn dunsterError (uIcc (2 : ℝ) 3))
+    (hBesselErrorContinuous :
+      ContinuousOn besselError (uIcc (2 : ℝ) 3))
+    (hDunsterStep :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        intermediate x = actual x + dunsterError x)
+    (hBesselStep :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        prolateFixedCosineReference a c offset amplitude x =
+          intermediate x + besselError x)
+    (hDunsterErrorPointwise :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        dunsterError x ^ 2 ≤
+          (dunsterK ^ 2 / c ^ 2) * amplitude * prolateFixedWeight a x)
+    (hBesselErrorPointwise :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        besselError x ^ 2 ≤
+          (besselK ^ 2 / c ^ 2) * amplitude * prolateFixedWeight a x)
+    (hFixedMassToExterior :
+      (∫ x in (2 : ℝ)..3, actual x ^ 2) ≤ mass)
+    (hDensityMeasurable :
+      AEStronglyMeasurable density (volume.restrict (Ioi 0)))
+    (hDensityNonneg : ∀ u ∈ Ioi (0 : ℝ), 0 ≤ density u)
+    (hEnvelope :
+      ∀ u ∈ Ioi (0 : ℝ),
+        density u ≤ (upper * amplitude) / cosh u)
+    (hResidual :
+      residual = ∫ u in Ioi 0, log (cosh u) * density u)
+    (hIdentity : physical = logScale * mass + residual) :
+    logScale * mass ≤ physical ∧
+      physical ≤ (logScale + 288 * upper) * mass := by
+  have hcPos : 0 < c := by linarith
+  have haUpper := prolateParameter_le_half_of_invFrequency
+    a c parameterK hcPos haInvFrequency hParameterThreshold
+  exact dilationLogMomentBoundsOfSeparatedDunsterBesselErrors
+    density actual intermediate
+    (prolateFixedCosineReference a c offset amplitude)
+    dunsterError besselError a c offset amplitude dunsterK besselK
+    physical residual mass logScale upper haNonneg haUpper hc
+    hAmplitudeNonneg hFrequencyThreshold hMassPos hUpperNonneg
+    hActualSqIntegrable
+    (prolateFixedCosineReferenceSqIntervalIntegrable
+      a c offset amplitude haNonneg haUpper)
+    hDunsterErrorContinuous hBesselErrorContinuous
+    (fun x hx => prolateFixedCosineReference_sq
+      a c offset amplitude x haNonneg haUpper hAmplitudeNonneg hx)
+    hDunsterStep hBesselStep hDunsterErrorPointwise hBesselErrorPointwise
+    hFixedMassToExterior hDensityMeasurable hDensityNonneg hEnvelope
+    hResidual hIdentity
 
 end HyperbolicEnvelope
 

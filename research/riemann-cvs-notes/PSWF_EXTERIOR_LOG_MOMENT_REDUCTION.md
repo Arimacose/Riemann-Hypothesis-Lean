@@ -683,6 +683,24 @@ and error-absorption results to this explicit primitive.  Dunster's phase from
 therefore changes only the additive phase offset already quantified by these
 theorems.
 
+That phase identification is now itself a Lean theorem rather than an informal
+calculus remark.  `sourcePhase_eq_prolateFixedPhase_add_base` proves that every
+source phase with derivative `prolateFixedPhaseSlope a` satisfies
+
+\[
+\xi_{\mathrm{source}}(x)
+=\xi_a^{[2]}(x)+\xi_{\mathrm{source}}(2)
+\qquad (2\le x\le3).
+\]
+
+The companion theorem `sourcePhaseCosine_eq_prolateFixedPhaseCosine` pushes
+this equality through the oscillatory factor and produces the exact adjusted
+offset
+
+\[
+c\,\xi_{\mathrm{source}}(2)+\theta.
+\]
+
 The remainder conversion is now formalized at function level rather than only
 as scalar algebra.  `intervalSqReferenceSplit` integrates
 \((f+e)^2\le2f^2+2e^2\), and
@@ -726,6 +744,36 @@ identities through the intermediate Bessel term, and retains
 96(K_D^2+K_B^2)\le c^2.
 \]
 
+The leading function is also closed as an internal object.  Lean defines
+`prolateFixedCosineReference` by
+
+\[
+r_{a,c,\theta,\mathcal A}(x)
+=
+\sqrt{\mathcal A w_a(x)}
+\cos\!\bigl(c\xi_a^{[2]}(x)+\theta\bigr).
+\]
+
+`prolateFixedCosineReference_sq` proves its exact squared normalization, while
+`prolateFixedCosineReferenceContinuousOnTwoThree` and
+`prolateFixedCosineReferenceSqIntervalIntegrable` discharge the continuity and
+integrability hypotheses that were previously supplied manually.
+
+Dunster's fixed-index parameter estimate can now enter through the source
+shape \(a\le K_a/c\).  The lemma
+`prolateParameter_le_half_of_invFrequency` proves
+
+\[
+a\le\frac{K_a}{c},\qquad 2K_a\le c
+\quad\Longrightarrow\quad
+a\le\frac12.
+\]
+
+Consequently `prolateFixedPhaseActualMassLowerOfCanonicalReference` needs
+neither an abstract reference function, nor its square identity or
+integrability, nor a separately assumed \(a\le1/2\).  It derives all of them
+before invoking the separated-error mass theorem.
+
 The fixed-interval estimate is now composed with the exterior envelope as
 well.  If the `[2,3]` mass is bounded above by the positive exterior mass and
 the hyperbolic density satisfies the established `sech` envelope with
@@ -747,17 +795,27 @@ remainders independently and reaches the same conductor bounds directly.  No
 manual construction of a single opaque `error` function or a square-root
 combined constant is needed at the source-adapter boundary.
 
+The stronger wrapper
+`dilationLogMomentBoundsOfCanonicalReferenceAndSeparatedErrors` additionally
+builds the canonical reference and converts \(a\le K_a/c\) into the fixed
+parameter rectangle internally.  Its remaining analytic inputs now match the
+source expansion directly: actual-to-intermediate identity,
+intermediate-to-canonical-reference identity, and the two pointwise error
+bounds.
+
 The remaining source-specific fixed-interval obligation is now narrower:
 state Dunster's uniform PSWF-to-Bessel error and the Bessel-to-cosine error with
-the repository's normalization, identify the normalized actual, intermediate,
-and reference functions, verify the parameter range \(0\le a\le1/2\), match
-the source phase to the explicit primitive up to an additive constant, and
-supply the two pointwise \(K_D/c\) and \(K_B/c\) hypotheses.
+the repository's normalization, identify the normalized actual and
+intermediate functions with the canonical reference, supply a concrete
+\(a\le K_a/c\) bound and its eventual threshold, verify the source-phase
+derivative, and supply the two pointwise \(K_D/c\) and \(K_B/c\) hypotheses.
 The explicit phase primitive, leading weight and mass, every required
 derivative and variation constant, nonlinear integration by parts, the leading
-\(1/36\) lower bound, the complete one-error and separated two-error absorption to
-\(\mathcal A/144\), defect normalization, and logarithmic-moment algebra are
-already in Lean, including their final common-scale composition.
+\(1/36\) lower bound, phase-offset identification, canonical reference,
+inverse-frequency parameter reduction, complete one-error and separated
+two-error absorption to \(\mathcal A/144\), defect normalization, and
+logarithmic-moment algebra are already in Lean, including their final
+common-scale composition.
 
 The displayed radial theorem does not itself state the derivative bound needed
 for the separate prime-dilation overlap.  That bound must be extracted from the

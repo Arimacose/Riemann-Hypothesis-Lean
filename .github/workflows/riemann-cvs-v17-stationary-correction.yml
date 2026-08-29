@@ -83,8 +83,14 @@ jobs:
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.prolateFixedPhaseActualMassLowerOfInvFrequencyError
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.sq_add_le_two_invFrequencyErrorBudget
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.prolateFixedPhaseActualMassLowerOfSeparatedErrors
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.sourcePhase_eq_prolateFixedPhase_add_base
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.sourcePhaseCosine_eq_prolateFixedPhaseCosine
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.prolateFixedCosineReference_sq
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.prolateParameter_le_half_of_invFrequency
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.prolateFixedPhaseActualMassLowerOfCanonicalReference
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfProlateFixedPhaseApproximation
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfSeparatedDunsterBesselErrors
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfCanonicalReferenceAndSeparatedErrors
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.massLowerOfReferenceAndQuarterError
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.exteriorEnvelopeLogMomentBound
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfSechEnvelope
