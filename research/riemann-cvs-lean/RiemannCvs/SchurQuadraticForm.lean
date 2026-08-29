@@ -43,10 +43,9 @@ theorem squareCompletion
         gap * (-(epsilon ^ 2 / gap) * s ^ 2) =
           -(epsilon ^ 2) * s ^ 2 := by
       field_simp [ne_of_gt hGap]
-      ring
     rw [hCancel]
     nlinarith
-  exact (mul_le_mul_left hGap).mp hScaled
+  exact le_of_mul_le_mul_left hScaled hGap
 
 /-- Abstract quadratic-form version.
 
@@ -72,10 +71,11 @@ theorem schurUnitLowerBound
     (hTotal : total = low + 2 * cross + high) :
     low - epsilon ^ 2 / gap ≤ total := by
   rw [hTotal]
-  have h := schurFormLowerBound
-    low high cross gap epsilon 1 t hGap hHigh
-  norm_num at h
-  exact h hCross
+  have hCross' : -epsilon * (1 : ℝ) * t ≤ cross := by
+    simpa only [mul_one] using hCross
+  simpa only [one_pow, mul_one] using
+    (schurFormLowerBound
+      low high cross gap epsilon 1 t hGap hHigh hCross')
 
 /-- If an odd low block has baseline `oddBase`, the even sector has an upper
 candidate `evenUpper`, and the Schur correction is strictly smaller than the
@@ -83,7 +83,7 @@ remaining margin, then the actual even minimum lies below every odd mixed
 state represented by the supplied lower bound. -/
 theorem parityFromSchurLowerBound
     (evenValue oddValue evenUpper oddBase gap epsilon : ℝ)
-    (hGap : 0 < gap)
+    (_hGap : 0 < gap)
     (hEven : evenValue ≤ evenUpper)
     (hOdd : oddBase - epsilon ^ 2 / gap ≤ oddValue)
     (hMargin : evenUpper < oddBase - epsilon ^ 2 / gap) :

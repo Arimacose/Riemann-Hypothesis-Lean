@@ -35,7 +35,6 @@ theorem normalizedBlockLowerBound
   have hDivision :
       epsilon ^ 2 / (gap / 2) = 2 * epsilon ^ 2 / gap := by
     field_simp [ne_of_gt hGap]
-    ring
   rw [hDivision] at hSquare
   rw [hTotal]
   nlinarith

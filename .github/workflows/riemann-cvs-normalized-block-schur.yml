@@ -4,11 +4,14 @@ on:
   push:
     branches:
       - main
+      - research/cvs-prolate-v17
     paths:
+      - 'research/riemann-cvs-lean/RiemannCvs/SchurQuadraticForm.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/NormalizedBlockSchur.lean'
       - '.github/workflows/riemann-cvs-normalized-block-schur.yml'
   pull_request:
     paths:
+      - 'research/riemann-cvs-lean/RiemannCvs/SchurQuadraticForm.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/NormalizedBlockSchur.lean'
       - '.github/workflows/riemann-cvs-normalized-block-schur.yml'
   workflow_dispatch:
@@ -39,11 +42,17 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if grep -nE '(^|[^[:alnum:]_])(sorry|admit)([^[:alnum:]_]|$)' RiemannCvs/NormalizedBlockSchur.lean; then
+          files=(
+            RiemannCvs/SchurQuadraticForm.lean
+            RiemannCvs/NormalizedBlockSchur.lean
+          )
+          if grep -nE '(^|[^[:alnum:]_])(sorry|admit)([^[:alnum:]_]|$)' "${files[@]}"; then
             exit 1
           fi
           cat > /tmp/NormalizedBlockSchurAxioms.lean <<'EOF'
           import RiemannCvs.NormalizedBlockSchur
+          #print axioms RiemannCvs.SchurQuadraticForm.squareCompletion
+          #print axioms RiemannCvs.SchurQuadraticForm.schurFormLowerBound
           #print axioms RiemannCvs.NormalizedBlockSchur.normalizedBlockLowerBound
           #print axioms RiemannCvs.NormalizedBlockSchur.normalizedBlockSchurBound
           #print axioms RiemannCvs.NormalizedBlockSchur.normalizedBlockTargetOfProductBudgets
