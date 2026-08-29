@@ -373,6 +373,131 @@ theorem relativeCoupling_of_formGrowth
     _ ≤ q * (low * high) := hScaled
     _ = q * low * high := by ring
 
+/-- Two nonnegative energy blocks glue whenever the square of their cross term
+does not exceed the product of the diagonal energies.  This is the scalar
+determinant step used by the recursive finite-shell certificate. -/
+theorem twoBlockEnergy_nonnegative
+    (coreEnergy tailEnergy cross : ℝ)
+    (hCore : 0 ≤ coreEnergy)
+    (hTail : 0 ≤ tailEnergy)
+    (hDet : cross ^ 2 ≤ coreEnergy * tailEnergy) :
+    0 ≤ coreEnergy + 2 * cross + tailEnergy := by
+  rcases hCore.eq_or_lt with hCoreZero | hCorePos
+  · have hCrossZero : cross = 0 := by
+      rw [← sq_eq_zero_iff]
+      nlinarith [sq_nonneg cross]
+    rw [hCoreZero, hCrossZero]
+    simpa using hTail
+  · have hMul :
+        coreEnergy * 0 ≤
+          coreEnergy * (coreEnergy + 2 * cross + tailEnergy) := by
+      nlinarith [sq_nonneg (coreEnergy + cross)]
+    exact le_of_mul_le_mul_left hMul hCorePos
+
+/-- Recover a relative coupling inequality from nonnegativity of the scaled
+two-block form for every scalar multiple of the low vector.  Algebraically,
+this is the converse discriminant direction to `twoBlockEnergy_nonnegative`. -/
+theorem relativeCoupling_of_scaledFormNonnegative
+    (scaledLow coupling high : ℝ)
+    (hScaledLow : 0 < scaledLow)
+    (hForm : ∀ r : ℝ,
+      0 ≤ scaledLow * r ^ 2 + 2 * coupling * r + high) :
+    coupling ^ 2 ≤ scaledLow * high := by
+  have hNonzero : scaledLow ≠ 0 := ne_of_gt hScaledLow
+  have hAtVertex := hForm (-coupling / scaledLow)
+  have hIdentity :
+      scaledLow * (-coupling / scaledLow) ^ 2 +
+          2 * coupling * (-coupling / scaledLow) + high =
+        high - coupling ^ 2 / scaledLow := by
+    field_simp [hNonzero]
+    ring
+  rw [hIdentity] at hAtVertex
+  have hDiv : coupling ^ 2 / scaledLow ≤ high := by linarith
+  have hMul : coupling ^ 2 ≤ high * scaledLow :=
+    (div_le_iff₀ hScaledLow).mp hDiv
+  nlinarith
+
+section RecursiveShell
+
+variable {E₀ M T : Type*}
+variable [AddCommGroup E₀] [Module ℝ E₀]
+variable [AddCommGroup M] [Module ℝ M]
+variable [AddCommGroup T] [Module ℝ T]
+
+/-- Recursive three-block gluing for the relative-energy route.
+
+The already certified core consists of the low block `E₀` and a middle block
+`M`; its scaled energy uses the desired final coefficient `q`.  A new shell
+`T` may be attached when its coupling to the whole core has relative
+coefficient `rho ≤ 1`.  Nonnegativity of every scaled three-block form then
+recovers the same coefficient `q` between the original low block and the
+enlarged high block `M ⊕ T`.
+
+This is the exact inductive adapter for certificates of
+`[[rho * R_core, C], [Cᵀ, H_shell]]`, where
+`R_core = [[q * L, B], [Bᵀ, H_middle]]`. -/
+theorem relativeCoupling_of_recursiveShell
+    (lowForm : E₀ →ₗ[ℝ] E₀ →ₗ[ℝ] ℝ)
+    (middleForm : M →ₗ[ℝ] M →ₗ[ℝ] ℝ)
+    (tailForm : T →ₗ[ℝ] T →ₗ[ℝ] ℝ)
+    (lowMiddle : E₀ →ₗ[ℝ] M →ₗ[ℝ] ℝ)
+    (lowTail : E₀ →ₗ[ℝ] T →ₗ[ℝ] ℝ)
+    (middleTail : M →ₗ[ℝ] T →ₗ[ℝ] ℝ)
+    (q rho : ℝ)
+    (hq : 0 < q)
+    (hrhoOne : rho ≤ 1)
+    (hLowPos : ∀ w, w ≠ 0 → 0 < lowForm w w)
+    (hCoreNonneg : ∀ w m,
+      0 ≤ q * lowForm w w + 2 * lowMiddle w m + middleForm m m)
+    (hTailNonneg : ∀ t, 0 ≤ tailForm t t)
+    (hCoreTailRelative : ∀ w m t,
+      (lowTail w t + middleTail m t) ^ 2 ≤
+        rho *
+          (q * lowForm w w + 2 * lowMiddle w m + middleForm m m) *
+          tailForm t t) :
+    ∀ w m t,
+      (lowMiddle w m + lowTail w t) ^ 2 ≤
+        q * lowForm w w *
+          (middleForm m m + 2 * middleTail m t + tailForm t t) := by
+  intro w m t
+  by_cases hw : w = 0
+  · subst w
+    simp
+  have hScaledLow : 0 < q * lowForm w w :=
+    mul_pos hq (hLowPos w hw)
+  apply relativeCoupling_of_scaledFormNonnegative
+    (q * lowForm w w)
+    (lowMiddle w m + lowTail w t)
+    (middleForm m m + 2 * middleTail m t + tailForm t t)
+    hScaledLow
+  intro r
+  let coreEnergy :=
+    q * lowForm (r • w) (r • w) +
+      2 * lowMiddle (r • w) m + middleForm m m
+  let tailEnergy := tailForm t t
+  let cross := lowTail (r • w) t + middleTail m t
+  have hCore : 0 ≤ coreEnergy := hCoreNonneg (r • w) m
+  have hTail : 0 ≤ tailEnergy := hTailNonneg t
+  have hRelative : cross ^ 2 ≤ rho * coreEnergy * tailEnergy :=
+    hCoreTailRelative (r • w) m t
+  have hProduct : 0 ≤ coreEnergy * tailEnergy := mul_nonneg hCore hTail
+  have hRhoProduct :
+      rho * (coreEnergy * tailEnergy) ≤ coreEnergy * tailEnergy := by
+    simpa only [one_mul] using
+      (mul_le_mul_of_nonneg_right hrhoOne hProduct)
+  have hDet : cross ^ 2 ≤ coreEnergy * tailEnergy := by
+    calc
+      cross ^ 2 ≤ rho * coreEnergy * tailEnergy := hRelative
+      _ = rho * (coreEnergy * tailEnergy) := by ring
+      _ ≤ coreEnergy * tailEnergy := hRhoProduct
+  have hGlue := twoBlockEnergy_nonnegative
+    coreEnergy tailEnergy cross hCore hTail hDet
+  dsimp [coreEnergy, tailEnergy, cross] at hGlue
+  simp only [map_smul, LinearMap.smul_apply, smul_eq_mul] at hGlue
+  nlinarith [hGlue]
+
+end RecursiveShell
+
 /-- Relative-energy boundary-Weyl error estimate.
 
 Unlike the Euclidean Schur estimate, this bound contains neither `‖eta‖²` nor

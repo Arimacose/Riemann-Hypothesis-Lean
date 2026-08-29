@@ -22,6 +22,7 @@ on:
       - 'research/riemann-cvs-numerics/audit_zero_mode_correction.py'
       - 'research/riemann-cvs-numerics/audit_log_tail_structure.py'
       - 'research/riemann-cvs-numerics/certify_relative_energy_coupling.py'
+      - 'research/riemann-cvs-numerics/certify_recursive_relative_energy_shells.py'
       - 'research/riemann-cvs-numerics/certify_boundary_weyl_cumulative.py'
       - 'research/riemann-cvs-numerics/certify_parity_gap.py'
       - 'research/riemann-cvs-notes/V23_BOUNDARY_WEYL_CUMULATIVE.md'
@@ -46,6 +47,7 @@ on:
       - 'research/riemann-cvs-numerics/audit_zero_mode_correction.py'
       - 'research/riemann-cvs-numerics/audit_log_tail_structure.py'
       - 'research/riemann-cvs-numerics/certify_relative_energy_coupling.py'
+      - 'research/riemann-cvs-numerics/certify_recursive_relative_energy_shells.py'
       - 'research/riemann-cvs-numerics/certify_boundary_weyl_cumulative.py'
       - 'research/riemann-cvs-numerics/certify_parity_gap.py'
       - 'research/riemann-cvs-notes/V23_BOUNDARY_WEYL_CUMULATIVE.md'
@@ -184,6 +186,9 @@ jobs:
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeSchurResponseNonnegative
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeSchurResponseBudget
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCoupling_of_formGrowth
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.twoBlockEnergy_nonnegative
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCoupling_of_scaledFormNonnegative
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCoupling_of_recursiveShell
           #print axioms RiemannCvs.BoundaryWeylSchurTail.boundaryWeylRelativeEnergyBudget
           #print axioms RiemannCvs.BoundaryWeylSchurTail.boundaryWeyl_mono_of_relativeEnergyCoupling
           #print axioms RiemannCvs.BoundaryWeylSchurTail.boundaryWeyl_pos_of_relativeEnergyCoupling
@@ -273,6 +278,21 @@ jobs:
             --q-upper 999/1000 \
             --json-out research/riemann-cvs-numerics/artifacts/v23_c13_N20_to_N120_relative_energy.json
 
+      - name: Certify the recursive V23 relative-energy shells
+        shell: bash
+        run: |
+          set -euo pipefail
+          python research/riemann-cvs-numerics/certify_recursive_relative_energy_shells.py \
+            --c 13 \
+            --low-cutoff 20 \
+            --base-cutoff 120 \
+            --stage 240:1/3 \
+            --stage 480:1/5 \
+            --prec 900 \
+            --shift-gain 1/1024 \
+            --q-upper 999/1000 \
+            --json-out research/riemann-cvs-numerics/artifacts/v23_c13_recursive_relative_energy_shells.json
+
       - name: Replay the corrected finite Arb parity certificate
         shell: bash
         run: |
@@ -327,6 +347,7 @@ jobs:
             research/riemann-cvs-numerics/artifacts/v23_v22_zero_mode_c13.json
             research/riemann-cvs-numerics/artifacts/v23_c13_log_tail_schur_budget.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N20_to_N120_relative_energy.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_recursive_relative_energy_shells.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N20_parity_gap.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N20_boundary_weyl_cumulative.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N12_boundary_weyl_compact_margin.json

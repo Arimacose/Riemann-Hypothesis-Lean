@@ -49,7 +49,9 @@ The new kernel-checked chain contains:
     `coupling(w,z)² <= q * lowForm(w,w) * highForm(z,z)` with `q < 1`, the weak
     block equations and low-form symmetry imply
     `<eta,u0> <= <eta,u>` directly, so finite positivity transfers without any
-    Euclidean boundary-mass or additive tail-margin loss;
+    Euclidean boundary-mass or additive tail-margin loss; a recursive
+    three-block theorem now preserves the same `q` when a new shell couples to
+    the already scaled core with coefficient `rho <= 1`;
 12. a normalized far-left estimate
     `|G_N(-t) - 1/t| <= moment/t²`, derived from total residue one and a first
     absolute spectral-moment budget;
@@ -62,9 +64,13 @@ individual residues whose prefixes nevertheless stay strictly positive.  It
 also certifies a `k = 11` Abel-prefix lower margin on `-100 ≤ x ≤ 0`.  The
 relative-energy companion certificate proves, by 2000-bit interval LDL, that
 the concrete nested split `N = 20` inside `N = 120` satisfies `q < 999/1000`
-in both parity sectors at `x = -1/1024`; positive diagonal growth extends that
-finite certificate to every `x ≤ -1/1024`.  This is evidence for the new
-all-cutoff target, not a replacement for its operator proof.  The
+in both parity sectors at `x = -1/1024`.  A second 900-bit recursive
+certificate attaches the shells `120 -> 240` with `rho < 1/3` and
+`240 -> 480` with `rho < 1/5`; every resulting even and odd LDL pivot is
+strictly positive.  Positive diagonal growth extends all three finite stages
+to every `x ≤ -1/1024`.  This is evidence for, and a scalable inductive
+interface toward, the all-cutoff target rather than a replacement for its
+operator proof.  The
 finite certificate is valid at the endpoint, but the real-valued
 finite-to-limit resolvent comparison must be applied on compact subintervals
 whose right endpoint is strictly negative: the certified lowest even pole
@@ -85,7 +91,8 @@ a dimension-independent coupling bound together with only logarithmic
 high-gap growth does not satisfy the synchronized Weyl Schur budget.  The next
 source estimate may instead prove the dimensionless relative-energy inequality
 with some `q < 1`: this removes the boundary vector entirely and is now the
-preferred target.  The finite `N = 120` certificate supplies a concrete
-`q = 999/1000` benchmark, while the remaining proof obligation is uniformity
-over every larger cutoff and passage to the closed tail operator.
+preferred target.  The finite recursive chain through `N = 480` preserves
+the concrete `q = 999/1000` benchmark.  The remaining proof obligation is a
+uniform analytic shell coefficient below one for every later dyadic stage,
+followed by passage from finite-support vectors to the closed tail operator.
 -/

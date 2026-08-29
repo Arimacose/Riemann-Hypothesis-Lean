@@ -493,6 +493,80 @@ limit stays strictly below one.  The finite result is materially stronger than
 the earlier raw `B_L` probe because it succeeds at `N=120` with a rigorous
 dimensionless constant while the Euclidean budget was structurally excluded.
 
+The finite certificate is now organized as a genuinely recursive shell chain.
+Let
+
+```text
+R_q(K) = [[q L, B_K], [B_K^T, H_K]]
+```
+
+be the scaled relative-energy form through cutoff `K`.  When a new shell is
+attached, write
+
+```text
+R_q(K') = [[R_q(K), C], [C^T, H_shell]].
+```
+
+`BoundaryWeylSchurTail.lean` now proves the exact gluing rule used by the
+certificate.  Positivity of
+
+```text
+[[rho * R_q(K), C], [C^T, H_shell]],    rho <= 1,
+```
+
+gives by the quadratic discriminant
+
+```text
+C(s,t)^2 <= rho * R_q(K)(s,s) * H_shell(t,t),
+```
+
+so the new shell preserves nonnegativity of the scaled form.  Applying the
+converse discriminant in the original low variable recovers the *same* `q`
+between the retained `N=20` block and the enlarged high block.  The checked
+Lean chain is
+
+```text
+twoBlockEnergy_nonnegative
+  -> relativeCoupling_of_scaledFormNonnegative
+  -> relativeCoupling_of_recursiveShell.
+```
+
+The tracked script `certify_recursive_relative_energy_shells.py` rigorously
+certifies two successive shells at 900 bits:
+
+```text
+base:       N = 20 -> 120, q = 999/1000,
+shell 1:    N = 120 -> 240, rho = 1/3,
+shell 2:    N = 240 -> 480, rho = 1/5.
+```
+
+Every interval-LDL pivot is strictly positive.  The local tracked replay gives
+
+```text
+even base:       121 / 121,
+  transcript 70fb7678981df48b29dc58d1e936715bf8564f6c823a960fd90cff7db35b4beb,
+even 120 -> 240: 241 / 241,
+  transcript d50a98b49b7b0cd209592b6e9c8d4eba5e6d7411cc29ccefe47ee89b95b8d2e4,
+even 240 -> 480: 481 / 481,
+  transcript afb671e55b48425ea672f695737ce7dc3bdf4ecfb7a9ef4c50e512e951d2e080,
+
+odd base:        120 / 120,
+  transcript e3461b61ab25a3e9b7b42950254d58610cc42ebd4f1e9d5b595a0fe8bdf6b8f1,
+odd 120 -> 240:  240 / 240,
+  transcript 622a213c72f30ef187a51256e0c3db318b5c0db3fae66173ed53b5e17c2ead34,
+odd 240 -> 480:  480 / 480,
+  transcript c29e397377a86cc6d1017b4bb8d405e44795354d60e0e7c6bc8fd8edcd8df359.
+```
+
+The JSON artifact SHA-256 is
+`A1A63FB1217E3A89F582B2D81A62E7B0212BED4F94C23BA001B4EC77C11B80AF`.
+Positive diagonal growth again propagates all stages from the endpoint
+`x=-1/1024` to every more negative parameter.  This does not yet quantify
+every later shell, but it moves the rigorous finite frontier from `N=120` to
+`N=480` and replaces the undifferentiated all-cutoff request by a precise
+uniform target: prove one coefficient `rho_*<1` for every later dyadic shell,
+then pass the finite-support inequality to the closed form domain.
+
 `BoundaryWeylFarLeft.lean` closes the algebraic part of the exterior
 normalization.  If all finite poles are nonnegative, the total residue is one,
 and
@@ -602,11 +676,12 @@ The following are still explicit proof obligations:
 
 1. instantiate the characteristic-polynomial identification for the concrete
    self-adjoint CvS blocks from a Lean-side ordered eigenvalue enumeration;
-2. upgrade the finite `N=20 -> 120`, `q<999/1000` relative-energy certificate
-   to the closed high complement for every larger cutoff, uniformly on compact
-   domains with right endpoint `< 0`; the older `a/gamma/epsilon` and restricted
-   `errorSpace` budgets remain fallback interfaces, while the relative form
-   inequality is now the preferred positivity route;
+2. prove a uniform `rho_*<1` bound for every recursive dyadic shell after the
+   rigorously checked chain `N=20 -> 120 -> 240 -> 480`, and pass the resulting
+   `q<999/1000` finite-support inequality to the closed high complement,
+   uniformly on compact domains with right endpoint `< 0`; the older
+   `a/gamma/epsilon` and restricted `errorSpace` budgets remain fallback
+   interfaces, while the relative form inequality is the preferred route;
 3. prove a cutoff-uniform upper bound for the absolute first spectral moment
    consumed by the new far-left theorem;
 4. keep the V22 central-mode functional distinct from the Sylvester boundary
@@ -617,12 +692,12 @@ The following are still explicit proof obligations:
    stationary-phase route.
 
 The cumulative certificate closes the finite `(13,20)` numerical hypothesis,
-and the new relative-energy certificate extends the checked Schur comparison
-to the concrete nested cutoff `20 -> 120` throughout `x <= -1/1024`.  The exact
+and the recursive relative-energy certificate extends the checked Schur
+comparison through `20 -> 120 -> 240 -> 480` throughout `x <= -1/1024`.  The exact
 finite displacement, characteristic-product, residue-normalization,
 determinant-ratio, quantitative Abel, energy-normalized monotonicity, and
-logical finite-to-limit adapters are now formalized.  The all-cutoff relative
-tail inequality, uniform moment bound, and limiting resolvent construction
+recursive shell adapters are now formalized.  The uniform later-shell bound,
+closed-form passage, uniform moment bound, and limiting resolvent construction
 remain the dominant proof boundary.
 
 ## 10. Local Lean replay
