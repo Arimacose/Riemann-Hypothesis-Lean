@@ -88,9 +88,17 @@ jobs:
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.prolateFixedCosineReference_sq
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.prolateParameter_le_half_of_invFrequency
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.prolateFixedPhaseActualMassLowerOfCanonicalReference
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.prolateFixedDunsterBesselScale_sq
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.sourcePhase_one_le_onTwoThree
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.prolateFixedSourceCosineReference_sq
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.dlmfJ0FirstRemainderBudget
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.besselJ0LeadingCosineErrorOfDlmfBudget
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.prolateFixedSourceActualMassLowerOfRawDunsterBesselErrors
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.prolateFixedSourceActualMassLowerOfDlmfDunsterErrors
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfProlateFixedPhaseApproximation
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfSeparatedDunsterBesselErrors
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfCanonicalReferenceAndSeparatedErrors
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfDlmfDunsterSource
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.massLowerOfReferenceAndQuarterError
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.exteriorEnvelopeLogMomentBound
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfSechEnvelope

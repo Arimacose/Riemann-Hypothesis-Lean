@@ -1994,6 +1994,569 @@ theorem prolateFixedPhaseActualMassLowerOfCanonicalReference
       a c offset amplitude x haNonneg haUpper hAmplitudeNonneg hx)
     hDunsterStep hBesselStep hDunsterErrorPointwise hBesselErrorPointwise
 
+/-!
+### Dunster J₀ source normalization and explicit DLMF remainder budget
+-/
+
+/-- Dunster's order-zero fourth-root prefactor after substituting
+`η = sourcePhase²` into (3.5). -/
+noncomputable def prolateFixedDunsterPrefactor
+    (sourcePhase : ℝ → ℝ) (a x : ℝ) : ℝ :=
+  sqrt (sourcePhase x) /
+    sqrt (sqrt (prolateFixedWeightRadicand a x))
+
+/-- Leading real-argument `J₀` scale `sqrt (2 / (π z))` at
+`z = c * phase`. -/
+noncomputable def besselJ0LeadingScale (c phase : ℝ) : ℝ :=
+  sqrt (2 / (π * c * phase))
+
+/-- Common squared radial amplitude left after cancelling the source phase
+between the Dunster prefactor and the leading Bessel scale. -/
+noncomputable def prolateFixedDunsterAmplitude (normalization c : ℝ) : ℝ :=
+  normalization ^ 2 * (2 / (π * c))
+
+lemma prolateFixedDunsterAmplitude_nonneg
+    (normalization c : ℝ) (hcPos : 0 < c) :
+    0 ≤ prolateFixedDunsterAmplitude normalization c := by
+  unfold prolateFixedDunsterAmplitude
+  exact mul_nonneg (sq_nonneg _) (div_nonneg (by norm_num)
+    (mul_nonneg Real.pi_pos.le hcPos.le))
+
+/-- Exact algebraic cancellation of the source phase in the squared leading
+Dunster--Bessel scale. -/
+lemma prolateFixedDunsterBesselScale_sq
+    (sourcePhase : ℝ → ℝ)
+    (a c normalization x : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2)
+    (hcPos : 0 < c)
+    (hPhasePos : 0 < sourcePhase x)
+    (hxLower : 2 ≤ x)
+    (hxUpper : x ≤ 3) :
+    (normalization * prolateFixedDunsterPrefactor sourcePhase a x *
+        besselJ0LeadingScale c (sourcePhase x)) ^ 2 =
+      prolateFixedDunsterAmplitude normalization c *
+        prolateFixedWeight a x := by
+  have hRadicand := prolateFixedWeightRadicandBounds
+    a x haNonneg haUpper hxLower hxUpper
+  have hRadicandPos : 0 < prolateFixedWeightRadicand a x := by
+    linarith [hRadicand.1]
+  have hSqrtRadicandPos : 0 < sqrt (prolateFixedWeightRadicand a x) :=
+    sqrt_pos.2 hRadicandPos
+  have hFourthRootPos :
+      0 < sqrt (sqrt (prolateFixedWeightRadicand a x)) :=
+    sqrt_pos.2 hSqrtRadicandPos
+  have hScaleDenomPos : 0 < π * c * sourcePhase x :=
+    mul_pos (mul_pos Real.pi_pos hcPos) hPhasePos
+  have hScaleQuotNonneg : 0 ≤ 2 / (π * c * sourcePhase x) :=
+    div_nonneg (by norm_num) hScaleDenomPos.le
+  unfold prolateFixedDunsterPrefactor besselJ0LeadingScale
+    prolateFixedDunsterAmplitude prolateFixedWeight
+  rw [mul_pow, mul_pow, div_pow,
+    sq_sqrt hPhasePos.le,
+    sq_sqrt (sqrt_nonneg (prolateFixedWeightRadicand a x)),
+    sq_sqrt hScaleQuotNonneg]
+  field_simp [ne_of_gt hPhasePos, ne_of_gt hcPos, ne_of_gt Real.pi_pos,
+    ne_of_gt hSqrtRadicandPos]
+
+/-- The source-shaped order-zero Bessel intermediate in Dunster (3.5). -/
+noncomputable def prolateFixedBesselIntermediate
+    (j0 sourcePhase : ℝ → ℝ)
+    (a c normalization x : ℝ) : ℝ :=
+  normalization * prolateFixedDunsterPrefactor sourcePhase a x *
+    j0 (c * sourcePhase x)
+
+/-- Leading source cosine before translating the source phase to the internal
+primitive based at `2`. -/
+noncomputable def prolateFixedSourceCosineReference
+    (sourcePhase : ℝ → ℝ)
+    (a c normalization x : ℝ) : ℝ :=
+  normalization * prolateFixedDunsterPrefactor sourcePhase a x *
+    besselJ0LeadingScale c (sourcePhase x) *
+    cos (c * sourcePhase x - π / 4)
+
+/-- The squared source cosine has exactly the canonical fixed-interval weight,
+amplitude, and phase-base offset. -/
+lemma prolateFixedSourceCosineReference_sq
+    (sourcePhase : ℝ → ℝ)
+    (a c normalization x : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2)
+    (hcPos : 0 < c)
+    (hPhasePos : 0 < sourcePhase x)
+    (hSourceDeriv :
+      ∀ y ∈ Icc (2 : ℝ) 3,
+        HasDerivAt sourcePhase (prolateFixedPhaseSlope a y) y)
+    (hx : x ∈ uIcc (2 : ℝ) 3) :
+    prolateFixedSourceCosineReference sourcePhase a c normalization x ^ 2 =
+      prolateFixedDunsterAmplitude normalization c *
+        (prolateFixedWeight a x *
+          cos (c * prolateFixedPhase a x +
+            (c * sourcePhase 2 - π / 4)) ^ 2) := by
+  have hx' : x ∈ Icc (2 : ℝ) 3 := by
+    simpa [uIcc_of_le (by norm_num : (2 : ℝ) ≤ 3)] using hx
+  have hScale := prolateFixedDunsterBesselScale_sq
+    sourcePhase a c normalization x haNonneg haUpper hcPos hPhasePos
+    hx'.1 hx'.2
+  have hCosine := sourcePhaseCosine_eq_prolateFixedPhaseCosine
+    sourcePhase a c (-π / 4) x hSourceDeriv hx'
+  unfold prolateFixedSourceCosineReference
+  rw [show c * sourcePhase x - π / 4 =
+    c * sourcePhase x + (-π / 4) by ring, hCosine]
+  calc
+    (normalization * prolateFixedDunsterPrefactor sourcePhase a x *
+      besselJ0LeadingScale c (sourcePhase x) *
+      cos (c * prolateFixedPhase a x +
+        (c * sourcePhase 2 + -π / 4))) ^ 2 =
+        (normalization * prolateFixedDunsterPrefactor sourcePhase a x *
+          besselJ0LeadingScale c (sourcePhase x)) ^ 2 *
+          cos (c * prolateFixedPhase a x +
+            (c * sourcePhase 2 - π / 4)) ^ 2 := by
+      ring_nf
+    _ = prolateFixedDunsterAmplitude normalization c *
+        (prolateFixedWeight a x *
+          cos (c * prolateFixedPhase a x +
+            (c * sourcePhase 2 - π / 4)) ^ 2) := by
+      rw [hScale]
+      ring
+
+/-- Multiplying a raw relative `J₀` error by Dunster's prefactor produces the
+weighted pointwise error expected by the separated-error mass theorem. -/
+lemma prolateFixedBesselErrorPointwiseOfRaw
+    (j0 sourcePhase : ℝ → ℝ)
+    (a c normalization besselK x : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2)
+    (hcPos : 0 < c)
+    (hPhasePos : 0 < sourcePhase x)
+    (hxLower : 2 ≤ x)
+    (hxUpper : x ≤ 3)
+    (hRawError :
+      (besselJ0LeadingScale c (sourcePhase x) *
+          cos (c * sourcePhase x - π / 4) -
+        j0 (c * sourcePhase x)) ^ 2 ≤
+        (besselK ^ 2 / c ^ 2) *
+          besselJ0LeadingScale c (sourcePhase x) ^ 2) :
+    (prolateFixedSourceCosineReference sourcePhase a c normalization x -
+      prolateFixedBesselIntermediate j0 sourcePhase a c normalization x) ^ 2 ≤
+      (besselK ^ 2 / c ^ 2) *
+        prolateFixedDunsterAmplitude normalization c *
+          prolateFixedWeight a x := by
+  have hScaled := mul_le_mul_of_nonneg_left hRawError
+    (sq_nonneg (normalization *
+      prolateFixedDunsterPrefactor sourcePhase a x))
+  have hScale := prolateFixedDunsterBesselScale_sq
+    sourcePhase a c normalization x haNonneg haUpper hcPos hPhasePos
+    hxLower hxUpper
+  unfold prolateFixedSourceCosineReference
+    prolateFixedBesselIntermediate
+  calc
+    (normalization * prolateFixedDunsterPrefactor sourcePhase a x *
+        besselJ0LeadingScale c (sourcePhase x) *
+        cos (c * sourcePhase x - π / 4) -
+      normalization * prolateFixedDunsterPrefactor sourcePhase a x *
+        j0 (c * sourcePhase x)) ^ 2 =
+        (normalization * prolateFixedDunsterPrefactor sourcePhase a x) ^ 2 *
+          (besselJ0LeadingScale c (sourcePhase x) *
+              cos (c * sourcePhase x - π / 4) -
+            j0 (c * sourcePhase x)) ^ 2 := by ring
+    _ ≤ (normalization * prolateFixedDunsterPrefactor sourcePhase a x) ^ 2 *
+        ((besselK ^ 2 / c ^ 2) *
+          besselJ0LeadingScale c (sourcePhase x) ^ 2) := hScaled
+    _ = (besselK ^ 2 / c ^ 2) *
+        (normalization * prolateFixedDunsterPrefactor sourcePhase a x *
+          besselJ0LeadingScale c (sourcePhase x)) ^ 2 := by ring
+    _ = (besselK ^ 2 / c ^ 2) *
+        prolateFixedDunsterAmplitude normalization c *
+          prolateFixedWeight a x := by
+      rw [hScale]
+      ring
+
+/-- The internal phase primitive is nonnegative to the right of its base point. -/
+lemma prolateFixedPhase_nonnegOnTwoThree
+    (a x : ℝ)
+    (hxLower : 2 ≤ x) :
+    0 ≤ prolateFixedPhase a x := by
+  unfold prolateFixedPhase
+  exact intervalIntegral.integral_nonneg hxLower (fun y _ => by
+    exact sqrt_nonneg ((y ^ 2 - a) / (y ^ 2 - 1)))
+
+/-- A source phase with base at least one remains at least one on `[2,3]`. -/
+lemma sourcePhase_one_le_onTwoThree
+    (sourcePhase : ℝ → ℝ) (a x : ℝ)
+    (hSourceBase : 1 ≤ sourcePhase 2)
+    (hSourceDeriv :
+      ∀ y ∈ Icc (2 : ℝ) 3,
+        HasDerivAt sourcePhase (prolateFixedPhaseSlope a y) y)
+    (hxLower : 2 ≤ x)
+    (hxUpper : x ≤ 3) :
+    1 ≤ sourcePhase x := by
+  rw [sourcePhase_eq_prolateFixedPhase_add_base sourcePhase a
+    hSourceDeriv x ⟨hxLower, hxUpper⟩]
+  linarith [prolateFixedPhase_nonnegOnTwoThree a x hxLower]
+
+lemma prolateFixedDunsterPrefactorContinuousOnTwoThree
+    (sourcePhase : ℝ → ℝ) (a : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2)
+    (hSourceDeriv :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        HasDerivAt sourcePhase (prolateFixedPhaseSlope a x) x) :
+    ContinuousOn (prolateFixedDunsterPrefactor sourcePhase a)
+      (uIcc (2 : ℝ) 3) := by
+  have hSourceContinuous :
+      ContinuousOn sourcePhase (uIcc (2 : ℝ) 3) := by
+    intro x hx
+    have hx' : x ∈ Icc (2 : ℝ) 3 := by
+      simpa [uIcc_of_le (by norm_num : (2 : ℝ) ≤ 3)] using hx
+    exact (hSourceDeriv x hx').continuousAt.continuousWithinAt
+  have hRadicandContinuous :
+      Continuous (prolateFixedWeightRadicand a) := by
+    unfold prolateFixedWeightRadicand
+    fun_prop
+  have hFourthRootContinuous :
+      Continuous (fun x => sqrt (sqrt (prolateFixedWeightRadicand a x))) :=
+    continuous_sqrt.comp (continuous_sqrt.comp hRadicandContinuous)
+  unfold prolateFixedDunsterPrefactor
+  apply (continuous_sqrt.comp_continuousOn hSourceContinuous).div
+    hFourthRootContinuous.continuousOn
+  intro x hx
+  have hx' : x ∈ Icc (2 : ℝ) 3 := by
+    simpa [uIcc_of_le (by norm_num : (2 : ℝ) ≤ 3)] using hx
+  have hRadicand := prolateFixedWeightRadicandBounds
+    a x haNonneg haUpper hx'.1 hx'.2
+  exact ne_of_gt (sqrt_pos.2 (sqrt_pos.2 (by linarith [hRadicand.1])))
+
+lemma sourcePhaseContinuousOnTwoThree
+    (sourcePhase : ℝ → ℝ) (a : ℝ)
+    (hSourceDeriv :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        HasDerivAt sourcePhase (prolateFixedPhaseSlope a x) x) :
+    ContinuousOn sourcePhase (uIcc (2 : ℝ) 3) := by
+  intro x hx
+  have hx' : x ∈ Icc (2 : ℝ) 3 := by
+    simpa [uIcc_of_le (by norm_num : (2 : ℝ) ≤ 3)] using hx
+  exact (hSourceDeriv x hx').continuousAt.continuousWithinAt
+
+lemma besselJ0LeadingScaleContinuousOnTwoThree
+    (sourcePhase : ℝ → ℝ) (a c : ℝ)
+    (hcPos : 0 < c)
+    (hSourceBase : 1 ≤ sourcePhase 2)
+    (hSourceDeriv :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        HasDerivAt sourcePhase (prolateFixedPhaseSlope a x) x) :
+    ContinuousOn (fun x => besselJ0LeadingScale c (sourcePhase x))
+      (uIcc (2 : ℝ) 3) := by
+  have hSourceContinuous :=
+    sourcePhaseContinuousOnTwoThree sourcePhase a hSourceDeriv
+  have hDenominatorContinuous :
+      ContinuousOn (fun x => π * c * sourcePhase x) (uIcc (2 : ℝ) 3) :=
+    continuousOn_const.mul hSourceContinuous
+  have hQuotientContinuous :
+      ContinuousOn (fun x => 2 / (π * c * sourcePhase x))
+        (uIcc (2 : ℝ) 3) := by
+    apply continuousOn_const.div hDenominatorContinuous
+    intro x hx
+    have hx' : x ∈ Icc (2 : ℝ) 3 := by
+      simpa [uIcc_of_le (by norm_num : (2 : ℝ) ≤ 3)] using hx
+    have hPhase := sourcePhase_one_le_onTwoThree sourcePhase a x
+      hSourceBase hSourceDeriv hx'.1 hx'.2
+    exact ne_of_gt (mul_pos (mul_pos Real.pi_pos hcPos) (by linarith))
+  unfold besselJ0LeadingScale
+  exact continuous_sqrt.comp_continuousOn hQuotientContinuous
+
+lemma prolateFixedBesselIntermediateContinuousOnTwoThree
+    (j0 sourcePhase : ℝ → ℝ)
+    (a c normalization : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2)
+    (hJ0Continuous : Continuous j0)
+    (hSourceDeriv :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        HasDerivAt sourcePhase (prolateFixedPhaseSlope a x) x) :
+    ContinuousOn
+      (prolateFixedBesselIntermediate j0 sourcePhase a c normalization)
+      (uIcc (2 : ℝ) 3) := by
+  have hSourceContinuous :=
+    sourcePhaseContinuousOnTwoThree sourcePhase a hSourceDeriv
+  have hPrefactor := prolateFixedDunsterPrefactorContinuousOnTwoThree
+    sourcePhase a haNonneg haUpper hSourceDeriv
+  have hArgument :
+      ContinuousOn (fun x => c * sourcePhase x) (uIcc (2 : ℝ) 3) :=
+    continuousOn_const.mul hSourceContinuous
+  unfold prolateFixedBesselIntermediate
+  exact (continuousOn_const.mul hPrefactor).mul
+    (hJ0Continuous.comp_continuousOn hArgument)
+
+lemma prolateFixedSourceCosineReferenceContinuousOnTwoThree
+    (sourcePhase : ℝ → ℝ)
+    (a c normalization : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2)
+    (hcPos : 0 < c)
+    (hSourceBase : 1 ≤ sourcePhase 2)
+    (hSourceDeriv :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        HasDerivAt sourcePhase (prolateFixedPhaseSlope a x) x) :
+    ContinuousOn
+      (prolateFixedSourceCosineReference sourcePhase a c normalization)
+      (uIcc (2 : ℝ) 3) := by
+  have hSourceContinuous :=
+    sourcePhaseContinuousOnTwoThree sourcePhase a hSourceDeriv
+  have hPrefactor := prolateFixedDunsterPrefactorContinuousOnTwoThree
+    sourcePhase a haNonneg haUpper hSourceDeriv
+  have hScale := besselJ0LeadingScaleContinuousOnTwoThree
+    sourcePhase a c hcPos hSourceBase hSourceDeriv
+  have hOscillation :
+      ContinuousOn (fun x => cos (c * sourcePhase x - π / 4))
+        (uIcc (2 : ℝ) 3) :=
+    Real.continuous_cos.comp_continuousOn
+      ((continuousOn_const.mul hSourceContinuous).sub continuousOn_const)
+  unfold prolateFixedSourceCosineReference
+  exact (((continuousOn_const.mul hPrefactor).mul hScale).mul hOscillation)
+
+/-- Difference from the source Bessel intermediate to the actual radial mode. -/
+noncomputable def prolateFixedDunsterError
+    (actual j0 sourcePhase : ℝ → ℝ)
+    (a c normalization x : ℝ) : ℝ :=
+  prolateFixedBesselIntermediate j0 sourcePhase a c normalization x -
+    actual x
+
+/-- Difference from the source cosine reference to the Bessel intermediate. -/
+noncomputable def prolateFixedBesselError
+    (j0 sourcePhase : ℝ → ℝ)
+    (a c normalization x : ℝ) : ℝ :=
+  prolateFixedSourceCosineReference sourcePhase a c normalization x -
+    prolateFixedBesselIntermediate j0 sourcePhase a c normalization x
+
+/-- Source-level fixed-interval mass theorem.  It constructs the intermediate,
+both errors, their decompositions, and all continuity/integrability obligations
+from the actual mode, a continuous order-zero Bessel function, and raw
+pointwise Dunster/Bessel estimates. -/
+theorem prolateFixedSourceActualMassLowerOfRawDunsterBesselErrors
+    (actual j0 sourcePhase : ℝ → ℝ)
+    (a c normalization dunsterK besselK : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2)
+    (hc : 33 ≤ c)
+    (hSourceBase : 1 ≤ sourcePhase 2)
+    (hSourceDeriv :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        HasDerivAt sourcePhase (prolateFixedPhaseSlope a x) x)
+    (hJ0Continuous : Continuous j0)
+    (hActualContinuous : ContinuousOn actual (uIcc (2 : ℝ) 3))
+    (hFrequencyThreshold :
+      96 * (dunsterK ^ 2 + besselK ^ 2) ≤ c ^ 2)
+    (hDunsterErrorPointwise :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        (prolateFixedBesselIntermediate
+            j0 sourcePhase a c normalization x - actual x) ^ 2 ≤
+          (dunsterK ^ 2 / c ^ 2) *
+            prolateFixedDunsterAmplitude normalization c *
+              prolateFixedWeight a x)
+    (hRawBesselErrorPointwise :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        (besselJ0LeadingScale c (sourcePhase x) *
+            cos (c * sourcePhase x - π / 4) -
+          j0 (c * sourcePhase x)) ^ 2 ≤
+            (besselK ^ 2 / c ^ 2) *
+              besselJ0LeadingScale c (sourcePhase x) ^ 2) :
+    (1 / 144 : ℝ) * prolateFixedDunsterAmplitude normalization c ≤
+      ∫ x in (2 : ℝ)..3, actual x ^ 2 := by
+  have hcPos : 0 < c := by linarith
+  let intermediate : ℝ → ℝ :=
+    prolateFixedBesselIntermediate j0 sourcePhase a c normalization
+  let reference : ℝ → ℝ :=
+    prolateFixedSourceCosineReference sourcePhase a c normalization
+  let dunsterError : ℝ → ℝ :=
+    prolateFixedDunsterError actual j0 sourcePhase a c normalization
+  let besselError : ℝ → ℝ :=
+    prolateFixedBesselError j0 sourcePhase a c normalization
+  have hAmplitudeNonneg := prolateFixedDunsterAmplitude_nonneg
+    normalization c hcPos
+  have hIntermediateContinuous :
+      ContinuousOn intermediate (uIcc (2 : ℝ) 3) := by
+    dsimp [intermediate]
+    exact prolateFixedBesselIntermediateContinuousOnTwoThree
+      j0 sourcePhase a c normalization haNonneg haUpper
+      hJ0Continuous hSourceDeriv
+  have hReferenceContinuous :
+      ContinuousOn reference (uIcc (2 : ℝ) 3) := by
+    dsimp [reference]
+    exact prolateFixedSourceCosineReferenceContinuousOnTwoThree
+      sourcePhase a c normalization haNonneg haUpper hcPos
+      hSourceBase hSourceDeriv
+  have hDunsterErrorContinuous :
+      ContinuousOn dunsterError (uIcc (2 : ℝ) 3) := by
+    dsimp [dunsterError, prolateFixedDunsterError]
+    exact hIntermediateContinuous.sub hActualContinuous
+  have hBesselErrorContinuous :
+      ContinuousOn besselError (uIcc (2 : ℝ) 3) := by
+    dsimp [besselError, prolateFixedBesselError]
+    exact hReferenceContinuous.sub hIntermediateContinuous
+  apply prolateFixedPhaseActualMassLowerOfSeparatedErrors
+    actual intermediate reference dunsterError besselError
+    a c (c * sourcePhase 2 - π / 4)
+    (prolateFixedDunsterAmplitude normalization c)
+    dunsterK besselK haNonneg haUpper hc hAmplitudeNonneg
+    hFrequencyThreshold
+    ((hActualContinuous.pow 2).intervalIntegrable)
+    ((hReferenceContinuous.pow 2).intervalIntegrable)
+    hDunsterErrorContinuous hBesselErrorContinuous
+  · intro x hx
+    dsimp [reference]
+    have hx' : x ∈ Icc (2 : ℝ) 3 := by
+      simpa [uIcc_of_le (by norm_num : (2 : ℝ) ≤ 3)] using hx
+    have hPhasePos : 0 < sourcePhase x := by
+      linarith [sourcePhase_one_le_onTwoThree sourcePhase a x
+        hSourceBase hSourceDeriv hx'.1 hx'.2]
+    exact prolateFixedSourceCosineReference_sq
+      sourcePhase a c normalization x haNonneg haUpper hcPos hPhasePos
+      hSourceDeriv hx
+  · intro x _
+    dsimp [intermediate, dunsterError, prolateFixedDunsterError]
+    ring
+  · intro x _
+    dsimp [reference, intermediate, besselError,
+      prolateFixedBesselError]
+    ring
+  · intro x hx
+    dsimp [dunsterError, prolateFixedDunsterError]
+    exact hDunsterErrorPointwise x hx
+  · intro x hx
+    dsimp [besselError, prolateFixedBesselError]
+    have hPhasePos : 0 < sourcePhase x := by
+      linarith [sourcePhase_one_le_onTwoThree sourcePhase a x
+        hSourceBase hSourceDeriv hx.1 hx.2]
+    exact prolateFixedBesselErrorPointwiseOfRaw
+      j0 sourcePhase a c normalization besselK x haNonneg haUpper
+      hcPos hPhasePos hx.1 hx.2 (hRawBesselErrorPointwise x hx)
+
+/-- The first omitted DLMF `J₀` coefficients fit one explicit `1 / z`
+budget once `z ≥ 1`: `1/8 + 9/128 + 75/1024 = 275/1024`. -/
+lemma dlmfJ0FirstRemainderBudget
+    (z : ℝ) (hz : 1 ≤ z) :
+    1 / (8 * z) + 9 / (128 * z ^ 2) + 75 / (1024 * z ^ 3) ≤
+      (275 / 1024 : ℝ) / z := by
+  have hzPos : 0 < z := by linarith
+  have hzSq : z ≤ z ^ 2 := by nlinarith
+  have hOneSq : 1 ≤ z ^ 2 := by nlinarith
+  have hMultiplier : 0 < (1024 : ℝ) * z ^ 3 :=
+    mul_pos (by norm_num) (pow_pos hzPos 3)
+  refine le_of_mul_le_mul_left ?_ hMultiplier
+  field_simp [ne_of_gt hzPos]
+  nlinarith
+
+/-- Converts the first DLMF remainder budget into the exact squared relative
+error interface used by the fixed-interval mass theorem. -/
+lemma besselJ0LeadingCosineErrorOfDlmfBudget
+    (j0Value c phase : ℝ)
+    (hcOne : 1 ≤ c)
+    (hPhaseOne : 1 ≤ phase)
+    (hDlmfAbsoluteError :
+      |besselJ0LeadingScale c phase *
+          cos (c * phase - π / 4) - j0Value| ≤
+        besselJ0LeadingScale c phase *
+          (1 / (8 * (c * phase)) +
+            9 / (128 * (c * phase) ^ 2) +
+            75 / (1024 * (c * phase) ^ 3))) :
+    (besselJ0LeadingScale c phase *
+        cos (c * phase - π / 4) - j0Value) ^ 2 ≤
+      (((275 / 1024 : ℝ) ^ 2) / c ^ 2) *
+        besselJ0LeadingScale c phase ^ 2 := by
+  have hcPos : 0 < c := by linarith
+  have hPhasePos : 0 < phase := by linarith
+  have hzOne : 1 ≤ c * phase := by
+    nlinarith [mul_nonneg (sub_nonneg.mpr hcOne) (sub_nonneg.mpr hPhaseOne)]
+  have hzPos : 0 < c * phase := by linarith
+  have hScaleNonneg : 0 ≤ besselJ0LeadingScale c phase := by
+    unfold besselJ0LeadingScale
+    exact sqrt_nonneg _
+  have hCoefficientNonneg : 0 ≤ (275 / 1024 : ℝ) := by norm_num
+  have hCoefficientDiv :
+      (275 / 1024 : ℝ) / (c * phase) ≤
+        (275 / 1024 : ℝ) / c := by
+    apply (div_le_div_iff₀ hzPos hcPos).2
+    have hcLe : c ≤ c * phase := by
+      nlinarith [mul_nonneg hcPos.le (sub_nonneg.mpr hPhaseOne)]
+    exact mul_le_mul_of_nonneg_left hcLe hCoefficientNonneg
+  have hAbsoluteError :
+      |besselJ0LeadingScale c phase *
+          cos (c * phase - π / 4) - j0Value| ≤
+        besselJ0LeadingScale c phase *
+          ((275 / 1024 : ℝ) / c) :=
+    hDlmfAbsoluteError.trans <|
+      (mul_le_mul_of_nonneg_left
+        ((dlmfJ0FirstRemainderBudget (c * phase) hzOne).trans
+          hCoefficientDiv)
+        hScaleNonneg)
+  have hRightNonneg :
+      0 ≤ besselJ0LeadingScale c phase *
+        ((275 / 1024 : ℝ) / c) :=
+    mul_nonneg hScaleNonneg (div_nonneg hCoefficientNonneg hcPos.le)
+  have hSquared :
+      |besselJ0LeadingScale c phase *
+          cos (c * phase - π / 4) - j0Value| ^ 2 ≤
+        (besselJ0LeadingScale c phase *
+          ((275 / 1024 : ℝ) / c)) ^ 2 := by
+    nlinarith [abs_nonneg
+      (besselJ0LeadingScale c phase *
+        cos (c * phase - π / 4) - j0Value)]
+  rw [sq_abs] at hSquared
+  calc
+    (besselJ0LeadingScale c phase *
+        cos (c * phase - π / 4) - j0Value) ^ 2 ≤
+        (besselJ0LeadingScale c phase *
+          ((275 / 1024 : ℝ) / c)) ^ 2 := hSquared
+    _ = (((275 / 1024 : ℝ) ^ 2) / c ^ 2) *
+        besselJ0LeadingScale c phase ^ 2 := by ring
+
+/-- Fixed-interval source theorem with the Bessel constant discharged from the
+first DLMF remainder coefficients.  Only the Dunster constant remains symbolic. -/
+theorem prolateFixedSourceActualMassLowerOfDlmfDunsterErrors
+    (actual j0 sourcePhase : ℝ → ℝ)
+    (a c normalization dunsterK : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2)
+    (hc : 33 ≤ c)
+    (hSourceBase : 1 ≤ sourcePhase 2)
+    (hSourceDeriv :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        HasDerivAt sourcePhase (prolateFixedPhaseSlope a x) x)
+    (hJ0Continuous : Continuous j0)
+    (hActualContinuous : ContinuousOn actual (uIcc (2 : ℝ) 3))
+    (hFrequencyThreshold :
+      96 * (dunsterK ^ 2 + (275 / 1024 : ℝ) ^ 2) ≤ c ^ 2)
+    (hDunsterErrorPointwise :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        (prolateFixedBesselIntermediate
+            j0 sourcePhase a c normalization x - actual x) ^ 2 ≤
+          (dunsterK ^ 2 / c ^ 2) *
+            prolateFixedDunsterAmplitude normalization c *
+              prolateFixedWeight a x)
+    (hDlmfAbsoluteErrorPointwise :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        |besselJ0LeadingScale c (sourcePhase x) *
+            cos (c * sourcePhase x - π / 4) -
+          j0 (c * sourcePhase x)| ≤
+            besselJ0LeadingScale c (sourcePhase x) *
+              (1 / (8 * (c * sourcePhase x)) +
+                9 / (128 * (c * sourcePhase x) ^ 2) +
+                75 / (1024 * (c * sourcePhase x) ^ 3))) :
+    (1 / 144 : ℝ) * prolateFixedDunsterAmplitude normalization c ≤
+      ∫ x in (2 : ℝ)..3, actual x ^ 2 := by
+  apply prolateFixedSourceActualMassLowerOfRawDunsterBesselErrors
+    actual j0 sourcePhase a c normalization dunsterK (275 / 1024 : ℝ)
+    haNonneg haUpper hc hSourceBase hSourceDeriv hJ0Continuous
+    hActualContinuous hFrequencyThreshold hDunsterErrorPointwise
+  intro x hx
+  exact besselJ0LeadingCosineErrorOfDlmfBudget
+    (j0 (c * sourcePhase x)) c (sourcePhase x) (by linarith)
+    (sourcePhase_one_le_onTwoThree sourcePhase a x
+      hSourceBase hSourceDeriv hx.1 hx.2)
+    (hDlmfAbsoluteErrorPointwise x hx)
+
+
 end ProlateFixedIntervalWeight
 
 section HyperbolicEnvelope
@@ -2498,6 +3061,84 @@ theorem dilationLogMomentBoundsOfCanonicalReferenceAndSeparatedErrors
     hDunsterStep hBesselStep hDunsterErrorPointwise hBesselErrorPointwise
     hFixedMassToExterior hDensityMeasurable hDensityNonneg hEnvelope
     hResidual hIdentity
+
+/-- Conductor-ready composition of the concrete Dunster `J₀` source adapter,
+the explicit DLMF coefficient budget, and the exterior `sech` envelope. -/
+theorem dilationLogMomentBoundsOfDlmfDunsterSource
+    (density actual j0 sourcePhase : ℝ → ℝ)
+    (a c normalization parameterK dunsterK
+      physical residual mass logScale upper : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haInvFrequency : a ≤ parameterK / c)
+    (hParameterThreshold : 2 * parameterK ≤ c)
+    (hc : 33 ≤ c)
+    (hSourceBase : 1 ≤ sourcePhase 2)
+    (hSourceDeriv :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        HasDerivAt sourcePhase (prolateFixedPhaseSlope a x) x)
+    (hJ0Continuous : Continuous j0)
+    (hActualContinuous : ContinuousOn actual (uIcc (2 : ℝ) 3))
+    (hFrequencyThreshold :
+      96 * (dunsterK ^ 2 + (275 / 1024 : ℝ) ^ 2) ≤ c ^ 2)
+    (hMassPos : 0 < mass)
+    (hUpperNonneg : 0 ≤ upper)
+    (hDunsterErrorPointwise :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        (prolateFixedBesselIntermediate
+            j0 sourcePhase a c normalization x - actual x) ^ 2 ≤
+          (dunsterK ^ 2 / c ^ 2) *
+            prolateFixedDunsterAmplitude normalization c *
+              prolateFixedWeight a x)
+    (hDlmfAbsoluteErrorPointwise :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        |besselJ0LeadingScale c (sourcePhase x) *
+            cos (c * sourcePhase x - π / 4) -
+          j0 (c * sourcePhase x)| ≤
+            besselJ0LeadingScale c (sourcePhase x) *
+              (1 / (8 * (c * sourcePhase x)) +
+                9 / (128 * (c * sourcePhase x) ^ 2) +
+                75 / (1024 * (c * sourcePhase x) ^ 3)))
+    (hFixedMassToExterior :
+      (∫ x in (2 : ℝ)..3, actual x ^ 2) ≤ mass)
+    (hDensityMeasurable :
+      AEStronglyMeasurable density (volume.restrict (Ioi 0)))
+    (hDensityNonneg : ∀ u ∈ Ioi (0 : ℝ), 0 ≤ density u)
+    (hEnvelope :
+      ∀ u ∈ Ioi (0 : ℝ),
+        density u ≤
+          (upper * prolateFixedDunsterAmplitude normalization c) / cosh u)
+    (hResidual :
+      residual = ∫ u in Ioi 0, log (cosh u) * density u)
+    (hIdentity : physical = logScale * mass + residual) :
+    logScale * mass ≤ physical ∧
+      physical ≤ (logScale + 288 * upper) * mass := by
+  have hcPos : 0 < c := by linarith
+  have haUpper := prolateParameter_le_half_of_invFrequency
+    a c parameterK hcPos haInvFrequency hParameterThreshold
+  have hAmplitudeNonneg := prolateFixedDunsterAmplitude_nonneg
+    normalization c hcPos
+  have hFixedLower := prolateFixedSourceActualMassLowerOfDlmfDunsterErrors
+    actual j0 sourcePhase a c normalization dunsterK
+    haNonneg haUpper hc hSourceBase hSourceDeriv hJ0Continuous
+    hActualContinuous hFrequencyThreshold hDunsterErrorPointwise
+    hDlmfAbsoluteErrorPointwise
+  have hMassLower :
+      (1 / 144 : ℝ) * prolateFixedDunsterAmplitude normalization c ≤ mass :=
+    hFixedLower.trans hFixedMassToExterior
+  have hBounds := dilationLogMomentBoundsOfSechEnvelope
+    density physical residual mass
+    (prolateFixedDunsterAmplitude normalization c)
+    logScale upper (1 / 144 : ℝ)
+    hMassPos hAmplitudeNonneg hUpperNonneg (by norm_num)
+    hDensityMeasurable hDensityNonneg hEnvelope hMassLower hResidual hIdentity
+  have hCoefficient : (2 * upper) / (1 / 144 : ℝ) = 288 * upper := by
+    norm_num [div_eq_mul_inv]
+    ring
+  constructor
+  · exact hBounds.1
+  · rw [hCoefficient] at hBounds
+    exact hBounds.2
+
 
 end HyperbolicEnvelope
 

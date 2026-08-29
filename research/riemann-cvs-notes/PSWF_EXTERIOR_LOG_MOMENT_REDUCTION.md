@@ -774,6 +774,70 @@ neither an abstract reference function, nor its square identity or
 integrability, nor a separately assumed \(a\le1/2\).  It derives all of them
 before invoking the separated-error mass theorem.
 
+The source normalization has now been pushed one layer further.  Lean defines
+the exact Dunster prefactor
+
+\[
+q_{a,\xi}(x)
+=\frac{\sqrt{\xi(x)}}
+       {\sqrt{\sqrt{(x^2-1)(x^2-a)}}},
+\]
+
+the leading Bessel scale
+
+\[
+b_c(\xi)=\sqrt{\frac{2}{\pi c\xi}},
+\]
+
+and the intermediate function
+
+\[
+g(x)=Nq_{a,\xi}(x)J_0(c\xi(x)).
+\]
+
+These are `prolateFixedDunsterPrefactor`, `besselJ0LeadingScale`, and
+`prolateFixedBesselIntermediate`.  The theorem
+`prolateFixedDunsterBesselScale_sq` verifies the exact cancellation
+
+\[
+\bigl(Nq_{a,\xi}(x)b_c(\xi(x))\bigr)^2
+=N^2\frac{2}{\pi c}\,w_a(x).
+\]
+
+Thus the repository amplitude is no longer a free adapter variable:
+`prolateFixedDunsterAmplitude N c = N^2(2/(\pi c))`.  The source cosine
+reference uses the literal Dunster phase \(c\xi(x)-\pi/4\), and
+`prolateFixedSourceCosineReference_sq` converts its square to the internal
+primitive with the exact offset \(c\xi(2)-\pi/4\).
+
+The source phase and regularity bookkeeping are closed too.  From
+\(\xi(2)\ge1\) and \(\xi'=p_a\), Lean proves \(\xi(x)\ge1\) on `[2,3]` and
+derives continuity of the prefactor, Bessel intermediate, source cosine
+reference, and the two difference errors.  Therefore
+`prolateFixedSourceActualMassLowerOfRawDunsterBesselErrors` takes the actual
+mode, a continuous `J0` function, the phase derivative, and the two raw
+pointwise estimates directly; it constructs every intermediate/error function
+and every integrability proof internally.
+
+The large-argument coefficient arithmetic is explicit rather than hidden in a
+symbolic \(K_B\).  For order zero the first relevant DLMF coefficients give
+
+\[
+\frac1{8z}+\frac9{128z^2}+\frac{75}{1024z^3}
+\le \frac{275}{1024z},\qquad z\ge1.
+\]
+
+This is `dlmfJ0FirstRemainderBudget`.  The theorem
+`besselJ0LeadingCosineErrorOfDlmfBudget` converts the corresponding absolute
+error into the squared source interface with the fixed constant
+\(K_B=275/1024\).  Consequently
+`prolateFixedSourceActualMassLowerOfDlmfDunsterErrors` leaves only \(K_D\)
+symbolic and uses the concrete threshold
+
+\[
+96\left(K_D^2+(275/1024)^2\right)\le c^2.
+\]
+
 The fixed-interval estimate is now composed with the exterior envelope as
 well.  If the `[2,3]` mass is bounded above by the positive exterior mass and
 the hyperbolic density satisfies the established `sech` envelope with
@@ -803,19 +867,24 @@ source expansion directly: actual-to-intermediate identity,
 intermediate-to-canonical-reference identity, and the two pointwise error
 bounds.
 
+The concrete wrapper `dilationLogMomentBoundsOfDlmfDunsterSource` now performs
+the same conductor composition directly from the Dunster-prefactor/J0 source
+data.  It derives \(a\le1/2\), fixes \(K_B=275/1024\), constructs both errors,
+proves their continuity, obtains the fixed-interval mass lower bound, and then
+applies the `sech` envelope to return the same
+\((\log R+288\,\mathrm{upper})M\) upper bound.
+
 The remaining source-specific fixed-interval obligation is now narrower:
-state Dunster's uniform PSWF-to-Bessel error and the Bessel-to-cosine error with
-the repository's normalization, identify the normalized actual and
-intermediate functions with the canonical reference, supply a concrete
-\(a\le K_a/c\) bound and its eventual threshold, verify the source-phase
-derivative, and supply the two pointwise \(K_D/c\) and \(K_B/c\) hypotheses.
-The explicit phase primitive, leading weight and mass, every required
-derivative and variation constant, nonlinear integration by parts, the leading
-\(1/36\) lower bound, phase-offset identification, canonical reference,
-inverse-frequency parameter reduction, complete one-error and separated
-two-error absorption to \(\mathcal A/144\), defect normalization, and
-logarithmic-moment algebra are already in Lean, including their final
-common-scale composition.
+formalize or import the order-zero Bessel function and instantiate the stated
+DLMF real-argument remainder bound; state Dunster's uniform PSWF-to-Bessel
+error in the exact normalized prefactor above; and supply a concrete
+\(a\le K_a/c\) estimate, its eventual threshold, and the source-phase
+derivative.  The Bessel coefficient arithmetic, function definitions,
+phase-base conversion, continuity and integrability, error construction,
+leading weight and mass, every required derivative and variation constant,
+nonlinear integration by parts, the leading \(1/36\) lower bound, complete
+two-error absorption to \(\mathcal A/144\), defect normalization, and the
+conductor-ready logarithmic-moment composition are already in Lean.
 
 The displayed radial theorem does not itself state the derivative bound needed
 for the separate prime-dilation overlap.  That bound must be extracted from the
