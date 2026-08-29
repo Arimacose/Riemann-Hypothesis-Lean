@@ -33,9 +33,9 @@ jobs:
           lint: false
           use-mathlib-cache: true
 
-      - name: Elaborate normalized block-Schur module
+      - name: Build normalized block-Schur module and dependencies
         working-directory: research/riemann-cvs-lean
-        run: lake env lean RiemannCvs/NormalizedBlockSchur.lean
+        run: lake build RiemannCvs.NormalizedBlockSchur
 
       - name: Reject placeholders and print theorem axioms
         working-directory: research/riemann-cvs-lean
