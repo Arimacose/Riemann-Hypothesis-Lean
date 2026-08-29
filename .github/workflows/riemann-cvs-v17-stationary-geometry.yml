@@ -75,6 +75,8 @@ jobs:
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.normalizedWeightedMomentBound
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.exteriorEnvelopeLogMomentBound
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfSechEnvelope
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.oneSidedExteriorMassOfConcentration
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfConcentrationDefectEnvelope
           EOF
           lake env lean V17StationaryAxioms.lean | tee v17-stationary-axioms.txt
           if grep -E 'sorryAx' v17-stationary-axioms.txt; then

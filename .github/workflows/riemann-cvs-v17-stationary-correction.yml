@@ -69,6 +69,8 @@ jobs:
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfCommonScale
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.exteriorEnvelopeLogMomentBound
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfSechEnvelope
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.oneSidedExteriorMassOfConcentration
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfConcentrationDefectEnvelope
           #print axioms RiemannCvs.PrimeStationaryBudget.weightedStationaryOverlapWithSeriesCap
           #print axioms RiemannCvs.PrimeStationaryBudget.conductorDominatesPrimePerturbation
           EOF

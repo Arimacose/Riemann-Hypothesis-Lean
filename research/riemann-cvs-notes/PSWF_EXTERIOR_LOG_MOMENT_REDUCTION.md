@@ -262,29 +262,75 @@ Fourier transform and set
 d_n(c)=1-\sigma_n(c)^2.
 \]
 
-After the same normalization is used on the retained mode and its entire
-continuation, the exterior leakage mass equals \(d_n(c)\).  A Fuchs asymptotic
-controls this concentration defect.  It does not, by notation alone, identify
-the defect with the differential separation eigenvalue \(\Lambda_n(c)\).
-
-The WKB reduction additionally needs the matching amplitude \(A_{n,c}\) to be
-tied to that normalization.  The sufficient statement is the two-sided
-comparison
+There is an exact normalization statement, rather than an additional
+asymptotic hypothesis.  To avoid colliding with the differential separation
+eigenvalue \(\Lambda_n(c)\), write
 
 \[
-c_n\frac{|A_{n,c}|^2}{c}
-\le d_n(c)
-\le C_n\frac{|A_{n,c}|^2}{c}.
+\kappa_n(c)=\sigma_n(c)^2
 \]
 
-Thus the source audit has two logically separate obligations:
+for the DLMF concentration eigenvalue.  With \(\tau=1\),
+[DLMF 30.15.1](https://dlmf.nist.gov/30.15.E1) defines the globally normalized
+band-limited mode
 
-1. a Fuchs-type fixed-index estimate for \(d_n(c)\);
-2. a matching/normalization theorem comparing the exterior WKB amplitude scale
-   \(|A_{n,c}|^2/c\) with \(d_n(c)\).
+\[
+\phi_{n,c}(x)
+=
+\sqrt{\frac{2n+1}{2}}\sqrt{\kappa_n(c)}\,
+\operatorname{Ps}_n^0(x,c^2).
+\]
 
-For the log-moment argument, exact asymptotic constants are unnecessary; uniform
-two-sided comparisons are sufficient.
+[DLMF 30.15.7](https://dlmf.nist.gov/30.15.E7) and
+[DLMF 30.15.8](https://dlmf.nist.gov/30.15.E8) give
+
+\[
+\int_{-1}^{1}|\phi_{n,c}(x)|^2dx=\kappa_n(c),
+\qquad
+\int_{\mathbb R}|\phi_{n,c}(x)|^2dx=1.
+\]
+
+Consequently the total exterior mass is exactly \(d_n(c)\).  Since every
+fixed-index mode has definite parity, the positive radial branch has the exact
+mass
+
+\[
+\boxed{
+\int_1^\infty |\phi_{n,c}(x)|^2dx
+=\frac{d_n(c)}2.
+}
+\]
+
+The scalar identity is formalized as
+`ExteriorLogMomentTransfer.oneSidedExteriorMassOfConcentration`.  Thus the
+mass itself is no longer a normalization gap.
+
+What remains is to express Dunster's radial envelope coefficient in units of
+this exact defect.  If \(A_{n,c}\) denotes the coefficient after applying the
+displayed DLMF global normalization, the sufficient one-sided comparison is
+
+\[
+\frac{|A_{n,c}|^2}{c}
+\le C_n d_n(c).
+\]
+
+It can be obtained directly from a fixed exterior interval, without first
+computing the common Fuchs constant: prove
+
+\[
+L_n\frac{|A_{n,c}|^2}{c}
+\le
+\int_2^3|\phi_{n,c}(x)|^2dx.
+\]
+
+The right-hand side is at most \(d_n(c)/2\), so the desired comparison follows
+with \(C_n=(2L_n)^{-1}\).  Only this lower Bessel mean-square estimate remains
+in the fixed-index normalization step.  Fuchs' asymptotic is still used
+elsewhere for defect ratios and power counting, but it is not needed to
+identify the exterior mass here.
+
+For the log-moment argument, no exact asymptotic constant is needed; a positive
+uniform \(L_n\) is sufficient.
 
 ---
 
@@ -329,7 +375,7 @@ Here \(s\) denotes the paper's turning-point parameter; the paper calls it
 \(\sigma_n(c)\) used in Section 6.
 
 This source reduces the conductor-side analytic task to the following explicit
-normalization lemma:
+fixed-index estimate:
 
 1. translate Dunster's \(m=0\) radial function and endpoint constant into the
    Fourier convention used by the repository;
@@ -339,10 +385,10 @@ normalization lemma:
    \int_1^\infty \log x\,|\psi(x)|^2dx
    \le C_n\frac{|A_{n,c}|^2}{c};
    \]
-3. prove the matching two-sided comparison
-   \(|A_{n,c}|^2/c\asymp d_n(c)\) in that same normalization;
+3. use the fixed-interval Bessel mean square to prove
+   \(|A_{n,c}|^2/c\le C_n d_n(c)\) in that same normalization;
 4. feed those scalar bounds to
-   `ExteriorLogMomentTransfer.dilationLogMomentBoundsOfSechEnvelope`.
+   `ExteriorLogMomentTransfer.dilationLogMomentBoundsOfConcentrationDefectEnvelope`.
 
 The elementary integration in the last step is now formalized.  With
 
@@ -352,32 +398,32 @@ The elementary integration in the last step is now formalized.  With
 |\psi(\cosh u)|^2\sinh u,
 \]
 
-the Lean theorem takes the two remaining analytic inputs
+the fixed-interval estimate converts Dunster's envelope to the single
+defect-normalized input
 
 \[
 0\le\rho_{n,c}(u)
 \le
-\frac{U_n|A_{n,c}|^2/c}{\cosh u},
-\qquad
-L_n\frac{|A_{n,c}|^2}{c}
-\le
-\int_1^\infty |\psi(x)|^2dx,
+\frac{U_n' d_n(c)}{\cosh u}.
 \]
 
-and proves, with the explicit coarse constant
+Together with the exact mass \(d_n(c)/2\), the Lean theorem proves, using the
+coarse inequality
 \(\operatorname{sech}u\le2e^{-u}\), that
 
 \[
 \int_0^\infty
 \log(\cosh u)\rho_{n,c}(u)du
 \le
-2U_n\frac{|A_{n,c}|^2}{c}.
+2U_n'd_n(c)
+=
+4U_n'\int_1^\infty|\phi_{n,c}(x)|^2dx.
 \]
 
-It then combines this bound with the dilation identity and the mass lower bound
-to give the physical logarithmic-moment interval.  Thus no improper-integral or
-normalization division remains outside Lean once the displayed pointwise
-envelope and matching mass lower bound are supplied.
+It then combines this bound with the dilation identity to give the physical
+logarithmic-moment interval.  Thus no improper-integral, normalization division,
+or free lower-mass parameter remains outside Lean once the displayed pointwise
+envelope is measured in units of the concentration defect.
 
 ### 8.1 Extracting the `sech` envelope from Dunster (3.5)
 
@@ -443,15 +489,66 @@ x^2-s^2\ge\frac{x^2}{2},
 \frac{\sqrt2C_n|A_{n,c}|^2/c}{\cosh u}.
 \]
 
-This is exactly the pointwise hypothesis of
-`dilationLogMomentBoundsOfSechEnvelope`.  Consequently the conductor-side
-weighted-tail integration is reduced to choosing the uniform remainder
-constant in Dunster's theorem.  The genuinely normalization-sensitive item
-left in this fixed-index conductor step is the matching lower mass bound
+This is the pointwise hypothesis of
+`dilationLogMomentBoundsOfSechEnvelope`.  After the DLMF normalization audit in
+Section 6, the positive exterior mass is exactly \(d_n(c)/2\).  The remaining
+analytic conversion is therefore the fixed-interval estimate
 
 \[
-L_n|A_{n,c}|^2/c\le d_n(c).
+L_n|A_{n,c}|^2/c
+\le
+\int_2^3|\phi_{n,c}(x)|^2dx
+\le d_n(c)/2.
 \]
+
+### 8.2 Fixed-interval Bessel mean square
+
+On \(I=[2,3]\), Dunster's turning parameter satisfies \(s^2=O_n(c^{-1})\),
+so every algebraic prefactor in (3.5) is uniformly bounded above and below.
+The radial coordinate \(\xi(x)\) is smooth there and satisfies
+
+\[
+0<a_n\le\xi'(x)\le b_n,
+\qquad x\in I,
+\]
+
+for all sufficiently large \(c\).  The large-positive-argument expansion
+[DLMF 10.17.3](https://dlmf.nist.gov/10.17.E3), with its real-argument error
+bounds from DLMF 10.17(iii), gives uniformly on \(I\)
+
+\[
+J_0(c\xi(x))
+=
+\sqrt{\frac{2}{\pi c\xi(x)}}
+\left(\cos(c\xi(x)-\pi/4)+O_n(c^{-1})\right).
+\]
+
+Inserting this into Dunster (3.5) shows that the main squared density is a
+positive bounded weight times
+\(c^{-1}\cos^2(c\xi(x)-\pi/4)\).  Since
+
+\[
+\cos^2\theta=\frac12+\frac12\cos(2\theta),
+\]
+
+one integration by parts, using the displayed lower bound for \(\xi'\), yields
+
+\[
+\int_2^3 w_{n,c}(x)
+\cos^2(c\xi(x)-\pi/4)dx
+\ge \ell_n>0
+\]
+
+for all sufficiently large \(c\).  Dunster's
+\(O(c^{-1})\operatorname{env}J_0\) remainder contributes
+\(O_n(|A_{n,c}|^2c^{-2})\) to the cross term and a still smaller squared-error
+term on this fixed interval.  After enlarging the threshold once more, this
+proves the required positive constant \(L_n\).
+
+The remaining formalization boundary is now narrow: encode the weighted
+oscillatory-average estimate (including its integration-by-parts remainder)
+and instantiate it with Dunster's \(\xi\) and prefactor.  All subsequent
+defect normalization and logarithmic-moment algebra is already in Lean.
 
 The displayed radial theorem does not itself state the derivative bound needed
 for the separate prime-dilation overlap.  That bound must be extracted from the

@@ -18,12 +18,14 @@ the revised main line:
 1. exact Fourier symmetrization of compressed prolate modes;
 2. preservation of fixed-index defects, residues, and gaps;
 3. exact logarithmic conductor identity for the leakage tail;
-4. explicit hyperbolic-envelope integration and transfer from a common WKB
-   amplitude scale to the physical logarithmic-moment bounds;
+4. explicit hyperbolic-envelope integration, exact one-sided DLMF
+   concentration normalization, and transfer to the physical
+   logarithmic-moment bounds;
 5. defect-weighted conductor coercivity;
 6. common-leading Weil transfer and odd-sector Temple budgets.
 
-The analytic PSWF exterior estimates feeding that scalar transfer, closed-form
-radical extension, prime oscillatory bound, and actual odd-sector spectral gap
-are not asserted by this module.
+The fixed-interval Bessel mean-square estimate converting Dunster's radial
+amplitude to concentration-defect units, closed-form radical extension, prime
+oscillatory bound, and actual odd-sector spectral gap are not asserted by this
+module.
 -/

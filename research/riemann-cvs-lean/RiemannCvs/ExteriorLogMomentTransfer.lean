@@ -10,6 +10,12 @@ The second half of this file makes the radial integration step explicit.  A
 nonnegative density bounded by a multiple of `1 / cosh u` has both mass and
 `log (cosh u)` moment at most twice that multiple.  This is the elementary
 integral estimate needed after inserting a uniform radial Bessel envelope.
+
+The final bridge records the exact one-sided normalization used by the DLMF
+signal-analysis convention: a globally normalized parity mode with retained
+mass `concentration` has total exterior defect `1 - concentration`, hence each
+exterior half-line has mass `(1 - concentration) / 2`.  This removes a formerly
+free mass-normalization hypothesis from the fixed-index PSWF application.
 -/
 
 namespace RiemannCvs.ExteriorLogMomentTransfer
@@ -329,6 +335,56 @@ theorem dilationLogMomentBoundsOfSechEnvelope
     physical residual mass amplitude logScale (2 * upper) lower
     hmassPos hResidualNonneg (mul_nonneg (by norm_num) hupper) hlower
     hResidualUpper hMass hIdentity
+
+/-- In the globally normalized signal-analysis convention, orthogonal mass
+decomposition and parity split the concentration defect equally between the
+two exterior half-lines.  This is the scalar content of DLMF 30.15.7--30.15.8
+after identifying `concentration` with the retained mass. -/
+theorem oneSidedExteriorMassOfConcentration
+    (globalMass retainedMass exteriorMass oneSidedMass concentration defect : ℝ)
+    (hGlobal : globalMass = 1)
+    (hRetained : retainedMass = concentration)
+    (hDecomposition : globalMass = retainedMass + exteriorMass)
+    (hParity : exteriorMass = 2 * oneSidedMass)
+    (hDefect : defect = 1 - concentration) :
+    oneSidedMass = defect / 2 := by
+  linarith
+
+/-- Concentration-normalized version of
+`dilationLogMomentBoundsOfSechEnvelope`.
+
+For a parity PSWF normalized to global mass one, the positive exterior radial
+mass is exactly `defect / 2`.  Therefore a `sech` envelope measured directly in
+units of the total concentration defect yields an explicit residual constant
+`4 * upper`; no additional lower-normalization parameter remains. -/
+theorem dilationLogMomentBoundsOfConcentrationDefectEnvelope
+    (density : ℝ → ℝ)
+    (physical residual mass defect logScale upper : ℝ)
+    (hDefectPos : 0 < defect)
+    (hupper : 0 ≤ upper)
+    (hMass : mass = defect / 2)
+    (hmeas : AEStronglyMeasurable density (volume.restrict (Ioi 0)))
+    (hdensityNonneg : ∀ u ∈ Ioi (0 : ℝ), 0 ≤ density u)
+    (henvelope :
+      ∀ u ∈ Ioi (0 : ℝ), density u ≤ (upper * defect) / cosh u)
+    (hResidual : residual =
+      ∫ u in Ioi 0, log (cosh u) * density u)
+    (hIdentity : physical = logScale * mass + residual) :
+    logScale * mass ≤ physical ∧
+      physical ≤ (logScale + 4 * upper) * mass := by
+  have hMassPos : 0 < mass := by
+    rw [hMass]
+    positivity
+  have hMassLower : (1 / 2 : ℝ) * defect ≤ mass := by
+    rw [hMass]
+    ring_nf
+    exact le_rfl
+  have h := dilationLogMomentBoundsOfSechEnvelope
+    density physical residual mass defect logScale upper (1 / 2 : ℝ)
+    hMassPos (le_of_lt hDefectPos) hupper (by norm_num) hmeas
+    hdensityNonneg henvelope hMassLower hResidual hIdentity
+  convert h using 1
+  ring_nf
 
 end HyperbolicEnvelope
 
