@@ -49,11 +49,13 @@ theorem two_mul_r_le_innerSlope
   have hratio : 4 * r ^ 2 ≤ (1 - a) * r ^ 2 / s := by
     apply (le_div_iff₀ hs0).2
     have hsScaled : 4 * r ^ 2 * s ≤ (1 / 2) * r ^ 2 := by
-      have h := mul_le_mul_of_nonneg_left hs8 (mul_nonneg (by norm_num) (sq_nonneg r))
+      have h := mul_le_mul_of_nonneg_left hs8
+        (show 0 ≤ (4 : ℝ) * r ^ 2 by positivity)
       nlinarith
     have hcoef := mul_le_mul_of_nonneg_right hOneMinus (sq_nonneg r)
     nlinarith
-  have hrad : 0 ≤ 1 + (1 - a) * r ^ 2 / s := by linarith
+  have hrad : 0 ≤ 1 + (1 - a) * r ^ 2 / s := by
+    nlinarith [sq_nonneg r]
   have hsq := Real.sq_sqrt hrad
   have hsqrt0 := Real.sqrt_nonneg (1 + (1 - a) * r ^ 2 / s)
   unfold innerSlope
@@ -75,15 +77,11 @@ theorem dilatedSlope_le_threeHalves
   have hratio : (1 - b) / (r ^ 2 + s - 1) ≤ 1 / 3 := by
     apply (div_le_iff₀ hden).2
     nlinarith
-  have hrad : 0 ≤ 1 + (1 - b) / (r ^ 2 + s - 1) := by
-    have hnum0 : 0 ≤ 1 - b := by
-      have : b ≤ 1 := by linarith
-      linarith
-    exact add_nonneg (by norm_num) (div_nonneg hnum0 (le_of_lt hden))
-  have hsq := Real.sq_sqrt hrad
-  have hsqrt0 := Real.sqrt_nonneg (1 + (1 - b) / (r ^ 2 + s - 1))
   unfold dilatedSlope
-  nlinarith
+  rw [Real.sqrt_le_iff]
+  constructor
+  · norm_num
+  · nlinarith
 
 /-- The dilation phase is strictly decreasing before the compact stationary
 box. -/
@@ -118,18 +116,13 @@ theorem innerSlope_le_fourFifths
     have hcoef := mul_le_mul_of_nonneg_right hOneMinus (sq_nonneg r)
     have hthree := mul_le_mul_of_nonneg_left hs3 (sq_nonneg r)
     nlinarith
-  have hrad : 0 ≤ 1 + (1 - a) * r ^ 2 / s := by
-    have hOneMinus0 : 0 ≤ 1 - a := by
-      have : a ≤ 1 := by linarith
-      linarith
-    exact add_nonneg (by norm_num)
-      (div_nonneg (mul_nonneg hOneMinus0 (sq_nonneg r)) (le_of_lt hs0))
   have htarget : 1 + r ^ 2 / 3 ≤ (16 / 25) * r ^ 2 := by
     nlinarith [sq_nonneg (r - 2)]
-  have hsq := Real.sq_sqrt hrad
-  have hsqrt0 := Real.sqrt_nonneg (1 + (1 - a) * r ^ 2 / s)
   unfold innerSlope
-  nlinarith
+  rw [Real.sqrt_le_iff]
+  constructor
+  · positivity
+  · nlinarith
 
 /-- The dilated radial slope is always at least one on the relevant parameter
 range. -/
