@@ -1402,6 +1402,221 @@ theorem prolateFixedIntervalWeightedCosSqLower
       intro x _
       ring_nf
 
+/-- The same explicit pointwise estimate gives a matching crude upper mass
+bound on the unit interval. -/
+lemma prolateFixedWeightMassUpperOnTwoThree
+    (a : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2) :
+    (∫ x in (2 : ℝ)..3, prolateFixedWeight a x) ≤ 1 / 3 := by
+  have hWeightIntegrable :=
+    prolateFixedWeightIntervalIntegrableOnTwoThree a haNonneg haUpper
+  calc
+    (∫ x in (2 : ℝ)..3, prolateFixedWeight a x) ≤
+        ∫ _x in (2 : ℝ)..3, (1 / 3 : ℝ) := by
+      apply intervalIntegral.integral_mono_on (by norm_num)
+        hWeightIntegrable intervalIntegrable_const
+      intro x hx
+      exact (prolateFixedWeightBounds a x haNonneg haUpper hx.1 hx.2).2
+    _ = 1 / 3 := by norm_num
+
+/-- Integrating `(actual + error)² ≤ 2 actual² + 2 error²` supplies the scalar
+reference-splitting hypothesis used by the remainder budget. -/
+lemma intervalSqReferenceSplit
+    (actual reference error : ℝ → ℝ)
+    (a b : ℝ)
+    (hab : a ≤ b)
+    (hActualSq : IntervalIntegrable (fun x => actual x ^ 2) volume a b)
+    (hReferenceSq : IntervalIntegrable (fun x => reference x ^ 2) volume a b)
+    (hErrorSq : IntervalIntegrable (fun x => error x ^ 2) volume a b)
+    (hDecomp : ∀ x ∈ Icc a b, reference x = actual x + error x) :
+    (∫ x in a..b, reference x ^ 2) ≤
+      2 * (∫ x in a..b, actual x ^ 2) +
+        2 * (∫ x in a..b, error x ^ 2) := by
+  have hRight :
+      IntervalIntegrable (fun x => 2 * actual x ^ 2 + 2 * error x ^ 2)
+        volume a b :=
+    (hActualSq.const_mul 2).add (hErrorSq.const_mul 2)
+  calc
+    (∫ x in a..b, reference x ^ 2) ≤
+        ∫ x in a..b, (2 * actual x ^ 2 + 2 * error x ^ 2) := by
+      apply intervalIntegral.integral_mono_on hab hReferenceSq hRight
+      intro x hx
+      rw [hDecomp x hx]
+      nlinarith [sq_nonneg (actual x - error x)]
+    _ = 2 * (∫ x in a..b, actual x ^ 2) +
+        2 * (∫ x in a..b, error x ^ 2) := by
+      rw [intervalIntegral.integral_add
+          (hActualSq.const_mul 2) (hErrorSq.const_mul 2),
+        intervalIntegral.integral_const_mul,
+        intervalIntegral.integral_const_mul]
+
+/-- A pointwise squared error measured against the explicit Dunster weight has
+total mass at most one third of its coefficient-amplitude scale. -/
+lemma prolateFixedIntervalErrorMassUpper
+    (error : ℝ → ℝ)
+    (a coefficient amplitude : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2)
+    (hCoefficientNonneg : 0 ≤ coefficient)
+    (hAmplitudeNonneg : 0 ≤ amplitude)
+    (hErrorSqIntegrable :
+      IntervalIntegrable (fun x => error x ^ 2) volume 2 3)
+    (hErrorPointwise :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        error x ^ 2 ≤ coefficient * amplitude * prolateFixedWeight a x) :
+    (∫ x in (2 : ℝ)..3, error x ^ 2) ≤
+      (coefficient / 3) * amplitude := by
+  have hWeightIntegrable :=
+    prolateFixedWeightIntervalIntegrableOnTwoThree a haNonneg haUpper
+  have hScaledIntegrable :
+      IntervalIntegrable
+        (fun x => coefficient * amplitude * prolateFixedWeight a x)
+        volume 2 3 :=
+    hWeightIntegrable.const_mul (coefficient * amplitude)
+  have hMassUpper :=
+    prolateFixedWeightMassUpperOnTwoThree a haNonneg haUpper
+  calc
+    (∫ x in (2 : ℝ)..3, error x ^ 2) ≤
+        ∫ x in (2 : ℝ)..3,
+          coefficient * amplitude * prolateFixedWeight a x := by
+      exact intervalIntegral.integral_mono_on (by norm_num)
+        hErrorSqIntegrable hScaledIntegrable hErrorPointwise
+    _ = (coefficient * amplitude) *
+        (∫ x in (2 : ℝ)..3, prolateFixedWeight a x) := by
+      rw [intervalIntegral.integral_const_mul]
+    _ ≤ (coefficient * amplitude) * (1 / 3 : ℝ) :=
+      mul_le_mul_of_nonneg_left hMassUpper
+        (mul_nonneg hCoefficientNonneg hAmplitudeNonneg)
+    _ = (coefficient / 3) * amplitude := by ring
+
+/-- A pointwise Dunster/Bessel approximation error with coefficient at most
+`1 / 48` preserves an explicit fraction of the fixed-interval leading mass. -/
+theorem prolateFixedIntervalActualMassLowerOfErrorBudget
+    (actual reference error phase : ℝ → ℝ)
+    (a c offset amplitude coefficient : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2)
+    (hc : 33 ≤ c)
+    (hAmplitudeNonneg : 0 ≤ amplitude)
+    (hCoefficientNonneg : 0 ≤ coefficient)
+    (hCoefficientThreshold : 48 * coefficient ≤ 1)
+    (hPhaseDeriv :
+      ∀ x ∈ uIcc (2 : ℝ) 3,
+        HasDerivAt phase (prolateFixedPhaseSlope a x) x)
+    (hActualSqIntegrable :
+      IntervalIntegrable (fun x => actual x ^ 2) volume 2 3)
+    (hReferenceSqIntegrable :
+      IntervalIntegrable (fun x => reference x ^ 2) volume 2 3)
+    (hErrorSqIntegrable :
+      IntervalIntegrable (fun x => error x ^ 2) volume 2 3)
+    (hReferencePointwise :
+      ∀ x ∈ uIcc (2 : ℝ) 3,
+        reference x ^ 2 =
+          amplitude *
+            (prolateFixedWeight a x * cos (c * phase x + offset) ^ 2))
+    (hDecomp :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        reference x = actual x + error x)
+    (hErrorPointwise :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        error x ^ 2 ≤
+          coefficient * amplitude * prolateFixedWeight a x) :
+    (1 / 144 : ℝ) * amplitude ≤
+      ∫ x in (2 : ℝ)..3, actual x ^ 2 := by
+  have hLeading := prolateFixedIntervalWeightedCosSqLower
+    a c offset phase haNonneg haUpper hc hPhaseDeriv
+  have hReferenceIdentity :
+      (∫ x in (2 : ℝ)..3, reference x ^ 2) =
+        amplitude *
+          (∫ x in (2 : ℝ)..3,
+            prolateFixedWeight a x * cos (c * phase x + offset) ^ 2) := by
+    calc
+      (∫ x in (2 : ℝ)..3, reference x ^ 2) =
+          ∫ x in (2 : ℝ)..3,
+            amplitude *
+              (prolateFixedWeight a x * cos (c * phase x + offset) ^ 2) := by
+        apply intervalIntegral.integral_congr
+        intro x hx
+        exact hReferencePointwise x hx
+      _ = amplitude *
+          (∫ x in (2 : ℝ)..3,
+            prolateFixedWeight a x * cos (c * phase x + offset) ^ 2) := by
+        rw [intervalIntegral.integral_const_mul]
+  have hReferenceLower :
+      (1 / 36 : ℝ) * amplitude ≤
+        ∫ x in (2 : ℝ)..3, reference x ^ 2 := by
+    calc
+      (1 / 36 : ℝ) * amplitude = amplitude * (1 / 36 : ℝ) := by ring
+      _ ≤ amplitude *
+          (∫ x in (2 : ℝ)..3,
+            prolateFixedWeight a x * cos (c * phase x + offset) ^ 2) :=
+        mul_le_mul_of_nonneg_left hLeading hAmplitudeNonneg
+      _ = ∫ x in (2 : ℝ)..3, reference x ^ 2 := hReferenceIdentity.symm
+  have hReferenceSplit := intervalSqReferenceSplit
+    actual reference error 2 3 (by norm_num) hActualSqIntegrable
+    hReferenceSqIntegrable hErrorSqIntegrable hDecomp
+  have hErrorUpper := prolateFixedIntervalErrorMassUpper
+    error a coefficient amplitude haNonneg haUpper hCoefficientNonneg
+    hAmplitudeNonneg hErrorSqIntegrable hErrorPointwise
+  have hQuarter : 4 * (coefficient / 3) ≤ (1 / 36 : ℝ) := by
+    linarith
+  have hFinal := massLowerOfReferenceAndQuarterError
+    (∫ x in (2 : ℝ)..3, actual x ^ 2)
+    (∫ x in (2 : ℝ)..3, reference x ^ 2)
+    (∫ x in (2 : ℝ)..3, error x ^ 2)
+    amplitude (1 / 36) (coefficient / 3) hAmplitudeNonneg
+    hReferenceLower hReferenceSplit hErrorUpper hQuarter
+  norm_num at hFinal ⊢
+  exact hFinal
+
+/-- Fixed-index form of the preceding budget: a pointwise relative error
+`K / c` is absorbable as soon as `48 K² ≤ c²`. -/
+theorem prolateFixedIntervalActualMassLowerOfInvFrequencyError
+    (actual reference error phase : ℝ → ℝ)
+    (a c offset amplitude K : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2)
+    (hc : 33 ≤ c)
+    (hAmplitudeNonneg : 0 ≤ amplitude)
+    (hFrequencyThreshold : 48 * K ^ 2 ≤ c ^ 2)
+    (hPhaseDeriv :
+      ∀ x ∈ uIcc (2 : ℝ) 3,
+        HasDerivAt phase (prolateFixedPhaseSlope a x) x)
+    (hActualSqIntegrable :
+      IntervalIntegrable (fun x => actual x ^ 2) volume 2 3)
+    (hReferenceSqIntegrable :
+      IntervalIntegrable (fun x => reference x ^ 2) volume 2 3)
+    (hErrorSqIntegrable :
+      IntervalIntegrable (fun x => error x ^ 2) volume 2 3)
+    (hReferencePointwise :
+      ∀ x ∈ uIcc (2 : ℝ) 3,
+        reference x ^ 2 =
+          amplitude *
+            (prolateFixedWeight a x * cos (c * phase x + offset) ^ 2))
+    (hDecomp :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        reference x = actual x + error x)
+    (hErrorPointwise :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        error x ^ 2 ≤
+          (K ^ 2 / c ^ 2) * amplitude * prolateFixedWeight a x) :
+    (1 / 144 : ℝ) * amplitude ≤
+      ∫ x in (2 : ℝ)..3, actual x ^ 2 := by
+  have hcPos : 0 < c := by linarith
+  have hcSquarePos : 0 < c ^ 2 := sq_pos_of_pos hcPos
+  have hCoefficientNonneg : 0 ≤ K ^ 2 / c ^ 2 :=
+    div_nonneg (sq_nonneg K) (sq_nonneg c)
+  have hCoefficientThreshold : 48 * (K ^ 2 / c ^ 2) ≤ 1 := by
+    rw [show 48 * (K ^ 2 / c ^ 2) = (48 * K ^ 2) / c ^ 2 by ring]
+    exact (div_le_iff₀ hcSquarePos).2 (by simpa using hFrequencyThreshold)
+  exact prolateFixedIntervalActualMassLowerOfErrorBudget
+    actual reference error phase a c offset amplitude (K ^ 2 / c ^ 2)
+    haNonneg haUpper hc hAmplitudeNonneg hCoefficientNonneg
+    hCoefficientThreshold hPhaseDeriv hActualSqIntegrable
+    hReferenceSqIntegrable hErrorSqIntegrable hReferencePointwise hDecomp
+    hErrorPointwise
+
 end ProlateFixedIntervalWeight
 
 section HyperbolicEnvelope

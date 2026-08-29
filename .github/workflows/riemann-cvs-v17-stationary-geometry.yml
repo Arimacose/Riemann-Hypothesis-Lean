@@ -81,6 +81,7 @@ jobs:
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.nonlinearPhaseWeightedCosSqLowerOfUniformBudget
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.prolateFixedWeightMassLowerOnTwoThree
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.prolateFixedIntervalWeightedCosSqLower
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.prolateFixedIntervalActualMassLowerOfInvFrequencyError
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.massLowerOfReferenceAndQuarterError
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.exteriorEnvelopeLogMomentBound
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfSechEnvelope

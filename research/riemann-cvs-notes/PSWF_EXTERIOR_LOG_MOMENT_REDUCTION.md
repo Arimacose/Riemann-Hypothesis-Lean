@@ -668,17 +668,37 @@ derivative \(p_a\) on `[2,3]` and every offset \(\theta\),
 Thus the leading fixed-interval oscillatory lower bound is no longer an open
 calculus or variation obligation in the Lean development.
 
-Theorems `massLowerOfReferenceAndErrorBudget` and
-`massLowerOfReferenceAndQuarterError` provide the final abstract step for
-absorbing Dunster's remainder into the actual radial mass.  The remaining
-source-specific fixed-interval obligation is now narrower: state Dunster's
-uniform error estimate with the repository's normalization, connect its
-parameter and phase to \(0\le a\le1/2\) and the derivative \(p_a\) (an additive
-phase constant is absorbed by the offset), and prove that its cross and
-squared-error mass meet the quarter-error threshold.  The explicit leading
-weight, its mass, every required derivative and variation constant, the
-nonlinear integration by parts, the leading \(1/36\) lower bound, abstract
-remainder absorption, defect normalization, and logarithmic-moment algebra are
+The remainder conversion is now formalized at function level rather than only
+as scalar algebra.  `intervalSqReferenceSplit` integrates
+\((f+e)^2\le2f^2+2e^2\), and
+`prolateFixedIntervalErrorMassUpper` converts a pointwise estimate
+
+\[
+|e(x)|^2\le \kappa\,\mathcal A\,w_a(x)
+\]
+
+into \(\int_2^3|e|^2\le(\kappa/3)\mathcal A\).  Consequently
+`prolateFixedIntervalActualMassLowerOfErrorBudget` proves
+
+\[
+\frac{\mathcal A}{144}
+\le \int_2^3|f(x)|^2dx
+\]
+
+whenever \(48\kappa\le1\).  Its fixed-index specialization
+`prolateFixedIntervalActualMassLowerOfInvFrequencyError` takes
+\(\kappa=K^2/c^2\), so the explicit absorption threshold is
+\(48K^2\le c^2\).
+
+The remaining source-specific fixed-interval obligation is now narrower:
+state Dunster's uniform error estimate with the repository's normalization,
+identify the normalized reference, actual, and error functions, connect its
+parameter and phase to \(0\le a\le1/2\) and derivative \(p_a\) (an additive
+phase constant is absorbed by the offset), and supply the resulting pointwise
+\(K/c\) hypothesis.  The explicit leading weight and mass, every required
+derivative and variation constant, nonlinear integration by parts, the leading
+\(1/36\) lower bound, the complete \(K/c\) error absorption to
+\(\mathcal A/144\), defect normalization, and logarithmic-moment algebra are
 already in Lean.
 
 The displayed radial theorem does not itself state the derivative bound needed
