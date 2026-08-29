@@ -874,17 +874,41 @@ proves their continuity, obtains the fixed-interval mass lower bound, and then
 applies the `sech` envelope to return the same
 \((\log R+288\,\mathrm{upper})M\) upper bound.
 
+The abstract `J0` argument has now been replaced by a repository function as
+well.  `BesselJ0Series.besselJ0` is defined by the canonical real series
+
+\[
+J_0(x)=\sum_{n=0}^{\infty}
+\frac{(-1)^n(x^2/4)^n}{(n!)^2}.
+\]
+
+Lean proves absolute summability at every real argument by comparison with
+\(\sum |x^2/4|^n/n!\), uniform convergence on every symmetric compact
+interval, and therefore global continuity.  It also proves evenness,
+\(J_0(0)=1\), the first two nonconstant terms, and the exact recurrence
+
+\[
+t_{n+1}(x)
+=-\frac{x^2/4}{(n+1)^2}t_n(x).
+\]
+
+The specializations
+`prolateFixedSourceActualMassLowerOfConcreteJ0DlmfDunsterErrors` and
+`dilationLogMomentBoundsOfConcreteJ0DunsterSource` consequently remove both
+the abstract Bessel function and its continuity hypothesis from the fixed-mass
+and conductor interfaces.
+
 The remaining source-specific fixed-interval obligation is now narrower:
-formalize or import the order-zero Bessel function and instantiate the stated
-DLMF real-argument remainder bound; state Dunster's uniform PSWF-to-Bessel
-error in the exact normalized prefactor above; and supply a concrete
-\(a\le K_a/c\) estimate, its eventual threshold, and the source-phase
-derivative.  The Bessel coefficient arithmetic, function definitions,
-phase-base conversion, continuity and integrability, error construction,
-leading weight and mass, every required derivative and variation constant,
-nonlinear integration by parts, the leading \(1/36\) lower bound, complete
-two-error absorption to \(\mathcal A/144\), defect normalization, and the
-conductor-ready logarithmic-moment composition are already in Lean.
+prove the stated DLMF real-argument remainder bound for the concrete series;
+state Dunster's uniform PSWF-to-Bessel error in the exact normalized prefactor
+above; and supply a concrete \(a\le K_a/c\) estimate, its eventual threshold,
+and the source-phase derivative.  The Bessel function, its global convergence
+and continuity, the coefficient arithmetic, source function definitions,
+phase-base conversion, error construction, leading weight and mass, every
+required derivative and variation constant, nonlinear integration by parts,
+the leading \(1/36\) lower bound, complete two-error absorption to
+\(\mathcal A/144\), defect normalization, and the conductor-ready
+logarithmic-moment composition are already in Lean.
 
 The displayed radial theorem does not itself state the derivative bound needed
 for the separate prime-dilation overlap.  That bound must be extracted from the

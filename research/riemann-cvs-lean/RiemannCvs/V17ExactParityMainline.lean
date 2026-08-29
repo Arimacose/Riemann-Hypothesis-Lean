@@ -5,6 +5,7 @@ import RiemannCvs.SymmetrizedProlateSecular
 import RiemannCvs.SymmetrizedProlateGap
 import RiemannCvs.ProlateDilationStationaryPoint
 import RiemannCvs.ProlateConductorIdentity
+import RiemannCvs.BesselJ0Series
 import RiemannCvs.ExteriorLogMomentTransfer
 import RiemannCvs.ConductorDefectCoercivity
 import RiemannCvs.NormalizedSymmetrizedConductor
@@ -29,8 +30,11 @@ the revised main line:
    square identity and integrability internally, `a ≤ parameterK / c` enters
    the fixed rectangle under `2 * parameterK ≤ c`, and any source phase with
    the same slope is proved to differ by one explicit offset.  The concrete
-   Dunster four-root prefactor, the `J₀` intermediate, and both difference-error
-   functions are now defined internally.  Source-phase positivity and all
+   Dunster four-root prefactor, a concrete everywhere-convergent real `J₀`
+   series, the corresponding intermediate, and both difference-error functions
+   are now defined internally.  The series is proved summable at every real
+   argument, continuous, even, normalized by `J₀(0) = 1`, and equipped with its
+   Bessel coefficient recurrence.  Source-phase positivity and all
    continuity/integrability adapters are discharged from the phase derivative,
    `sourcePhase 2 ≥ 1`, continuity of `J₀`, and continuity of the actual radial
    mode.  The first DLMF remainder coefficients are combined into the explicit
@@ -44,9 +48,10 @@ the revised main line:
 
 The source-specific analytic inputs still to be supplied are Dunster's uniform
 PSWF-to-Bessel remainder in the repository normalization, a concrete
-`a ≤ parameterK / c` constant and eventual threshold, and the real-argument
-DLMF `J₀` remainder statement presented through the now-explicit three-term
-absolute-error interface.  The closed-form radical extension, prime
+`a ≤ parameterK / c` constant and eventual threshold, and a proof of the
+real-argument DLMF remainder statement for the concrete repository `J₀`
+series through the now-explicit three-term absolute-error interface.  The
+closed-form radical extension, prime
 oscillatory bound, and actual odd-sector spectral gap are also not asserted by
 this module.
 -/

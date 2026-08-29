@@ -8,6 +8,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/ProlateDilationStationaryPoint.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ProlateCrossDilationStationaryPoint.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ProlateScaledStationaryFamily.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/BesselJ0Series.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ExteriorLogMomentTransfer.lean'
       - '.github/workflows/riemann-cvs-v17-stationary-geometry.yml'
   pull_request:
@@ -15,6 +16,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/ProlateDilationStationaryPoint.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ProlateCrossDilationStationaryPoint.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ProlateScaledStationaryFamily.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/BesselJ0Series.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ExteriorLogMomentTransfer.lean'
       - '.github/workflows/riemann-cvs-v17-stationary-geometry.yml'
   workflow_dispatch:
@@ -42,11 +44,13 @@ jobs:
           lake env lean RiemannCvs/ProlateDilationStationaryPoint.lean
           lake env lean RiemannCvs/ProlateCrossDilationStationaryPoint.lean
           lake env lean RiemannCvs/ProlateScaledStationaryFamily.lean
+          lake env lean RiemannCvs/BesselJ0Series.lean
           lake env lean RiemannCvs/ExteriorLogMomentTransfer.lean
           lake build \
             RiemannCvs.ProlateDilationStationaryPoint \
             RiemannCvs.ProlateCrossDilationStationaryPoint \
             RiemannCvs.ProlateScaledStationaryFamily \
+            RiemannCvs.BesselJ0Series \
             RiemannCvs.ExteriorLogMomentTransfer
       - name: Reject placeholders and print axioms
         working-directory: research/riemann-cvs-lean
@@ -57,6 +61,7 @@ jobs:
             RiemannCvs/ProlateDilationStationaryPoint.lean
             RiemannCvs/ProlateCrossDilationStationaryPoint.lean
             RiemannCvs/ProlateScaledStationaryFamily.lean
+            RiemannCvs/BesselJ0Series.lean
             RiemannCvs/ExteriorLogMomentTransfer.lean
           )
           if grep -nE '(^|[^[:alnum:]_])(sorry|admit)([^[:alnum:]_]|$)' "${files[@]}"; then
@@ -66,6 +71,7 @@ jobs:
           import RiemannCvs.ProlateDilationStationaryPoint
           import RiemannCvs.ProlateCrossDilationStationaryPoint
           import RiemannCvs.ProlateScaledStationaryFamily
+          import RiemannCvs.BesselJ0Series
           import RiemannCvs.ExteriorLogMomentTransfer
           #print axioms RiemannCvs.ProlateDilationStationaryPoint.rootWidthBudget
           #print axioms RiemannCvs.ProlateDilationStationaryPoint.prolateSlopeBoundsOnTwoThree
@@ -73,6 +79,12 @@ jobs:
           #print axioms RiemannCvs.ProlateCrossDilationStationaryPoint.uniqueScaledRoot
           #print axioms RiemannCvs.ProlateCrossDilationStationaryPoint.curvatureScaleFromBudgets
           #print axioms RiemannCvs.ProlateScaledStationaryFamily.scaledSlopePolynomialAtReciprocal
+          #print axioms RiemannCvs.BesselJ0Series.summable_besselJ0Term
+          #print axioms RiemannCvs.BesselJ0Series.tendstoUniformlyOn_besselJ0_partialSums_Icc
+          #print axioms RiemannCvs.BesselJ0Series.continuous_besselJ0
+          #print axioms RiemannCvs.BesselJ0Series.besselJ0_zero
+          #print axioms RiemannCvs.BesselJ0Series.besselJ0_neg
+          #print axioms RiemannCvs.BesselJ0Series.besselJ0Term_succ
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.normalizedWeightedMomentBound
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.weightedCosSqIntegralLower
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.linearPhaseOscillatoryIntegralBoundByVariation
@@ -97,10 +109,12 @@ jobs:
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.besselJ0LeadingCosineErrorOfDlmfBudget
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.prolateFixedSourceActualMassLowerOfRawDunsterBesselErrors
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.prolateFixedSourceActualMassLowerOfDlmfDunsterErrors
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.prolateFixedSourceActualMassLowerOfConcreteJ0DlmfDunsterErrors
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfProlateFixedPhaseApproximation
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfSeparatedDunsterBesselErrors
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfCanonicalReferenceAndSeparatedErrors
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfDlmfDunsterSource
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfConcreteJ0DunsterSource
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.massLowerOfReferenceAndQuarterError
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.exteriorEnvelopeLogMomentBound
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfSechEnvelope
