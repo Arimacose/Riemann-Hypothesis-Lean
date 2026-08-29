@@ -2011,6 +2011,72 @@ theorem dilationLogMomentBoundsOfConcentrationDefectEnvelope
   convert h using 1
   ring_nf
 
+/-- Conductor-ready composition of the fixed-interval Dunster approximation
+with the exterior hyperbolic envelope.  The explicit `1 / 144` retained scale
+turns the envelope coefficient `upper` into the residual constant
+`288 * upper`. -/
+theorem dilationLogMomentBoundsOfProlateFixedPhaseApproximation
+    (density actual reference error : ℝ → ℝ)
+    (a c offset amplitude K physical residual mass logScale upper : ℝ)
+    (haNonneg : 0 ≤ a)
+    (haUpper : a ≤ 1 / 2)
+    (hc : 33 ≤ c)
+    (hAmplitudeNonneg : 0 ≤ amplitude)
+    (hFrequencyThreshold : 48 * K ^ 2 ≤ c ^ 2)
+    (hMassPos : 0 < mass)
+    (hUpperNonneg : 0 ≤ upper)
+    (hActualSqIntegrable :
+      IntervalIntegrable (fun x => actual x ^ 2) volume 2 3)
+    (hReferenceSqIntegrable :
+      IntervalIntegrable (fun x => reference x ^ 2) volume 2 3)
+    (hErrorSqIntegrable :
+      IntervalIntegrable (fun x => error x ^ 2) volume 2 3)
+    (hReferencePointwise :
+      ∀ x ∈ uIcc (2 : ℝ) 3,
+        reference x ^ 2 =
+          amplitude *
+            (prolateFixedWeight a x *
+              cos (c * prolateFixedPhase a x + offset) ^ 2))
+    (hDecomp :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        reference x = actual x + error x)
+    (hErrorPointwise :
+      ∀ x ∈ Icc (2 : ℝ) 3,
+        error x ^ 2 ≤
+          (K ^ 2 / c ^ 2) * amplitude * prolateFixedWeight a x)
+    (hFixedMassToExterior :
+      (∫ x in (2 : ℝ)..3, actual x ^ 2) ≤ mass)
+    (hDensityMeasurable :
+      AEStronglyMeasurable density (volume.restrict (Ioi 0)))
+    (hDensityNonneg : ∀ u ∈ Ioi (0 : ℝ), 0 ≤ density u)
+    (hEnvelope :
+      ∀ u ∈ Ioi (0 : ℝ),
+        density u ≤ (upper * amplitude) / cosh u)
+    (hResidual :
+      residual = ∫ u in Ioi 0, log (cosh u) * density u)
+    (hIdentity : physical = logScale * mass + residual) :
+    logScale * mass ≤ physical ∧
+      physical ≤ (logScale + 288 * upper) * mass := by
+  have hFixedLower :=
+    prolateFixedPhaseActualMassLowerOfInvFrequencyError
+      actual reference error a c offset amplitude K haNonneg haUpper hc
+      hAmplitudeNonneg hFrequencyThreshold hActualSqIntegrable
+      hReferenceSqIntegrable hErrorSqIntegrable hReferencePointwise hDecomp
+      hErrorPointwise
+  have hMassLower : (1 / 144 : ℝ) * amplitude ≤ mass :=
+    hFixedLower.trans hFixedMassToExterior
+  have hBounds := dilationLogMomentBoundsOfSechEnvelope
+    density physical residual mass amplitude logScale upper (1 / 144 : ℝ)
+    hMassPos hAmplitudeNonneg hUpperNonneg (by norm_num)
+    hDensityMeasurable hDensityNonneg hEnvelope hMassLower hResidual hIdentity
+  have hCoefficient : (2 * upper) / (1 / 144 : ℝ) = 288 * upper := by
+    norm_num [div_eq_mul_inv]
+    ring
+  constructor
+  · exact hBounds.1
+  · rw [hCoefficient] at hBounds
+    exact hBounds.2
+
 end HyperbolicEnvelope
 
 end RiemannCvs.ExteriorLogMomentTransfer

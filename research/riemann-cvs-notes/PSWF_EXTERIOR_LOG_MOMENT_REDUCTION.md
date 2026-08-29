@@ -705,6 +705,21 @@ whenever \(48\kappa\le1\).  Its fixed-index specialization
 \(\kappa=K^2/c^2\), so the explicit absorption threshold is
 \(48K^2\le c^2\).
 
+The fixed-interval estimate is now composed with the exterior envelope as
+well.  If the `[2,3]` mass is bounded above by the positive exterior mass and
+the hyperbolic density satisfies the established `sech` envelope with
+coefficient `upper`, then
+`dilationLogMomentBoundsOfProlateFixedPhaseApproximation` proves
+
+\[
+(\log R)M\le \mathcal H
+\le (\log R+288\,\mathrm{upper})M.
+\]
+
+The constant is exactly \(2\,\mathrm{upper}/(1/144)=288\,\mathrm{upper}\).
+This is the conductor-ready composition that the earlier reduction left as a
+manual chain of inequalities.
+
 The remaining source-specific fixed-interval obligation is now narrower:
 state Dunster's uniform error estimate with the repository's normalization,
 identify the normalized reference, actual, and error functions, verify its
@@ -714,7 +729,7 @@ The explicit phase primitive, leading weight and mass, every required
 derivative and variation constant, nonlinear integration by parts, the leading
 \(1/36\) lower bound, the complete \(K/c\) error absorption to
 \(\mathcal A/144\), defect normalization, and logarithmic-moment algebra are
-already in Lean.
+already in Lean, including their final common-scale composition.
 
 The displayed radial theorem does not itself state the derivative bound needed
 for the separate prime-dilation overlap.  That bound must be extracted from the

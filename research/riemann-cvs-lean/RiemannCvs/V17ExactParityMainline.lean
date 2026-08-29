@@ -23,7 +23,8 @@ the revised main line:
    prolate slope, curvature, and reduced-weight variation bounds, including the
    concrete
    `c ≥ 33` weighted-cosine lower bound and the `48 K² ≤ c²`
-   fixed-interval remainder-absorption budget,
+   fixed-interval remainder-absorption budget, followed by the conductor-ready
+   `288 * upper` logarithmic-moment composition,
    weighted oscillatory-average and `L²` remainder budgets, explicit
    hyperbolic-envelope integration, exact one-sided DLMF concentration
    normalization, and transfer to the physical logarithmic-moment bounds;
