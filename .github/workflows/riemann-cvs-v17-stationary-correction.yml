@@ -28,14 +28,15 @@ jobs:
           test: false
           lint: false
           use-mathlib-cache: true
-      - name: Elaborate V17 stationary-correction modules
+      - name: Build V17 stationary-correction modules
         working-directory: research/riemann-cvs-lean
         run: |
-          lake env lean RiemannCvs/ProlateCrossDilationStationaryPoint.lean
-          lake env lean RiemannCvs/ProlateScaledStationaryFamily.lean
-          lake env lean RiemannCvs/ProlateDilationConvexityCore.lean
-          lake env lean RiemannCvs/ExteriorLogMomentTransfer.lean
-          lake env lean RiemannCvs/PrimeStationaryBudget.lean
+          lake build \
+            RiemannCvs.ProlateCrossDilationStationaryPoint \
+            RiemannCvs.ProlateScaledStationaryFamily \
+            RiemannCvs.ProlateDilationConvexityCore \
+            RiemannCvs.ExteriorLogMomentTransfer \
+            RiemannCvs.PrimeStationaryBudget
       - name: Reject placeholders and print axioms
         working-directory: research/riemann-cvs-lean
         shell: bash
@@ -64,6 +65,8 @@ jobs:
           #print axioms RiemannCvs.ProlateDilationConvexityCore.uniformCorePositive
           #print axioms RiemannCvs.ProlateDilationConvexityCore.radialCurvatureSquareDominance
           #print axioms RiemannCvs.ExteriorLogMomentTransfer.normalizedWeightedMomentBound
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBounds
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfCommonScale
           #print axioms RiemannCvs.PrimeStationaryBudget.weightedStationaryOverlapWithSeriesCap
           #print axioms RiemannCvs.PrimeStationaryBudget.conductorDominatesPrimePerturbation
           EOF

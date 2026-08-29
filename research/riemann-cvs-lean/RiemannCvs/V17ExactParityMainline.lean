@@ -4,6 +4,7 @@ import RiemannCvs.SymmetrizedProlateBridge
 import RiemannCvs.SymmetrizedProlateSecular
 import RiemannCvs.SymmetrizedProlateGap
 import RiemannCvs.ProlateConductorIdentity
+import RiemannCvs.ExteriorLogMomentTransfer
 import RiemannCvs.ConductorDefectCoercivity
 import RiemannCvs.NormalizedSymmetrizedConductor
 
@@ -17,10 +18,12 @@ the revised main line:
 1. exact Fourier symmetrization of compressed prolate modes;
 2. preservation of fixed-index defects, residues, and gaps;
 3. exact logarithmic conductor identity for the leakage tail;
-4. defect-weighted conductor coercivity;
-5. common-leading Weil transfer and odd-sector Temple budgets.
+4. scalar transfer from a common WKB amplitude scale to the physical
+   logarithmic-moment bounds;
+5. defect-weighted conductor coercivity;
+6. common-leading Weil transfer and odd-sector Temple budgets.
 
-The analytic PSWF exterior estimates, closed-form radical extension, prime
-oscillatory bound, and actual odd-sector spectral gap are not asserted by this
-module.
+The analytic PSWF exterior estimates feeding that scalar transfer, closed-form
+radical extension, prime oscillatory bound, and actual odd-sector spectral gap
+are not asserted by this module.
 -/

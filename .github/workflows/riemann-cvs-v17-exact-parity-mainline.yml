@@ -11,6 +11,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/SymmetrizedProlateSecular.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/SymmetrizedProlateGap.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ProlateConductorIdentity.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/ExteriorLogMomentTransfer.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ConductorDefectCoercivity.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/NormalizedSymmetrizedConductor.lean'
       - '.github/workflows/riemann-cvs-v17-exact-parity-mainline.yml'
@@ -22,6 +23,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/SymmetrizedProlateSecular.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/SymmetrizedProlateGap.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ProlateConductorIdentity.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/ExteriorLogMomentTransfer.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ConductorDefectCoercivity.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/NormalizedSymmetrizedConductor.lean'
       - '.github/workflows/riemann-cvs-v17-exact-parity-mainline.yml'
@@ -59,6 +61,7 @@ jobs:
             RiemannCvs/SymmetrizedProlateSecular.lean
             RiemannCvs/SymmetrizedProlateGap.lean
             RiemannCvs/ProlateConductorIdentity.lean
+            RiemannCvs/ExteriorLogMomentTransfer.lean
             RiemannCvs/ConductorDefectCoercivity.lean
             RiemannCvs/NormalizedSymmetrizedConductor.lean
           )
@@ -73,6 +76,7 @@ jobs:
           #print axioms RiemannCvs.SymmetrizedProlateSecular.twoPoleWeightPerturbation
           #print axioms RiemannCvs.SymmetrizedProlateGap.normalizedHighGap
           #print axioms RiemannCvs.ProlateConductorIdentity.conductorEnergyIdentityOfConcentrationDefect
+          #print axioms RiemannCvs.ExteriorLogMomentTransfer.dilationLogMomentBoundsOfCommonScale
           #print axioms RiemannCvs.ConductorDefectCoercivity.threeModeConductorAtLeastLogDefect
           #print axioms RiemannCvs.NormalizedSymmetrizedConductor.normalizedExactParityConductorBound
           EOF

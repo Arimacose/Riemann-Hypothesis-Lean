@@ -84,7 +84,6 @@ theorem weightedStationaryOverlapWithSeriesCap
 comparison with the logarithmic conductor scale. -/
 theorem combineMainAndEnvelopeRemainder
     (main remainder total mainScale remainderScale normSq : ℝ)
-    (hNorm : 0 ≤ normSq)
     (hMain : |main| ≤ mainScale * normSq)
     (hRemainder : |remainder| ≤ remainderScale * normSq)
     (hTotal : total = main + remainder) :
