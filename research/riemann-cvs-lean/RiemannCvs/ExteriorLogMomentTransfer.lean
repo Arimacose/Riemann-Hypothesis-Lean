@@ -96,6 +96,336 @@ theorem dilationLogMomentBoundsOfCommonScale
   exact dilationLogMomentBounds physical residual mass logScale
     (upper / lower) hResidualNonneg hResidualUpper hIdentity
 
+section OscillatoryAverage
+
+/-- Exact weighted `cos²` decomposition used by the fixed-interval Bessel
+mean-square argument.  The analytic integration-by-parts step only has to
+bound the second, oscillatory integral. -/
+theorem weightedCosSqIntegralIdentity
+    (weight phase : ℝ → ℝ) (s : Set ℝ)
+    (hs : MeasurableSet s)
+    (hWeight : IntegrableOn weight s)
+    (hOscillatory :
+      IntegrableOn (fun x => weight x * cos (2 * phase x)) s) :
+    (∫ x in s, weight x * cos (phase x) ^ 2) =
+      (1 / 2 : ℝ) *
+        ((∫ x in s, weight x) +
+          ∫ x in s, weight x * cos (2 * phase x)) := by
+  calc
+    (∫ x in s, weight x * cos (phase x) ^ 2) =
+        ∫ x in s,
+          (1 / 2 : ℝ) *
+            (weight x + weight x * cos (2 * phase x)) := by
+      apply setIntegral_congr_fun hs
+      intro x _
+      change weight x * cos (phase x) ^ 2 =
+        (1 / 2 : ℝ) * (weight x + weight x * cos (2 * phase x))
+      rw [Real.cos_two_mul]
+      ring
+    _ = (1 / 2 : ℝ) *
+        (∫ x in s, weight x + weight x * cos (2 * phase x)) := by
+      rw [integral_const_mul]
+    _ = (1 / 2 : ℝ) *
+        ((∫ x in s, weight x) +
+          ∫ x in s, weight x * cos (2 * phase x)) := by
+      rw [integral_add hWeight hOscillatory]
+
+/-- If integration by parts shows that the weighted double-frequency term is
+not more negative than half of the nonoscillatory weight mass, then the
+weighted `cos²` average retains at least one quarter of that mass. -/
+theorem weightedCosSqIntegralLower
+    (weight phase : ℝ → ℝ) (s : Set ℝ)
+    (hs : MeasurableSet s)
+    (hWeight : IntegrableOn weight s)
+    (hOscillatory :
+      IntegrableOn (fun x => weight x * cos (2 * phase x)) s)
+    (hOscillatoryLower :
+      -((1 / 2 : ℝ) * (∫ x in s, weight x)) ≤
+        ∫ x in s, weight x * cos (2 * phase x)) :
+    (1 / 4 : ℝ) * (∫ x in s, weight x) ≤
+      ∫ x in s, weight x * cos (phase x) ^ 2 := by
+  rw [weightedCosSqIntegralIdentity weight phase s hs hWeight hOscillatory]
+  linarith
+
+/-- Interval-integral version of `weightedCosSqIntegralIdentity`, suited to the
+fixed compact interval on which the Dunster approximation is instantiated. -/
+theorem weightedCosSqIntervalIntegralIdentity
+    (weight phase : ℝ → ℝ) (a b : ℝ)
+    (hWeight : IntervalIntegrable weight volume a b)
+    (hOscillatory :
+      IntervalIntegrable (fun x => weight x * cos (2 * phase x)) volume a b) :
+    (∫ x in a..b, weight x * cos (phase x) ^ 2) =
+      (1 / 2 : ℝ) *
+        ((∫ x in a..b, weight x) +
+          ∫ x in a..b, weight x * cos (2 * phase x)) := by
+  calc
+    (∫ x in a..b, weight x * cos (phase x) ^ 2) =
+        ∫ x in a..b,
+          (1 / 2 : ℝ) *
+            (weight x + weight x * cos (2 * phase x)) := by
+      apply intervalIntegral.integral_congr
+      intro x _
+      change weight x * cos (phase x) ^ 2 =
+        (1 / 2 : ℝ) * (weight x + weight x * cos (2 * phase x))
+      rw [Real.cos_two_mul]
+      ring
+    _ = (1 / 2 : ℝ) *
+        (∫ x in a..b, weight x + weight x * cos (2 * phase x)) := by
+      rw [intervalIntegral.integral_const_mul]
+    _ = (1 / 2 : ℝ) *
+        ((∫ x in a..b, weight x) +
+          ∫ x in a..b, weight x * cos (2 * phase x)) := by
+      rw [intervalIntegral.integral_add hWeight hOscillatory]
+
+/-- If the double-frequency interval integral is no more negative than half of
+the nonoscillatory interval mass, the weighted `cos²` integral keeps one
+quarter of that mass. -/
+theorem weightedCosSqIntervalIntegralLower
+    (weight phase : ℝ → ℝ) (a b : ℝ)
+    (hWeight : IntervalIntegrable weight volume a b)
+    (hOscillatory :
+      IntervalIntegrable (fun x => weight x * cos (2 * phase x)) volume a b)
+    (hOscillatoryLower :
+      -((1 / 2 : ℝ) * (∫ x in a..b, weight x)) ≤
+        ∫ x in a..b, weight x * cos (2 * phase x)) :
+    (1 / 4 : ℝ) * (∫ x in a..b, weight x) ≤
+      ∫ x in a..b, weight x * cos (phase x) ^ 2 := by
+  rw [weightedCosSqIntervalIntegralIdentity weight phase a b hWeight hOscillatory]
+  linarith
+
+/-- Integration by parts for a weighted linear-frequency cosine.  This is the
+form obtained from the fixed-interval Bessel phase after the monotone change of
+variables `y = ξ(x)`. -/
+theorem linearPhaseIntegrationByPartsIdentity
+    (weight weight' : ℝ → ℝ) (a b frequency offset : ℝ)
+    (hWeightDeriv :
+      ∀ x ∈ uIcc a b, HasDerivAt weight (weight' x) x)
+    (hWeightPrimeIntegrable : IntervalIntegrable weight' volume a b) :
+    frequency * (∫ x in a..b, weight x * cos (frequency * x + offset)) =
+      weight b * sin (frequency * b + offset) -
+        weight a * sin (frequency * a + offset) -
+        ∫ x in a..b, weight' x * sin (frequency * x + offset) := by
+  have hSinDeriv :
+      ∀ x ∈ uIcc a b,
+        HasDerivAt (fun y : ℝ => sin (frequency * y + offset))
+          (frequency * cos (frequency * x + offset)) x := by
+    intro x _
+    simpa only [id_eq, mul_one, mul_comm] using
+      (((hasDerivAt_id x).const_mul frequency).add_const offset).sin
+  have hSinPrimeIntegrable :
+      IntervalIntegrable
+        (fun x : ℝ => frequency * cos (frequency * x + offset))
+        volume a b := by
+    apply Continuous.intervalIntegrable
+    fun_prop
+  have hIBP := intervalIntegral.integral_mul_deriv_eq_deriv_mul
+    hWeightDeriv hSinDeriv hWeightPrimeIntegrable hSinPrimeIntegrable
+  calc
+    frequency * (∫ x in a..b, weight x * cos (frequency * x + offset)) =
+        ∫ x in a..b, frequency *
+          (weight x * cos (frequency * x + offset)) := by
+      rw [intervalIntegral.integral_const_mul]
+    _ = ∫ x in a..b, weight x *
+        (frequency * cos (frequency * x + offset)) := by
+      apply intervalIntegral.integral_congr
+      intro x _
+      ring
+    _ = weight b * sin (frequency * b + offset) -
+        weight a * sin (frequency * a + offset) -
+        ∫ x in a..b, weight' x * sin (frequency * x + offset) := hIBP
+
+/-- Endpoint-plus-variation bound obtained from
+`linearPhaseIntegrationByPartsIdentity`. -/
+theorem linearPhaseOscillatoryIntegralBound
+    (weight weight' : ℝ → ℝ) (a b frequency offset variation : ℝ)
+    (hFrequency : 0 < frequency)
+    (hWeightDeriv :
+      ∀ x ∈ uIcc a b, HasDerivAt weight (weight' x) x)
+    (hWeightPrimeIntegrable : IntervalIntegrable weight' volume a b)
+    (hVariation :
+      |∫ x in a..b, weight' x * sin (frequency * x + offset)| ≤ variation) :
+    |∫ x in a..b, weight x * cos (frequency * x + offset)| ≤
+      (|weight b| + |weight a| + variation) / frequency := by
+  have hIdentity := linearPhaseIntegrationByPartsIdentity
+    weight weight' a b frequency offset hWeightDeriv hWeightPrimeIntegrable
+  have hEndpointB :
+      |weight b * sin (frequency * b + offset)| ≤ |weight b| := by
+    rw [abs_mul]
+    simpa using mul_le_mul_of_nonneg_left
+      (abs_sin_le_one (frequency * b + offset)) (abs_nonneg (weight b))
+  have hEndpointA :
+      |weight a * sin (frequency * a + offset)| ≤ |weight a| := by
+    rw [abs_mul]
+    simpa using mul_le_mul_of_nonneg_left
+      (abs_sin_le_one (frequency * a + offset)) (abs_nonneg (weight a))
+  have hTriangle :
+      |weight b * sin (frequency * b + offset) -
+          weight a * sin (frequency * a + offset) -
+          ∫ x in a..b, weight' x * sin (frequency * x + offset)| ≤
+        |weight b * sin (frequency * b + offset)| +
+          |weight a * sin (frequency * a + offset)| +
+          |∫ x in a..b, weight' x * sin (frequency * x + offset)| := by
+    rw [sub_eq_add_neg, sub_eq_add_neg]
+    calc
+      |weight b * sin (frequency * b + offset) +
+          -(weight a * sin (frequency * a + offset)) +
+          -(∫ x in a..b, weight' x * sin (frequency * x + offset))| ≤
+          |weight b * sin (frequency * b + offset) +
+            -(weight a * sin (frequency * a + offset))| +
+            |-(∫ x in a..b, weight' x * sin (frequency * x + offset))| :=
+        abs_add_le _ _
+      _ ≤
+          (|weight b * sin (frequency * b + offset)| +
+            |-(weight a * sin (frequency * a + offset))|) +
+            |-(∫ x in a..b, weight' x * sin (frequency * x + offset))| :=
+        add_le_add (abs_add_le _ _) (le_refl _)
+      _ = |weight b * sin (frequency * b + offset)| +
+          |weight a * sin (frequency * a + offset)| +
+          |∫ x in a..b, weight' x * sin (frequency * x + offset)| := by
+        rw [abs_neg, abs_neg]
+  have hScaled :
+      frequency * |∫ x in a..b, weight x * cos (frequency * x + offset)| ≤
+        |weight b| + |weight a| + variation := by
+    calc
+      frequency * |∫ x in a..b, weight x * cos (frequency * x + offset)| =
+          |frequency * (∫ x in a..b,
+            weight x * cos (frequency * x + offset))| := by
+        rw [abs_mul, abs_of_pos hFrequency]
+      _ = |weight b * sin (frequency * b + offset) -
+          weight a * sin (frequency * a + offset) -
+          ∫ x in a..b, weight' x * sin (frequency * x + offset)| := by
+        rw [hIdentity]
+      _ ≤ |weight b * sin (frequency * b + offset)| +
+          |weight a * sin (frequency * a + offset)| +
+          |∫ x in a..b, weight' x * sin (frequency * x + offset)| := hTriangle
+      _ ≤ |weight b| + |weight a| + variation := by linarith
+  exact (le_div_iff₀ hFrequency).2 (by simpa [mul_comm] using hScaled)
+
+/-- A directly usable integration-by-parts bound in terms of the total
+variation `∫ |weight'|`. -/
+theorem linearPhaseOscillatoryIntegralBoundByVariation
+    (weight weight' : ℝ → ℝ) (a b frequency offset : ℝ)
+    (hab : a ≤ b)
+    (hFrequency : 0 < frequency)
+    (hWeightDeriv :
+      ∀ x ∈ uIcc a b, HasDerivAt weight (weight' x) x)
+    (hWeightPrimeIntegrable : IntervalIntegrable weight' volume a b) :
+    |∫ x in a..b, weight x * cos (frequency * x + offset)| ≤
+      (|weight b| + |weight a| + ∫ x in a..b, |weight' x|) /
+        frequency := by
+  have hSinContinuous :
+      ContinuousOn (fun x : ℝ => sin (frequency * x + offset)) (uIcc a b) := by
+    fun_prop
+  have hProductIntegrable :
+      IntervalIntegrable
+        (fun x : ℝ => weight' x * sin (frequency * x + offset))
+        volume a b :=
+    hWeightPrimeIntegrable.mul_continuousOn hSinContinuous
+  have hVariation :
+      |∫ x in a..b, weight' x * sin (frequency * x + offset)| ≤
+        ∫ x in a..b, |weight' x| := by
+    calc
+      |∫ x in a..b, weight' x * sin (frequency * x + offset)| ≤
+          ∫ x in a..b, |weight' x * sin (frequency * x + offset)| :=
+        intervalIntegral.abs_integral_le_integral_abs hab
+      _ ≤ ∫ x in a..b, |weight' x| := by
+        apply intervalIntegral.integral_mono_on hab
+          hProductIntegrable.norm hWeightPrimeIntegrable.norm
+        intro x _
+        rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_mul]
+        simpa using mul_le_mul_of_nonneg_left
+          (abs_sin_le_one (frequency * x + offset)) (abs_nonneg (weight' x))
+  exact linearPhaseOscillatoryIntegralBound
+    weight weight' a b frequency offset (∫ x in a..b, |weight' x|)
+    hFrequency hWeightDeriv hWeightPrimeIntegrable hVariation
+
+/-- A complete fixed-interval weighted mean-square lower bound.  Endpoint and
+total-variation control at the doubled phase frequency are sufficient to keep
+one quarter of the nonoscillatory weight mass. -/
+theorem linearPhaseWeightedCosSqLowerOfVariation
+    (weight weight' : ℝ → ℝ) (a b frequency offset : ℝ)
+    (hab : a ≤ b)
+    (hFrequency : 0 < frequency)
+    (hWeight : IntervalIntegrable weight volume a b)
+    (hWeightDeriv :
+      ∀ x ∈ uIcc a b, HasDerivAt weight (weight' x) x)
+    (hWeightPrimeIntegrable : IntervalIntegrable weight' volume a b)
+    (hOscillatoryBudget :
+      (|weight b| + |weight a| + ∫ x in a..b, |weight' x|) / frequency ≤
+        (1 / 2 : ℝ) * (∫ x in a..b, weight x)) :
+    (1 / 4 : ℝ) * (∫ x in a..b, weight x) ≤
+      ∫ x in a..b,
+        weight x * cos ((frequency * x + offset) / 2) ^ 2 := by
+  have hPhaseContinuous :
+      ContinuousOn (fun x : ℝ => cos (frequency * x + offset)) (uIcc a b) := by
+    fun_prop
+  have hOscBase :
+      IntervalIntegrable (fun x : ℝ => weight x * cos (frequency * x + offset))
+        volume a b :=
+    hWeight.mul_continuousOn hPhaseContinuous
+  have hOsc :
+      IntervalIntegrable
+        (fun x : ℝ => weight x * cos (2 * ((frequency * x + offset) / 2)))
+        volume a b := by
+    convert hOscBase using 1
+    funext x
+    congr 1
+    ring_nf
+  have hAbs := linearPhaseOscillatoryIntegralBoundByVariation
+    weight weight' a b frequency offset hab hFrequency hWeightDeriv
+      hWeightPrimeIntegrable
+  have hAbsHalf :
+      |∫ x in a..b, weight x * cos (frequency * x + offset)| ≤
+        (1 / 2 : ℝ) * (∫ x in a..b, weight x) :=
+    hAbs.trans hOscillatoryBudget
+  have hLowerBase :
+      -((1 / 2 : ℝ) * (∫ x in a..b, weight x)) ≤
+        ∫ x in a..b, weight x * cos (frequency * x + offset) :=
+    neg_le_of_abs_le hAbsHalf
+  have hLower :
+      -((1 / 2 : ℝ) * (∫ x in a..b, weight x)) ≤
+        ∫ x in a..b,
+          weight x * cos (2 * ((frequency * x + offset) / 2)) := by
+    convert hLowerBase using 1
+    apply intervalIntegral.integral_congr
+    intro x _
+    ring_nf
+  exact weightedCosSqIntervalIntegralLower weight
+    (fun x => (frequency * x + offset) / 2) a b hWeight hOsc hLower
+
+/-- Scalar `L²`-approximation budget.  If the reference mass is controlled by
+twice the actual mass plus twice the error mass, a reference lower bound and an
+error upper bound leave the displayed positive part of the reference scale in
+the actual mass. -/
+theorem massLowerOfReferenceAndErrorBudget
+    (actualMass referenceMass errorMass amplitude lower error : ℝ)
+    (hReferenceLower : lower * amplitude ≤ referenceMass)
+    (hReferenceSplit : referenceMass ≤ 2 * actualMass + 2 * errorMass)
+    (hErrorUpper : errorMass ≤ error * amplitude) :
+    ((lower - 2 * error) / 2) * amplitude ≤ actualMass := by
+  nlinarith
+
+/-- Convenient positive-margin form of
+`massLowerOfReferenceAndErrorBudget`: an error coefficient at most one quarter
+of the reference coefficient leaves at least one quarter of the reference
+scale in the actual mass. -/
+theorem massLowerOfReferenceAndQuarterError
+    (actualMass referenceMass errorMass amplitude lower error : ℝ)
+    (hAmplitudeNonneg : 0 ≤ amplitude)
+    (hReferenceLower : lower * amplitude ≤ referenceMass)
+    (hReferenceSplit : referenceMass ≤ 2 * actualMass + 2 * errorMass)
+    (hErrorUpper : errorMass ≤ error * amplitude)
+    (hQuarter : 4 * error ≤ lower) :
+    (lower / 4) * amplitude ≤ actualMass := by
+  have hBudget := massLowerOfReferenceAndErrorBudget
+    actualMass referenceMass errorMass amplitude lower error
+    hReferenceLower hReferenceSplit hErrorUpper
+  have hCoefficient : lower / 4 ≤ (lower - 2 * error) / 2 := by
+    linarith
+  exact (mul_le_mul_of_nonneg_right hCoefficient hAmplitudeNonneg).trans hBudget
+
+end OscillatoryAverage
+
 section HyperbolicEnvelope
 
 /-- The elementary exponential envelope for the hyperbolic secant. -/

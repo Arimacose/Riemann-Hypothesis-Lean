@@ -545,10 +545,44 @@ for all sufficiently large \(c\).  Dunster's
 term on this fixed interval.  After enlarging the threshold once more, this
 proves the required positive constant \(L_n\).
 
-The remaining formalization boundary is now narrow: encode the weighted
-oscillatory-average estimate (including its integration-by-parts remainder)
-and instantiate it with Dunster's \(\xi\) and prefactor.  All subsequent
-defect normalization and logarithmic-moment algebra is already in Lean.
+The nonoscillatory algebra is now formalized in the set-integral theorems
+`ExteriorLogMomentTransfer.weightedCosSqIntegralIdentity` and
+`ExteriorLogMomentTransfer.weightedCosSqIntegralLower`, with interval-integral
+counterparts for the fixed compact interval.  Once integration by parts
+supplies
+
+\[
+-\frac12\int_2^3 w_{n,c}(x)dx
+\le
+\int_2^3 w_{n,c}(x)\cos(2c\xi(x)-\pi/2)dx,
+\]
+
+Lean retains one quarter of the weight mass.  The linear-phase integration by
+parts itself is also formalized in
+`linearPhaseIntegrationByPartsIdentity` and
+`linearPhaseOscillatoryIntegralBoundByVariation`: after the monotone change of
+variables \(y=\xi(x)\), the oscillatory term is bounded by
+
+\[
+\frac{|W(y_2)|+|W(y_1)|+
+\int_{y_1}^{y_2}|W'(y)|dy}{2c}.
+\]
+
+The combined theorem
+`linearPhaseWeightedCosSqLowerOfVariation` now closes this generic
+fixed-interval mean-square step directly: whenever the displayed endpoint-plus-
+variation budget is at most half of the weight mass, the weighted squared
+cosine retains at least one quarter of that mass.
+
+Theorems
+`massLowerOfReferenceAndErrorBudget` and
+`massLowerOfReferenceAndQuarterError` then absorb Dunster's explicit
+remainder into the actual radial mass.  The remaining source-specific
+formalization boundary is therefore source-specific: justify the change of
+variables for Dunster's \(\xi\), define
+\(W=w_{n,c}/\xi'\) on its image interval, and prove uniform endpoint and total-
+variation bounds for \(W\).  The integration-by-parts, remainder absorption,
+defect normalization, and logarithmic-moment algebra are already in Lean.
 
 The displayed radial theorem does not itself state the derivative bound needed
 for the separate prime-dilation overlap.  That bound must be extracted from the
