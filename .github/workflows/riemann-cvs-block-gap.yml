@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - research/cvs-prolate-v17
     paths:
       - 'research/riemann-cvs-lean/RiemannCvs/BlockGapTransfer.lean'
       - '.github/workflows/riemann-cvs-block-gap.yml'
@@ -33,9 +34,9 @@ jobs:
           lint: false
           use-mathlib-cache: true
 
-      - name: Elaborate block-gap module
+      - name: Build block-gap module
         working-directory: research/riemann-cvs-lean
-        run: lake env lean RiemannCvs/BlockGapTransfer.lean
+        run: lake build RiemannCvs.BlockGapTransfer
 
       - name: Reject proof placeholders and user axioms
         working-directory: research/riemann-cvs-lean
@@ -56,7 +57,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cat > /tmp/BlockGapAxioms.lean <<'EOF'
+          cat > BlockGapAxioms.lean <<'EOF'
           import RiemannCvs.BlockGapTransfer
           #print axioms RiemannCvs.BlockGapTransfer.twoByTwoFormNonnegative
           #print axioms RiemannCvs.BlockGapTransfer.blockLowerBound
@@ -65,7 +66,7 @@ jobs:
           #print axioms RiemannCvs.BlockGapTransfer.quarticEvenOddSeparation
           #print axioms RiemannCvs.BlockGapTransfer.quarticEvenOddSeparationFromCouplingBudget
           EOF
-          lake env lean /tmp/BlockGapAxioms.lean | tee block-gap-axioms.txt
+          lake env lean BlockGapAxioms.lean | tee block-gap-axioms.txt
           if grep -E 'sorryAx|RiemannCvs\..*axiom' block-gap-axioms.txt; then
             echo 'Unexpected axiom dependency detected.' >&2
             exit 1
