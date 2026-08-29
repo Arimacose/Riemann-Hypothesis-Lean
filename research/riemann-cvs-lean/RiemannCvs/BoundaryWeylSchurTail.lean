@@ -394,6 +394,136 @@ theorem twoBlockEnergy_nonnegative
       nlinarith [sq_nonneg (coreEnergy + cross)]
     exact le_of_mul_le_mul_left hMul hCorePos
 
+/-- A tighter relative coefficient `q₀` leaves a direct low-channel reserve
+when the same form is evaluated with a larger coefficient `q`. -/
+theorem relativeCouplingSlack_lowReserve
+    (low high cross q₀ q : ℝ)
+    (hLow : 0 ≤ low)
+    (hHigh : 0 ≤ high)
+    (hq₀ : 0 ≤ q₀)
+    (hRelative : cross ^ 2 ≤ q₀ * low * high) :
+    (q - q₀) * low ≤ q * low + 2 * cross + high := by
+  have hCore : 0 ≤ q₀ * low := mul_nonneg hq₀ hLow
+  have hBase := twoBlockEnergy_nonnegative
+    (q₀ * low) high cross hCore hHigh hRelative
+  nlinarith
+
+/-- Division-free high-channel companion to
+`relativeCouplingSlack_lowReserve`.  Multiplication by `q` avoids introducing
+the quotient `q₀ / q` into an interval certificate. -/
+theorem relativeCouplingSlack_highReserve
+    (low high cross q₀ q : ℝ)
+    (hLow : 0 ≤ low)
+    (hHigh : 0 ≤ high)
+    (hq₀ : 0 ≤ q₀)
+    (hRelative : cross ^ 2 ≤ q₀ * low * high) :
+    (q - q₀) * high ≤ q * (q * low + 2 * cross + high) := by
+  have hCore : 0 ≤ q ^ 2 * low := mul_nonneg (sq_nonneg q) hLow
+  have hTail : 0 ≤ q₀ * high := mul_nonneg hq₀ hHigh
+  have hScaled := mul_le_mul_of_nonneg_left hRelative (sq_nonneg q)
+  have hDet : (q * cross) ^ 2 ≤ (q ^ 2 * low) * (q₀ * high) := by
+    calc
+      (q * cross) ^ 2 = q ^ 2 * cross ^ 2 := by ring
+      _ ≤ q ^ 2 * (q₀ * low * high) := hScaled
+      _ = (q ^ 2 * low) * (q₀ * high) := by ring
+  have hBase := twoBlockEnergy_nonnegative
+    (q ^ 2 * low) (q₀ * high) (q * cross)
+    hCore hTail hDet
+  nlinarith
+
+/-- Balanced division-free reserve from a strict coefficient gap `q₀ < q`.
+It lower-bounds the `q`-scaled core simultaneously in its low and high
+energies, which is the form needed to estimate the next dyadic shell. -/
+theorem relativeCouplingSlack_balancedReserve
+    (low high cross q₀ q : ℝ)
+    (hLow : 0 ≤ low)
+    (hHigh : 0 ≤ high)
+    (hq₀ : 0 ≤ q₀)
+    (hq₀Lt : q₀ < q)
+    (hRelative : cross ^ 2 ≤ q₀ * low * high) :
+    (q - q₀) * (q * low + high) ≤
+      2 * q * (q * low + 2 * cross + high) := by
+  have hq : 0 < q := lt_of_le_of_lt hq₀ hq₀Lt
+  have hLowReserve := relativeCouplingSlack_lowReserve
+    low high cross q₀ q hLow hHigh hq₀ hRelative
+  have hHighReserve := relativeCouplingSlack_highReserve
+    low high cross q₀ q hLow hHigh hq₀ hRelative
+  have hLowScaled := mul_le_mul_of_nonneg_left hLowReserve (le_of_lt hq)
+  nlinarith
+
+/-- Quotient form of `relativeCouplingSlack_balancedReserve`.  For the concrete
+V23 coefficients `q₀ = 249/250` and `q = 999/1000`, the prefactor on the left
+is exactly `1/666`. -/
+theorem relativeCouplingSlack_balancedLowerBound
+    (low high cross q₀ q : ℝ)
+    (hLow : 0 ≤ low)
+    (hHigh : 0 ≤ high)
+    (hq₀ : 0 ≤ q₀)
+    (hq₀Lt : q₀ < q)
+    (hRelative : cross ^ 2 ≤ q₀ * low * high) :
+    ((q - q₀) / (2 * q)) * (q * low + high) ≤
+      q * low + 2 * cross + high := by
+  have hq : 0 < q := lt_of_le_of_lt hq₀ hq₀Lt
+  have hTwoQ : 0 < 2 * q := by positivity
+  have hReserve := relativeCouplingSlack_balancedReserve
+    low high cross q₀ q hLow hHigh hq₀ hq₀Lt hRelative
+  have hDiv :
+      ((q - q₀) * (q * low + high)) / (2 * q) ≤
+        q * low + 2 * cross + high := by
+    apply (div_le_iff₀ hTwoQ).2
+    nlinarith
+  calc
+    ((q - q₀) / (2 * q)) * (q * low + high) =
+        ((q - q₀) * (q * low + high)) / (2 * q) := by ring
+    _ ≤ q * low + 2 * cross + high := hDiv
+
+/-- Concrete V23 specialization of the balanced reserve.  A certificate with
+`q₀ = 249/250` supplies exactly `1/666` of the reference energy when the final
+relative coefficient is `q = 999/1000`. -/
+theorem relativeCouplingSlack_v23BalancedLowerBound
+    (low high cross : ℝ)
+    (hLow : 0 ≤ low)
+    (hHigh : 0 ≤ high)
+    (hRelative : cross ^ 2 ≤ (249 / 250 : ℝ) * low * high) :
+    (1 / 666 : ℝ) * ((999 / 1000 : ℝ) * low + high) ≤
+      (999 / 1000 : ℝ) * low + 2 * cross + high := by
+  have h := relativeCouplingSlack_balancedLowerBound
+    low high cross (249 / 250 : ℝ) (999 / 1000 : ℝ)
+    hLow hHigh (by norm_num) (by norm_num) hRelative
+  norm_num at h ⊢
+  exact h
+
+/-- Convert a coupling estimate measured against a simpler reference energy
+into the core-relative form consumed by `relativeCoupling_of_recursiveShell`.
+The scalar budget `budget ≤ rho * reserve` is the exact next-shell acceptance
+condition once `reserve * reference ≤ core` has been established. -/
+theorem relativeShell_of_referenceReserve
+    (reference core tail cross reserve budget rho : ℝ)
+    (hReference : 0 ≤ reference)
+    (hTail : 0 ≤ tail)
+    (hRho : 0 ≤ rho)
+    (hReserveCore : reserve * reference ≤ core)
+    (hBudget : budget ≤ rho * reserve)
+    (hCross : cross ^ 2 ≤ budget * reference * tail) :
+    cross ^ 2 ≤ rho * core * tail := by
+  have hBudgetReference :
+      budget * reference ≤ (rho * reserve) * reference :=
+    mul_le_mul_of_nonneg_right hBudget hReference
+  have hBudgetTail :
+      budget * reference * tail ≤
+        (rho * reserve) * reference * tail :=
+    mul_le_mul_of_nonneg_right hBudgetReference hTail
+  have hCoreRho : rho * (reserve * reference) ≤ rho * core :=
+    mul_le_mul_of_nonneg_left hReserveCore hRho
+  have hCoreTail :
+      rho * (reserve * reference) * tail ≤ rho * core * tail :=
+    mul_le_mul_of_nonneg_right hCoreRho hTail
+  calc
+    cross ^ 2 ≤ budget * reference * tail := hCross
+    _ ≤ (rho * reserve) * reference * tail := hBudgetTail
+    _ = rho * (reserve * reference) * tail := by ring
+    _ ≤ rho * core * tail := hCoreTail
+
 /-- Recover a relative coupling inequality from nonnegativity of the scaled
 two-block form for every scalar multiple of the low vector.  Algebraically,
 this is the converse discriminant direction to `twoBlockEnergy_nonnegative`. -/

@@ -155,6 +155,7 @@ def certify(
     precision: int,
     shift_gain: Fraction,
     q_upper: Fraction,
+    target_q: Fraction | None = None,
 ) -> dict[str, Any]:
     if c <= 1:
         raise ValueError("c must exceed one")
@@ -164,6 +165,8 @@ def certify(
         raise ValueError("precision must be at least 128 bits")
     if not 0 < q_upper < 1:
         raise ValueError("q_upper must lie strictly between zero and one")
+    if target_q is not None and not q_upper < target_q < 1:
+        raise ValueError("target_q must lie strictly between q_upper and one")
     if not stages:
         raise ValueError("at least one recursive shell stage is required")
 
@@ -267,7 +270,7 @@ def certify(
             }
         )
 
-    return {
+    payload: dict[str, Any] = {
         "status": "PASS",
         "scope": (
             "rigorous finite recursive-shell relative-energy certificate; "
@@ -297,6 +300,26 @@ def certify(
         "sectors": sector_records,
         "total_seconds": round(time.time() - started, 3),
     }
+    if target_q is not None:
+        reserve_gap = target_q - q_upper
+        payload["target_q"] = str(target_q)
+        payload["reserve_gap"] = str(reserve_gap)
+        payload["balanced_reserve_coefficient"] = str(
+            reserve_gap / (2 * target_q)
+        )
+        payload["balanced_reserve_inequality"] = (
+            "(target_q-q_upper)*(target_q*L+H) "
+            "<= 2*target_q*R_target_q"
+        )
+        payload["lean_targets"].append(
+            "RiemannCvs.BoundaryWeylSchurTail."
+            "relativeCouplingSlack_balancedReserve"
+        )
+        payload["lean_targets"].append(
+            "RiemannCvs.BoundaryWeylSchurTail."
+            "relativeCouplingSlack_balancedLowerBound"
+        )
+    return payload
 
 
 def main() -> int:
@@ -314,10 +337,20 @@ def main() -> int:
     parser.add_argument("--prec", type=int, default=900)
     parser.add_argument("--shift-gain", default="1/1024")
     parser.add_argument("--q-upper", default="999/1000")
+    parser.add_argument(
+        "--target-q",
+        default=None,
+        help="optional larger q whose explicit reserve is recorded",
+    )
     parser.add_argument("--json-out", type=Path, required=True)
     args = parser.parse_args()
 
     stages = args.stage or [(240, Fraction(1, 3)), (480, Fraction(1, 5))]
+    target_q = (
+        _positive_fraction(args.target_q, "target_q")
+        if args.target_q is not None
+        else None
+    )
     payload = certify(
         c=args.c,
         low_cutoff=args.low_cutoff,
@@ -326,6 +359,7 @@ def main() -> int:
         precision=args.prec,
         shift_gain=_positive_fraction(args.shift_gain, "shift_gain"),
         q_upper=_positive_fraction(args.q_upper, "q_upper"),
+        target_q=target_q,
     )
     payload.update(
         {
@@ -366,6 +400,13 @@ def main() -> int:
                 f"positive_pivots={shell['n_pos']} "
                 f"transcript={shell['pivot_transcript_sha256']}"
             )
+    if "target_q" in payload:
+        print(
+            f"  target_q={payload['target_q']} "
+            f"reserve_gap={payload['reserve_gap']} "
+            "balanced_reserve_coefficient="
+            f"{payload['balanced_reserve_coefficient']}"
+        )
     print(f"artifact={args.json_out.resolve()}")
     print(f"sha256={digest}")
     return 0

@@ -567,6 +567,66 @@ every later shell, but it moves the rigorous finite frontier from `N=120` to
 uniform target: prove one coefficient `rho_*<1` for every later dyadic shell,
 then pass the finite-support inequality to the closed form domain.
 
+The next certificate deliberately spends a smaller coefficient before trying
+to estimate all future shells.  At 900 bits it proves
+
+```text
+reference coefficient q_0 = 249/250,
+base:       N = 20 -> 480,
+shell:      N = 480 -> 960, rho = 1/7,
+x = -1/1024.
+```
+
+Every interval-LDL pivot is again strictly positive:
+
+```text
+even base:       481 / 481,
+  transcript 2f7622c5c069b9e3ca5a1c17d1fe663eb7c1c59c94b7d83a30862d9315cc2813,
+even 480 -> 960: 961 / 961,
+  transcript d8ccfdb2e1fc8d9e4761c1b3838ebfc811f4842981f7c54c90c332c74fe3ab34,
+
+odd base:        480 / 480,
+  transcript 9c7ff1683830d053dc70e0fa1376a07f85094908920fbe0316777052fe32d63e,
+odd 480 -> 960:  960 / 960,
+  transcript b6e13bf080ecd0d49eca975cb7929dba9a1c0681d44b8b6398ce5778619712ef.
+```
+
+The JSON artifact SHA-256 is
+`7DDC919A3644F04C3B33E09AA29139856493D40F9A685DDC91300324E5EF4050`.
+This moves the strict finite `q_0` frontier to
+`N=960`.  More importantly, evaluating the enlarged core with the final
+coefficient `q=999/1000` leaves the exact gap
+
+```text
+q - q_0 = 3/1000,
+(q - q_0) / (2q) = 1/666.
+```
+
+`relativeCouplingSlack_balancedReserve` proves this reserve without a square
+root, and `relativeCouplingSlack_v23BalancedLowerBound` kernel-checks its exact
+V23 specialization:
+
+```text
+(q-q_0) * (q*L + H) <= 2*q*R_q,
+(1/666) * (q*L + H) <= R_q
+  when q_0 = 249/250 and q = 999/1000.
+```
+
+The theorem `relativeShell_of_referenceReserve` then converts a shell estimate
+against the simpler reference energy into the core-relative hypothesis used by
+the recursive gluing theorem.  Consequently the open analytic estimate has the
+explicit form
+
+```text
+C_K(s,t)^2 <= kappa_K * (q*L + H_K)(s,s) * H_shell(t,t),
+kappa_K <= rho/666
+```
+
+for one uniform `rho<1` on all later dyadic shells.  This is strictly sharper
+than asking directly for an unspecified core-relative coefficient: the finite
+certificate has supplied the exact amount of reference energy available to
+pay for every later coupling.
+
 `BoundaryWeylFarLeft.lean` closes the algebraic part of the exterior
 normalization.  If all finite poles are nonnegative, the total residue is one,
 and
@@ -676,12 +736,14 @@ The following are still explicit proof obligations:
 
 1. instantiate the characteristic-polynomial identification for the concrete
    self-adjoint CvS blocks from a Lean-side ordered eigenvalue enumeration;
-2. prove a uniform `rho_*<1` bound for every recursive dyadic shell after the
-   rigorously checked chain `N=20 -> 120 -> 240 -> 480`, and pass the resulting
-   `q<999/1000` finite-support inequality to the closed high complement,
-   uniformly on compact domains with right endpoint `< 0`; the older
+2. prove the uniform reference-energy estimate `kappa_K <= rho/666` for one
+   `rho<1` on every recursive dyadic shell after the rigorously checked chain
+   `N=20 -> 120 -> 240 -> 480 -> 960`, and pass the resulting
+   `q=999/1000` finite-support inequality to the closed high complement,
+   uniformly on compact domains with right endpoint `< 0`; the tighter
+   `q_0=249/250` certificate supplies the exact `1/666` reserve; the older
    `a/gamma/epsilon` and restricted `errorSpace` budgets remain fallback
-   interfaces, while the relative form inequality is the preferred route;
+   interfaces, and the relative form inequality is the preferred route;
 3. prove a cutoff-uniform upper bound for the absolute first spectral moment
    consumed by the new far-left theorem;
 4. keep the V22 central-mode functional distinct from the Sylvester boundary
@@ -692,11 +754,14 @@ The following are still explicit proof obligations:
    stationary-phase route.
 
 The cumulative certificate closes the finite `(13,20)` numerical hypothesis,
-and the recursive relative-energy certificate extends the checked Schur
-comparison through `20 -> 120 -> 240 -> 480` throughout `x <= -1/1024`.  The exact
+and the recursive relative-energy certificates extend the checked Schur
+comparison through `20 -> 120 -> 240 -> 480 -> 960` throughout
+`x <= -1/1024`; the last stage uses `q_0=249/250` and leaves the exact `1/666`
+reference-energy reserve for `q=999/1000`.  The exact
 finite displacement, characteristic-product, residue-normalization,
 determinant-ratio, quantitative Abel, energy-normalized monotonicity, and
-recursive shell adapters are now formalized.  The uniform later-shell bound,
+recursive shell and reference-reserve adapters are now formalized.  The
+uniform later-shell reference-energy bound,
 closed-form passage, uniform moment bound, and limiting resolvent construction
 remain the dominant proof boundary.
 

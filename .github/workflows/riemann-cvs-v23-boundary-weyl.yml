@@ -187,6 +187,12 @@ jobs:
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeSchurResponseBudget
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCoupling_of_formGrowth
           #print axioms RiemannCvs.BoundaryWeylSchurTail.twoBlockEnergy_nonnegative
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCouplingSlack_lowReserve
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCouplingSlack_highReserve
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCouplingSlack_balancedReserve
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCouplingSlack_balancedLowerBound
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCouplingSlack_v23BalancedLowerBound
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeShell_of_referenceReserve
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCoupling_of_scaledFormNonnegative
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCoupling_of_recursiveShell
           #print axioms RiemannCvs.BoundaryWeylSchurTail.boundaryWeylRelativeEnergyBudget
@@ -293,6 +299,21 @@ jobs:
             --q-upper 999/1000 \
             --json-out research/riemann-cvs-numerics/artifacts/v23_c13_recursive_relative_energy_shells.json
 
+      - name: Certify the tighter V23 reserve through N960
+        shell: bash
+        run: |
+          set -euo pipefail
+          python research/riemann-cvs-numerics/certify_recursive_relative_energy_shells.py \
+            --c 13 \
+            --low-cutoff 20 \
+            --base-cutoff 480 \
+            --stage 960:1/7 \
+            --prec 900 \
+            --shift-gain 1/1024 \
+            --q-upper 249/250 \
+            --target-q 999/1000 \
+            --json-out research/riemann-cvs-numerics/artifacts/v23_c13_q996_N480_to_N960_shell.json
+
       - name: Replay the corrected finite Arb parity certificate
         shell: bash
         run: |
@@ -348,6 +369,7 @@ jobs:
             research/riemann-cvs-numerics/artifacts/v23_c13_log_tail_schur_budget.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N20_to_N120_relative_energy.json
             research/riemann-cvs-numerics/artifacts/v23_c13_recursive_relative_energy_shells.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_q996_N480_to_N960_shell.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N20_parity_gap.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N20_boundary_weyl_cumulative.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N12_boundary_weyl_compact_margin.json
