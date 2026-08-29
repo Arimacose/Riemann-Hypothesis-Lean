@@ -23,6 +23,10 @@ The new kernel-checked chain contains:
 6. the repaired boundary-gap obstruction, continuous no-crossing propagation,
    and order preservation across rank-one prime events.
 
+The companion Arb audit certifies the cumulative-residue hypotheses for the
+corrected finite `(c,N) = (13,20)` parity blocks, including several negative
+individual residues whose prefixes nevertheless stay strictly positive.
+
 This is a reduction layer, not a hidden continuum estimate.  Applying it to
 the full CvS family still requires a concrete displacement/determinant
 identity, rigorous cumulative-residue bounds uniform in the cutoff, spectral

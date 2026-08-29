@@ -15,6 +15,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/ParityOrderContinuation.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PiecewiseParityContinuation.lean'
       - 'research/riemann-cvs-numerics/audit_zero_mode_correction.py'
+      - 'research/riemann-cvs-numerics/certify_boundary_weyl_cumulative.py'
       - 'research/riemann-cvs-numerics/certify_parity_gap.py'
       - 'research/riemann-cvs-notes/V23_BOUNDARY_WEYL_CUMULATIVE.md'
       - '.github/workflows/riemann-cvs-v23-boundary-weyl.yml'
@@ -31,6 +32,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/ParityOrderContinuation.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PiecewiseParityContinuation.lean'
       - 'research/riemann-cvs-numerics/audit_zero_mode_correction.py'
+      - 'research/riemann-cvs-numerics/certify_boundary_weyl_cumulative.py'
       - 'research/riemann-cvs-numerics/certify_parity_gap.py'
       - 'research/riemann-cvs-notes/V23_BOUNDARY_WEYL_CUMULATIVE.md'
       - '.github/workflows/riemann-cvs-v23-boundary-weyl.yml'
@@ -156,6 +158,18 @@ jobs:
             --threshold 1e-38 \
             --json-out research/riemann-cvs-numerics/artifacts/v23_c13_N20_parity_gap.json
 
+      - name: Certify the V23 cumulative boundary-Weyl residues
+        shell: bash
+        run: |
+          set -euo pipefail
+          python research/riemann-cvs-numerics/certify_boundary_weyl_cumulative.py \
+            --c 13 \
+            --N 20 \
+            --prec 900 \
+            --dps 180 \
+            --iterations 120 \
+            --json-out research/riemann-cvs-numerics/artifacts/v23_c13_N20_boundary_weyl_cumulative.json
+
       - name: Upload V23 regression artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -164,4 +178,5 @@ jobs:
           path: |
             research/riemann-cvs-numerics/artifacts/v23_v22_zero_mode_c13.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N20_parity_gap.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_N20_boundary_weyl_cumulative.json
           if-no-files-found: error
