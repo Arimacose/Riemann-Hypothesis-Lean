@@ -11,6 +11,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/ProlateDilationStationaryPoint.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/BesselJ0Series.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/BesselJ0DifferentialEquation.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/BesselJ0IntegralRepresentation.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/BesselJ0Dlmf.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ExteriorLogMomentTransfer.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeStationaryBudget.lean'
@@ -39,6 +40,8 @@ jobs:
           lake build RiemannCvs.BesselJ0Series
           lake env lean RiemannCvs/BesselJ0DifferentialEquation.lean
           lake build RiemannCvs.BesselJ0DifferentialEquation
+          lake env lean RiemannCvs/BesselJ0IntegralRepresentation.lean
+          lake build RiemannCvs.BesselJ0IntegralRepresentation
           lake env lean RiemannCvs/BesselJ0Dlmf.lean
           lake build RiemannCvs.BesselJ0Dlmf
           lake build \
@@ -48,6 +51,7 @@ jobs:
             RiemannCvs.ProlateDilationStationaryPoint \
             RiemannCvs.BesselJ0Series \
             RiemannCvs.BesselJ0DifferentialEquation \
+            RiemannCvs.BesselJ0IntegralRepresentation \
             RiemannCvs.BesselJ0Dlmf \
             RiemannCvs.ExteriorLogMomentTransfer \
             RiemannCvs.PrimeStationaryBudget
@@ -63,6 +67,7 @@ jobs:
             RiemannCvs/ProlateDilationStationaryPoint.lean \
             RiemannCvs/BesselJ0Series.lean \
             RiemannCvs/BesselJ0DifferentialEquation.lean \
+            RiemannCvs/BesselJ0IntegralRepresentation.lean \
             RiemannCvs/BesselJ0Dlmf.lean \
             RiemannCvs/ExteriorLogMomentTransfer.lean \
             RiemannCvs/PrimeStationaryBudget.lean; do
@@ -73,6 +78,7 @@ jobs:
           if grep -nE '^[[:space:]]*(axiom|constant)[[:space:]]' \
             RiemannCvs/BesselJ0Series.lean \
             RiemannCvs/BesselJ0DifferentialEquation.lean \
+            RiemannCvs/BesselJ0IntegralRepresentation.lean \
             RiemannCvs/BesselJ0Dlmf.lean; then
             exit 1
           fi
@@ -83,6 +89,7 @@ jobs:
           import RiemannCvs.ProlateDilationStationaryPoint
           import RiemannCvs.BesselJ0Series
           import RiemannCvs.BesselJ0DifferentialEquation
+          import RiemannCvs.BesselJ0IntegralRepresentation
           import RiemannCvs.BesselJ0Dlmf
           import RiemannCvs.ExteriorLogMomentTransfer
           import RiemannCvs.PrimeStationaryBudget
@@ -107,6 +114,13 @@ jobs:
           #print axioms RiemannCvs.BesselJ0DifferentialEquation.besselJ0_differentialEquation
           #print axioms RiemannCvs.BesselJ0DifferentialEquation.besselJ0_deriv_differentialEquation
           #print axioms RiemannCvs.BesselJ0DifferentialEquation.besselJ0_second_order_differentialEquation
+          #print axioms RiemannCvs.BesselJ0IntegralRepresentation.wallisProduct_eq_factorialRatio
+          #print axioms RiemannCvs.BesselJ0IntegralRepresentation.integral_sin_pow_even_factorial
+          #print axioms RiemannCvs.BesselJ0IntegralRepresentation.hasSum_integral_cosineSeriesTerm
+          #print axioms RiemannCvs.BesselJ0IntegralRepresentation.integral_cosineSeriesTerm
+          #print axioms RiemannCvs.BesselJ0IntegralRepresentation.besselJ0Integral_eq_besselJ0
+          #print axioms RiemannCvs.BesselJ0IntegralRepresentation.besselJ0_integral_representation
+          #print axioms RiemannCvs.BesselJ0Dlmf.concreteJ0_integral_representation
           #print axioms RiemannCvs.BesselJ0Dlmf.orderZeroCoefficient_three
           #print axioms RiemannCvs.BesselJ0Dlmf.firstRemainderEnvelope_nonneg
           #print axioms RiemannCvs.BesselJ0Dlmf.leadingCosine_error_of_separated_remainders

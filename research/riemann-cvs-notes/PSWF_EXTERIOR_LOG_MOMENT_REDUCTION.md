@@ -907,9 +907,23 @@ x^2J_0''(x)+xJ_0'(x)+x^2J_0(x)=0
 \]
 
 on the whole real axis.  This removes the differential-equation
-characterization of the repository series from the remaining DLMF boundary;
-the next bridge can therefore identify an integral/asymptotic construction by
-ODE uniqueness instead of re-proving the power-series recurrence downstream.
+characterization of the repository series from the remaining DLMF boundary.
+The integral bridge below is proved directly from the same coefficients, so it
+does not rely on uniqueness at the singular point.
+
+That bridge is now explicit.  `BesselJ0IntegralRepresentation` evaluates the
+even sine moments, controls the integrated cosine series by the summable
+`cosh |x|` series, and applies dominated convergence to prove
+
+\[
+J_0(x)=\frac1\pi\int_0^\pi \cos(x\sin t)\,dt
+\qquad (x\in\mathbb R).
+\]
+
+The concrete repository series is therefore connected to a real oscillatory
+integral without appealing to ordinary ODE uniqueness at the regular singular
+point.  The remaining DLMF task can start directly from the stationary point
+at (t=\pi/2) and prove quantitative even/odd remainder estimates.
 
 The specializations
 `prolateFixedSourceActualMassLowerOfConcreteJ0DlmfDunsterErrors` and
@@ -956,7 +970,8 @@ their first-neglected-term bounds; state Dunster's uniform PSWF-to-Bessel error
 in the exact normalized prefactor above; and supply a concrete
 (a\le K_a/c\) estimate, its eventual threshold, and the source-phase
 derivative.  The Bessel function, its global convergence, continuity, two
-termwise derivatives, initial data, and order-zero differential equation, the
+termwise derivatives, initial data, order-zero differential equation, and real
+Poisson--Schlafli integral representation, the
 first DLMF coefficient specialization, separated-remainder combination,
 source-interval transport, source function definitions,
 phase-base conversion, error construction, leading weight and mass, every

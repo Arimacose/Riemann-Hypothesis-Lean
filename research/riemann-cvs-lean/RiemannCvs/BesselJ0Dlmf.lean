@@ -1,8 +1,16 @@
-import RiemannCvs.BesselJ0DifferentialEquation
+import RiemannCvs.BesselJ0IntegralRepresentation
 
 namespace RiemannCvs.BesselJ0Dlmf
 
 open Real
+
+/-- The concrete repository function entering the DLMF remainder interface now
+has a proved real oscillatory integral representation. -/
+theorem concreteJ0_integral_representation (x : ℝ) :
+    BesselJ0Series.besselJ0 x =
+      Real.pi⁻¹ * ∫ t in (0 : ℝ)..Real.pi,
+        Real.cos (x * Real.sin t) :=
+  BesselJ0IntegralRepresentation.besselJ0_integral_representation x
 
 /-!
 # The order-zero DLMF large-argument remainder interface

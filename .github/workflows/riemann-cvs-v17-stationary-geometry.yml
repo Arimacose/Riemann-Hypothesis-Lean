@@ -10,6 +10,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/ProlateScaledStationaryFamily.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/BesselJ0Series.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/BesselJ0DifferentialEquation.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/BesselJ0IntegralRepresentation.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/BesselJ0Dlmf.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ExteriorLogMomentTransfer.lean'
       - '.github/workflows/riemann-cvs-v17-stationary-geometry.yml'
@@ -20,6 +21,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/ProlateScaledStationaryFamily.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/BesselJ0Series.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/BesselJ0DifferentialEquation.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/BesselJ0IntegralRepresentation.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/BesselJ0Dlmf.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ExteriorLogMomentTransfer.lean'
       - '.github/workflows/riemann-cvs-v17-stationary-geometry.yml'
@@ -52,6 +54,8 @@ jobs:
           lake build RiemannCvs.BesselJ0Series
           lake env lean RiemannCvs/BesselJ0DifferentialEquation.lean
           lake build RiemannCvs.BesselJ0DifferentialEquation
+          lake env lean RiemannCvs/BesselJ0IntegralRepresentation.lean
+          lake build RiemannCvs.BesselJ0IntegralRepresentation
           lake env lean RiemannCvs/BesselJ0Dlmf.lean
           lake build RiemannCvs.BesselJ0Dlmf
           lake env lean RiemannCvs/ExteriorLogMomentTransfer.lean
@@ -61,6 +65,7 @@ jobs:
             RiemannCvs.ProlateScaledStationaryFamily \
             RiemannCvs.BesselJ0Series \
             RiemannCvs.BesselJ0DifferentialEquation \
+            RiemannCvs.BesselJ0IntegralRepresentation \
             RiemannCvs.BesselJ0Dlmf \
             RiemannCvs.ExteriorLogMomentTransfer
       - name: Reject placeholders and print axioms
@@ -74,6 +79,7 @@ jobs:
             RiemannCvs/ProlateScaledStationaryFamily.lean
             RiemannCvs/BesselJ0Series.lean
             RiemannCvs/BesselJ0DifferentialEquation.lean
+            RiemannCvs/BesselJ0IntegralRepresentation.lean
             RiemannCvs/BesselJ0Dlmf.lean
             RiemannCvs/ExteriorLogMomentTransfer.lean
           )
@@ -89,6 +95,7 @@ jobs:
           import RiemannCvs.ProlateScaledStationaryFamily
           import RiemannCvs.BesselJ0Series
           import RiemannCvs.BesselJ0DifferentialEquation
+          import RiemannCvs.BesselJ0IntegralRepresentation
           import RiemannCvs.BesselJ0Dlmf
           import RiemannCvs.ExteriorLogMomentTransfer
           #print axioms RiemannCvs.ProlateDilationStationaryPoint.rootWidthBudget
@@ -111,6 +118,13 @@ jobs:
           #print axioms RiemannCvs.BesselJ0DifferentialEquation.besselJ0_differentialEquation
           #print axioms RiemannCvs.BesselJ0DifferentialEquation.besselJ0_deriv_differentialEquation
           #print axioms RiemannCvs.BesselJ0DifferentialEquation.besselJ0_second_order_differentialEquation
+          #print axioms RiemannCvs.BesselJ0IntegralRepresentation.wallisProduct_eq_factorialRatio
+          #print axioms RiemannCvs.BesselJ0IntegralRepresentation.integral_sin_pow_even_factorial
+          #print axioms RiemannCvs.BesselJ0IntegralRepresentation.hasSum_integral_cosineSeriesTerm
+          #print axioms RiemannCvs.BesselJ0IntegralRepresentation.integral_cosineSeriesTerm
+          #print axioms RiemannCvs.BesselJ0IntegralRepresentation.besselJ0Integral_eq_besselJ0
+          #print axioms RiemannCvs.BesselJ0IntegralRepresentation.besselJ0_integral_representation
+          #print axioms RiemannCvs.BesselJ0Dlmf.concreteJ0_integral_representation
           #print axioms RiemannCvs.BesselJ0Dlmf.orderZeroCoefficient_three
           #print axioms RiemannCvs.BesselJ0Dlmf.firstRemainderEnvelope_nonneg
           #print axioms RiemannCvs.BesselJ0Dlmf.leadingCosine_error_of_separated_remainders
