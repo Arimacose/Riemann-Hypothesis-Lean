@@ -1,5 +1,310 @@
 import Mathlib
+import RiemannCvs.BoundaryWeylUniformLimit
+
+/-!
+# Quantitative block-Schur tail for a boundary-Weyl response
+
+This module replaces an abstract finite-to-limit error slot by a variational
+estimate with source-level inputs.  The finite low-block solution `u0` and the
+low/high components `(u,v)` of the full solution satisfy their weak resolvent
+equations.  Low coercivity `a`, high coercivity `gamma`, and a coupling bound
+`epsilon` then imply
+
+`‖u-u0‖ <= epsilon² / (a*gamma-epsilon²) * ‖u0‖`
+
+and hence
+
+`|<eta,u>-<eta,u0>|
+  <= ‖eta‖² epsilon² / (a * (a*gamma-epsilon²))`.
+
+The division-free product budget and domain-uniform positivity theorem are
+designed to accept interval-certified constants.  No CvS coercivity or
+coupling estimate is postulated inside the module; each remains an explicit
+hypothesis to be discharged by the log-tail or sharper prolate analysis.
+-/
 
 namespace RiemannCvs.BoundaryWeylSchurTail
+
+open scoped InnerProductSpace
+
+variable {E H : Type*}
+variable [SeminormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable [SeminormedAddCommGroup H] [InnerProductSpace ℝ H]
+
+private theorem norm_le_of_coercive_variational_coupling
+    (form : E →ₗ[ℝ] E →ₗ[ℝ] ℝ)
+    (coupling : E →ₗ[ℝ] H →ₗ[ℝ] ℝ)
+    (w : E) (v : H) (gap epsilon : ℝ)
+    (_hGap : 0 < gap)
+    (hEpsilon : 0 ≤ epsilon)
+    (hCoercive : gap * ‖w‖ ^ 2 ≤ form w w)
+    (hEquation : form w w + coupling w v = 0)
+    (hCoupling : |coupling w v| ≤ epsilon * ‖w‖ * ‖v‖) :
+    gap * ‖w‖ ≤ epsilon * ‖v‖ := by
+  have hForm : form w w = -coupling w v := by linarith
+  have hNegLeAbs : -coupling w v ≤ |coupling w v| := neg_le_abs _
+  have hProduct : gap * ‖w‖ ^ 2 ≤ epsilon * ‖w‖ * ‖v‖ := by
+    calc
+      gap * ‖w‖ ^ 2 ≤ form w w := hCoercive
+      _ = -coupling w v := hForm
+      _ ≤ |coupling w v| := hNegLeAbs
+      _ ≤ epsilon * ‖w‖ * ‖v‖ := hCoupling
+  by_cases hw : ‖w‖ = 0
+  · simp [hw, mul_nonneg hEpsilon (norm_nonneg v)]
+  · have hwPos : 0 < ‖w‖ := lt_of_le_of_ne (norm_nonneg w) (Ne.symm hw)
+    nlinarith [hProduct]
+
+private theorem finite_solution_norm_le
+    (form : E →ₗ[ℝ] E →ₗ[ℝ] ℝ)
+    (eta u0 : E) (gap : ℝ)
+    (_hGap : 0 < gap)
+    (hCoercive : gap * ‖u0‖ ^ 2 ≤ form u0 u0)
+    (hEquation : form u0 u0 = ⟪eta, u0⟫_ℝ) :
+    gap * ‖u0‖ ≤ ‖eta‖ := by
+  have hInnerAbs : form u0 u0 ≤ |⟪eta, u0⟫_ℝ| := by
+    rw [hEquation]
+    exact le_abs_self _
+  have hCauchy : |⟪eta, u0⟫_ℝ| ≤ ‖eta‖ * ‖u0‖ :=
+    abs_real_inner_le_norm eta u0
+  have hProduct : gap * ‖u0‖ ^ 2 ≤ ‖eta‖ * ‖u0‖ :=
+    hCoercive.trans (hInnerAbs.trans hCauchy)
+  by_cases hu0 : ‖u0‖ = 0
+  · simp [hu0]
+  · have hu0Pos : 0 < ‖u0‖ := lt_of_le_of_ne (norm_nonneg u0) (Ne.symm hu0)
+    nlinarith [hProduct]
+
+/-- Variational block-Schur estimate for the low-component resolvent error. -/
+theorem lowComponentError_norm_le
+    (lowForm : E →ₗ[ℝ] E →ₗ[ℝ] ℝ)
+    (highForm : H →ₗ[ℝ] H →ₗ[ℝ] ℝ)
+    (coupling : E →ₗ[ℝ] H →ₗ[ℝ] ℝ)
+    (u0 u : E) (v : H)
+    (lowGap highGap epsilon : ℝ)
+    (hLowGap : 0 < lowGap)
+    (hHighGap : 0 < highGap)
+    (hEpsilon : 0 ≤ epsilon)
+    (hSmall : epsilon ^ 2 < lowGap * highGap)
+    (hLowCoercive : ∀ w, lowGap * ‖w‖ ^ 2 ≤ lowForm w w)
+    (hHighCoercive : ∀ z, highGap * ‖z‖ ^ 2 ≤ highForm z z)
+    (hCoupling : ∀ w z, |coupling w z| ≤ epsilon * ‖w‖ * ‖z‖)
+    (hLowEquation : ∀ w, lowForm (u - u0) w + coupling w v = 0)
+    (hHighEquation : ∀ z, highForm v z + coupling u z = 0) :
+    ‖u - u0‖ ≤
+      (epsilon ^ 2 / (lowGap * highGap - epsilon ^ 2)) * ‖u0‖ := by
+  let d : E := u - u0
+  have hD : lowGap * ‖d‖ ≤ epsilon * ‖v‖ :=
+    norm_le_of_coercive_variational_coupling
+      lowForm coupling d v lowGap epsilon hLowGap hEpsilon
+      (hLowCoercive d) (hLowEquation d) (hCoupling d v)
+  have hFlipCoupling :
+      |coupling.flip v u| ≤ epsilon * ‖v‖ * ‖u‖ := by
+    change |coupling u v| ≤ epsilon * ‖v‖ * ‖u‖
+    calc
+      |coupling u v| ≤ epsilon * ‖u‖ * ‖v‖ := hCoupling u v
+      _ = epsilon * ‖v‖ * ‖u‖ := by ring
+  have hV : highGap * ‖v‖ ≤ epsilon * ‖u‖ :=
+    norm_le_of_coercive_variational_coupling
+      highForm coupling.flip v u highGap epsilon hHighGap hEpsilon
+      (hHighCoercive v) (by simpa using hHighEquation v) hFlipCoupling
+  have hDProduct :
+      lowGap * highGap * ‖d‖ ≤ epsilon ^ 2 * ‖u‖ := by
+    have hD' := mul_le_mul_of_nonneg_left hD (le_of_lt hHighGap)
+    have hV' := mul_le_mul_of_nonneg_left hV hEpsilon
+    nlinarith
+  have hTriangle : ‖u‖ ≤ ‖d‖ + ‖u0‖ := by
+    have hu : u = d + u0 := by simp [d]
+    rw [hu]
+    exact norm_add_le d u0
+  have hEpsSq : 0 ≤ epsilon ^ 2 := sq_nonneg epsilon
+  have hTriangleScaled := mul_le_mul_of_nonneg_left hTriangle hEpsSq
+  have hDenomMul :
+      (lowGap * highGap - epsilon ^ 2) * ‖d‖ ≤ epsilon ^ 2 * ‖u0‖ := by
+    nlinarith [hDProduct, hTriangleScaled]
+  have hDenomPos : 0 < lowGap * highGap - epsilon ^ 2 := sub_pos.mpr hSmall
+  change ‖d‖ ≤ (epsilon ^ 2 / (lowGap * highGap - epsilon ^ 2)) * ‖u0‖
+  rw [div_mul_eq_mul_div]
+  exact (le_div_iff₀ hDenomPos).2 (by simpa [mul_comm] using hDenomMul)
+
+/-- The finite low-block resolvent solution is controlled by its coercivity. -/
+theorem finiteResolvent_norm_le
+    (lowForm : E →ₗ[ℝ] E →ₗ[ℝ] ℝ)
+    (eta u0 : E) (lowGap : ℝ)
+    (hLowGap : 0 < lowGap)
+    (hLowCoercive : ∀ w, lowGap * ‖w‖ ^ 2 ≤ lowForm w w)
+    (hFiniteEquation : ∀ w, lowForm u0 w = ⟪eta, w⟫_ℝ) :
+    ‖u0‖ ≤ ‖eta‖ / lowGap := by
+  have h := finite_solution_norm_le lowForm eta u0 lowGap hLowGap
+    (hLowCoercive u0) (hFiniteEquation u0)
+  exact (le_div_iff₀ hLowGap).2 (by simpa [mul_comm] using h)
+
+/-- A coercive high block and a small low/high coupling give an explicit
+boundary-Weyl (quadratic resolvent response) error. -/
+theorem boundaryWeylError_le_of_blockSchur
+    (lowForm : E →ₗ[ℝ] E →ₗ[ℝ] ℝ)
+    (highForm : H →ₗ[ℝ] H →ₗ[ℝ] ℝ)
+    (coupling : E →ₗ[ℝ] H →ₗ[ℝ] ℝ)
+    (eta u0 u : E) (v : H)
+    (lowGap highGap epsilon : ℝ)
+    (hLowGap : 0 < lowGap)
+    (hHighGap : 0 < highGap)
+    (hEpsilon : 0 ≤ epsilon)
+    (hSmall : epsilon ^ 2 < lowGap * highGap)
+    (hLowCoercive : ∀ w, lowGap * ‖w‖ ^ 2 ≤ lowForm w w)
+    (hHighCoercive : ∀ z, highGap * ‖z‖ ^ 2 ≤ highForm z z)
+    (hCoupling : ∀ w z, |coupling w z| ≤ epsilon * ‖w‖ * ‖z‖)
+    (hFiniteEquation : ∀ w, lowForm u0 w = ⟪eta, w⟫_ℝ)
+    (hLowEquation : ∀ w, lowForm (u - u0) w + coupling w v = 0)
+    (hHighEquation : ∀ z, highForm v z + coupling u z = 0) :
+    |⟪eta, u⟫_ℝ - ⟪eta, u0⟫_ℝ| ≤
+      ‖eta‖ ^ 2 * epsilon ^ 2 /
+        (lowGap * (lowGap * highGap - epsilon ^ 2)) := by
+  have hError := lowComponentError_norm_le
+    lowForm highForm coupling u0 u v
+    lowGap highGap epsilon hLowGap hHighGap hEpsilon hSmall
+    hLowCoercive hHighCoercive hCoupling hLowEquation hHighEquation
+  have hFinite := finiteResolvent_norm_le
+    lowForm eta u0 lowGap hLowGap hLowCoercive hFiniteEquation
+  have hCauchy :
+      |⟪eta, u⟫_ℝ - ⟪eta, u0⟫_ℝ| ≤ ‖eta‖ * ‖u - u0‖ := by
+    rw [← inner_sub_right]
+    exact abs_real_inner_le_norm eta (u - u0)
+  have hEta : 0 ≤ ‖eta‖ := norm_nonneg eta
+  have hFactor : 0 ≤ epsilon ^ 2 / (lowGap * highGap - epsilon ^ 2) := by
+    positivity
+  have h1 := mul_le_mul_of_nonneg_left hError hEta
+  have h2 := mul_le_mul_of_nonneg_left hFinite hFactor
+  calc
+    |⟪eta, u⟫_ℝ - ⟪eta, u0⟫_ℝ| ≤ ‖eta‖ * ‖u - u0‖ := hCauchy
+    _ ≤ ‖eta‖ * ((epsilon ^ 2 / (lowGap * highGap - epsilon ^ 2)) * ‖u0‖) := h1
+    _ ≤ ‖eta‖ * ((epsilon ^ 2 / (lowGap * highGap - epsilon ^ 2)) * (‖eta‖ / lowGap)) := by
+      nlinarith [h2]
+    _ = ‖eta‖ ^ 2 * epsilon ^ 2 /
+        (lowGap * (lowGap * highGap - epsilon ^ 2)) := by
+      field_simp [ne_of_gt hLowGap, ne_of_gt (sub_pos.mpr hSmall)]
+
+
+/-- Division-free budget form of `boundaryWeylError_le_of_blockSchur`.  This is
+suited to interval certificates: only products of certified lower and upper
+bounds occur in the acceptance inequality. -/
+theorem boundaryWeylError_le_margin_of_blockSchur
+    (lowForm : E →ₗ[ℝ] E →ₗ[ℝ] ℝ)
+    (highForm : H →ₗ[ℝ] H →ₗ[ℝ] ℝ)
+    (coupling : E →ₗ[ℝ] H →ₗ[ℝ] ℝ)
+    (eta u0 u : E) (v : H)
+    (lowGap highGap epsilon margin : ℝ)
+    (hLowGap : 0 < lowGap)
+    (hHighGap : 0 < highGap)
+    (hEpsilon : 0 ≤ epsilon)
+    (hSmall : epsilon ^ 2 < lowGap * highGap)
+    (hLowCoercive : ∀ w, lowGap * ‖w‖ ^ 2 ≤ lowForm w w)
+    (hHighCoercive : ∀ z, highGap * ‖z‖ ^ 2 ≤ highForm z z)
+    (hCoupling : ∀ w z, |coupling w z| ≤ epsilon * ‖w‖ * ‖z‖)
+    (hFiniteEquation : ∀ w, lowForm u0 w = ⟪eta, w⟫_ℝ)
+    (hLowEquation : ∀ w, lowForm (u - u0) w + coupling w v = 0)
+    (hHighEquation : ∀ z, highForm v z + coupling u z = 0)
+    (hBudget :
+      ‖eta‖ ^ 2 * epsilon ^ 2 ≤
+        margin * lowGap * (lowGap * highGap - epsilon ^ 2)) :
+    |⟪eta, u⟫_ℝ - ⟪eta, u0⟫_ℝ| ≤ margin := by
+  have hRaw := boundaryWeylError_le_of_blockSchur
+    lowForm highForm coupling eta u0 u v
+    lowGap highGap epsilon hLowGap hHighGap hEpsilon hSmall
+    hLowCoercive hHighCoercive hCoupling
+    hFiniteEquation hLowEquation hHighEquation
+  have hDenomPos :
+      0 < lowGap * (lowGap * highGap - epsilon ^ 2) :=
+    mul_pos hLowGap (sub_pos.mpr hSmall)
+  exact hRaw.trans ((div_le_iff₀ hDenomPos).2 (by
+    simpa [mul_assoc] using hBudget))
+
+section UniformDomain
+
+variable {X : Type*}
+
+/-- Uniform compact/domain form of the Schur tail estimate.  At each spectral
+parameter `x`, `u0 x` solves the finite low-block resolvent equation and
+`(u x, v x)` solves the full low/high block system. -/
+theorem boundaryWeylErrorOn_le_margin_of_blockSchur
+    (domain : Set X)
+    (lowForm : X → E →ₗ[ℝ] E →ₗ[ℝ] ℝ)
+    (highForm : X → H →ₗ[ℝ] H →ₗ[ℝ] ℝ)
+    (coupling : X → E →ₗ[ℝ] H →ₗ[ℝ] ℝ)
+    (eta : E) (u0 u : X → E) (v : X → H)
+    (lowGap highGap epsilon margin : ℝ)
+    (hLowGap : 0 < lowGap)
+    (hHighGap : 0 < highGap)
+    (hEpsilon : 0 ≤ epsilon)
+    (hSmall : epsilon ^ 2 < lowGap * highGap)
+    (hLowCoercive : ∀ x ∈ domain, ∀ w,
+      lowGap * ‖w‖ ^ 2 ≤ lowForm x w w)
+    (hHighCoercive : ∀ x ∈ domain, ∀ z,
+      highGap * ‖z‖ ^ 2 ≤ highForm x z z)
+    (hCoupling : ∀ x ∈ domain, ∀ w z,
+      |coupling x w z| ≤ epsilon * ‖w‖ * ‖z‖)
+    (hFiniteEquation : ∀ x ∈ domain, ∀ w,
+      lowForm x (u0 x) w = ⟪eta, w⟫_ℝ)
+    (hLowEquation : ∀ x ∈ domain, ∀ w,
+      lowForm x (u x - u0 x) w + coupling x w (v x) = 0)
+    (hHighEquation : ∀ x ∈ domain, ∀ z,
+      highForm x (v x) z + coupling x (u x) z = 0)
+    (hBudget :
+      ‖eta‖ ^ 2 * epsilon ^ 2 ≤
+        margin * lowGap * (lowGap * highGap - epsilon ^ 2)) :
+    ∀ x ∈ domain,
+      |⟪eta, u0 x⟫_ℝ - ⟪eta, u x⟫_ℝ| ≤ margin := by
+  intro x hx
+  rw [abs_sub_comm]
+  exact boundaryWeylError_le_margin_of_blockSchur
+    (lowForm x) (highForm x) (coupling x)
+    eta (u0 x) (u x) (v x)
+    lowGap highGap epsilon margin
+    hLowGap hHighGap hEpsilon hSmall
+    (hLowCoercive x hx) (hHighCoercive x hx)
+    (hCoupling x hx) (hFiniteEquation x hx)
+    (hLowEquation x hx) (hHighEquation x hx) hBudget
+
+/-- Direct positivity bridge: a finite boundary response of at least twice the
+margin stays positive for the full response once the block-Schur product
+budget fits inside one margin. -/
+theorem positiveOn_of_finiteMargin_and_blockSchur
+    (domain : Set X)
+    (lowForm : X → E →ₗ[ℝ] E →ₗ[ℝ] ℝ)
+    (highForm : X → H →ₗ[ℝ] H →ₗ[ℝ] ℝ)
+    (coupling : X → E →ₗ[ℝ] H →ₗ[ℝ] ℝ)
+    (eta : E) (u0 u : X → E) (v : X → H)
+    (lowGap highGap epsilon margin : ℝ)
+    (hMargin : 0 < margin)
+    (hLowGap : 0 < lowGap)
+    (hHighGap : 0 < highGap)
+    (hEpsilon : 0 ≤ epsilon)
+    (hSmall : epsilon ^ 2 < lowGap * highGap)
+    (hFiniteMargin : ∀ x ∈ domain, 2 * margin ≤ ⟪eta, u0 x⟫_ℝ)
+    (hLowCoercive : ∀ x ∈ domain, ∀ w,
+      lowGap * ‖w‖ ^ 2 ≤ lowForm x w w)
+    (hHighCoercive : ∀ x ∈ domain, ∀ z,
+      highGap * ‖z‖ ^ 2 ≤ highForm x z z)
+    (hCoupling : ∀ x ∈ domain, ∀ w z,
+      |coupling x w z| ≤ epsilon * ‖w‖ * ‖z‖)
+    (hFiniteEquation : ∀ x ∈ domain, ∀ w,
+      lowForm x (u0 x) w = ⟪eta, w⟫_ℝ)
+    (hLowEquation : ∀ x ∈ domain, ∀ w,
+      lowForm x (u x - u0 x) w + coupling x w (v x) = 0)
+    (hHighEquation : ∀ x ∈ domain, ∀ z,
+      highForm x (v x) z + coupling x (u x) z = 0)
+    (hBudget :
+      ‖eta‖ ^ 2 * epsilon ^ 2 ≤
+        margin * lowGap * (lowGap * highGap - epsilon ^ 2)) :
+    ∀ x ∈ domain, 0 < ⟪eta, u x⟫_ℝ := by
+  apply RiemannCvs.BoundaryWeylUniformLimit.positiveOn_of_finiteMargin_and_uniformError
+    (fun x => ⟪eta, u0 x⟫_ℝ) (fun x => ⟪eta, u x⟫_ℝ)
+    domain margin hMargin hFiniteMargin
+  exact boundaryWeylErrorOn_le_margin_of_blockSchur
+    domain lowForm highForm coupling eta u0 u v
+    lowGap highGap epsilon margin
+    hLowGap hHighGap hEpsilon hSmall
+    hLowCoercive hHighCoercive hCoupling
+    hFiniteEquation hLowEquation hHighEquation hBudget
+
+end UniformDomain
 
 end RiemannCvs.BoundaryWeylSchurTail

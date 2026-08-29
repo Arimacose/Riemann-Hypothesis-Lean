@@ -17,8 +17,13 @@ eigenvalues and ``mu_k`` for the odd eigenvalues, interval arithmetic encloses
           / prod_{i != j} (lambda_j - lambda_i).
 
 The certificate passes only when every prefix ``R_j = sum_{i <= j} r_i`` is
-strictly positive.  This is the numerical hypothesis consumed by
-``RiemannCvs.BoundaryWeylCumulative``.  The sign convention there is
+strictly positive.  It also encloses the absolute first spectral moment
+
+    sum_j |r_j| lambda_j
+
+and checks it against a caller-supplied strict upper threshold.  These are the
+finite numerical hypotheses consumed by ``RiemannCvs.BoundaryWeylCumulative``
+and ``RiemannCvs.BoundaryWeylFarLeft``.  The sign convention is
 
     G(x) = sum_j r_j / (lambda_j - x)
          = -det(x I - O) / det(x I - E),  x < lambda_0.
@@ -231,6 +236,7 @@ def certify(
     margin_left: str,
     margin_right: str,
     margin_prefix_index: int,
+    moment_upper: str,
 ) -> dict[str, Any]:
     if c < 2 or N < 1:
         raise ValueError("require c >= 2 and N >= 1")
@@ -314,6 +320,24 @@ def certify(
     if not prefixes[-1].contains(1):
         raise RuntimeError("total residue interval does not contain monic value 1")
 
+    if any(not pole > 0 for pole in even_boxes):
+        raise RuntimeError("an even pole is not certified strictly positive")
+    absolute_first_moment = arb(0)
+    signed_first_moment = arb(0)
+    for residue, pole in zip(residues, even_boxes, strict=True):
+        absolute_first_moment += abs(residue) * pole
+        signed_first_moment += residue * pole
+    moment_upper_ball = arb(moment_upper)
+    if not moment_upper_ball.is_exact():
+        raise ValueError("absolute moment upper threshold must be an exact point ball")
+    if not moment_upper_ball > 0:
+        raise ValueError("absolute moment upper threshold must be positive")
+    if not absolute_first_moment < moment_upper_ball:
+        raise RuntimeError(
+            "absolute first spectral moment is not certified below "
+            f"{moment_upper}"
+        )
+
     margin_left_ball = arb(margin_left)
     margin_right_ball = arb(margin_right)
     if not margin_left_ball.is_exact() or not margin_right_ball.is_exact():
@@ -373,6 +397,25 @@ def certify(
         "negative_residue_indices": negative_indices,
         "indeterminate_residue_indices": indeterminate_indices,
         "total_residue_contains_one": True,
+        "absolute_first_spectral_moment_certificate": {
+            "all_even_poles_strictly_positive": True,
+            "absolute_first_moment": _ball_record(absolute_first_moment),
+            "signed_first_moment": _ball_record(signed_first_moment),
+            "strict_upper_threshold": _ball_record(moment_upper_ball),
+            "strictly_below_threshold": True,
+            "normalization_input": (
+                "the exact total-residue identity sum r_j = 1 is supplied "
+                "by ObliqueWeylDeterminant.sum_characteristicResidue_eq_one"
+            ),
+            "lean_theorem": (
+                "RiemannCvs.BoundaryWeylFarLeft."
+                "finiteBoundaryWeyl_sub_oneDiv_abs_le"
+            ),
+            "justification": (
+                "Arb enclosure of sum_j |r_j| lambda_j using the same "
+                "certified eigenvalue and residue boxes"
+            ),
+        },
         "compact_prefix_margin_certificate": {
             "interval_left": _ball_record(margin_left_ball),
             "interval_right": _ball_record(margin_right_ball),
@@ -418,6 +461,7 @@ def main() -> int:
     parser.add_argument("--margin-left", default="-100")
     parser.add_argument("--margin-right", default="0")
     parser.add_argument("--margin-prefix-index", type=int, default=11)
+    parser.add_argument("--moment-upper", default="2")
     parser.add_argument("--json-out", required=True)
     args = parser.parse_args()
 
@@ -430,6 +474,7 @@ def main() -> int:
         margin_left=args.margin_left,
         margin_right=args.margin_right,
         margin_prefix_index=args.margin_prefix_index,
+        moment_upper=args.moment_upper,
     )
     certificate.update(
         {
@@ -465,6 +510,9 @@ def main() -> int:
                 "first_cumulative_residue": first_prefix,
                 "negative_residue_indices": certificate[
                     "negative_residue_indices"
+                ],
+                "absolute_first_spectral_moment_certificate": certificate[
+                    "absolute_first_spectral_moment_certificate"
                 ],
                 "compact_prefix_margin_certificate": certificate[
                     "compact_prefix_margin_certificate"

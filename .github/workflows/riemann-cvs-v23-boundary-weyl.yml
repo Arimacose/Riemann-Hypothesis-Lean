@@ -9,6 +9,8 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/BoundaryGapNoCrossing.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/BoundaryWeylCumulative.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/BoundaryWeylUniformLimit.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/BoundaryWeylSchurTail.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/BoundaryWeylFarLeft.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/CvSParityDisplacement.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V23BoundaryWeylMainline.lean'
@@ -29,6 +31,8 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/BoundaryGapNoCrossing.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/BoundaryWeylCumulative.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/BoundaryWeylUniformLimit.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/BoundaryWeylSchurTail.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/BoundaryWeylFarLeft.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/CvSParityDisplacement.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V23BoundaryWeylMainline.lean'
@@ -89,6 +93,10 @@ jobs:
           lake env lean RiemannCvs/BoundaryWeylCumulative.lean
           lake build RiemannCvs.BoundaryWeylUniformLimit
           lake env lean RiemannCvs/BoundaryWeylUniformLimit.lean
+          lake build RiemannCvs.BoundaryWeylSchurTail
+          lake env lean RiemannCvs/BoundaryWeylSchurTail.lean
+          lake build RiemannCvs.BoundaryWeylFarLeft
+          lake env lean RiemannCvs/BoundaryWeylFarLeft.lean
           lake build RiemannCvs.V23BoundaryWeylMainline
           lake env lean RiemannCvs/V23BoundaryWeylMainline.lean
 
@@ -101,6 +109,8 @@ jobs:
             RiemannCvs/BoundaryGapNoCrossing.lean
             RiemannCvs/BoundaryWeylCumulative.lean
             RiemannCvs/BoundaryWeylUniformLimit.lean
+            RiemannCvs/BoundaryWeylSchurTail.lean
+            RiemannCvs/BoundaryWeylFarLeft.lean
             RiemannCvs/CvSParityDisplacement.lean
             RiemannCvs/ObliqueWeylDeterminant.lean
             RiemannCvs/V23BoundaryWeylMainline.lean
@@ -156,6 +166,16 @@ jobs:
           #print axioms RiemannCvs.BoundaryWeylUniformLimit.boundaryWeylLimit_ne_zero_of_oneCutoffError
           #print axioms RiemannCvs.BoundaryWeylUniformLimit.boundaryWeylLimit_pos_of_prefixDropError
           #print axioms RiemannCvs.BoundaryWeylUniformLimit.boundaryWeylLimit_posOn_Icc_of_prefixDropAtLeftError
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.lowComponentError_norm_le
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.finiteResolvent_norm_le
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.boundaryWeylError_le_of_blockSchur
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.boundaryWeylError_le_margin_of_blockSchur
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.boundaryWeylErrorOn_le_margin_of_blockSchur
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.positiveOn_of_finiteMargin_and_blockSchur
+          #print axioms RiemannCvs.BoundaryWeylFarLeft.finiteBoundaryWeyl_sub_oneDiv_abs_le
+          #print axioms RiemannCvs.BoundaryWeylFarLeft.finiteBoundaryWeyl_ge_farLeftMargin
+          #print axioms RiemannCvs.BoundaryWeylFarLeft.boundaryWeylLimit_pos_of_uniformFarLeftMoment
+          #print axioms RiemannCvs.BoundaryWeylFarLeft.positiveOn_openNegativeTail_of_compact_and_farLeft
           LEAN
           lake env lean V23BoundaryWeylAxioms.lean | tee v23-boundary-weyl-axioms.txt
           if grep -vE 'propext|Classical.choice|Quot.sound|depends on axioms|^$' \
@@ -224,6 +244,7 @@ jobs:
             --margin-left=-100 \
             --margin-right=0 \
             --margin-prefix-index 11 \
+            --moment-upper 2 \
             --json-out research/riemann-cvs-numerics/artifacts/v23_c13_N20_boundary_weyl_cumulative.json
 
       - name: Probe the fixed-prefix compact margin across a cutoff grid
@@ -240,6 +261,7 @@ jobs:
               --margin-left=-100 \
               --margin-right=0 \
               --margin-prefix-index 11 \
+              --moment-upper 2 \
               --json-out "research/riemann-cvs-numerics/artifacts/v23_c13_N${N}_boundary_weyl_compact_margin.json"
           done
 
