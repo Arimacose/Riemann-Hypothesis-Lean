@@ -40,6 +40,44 @@ variable {E H : Type*}
 variable [SeminormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable [SeminormedAddCommGroup H] [InnerProductSpace ℝ H]
 
+/-- A centered multiplier of norm at most `delta` has commutator norm at most
+twice `delta` against a contraction.  In the CvS tail application the
+multiplier is `M_(S - π/4)` and the contraction is the normalized discrete
+Hilbert transform. -/
+theorem commutator_norm_le_two_mul_of_norm_bounds
+    (A B : E →L[ℝ] E) (delta : ℝ)
+    (hDelta : 0 ≤ delta)
+    (hA : ‖A‖ ≤ delta)
+    (hB : ‖B‖ ≤ 1) :
+    ‖A.comp B - B.comp A‖ ≤ 2 * delta := by
+  calc
+    ‖A.comp B - B.comp A‖ ≤ ‖A.comp B‖ + ‖B.comp A‖ :=
+      norm_sub_le _ _
+    _ ≤ ‖A‖ * ‖B‖ + ‖B‖ * ‖A‖ :=
+      add_le_add
+        (ContinuousLinearMap.opNorm_comp_le A B)
+        (ContinuousLinearMap.opNorm_comp_le B A)
+    _ ≤ delta * 1 + 1 * delta := by
+      exact add_le_add
+        (mul_le_mul hA hB (norm_nonneg B) hDelta)
+        (mul_le_mul hB hA (norm_nonneg A) (by norm_num))
+    _ = 2 * delta := by ring
+
+/-- Numerical specialization used by the certified Archimedean tail: a
+centered multiplier bound `1 / (4*N)` yields the commutator bound
+`1 / (2*N)`. -/
+theorem commutator_norm_le_one_div_two_mul
+    (A B : E →L[ℝ] E) (N : ℝ)
+    (hN : 0 < N)
+    (hA : ‖A‖ ≤ 1 / (4 * N))
+    (hB : ‖B‖ ≤ 1) :
+    ‖A.comp B - B.comp A‖ ≤ 1 / (2 * N) := by
+  calc
+    ‖A.comp B - B.comp A‖ ≤ 2 * (1 / (4 * N)) :=
+      commutator_norm_le_two_mul_of_norm_bounds A B (1 / (4 * N))
+        (by positivity) hA hB
+    _ = 1 / (2 * N) := by field_simp; norm_num
+
 private theorem norm_le_of_coercive_variational_coupling
     (form : E →ₗ[ℝ] E →ₗ[ℝ] ℝ)
     (coupling : E →ₗ[ℝ] H →ₗ[ℝ] ℝ)

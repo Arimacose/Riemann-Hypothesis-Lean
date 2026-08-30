@@ -192,6 +192,8 @@ jobs:
           #print axioms RiemannCvs.BoundaryWeylSchurTail.lowComponentError_norm_le
           #print axioms RiemannCvs.BoundaryWeylSchurTail.finiteResolvent_norm_le
           #print axioms RiemannCvs.BoundaryWeylSchurTail.boundaryWeylError_le_of_blockSchur
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.commutator_norm_le_two_mul_of_norm_bounds
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.commutator_norm_le_one_div_two_mul
           #print axioms RiemannCvs.BoundaryWeylSchurTail.schurProductBudget_of_highGapBudget
           #print axioms RiemannCvs.BoundaryWeylSchurTail.highGapBudget_false_of_linearBoundaryGrowth
           #print axioms RiemannCvs.BoundaryWeylSchurTail.lowEnergy_le_relativeHighEnergy
@@ -312,8 +314,17 @@ jobs:
             --minimum-mode 960 \
             --diagonal-offset 19/20 \
             --symbol-upper 4/5 \
+            --centered-decay 1/4 \
             --prec 256 \
             --json-out research/riemann-cvs-numerics/artifacts/v23_c13_N960_archimedean_tail.json
+          python research/riemann-cvs-numerics/certify_archimedean_tail_envelope.py \
+            --c 13 \
+            --minimum-mode 960 \
+            --diagonal-offset 19/20 \
+            --symbol-upper 4/5 \
+            --centered-decay 1/4 \
+            --prec 384 \
+            --json-out research/riemann-cvs-numerics/artifacts/v23_c13_N960_archimedean_tail_384bit.json
 
       - name: Certify the finite V23 relative-energy coupling route
         shell: bash
@@ -486,6 +497,7 @@ jobs:
             research/riemann-cvs-numerics/artifacts/v23_c13_log_tail_schur_budget.json
             research/riemann-cvs-numerics/artifacts/v23_c13_prime_translation_power6.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N960_archimedean_tail.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_N960_archimedean_tail_384bit.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N20_to_N120_relative_energy.json
             research/riemann-cvs-numerics/artifacts/v23_c13_recursive_relative_energy_shells.json
             research/riemann-cvs-numerics/artifacts/v23_c13_q996_N480_to_N960_shell.json

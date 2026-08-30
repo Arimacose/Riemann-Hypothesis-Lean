@@ -19,6 +19,7 @@ and
 This script interval-checks a source-level proof that, for every ``n >= N0``,
 
     0 <= S_n <= 4/5,
+    |S_n - pi/4| <= 1/(4*n),
     -(W_R)_{nn} >= log(n) - 19/20
 
 when ``c=13`` and ``N0=960``.  The proof uses the following explicit bounds.
@@ -40,7 +41,10 @@ Every omitted correction decreases in magnitude as ``n`` grows, while
 ``atan(4y)`` increases.  It is therefore sufficient to certify the displayed
 constant inequalities at ``N0``.  Arb is used for every transcendental and
 rational comparison.  The script also reconstructs the exact source formulas
-at the endpoint as an independent wiring check.
+at the endpoint as an independent wiring check.  Together with the exact
+Hilbert-commutator identity and the contraction bound for the normalized
+discrete Hilbert transform, the centered estimate gives the conditional
+tail-to-tail operator bound ``||(W_R)_off|| <= 1/(2*N)`` on modes ``n>=N``.
 """
 
 from __future__ import annotations
@@ -103,6 +107,7 @@ def certify(
     minimum_mode: int,
     diagonal_offset: Fraction,
     symbol_upper: Fraction,
+    centered_decay: Fraction,
     precision: int,
 ) -> dict[str, Any]:
     if c <= 1:
@@ -173,6 +178,23 @@ def certify(
     symbol_lower_pass = bool(symbol_lower > 0)
     symbol_upper_pass = bool(symbol_upper_bound < symbol_target)
 
+    # The same DLMF remainder gives a much sharper centered envelope.  Since
+    # y = pi*n/L, multiplication by n turns the 1/y terms into constants and
+    # the 1/y^2 remainder into a decreasing 1/n error.  On the lower side use
+    # pi/2 - atan(4y) = atan(1/(4y)) <= 1/(4y).
+    centered_target = _fraction_arb(centered_decay)
+    centered_upper_scaled = n0 * (
+        1 / (4 * y0) + digamma_half_remainder
+    )
+    centered_lower_scaled = n0 * (
+        1 / (8 * y0)
+        + digamma_half_remainder
+        + geometric_mass / (2 * y0)
+    )
+    centered_upper_pass = bool(centered_upper_scaled < centered_target)
+    centered_lower_pass = bool(centered_lower_scaled < centered_target)
+    centered_commutator_coefficient = 2 * centered_target
+
     # Reconstruct the exact endpoint formulas used by the canonical matrix
     # builder.  This is not needed by the monotone envelope proof, but catches
     # a sign, scale, or geometric-correction wiring mismatch.
@@ -192,12 +214,18 @@ def certify(
         and source_symbol < symbol_target
         and source_diagonal_constant > diagonal_target
     )
+    source_centered_pass = bool(
+        abs(source_symbol - pi / 4) < centered_target / n0
+    )
 
     if not (
         diagonal_pass
         and symbol_lower_pass
         and symbol_upper_pass
+        and centered_upper_pass
+        and centered_lower_pass
         and source_endpoint_pass
+        and source_centered_pass
     ):
         raise RuntimeError("Archimedean tail envelope target failed")
 
@@ -214,6 +242,13 @@ def certify(
         "precision_bits": precision,
         "proved_for_every_integer_mode": f"n >= {minimum_mode}",
         "proved_symbol_envelope": f"0 <= S_n <= {symbol_upper}",
+        "proved_centered_symbol_envelope": (
+            f"abs(S_n - pi/4) <= ({centered_decay})/n"
+        ),
+        "conditional_tail_commutator_norm_envelope": (
+            "given the exact commutator identity and ||H||<=1, on modes "
+            f"n>=N, ||[M_S,H]|| <= ({2 * centered_decay})/N"
+        ),
         "proved_diagonal_envelope": (
             f"-(W_R)_nn >= log(n) - {diagonal_offset}"
         ),
@@ -233,6 +268,15 @@ def certify(
             (
                 "all error majorants decrease for y>=y0 and "
                 "atan(4y) increases"
+            ),
+            (
+                "pi/2-atan(4y)=atan(1/(4y))<=1/(4y); after "
+                "multiplication by n, both centered error majorants "
+                "are maximal at n0"
+            ),
+            (
+                "[M_S,H]=[M_(S-pi/4),H] and ||H||=1, so the "
+                "centered symbol envelope gives the tail norm bound"
             ),
         ],
         "constants": {
@@ -284,6 +328,31 @@ def certify(
                 symbol_target - symbol_upper_bound
             ),
         },
+        "centered_symbol_audit": {
+            "target_decay_coefficient": str(centered_decay),
+            "upper_scaled_error_at_n0": _ball_record(
+                centered_upper_scaled
+            ),
+            "lower_scaled_error_at_n0": _ball_record(
+                centered_lower_scaled
+            ),
+            "strict_upper_pass": centered_upper_pass,
+            "strict_lower_pass": centered_lower_pass,
+            "upper_slack": _ball_record(
+                centered_target - centered_upper_scaled
+            ),
+            "lower_slack": _ball_record(
+                centered_target - centered_lower_scaled
+            ),
+            "tail_commutator_norm_coefficient": _ball_record(
+                centered_commutator_coefficient
+            ),
+            "operator_consequence": (
+                "given the exact Hilbert-commutator adapter, for every "
+                "N>=n0 the Archimedean off-diagonal compression to modes "
+                f"n>=N has norm at most ({2 * centered_decay})/N"
+            ),
+        },
         "source_formula_endpoint_replay": {
             "mode": minimum_mode,
             "S_n": _ball_record(source_symbol),
@@ -294,6 +363,13 @@ def certify(
                 source_diagonal_constant
             ),
             "strict_target_pass": source_endpoint_pass,
+            "centered_error": _ball_record(
+                abs(source_symbol - pi / 4)
+            ),
+            "centered_target_at_endpoint": _ball_record(
+                centered_target / n0
+            ),
+            "strict_centered_pass": source_centered_pass,
         },
         "python_version": platform.python_version(),
         "python_flint_version": flint.__version__,
@@ -310,6 +386,7 @@ def main() -> int:
     parser.add_argument("--minimum-mode", type=int, default=960)
     parser.add_argument("--diagonal-offset", default="19/20")
     parser.add_argument("--symbol-upper", default="4/5")
+    parser.add_argument("--centered-decay", default="1/4")
     parser.add_argument("--prec", type=int, default=256)
     parser.add_argument("--json-out", type=Path, required=True)
     args = parser.parse_args()
@@ -321,6 +398,9 @@ def main() -> int:
             args.diagonal_offset, "diagonal_offset"
         ),
         symbol_upper=_positive_fraction(args.symbol_upper, "symbol_upper"),
+        centered_decay=_positive_fraction(
+            args.centered_decay, "centered_decay"
+        ),
         precision=args.prec,
     )
     args.json_out.parent.mkdir(parents=True, exist_ok=True)
@@ -336,6 +416,12 @@ def main() -> int:
                 ],
                 "proved_symbol_envelope": result[
                     "proved_symbol_envelope"
+                ],
+                "proved_centered_symbol_envelope": result[
+                    "proved_centered_symbol_envelope"
+                ],
+                "conditional_tail_commutator_norm_envelope": result[
+                    "conditional_tail_commutator_norm_envelope"
                 ],
                 "proved_diagonal_envelope": result[
                     "proved_diagonal_envelope"

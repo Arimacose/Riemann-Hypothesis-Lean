@@ -122,9 +122,16 @@ rational path geometry and Arb weights for all `415642` admissible sixth-power
 paths prove the prime translation norm `‖T_13‖ < 10/3`.  The digamma remainder,
 trigamma series, and geometric corrections prove, for every `n >= 960`,
 `0 <= S_n <= 4/5` and
-`-(W_R)_(n,n) >= log n - 19/20`.  These replace the old global prime and
-Archimedean constants; the remaining step is their sharp block-relative use,
-not another finite-cutoff extrapolation.  The
+`|S_n - π/4| <= 1/(4*n)`, as well as
+`-(W_R)_(n,n) >= log n - 19/20`.  Since constants disappear from a
+commutator, the normalized Hilbert-transform representation gives the
+tail-to-tail Archimedean norm bound `1/(2*N)` once its concrete compression
+adapter is instantiated.  The generic operator-norm step and its exact
+`1/(4*N) -> 1/(2*N)` specialization are proved in
+`BoundaryWeylSchurTail`.  Thus the old global Archimedean amplitude is no
+longer the limiting constant; the prime previous/middle crossblocks and their
+block-relative normalization are now the tight source terms, rather than
+another finite-cutoff extrapolation.  The
 finite certificate is valid at the endpoint, but the real-valued
 finite-to-limit resolvent comparison must be applied on compact subintervals
 whose right endpoint is strictly negative: the certified lowest even pole
@@ -156,5 +163,5 @@ theorem then supplies the direct recursive shell bound and renews a `1/3`
 reserve automatically.  This is followed by convergence of the finite-support
 energies to the closed tail form.  The scalar induction and order-limit
 passage are kernel-checked; the source-specific form convergence and uniform
-two-channel matrix estimate remain open.
+prime-dominated two-channel matrix estimate remain open.
 -/

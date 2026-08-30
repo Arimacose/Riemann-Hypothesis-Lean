@@ -967,6 +967,7 @@ All error majorants decrease after `n=960`, while `atan(4*y)` increases.  The
 ```text
 for every integer n >= 960:
   0 <= S_n <= 4/5,
+  |S_n - pi/4| <= 1/(4*n),
   -(W_R)_nn >= log(n) - 19/20.
 
 proved diagonal constant: -0.9473913542475865348897965532052193...
@@ -976,7 +977,49 @@ strict slack:               0.0026086457524134651102034467947807...
 proved S lower:             0.7851731290996126271701508678397670...
 proved S upper:             0.7856108654974296661809649367091011...
 upper slack below 4/5:      0.0143891345025703338190350632908989...
+
+n0 * upper centered error:  0.2041940159821023026919272536563560...
+n0 * lower centered error:  0.2160329274601019150386356674652970...
+centered target:             0.25
 ```
+
+The centered estimate is substantially stronger than the coarse amplitude
+bound.  On the upper side it uses
+`S_n-pi/4 <= 1/(4*y)+sqrt(2)/(12*y^2)`.  On the lower side,
+`pi/2-atan(4*y)=atan(1/(4*y)) <= 1/(4*y)` gives
+
+```text
+pi/4-S_n <= 1/(8*y) + sqrt(2)/(12*y^2) + C/(2*y).
+```
+
+After multiplication by `n`, both right sides are maximal at `n=960`; the
+displayed Arb enclosures are strictly below `1/4`.  Therefore the conclusion
+holds for every larger integer mode, rather than just at the replay endpoint.
+The canonical source endpoint has centered error
+`1.2332188514957847568e-5`, compared with the certified endpoint allowance
+`1/3840 = 0.00026041666...`.
+
+Constants disappear from the Loewner commutator:
+
+```text
+[M_S,H] = [M_(S-pi/4),H].
+```
+
+On a tail beginning at `N`, the multiplier norm is at most `1/(4*N)` and the
+compressed normalized discrete Hilbert transform has norm at most one.  Hence
+the conditional source-level operator consequence is
+
+```text
+||(W_R)_off,tail|| <= 1/(2*N).
+```
+
+At the uniform-induction start `N=1920`, this is at most `1/3840`, replacing
+the previous triangle estimate `2*||S||_infinity <= 8/5`.  Lean theorem
+`commutator_norm_le_two_mul_of_norm_bounds` proves the general contraction
+commutator bound, while `commutator_norm_le_one_div_two_mul` checks the exact
+`1/(4*N) -> 1/(2*N)` specialization.  The remaining concrete adapter is the
+identification of the CvS tail compression with these multiplication and
+Hilbert operators; no further asymptotic estimate for `S_n` is consumed.
 
 The script also reconstructs the canonical source formula at `n=960`; it
 finds `S_960 = 0.7853858312089333...` and
@@ -986,14 +1029,16 @@ digits while reducing the diagonal-constant radius from below `7.04e-76` to
 below `2.09e-114`.
 
 The tracked script SHA-256 is
-`107731D4DB2B0C8443FDE4ED5196C3EC6936A3B1BBB40D163F6A7D0F84904773`;
+`24B778E497CB18AD0E6CDFD42840DDB7F0F9845D01CF4EB5BCDBF27C780DE007`;
 the 256-bit and 384-bit JSON SHA-256 values are respectively
-`C93A2B4D12287948C7C695C4428EAE5025CDCE12C4AB291FC7B17A84EBEE0CC4`
+`E1BB0C78738A8D56723D2E91E911792FF19054EB0D243DB0411EFB1D2696E65F`
 and
-`B834F8F8F2040CC9CA5FB9B269CCB5796F82D23CF633840F9BEFD1C92D2E5299`.
+`DAB0B98F84358566EF5701BE70FC1230BEBBE0F4F45E4705A8628BD5EFB70B2E`.
 This all-mode envelope is a source-level analytic lemma with interval-audited
-constants; its remaining use is to combine the sharp symbol variation and the
-prime translation bound into the two relative `2/27` channel estimates.  The
+constants.  Its centered variation now removes the Archimedean amplitude from
+the tight budget; the remaining use is to combine the small commutator term
+with a cancellation-sensitive prime translation estimate in the two relative
+`2/27` channels.  The
 new Lean theorem `relativeCoupling_of_coerciveNormBounds` is the exact adapter:
 ordinary low/high coercive floors, a rectangular operator-norm bound, and the
 scalar budget `epsilon^2 <= q*lowGap*highGap` imply the required relative
@@ -1009,9 +1054,11 @@ D_L + B_L = 28.8619855743363547...
 ```
 
 for `c=13`, so their raw high-floor lower bound turns positive only beyond a
-cutoff of order `3.42e12`.  The new prime constant improves that scale but does
-not by itself control the archimedean channel sharply enough.  The preferred
-next theorem is therefore the two-channel recursive dyadic-reference estimate
+cutoff of order `3.42e12`.  The centered estimate bypasses that coarse
+Archimedean loss.  The global prime norm, however, discards the cancellation
+visible in each previous/middle crossblock and remains too large for the
+relative budget.  The preferred next theorem is therefore the two-channel
+recursive dyadic-reference estimate
 
 ```text
 |C_previous(s,t)|^2
@@ -1161,8 +1208,10 @@ The following are still explicit proof obligations:
    certificates supply the `960 -> 1920` and `1920 -> 3840` bridges, while the
    strict
    `||T_13||<10/3` power certificate removes most of the prime-block loss.  The
-   remaining analytic work is concentrated in the archimedean tail symbol,
-   shell coercivity, and their relative channel normalization;
+   centered Archimedean symbol decay is now interval-certified; the remaining
+   analytic work is concentrated in the prime previous/middle crossblocks,
+   shell coercivity, their relative channel normalization, and the concrete
+   Hilbert-compression adapter;
 3. prove a cutoff-uniform upper bound for the absolute first spectral moment
    consumed by the new far-left theorem;
 4. keep the V22 central-mode functional distinct from the Sylvester boundary
