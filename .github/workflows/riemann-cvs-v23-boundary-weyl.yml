@@ -29,6 +29,7 @@ on:
       - 'research/riemann-cvs-numerics/probe_dyadic_shell_scaling.py'
       - 'research/riemann-cvs-numerics/certify_prime_translation_power_bound.py'
       - 'research/riemann-cvs-numerics/certify_archimedean_tail_envelope.py'
+      - 'research/riemann-cvs-numerics/certify_eventual_dyadic_middle_channel.py'
       - 'research/riemann-cvs-numerics/certify_boundary_weyl_cumulative.py'
       - 'research/riemann-cvs-numerics/certify_parity_gap.py'
       - 'research/riemann-cvs-notes/V23_BOUNDARY_WEYL_CUMULATIVE.md'
@@ -60,6 +61,7 @@ on:
       - 'research/riemann-cvs-numerics/probe_dyadic_shell_scaling.py'
       - 'research/riemann-cvs-numerics/certify_prime_translation_power_bound.py'
       - 'research/riemann-cvs-numerics/certify_archimedean_tail_envelope.py'
+      - 'research/riemann-cvs-numerics/certify_eventual_dyadic_middle_channel.py'
       - 'research/riemann-cvs-numerics/certify_boundary_weyl_cumulative.py'
       - 'research/riemann-cvs-numerics/certify_parity_gap.py'
       - 'research/riemann-cvs-notes/V23_BOUNDARY_WEYL_CUMULATIVE.md'
@@ -326,6 +328,31 @@ jobs:
             --prec 384 \
             --json-out research/riemann-cvs-numerics/artifacts/v23_c13_N960_archimedean_tail_384bit.json
 
+      - name: Certify the eventual V23 dyadic middle channel
+        shell: bash
+        run: |
+          set -euo pipefail
+          python research/riemann-cvs-numerics/certify_eventual_dyadic_middle_channel.py \
+            --c 13 \
+            --prime-certificate research/riemann-cvs-numerics/artifacts/v23_c13_prime_translation_power6.json \
+            --archimedean-certificate research/riemann-cvs-numerics/artifacts/v23_c13_N960_archimedean_tail.json \
+            --start-mode 1920 \
+            --finite-frontier 3840 \
+            --shift-gain 1/1024 \
+            --channel-target 2/27 \
+            --prec 256 \
+            --json-out research/riemann-cvs-numerics/artifacts/v23_c13_eventual_middle_channel.json
+          python research/riemann-cvs-numerics/certify_eventual_dyadic_middle_channel.py \
+            --c 13 \
+            --prime-certificate research/riemann-cvs-numerics/artifacts/v23_c13_prime_translation_power6.json \
+            --archimedean-certificate research/riemann-cvs-numerics/artifacts/v23_c13_N960_archimedean_tail_384bit.json \
+            --start-mode 1920 \
+            --finite-frontier 3840 \
+            --shift-gain 1/1024 \
+            --channel-target 2/27 \
+            --prec 384 \
+            --json-out research/riemann-cvs-numerics/artifacts/v23_c13_eventual_middle_channel_384bit.json
+
       - name: Certify the finite V23 relative-energy coupling route
         shell: bash
         run: |
@@ -498,6 +525,8 @@ jobs:
             research/riemann-cvs-numerics/artifacts/v23_c13_prime_translation_power6.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N960_archimedean_tail.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N960_archimedean_tail_384bit.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_eventual_middle_channel.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_eventual_middle_channel_384bit.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N20_to_N120_relative_energy.json
             research/riemann-cvs-numerics/artifacts/v23_c13_recursive_relative_energy_shells.json
             research/riemann-cvs-numerics/artifacts/v23_c13_q996_N480_to_N960_shell.json

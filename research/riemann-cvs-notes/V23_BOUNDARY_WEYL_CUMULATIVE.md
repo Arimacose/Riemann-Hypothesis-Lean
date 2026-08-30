@@ -1084,6 +1084,91 @@ ordinary low/high coercive floors, a rectangular operator-norm bound, and the
 scalar budget `epsilon^2 <= q*lowGap*highGap` imply the required relative
 energy inequality without another informal division step.
 
+### Eventual global bound for the middle/new dyadic channel
+
+The tracked `certify_eventual_dyadic_middle_channel.py` composes the strict
+prime power certificate with the corrected Archimedean parity envelope.  Its
+scope is one of the two recursive channels: the adjacent crossblock from the
+middle shell `[N,2N]` to the new shell `[2N,4N]`.
+
+The remaining pole term is handled directly from the exact rank-two
+factorization.  With
+
+```text
+L = log(13),
+polePrefactor = 32*L*sinh(L/4)^2,
+a_n^2+b_n^2 = 1/(L^2+16*pi^2*n^2),
+```
+
+the signed tail and the integral comparison for `sum 1/n^2` give
+
+```text
+Pole(N) <= polePrefactor/(8*pi^2*(N-1)).
+```
+
+Orthogonal compression to a parity block, an internal shell, or a rectangular
+crossblock preserves this upper bound.  The two certified Archimedean bounds
+and the prime norm then give
+
+```text
+A_internal(N)
+  = log(3/2)/2 + 1/(2*N) + 1/(4*pi*(N-1)),
+
+A_cross(N)
+  = sqrt(log(5/3)*log(4/3))/2
+    + 1/(2*N) + 1/(4*pi*(N-1)),
+
+gap(N)
+  = log(N) - 19/20 - 10/3 - A_internal(N) - Pole(N) + 1/1024,
+
+epsilon(N)
+  = 10/3 + A_cross(N) + Pole(N),
+
+rho(N)
+  = epsilon(N)^2/(gap(N)*gap(2*N)).
+```
+
+Here the positive `1/1024` is the worst-case gain on `x<=-1/1024`.  The
+rectangular coercive-norm adapter turns `rho(N)<2/27` into exactly the required
+middle-channel relative-energy inequality.  Since `epsilon(N)` decreases and
+both gaps increase, one successful threshold check covers every larger integer
+mode, not only later powers of two.
+
+The 256-bit Arb replay finds the first successful dyadic point based at
+`N=1920` to be
+
+```text
+N:                     31,457,280 = 1920*2^14
+gap(N):                12.7790516339938208758751165531000...
+gap(2N):               13.4721988315436789108012415049796...
+epsilon(N):             3.52500716188773898155132726632185...
+rho(N):                 0.072174352883450058836996111895104...
+2/27-rho(N):            0.0018997211906240152370779621789703...
+```
+
+The immediately preceding dyadic point `N=15,728,640` has
+`rho(N)=0.080452998599332754813300470594574...`, strictly above `2/27` by
+`0.006378924525258680739226396520500...`.  Thus this is the first dyadic
+threshold for the stated coarse global bounds.  An independent 384-bit replay
+reproduces the first 60 midpoint digits; the threshold-radius drops from below
+`1.89e-77` to below `5.54e-116`.
+
+Together with the already certified `1920 -> 3840` transition, this reduces the
+middle-channel tail to the following thirteen finite start modes:
+
+```text
+3840, 7680, 15360, 30720, 61440, 122880, 245760,
+491520, 983040, 1966080, 3932160, 7864320, 15728640.
+```
+
+The tracked script SHA-256 is
+`48DCC1321A7C549F940E327CA94343E6705837C4234368652C75839B613CA99D`.
+It verifies that both input JSON files have `PASS` status, match the current
+prime/Archimedean script hashes, and were generated from the same current Git
+commit before composing them.  This result is deliberately channel-specific:
+the previous-core channel, the thirteen finite middle-channel bridges, and the
+concrete Hilbert/parity compression adapters remain separate obligations.
+
 The same measurements make the route choice sharper.  At `K=3840`, the
 reference coefficients remain about `13.37` and `16.14` times the exact
 `1/666` reserve.  The elementary log-tail constants are also too conservative
@@ -1096,16 +1181,18 @@ D_L + B_L = 28.8619855743363547...
 for `c=13`, so their raw high-floor lower bound turns positive only beyond a
 cutoff of order `3.42e12`.  The centered estimate bypasses that coarse
 Archimedean loss.  The global prime norm, however, discards the cancellation
-visible in each previous/middle crossblock and remains too large for the
-relative budget.  The preferred next theorem is therefore the two-channel
-recursive dyadic-reference estimate
+visible in each previous/middle crossblock and remains too large at the current
+finite frontier; it closes the middle channel only at the eventual threshold
+above and does not control the previous-core reference geometry.  The preferred
+next theorem is therefore the remaining recursive dyadic-reference estimate
 
 ```text
 |C_previous(s,t)|^2
   <= (2/27) * R_q0(K)(s,s) * H_[2K,4K](t,t),
 |C_middle(s,t)|^2
   <= (2/27) * H_[K,2K](s,s) * H_[2K,4K](t,t)
-for every dyadic K >= 1920.
+for the previous channel at every dyadic K >= 1920 and for the middle channel
+at the thirteen finite bridge modes below 31,457,280.
 ```
 
 Combined with `fourNinthsShell_of_twoChannelReference`, these estimates produce
@@ -1238,19 +1325,20 @@ The following are still explicit proof obligations:
 1. instantiate the characteristic-polynomial identification for the concrete
    self-adjoint CvS blocks from a Lean-side ordered eigenvalue enumeration;
 2. after the rigorously checked chain
-   `N=20 -> 120 -> 240 -> 480 -> 960 -> 1920 -> 3840`, prove the two uniform
-   dyadic channel bounds with coefficient `2/27` for every dyadic `K>=1920`,
-   or an eventual reference-energy estimate `kappa_K <= rho/666`; pass the resulting
-   `q=999/1000` finite-support inequality to the closed high complement
-   uniformly on compact domains with right endpoint `< 0`.  The exact `1/666`
-   reserve, the optimized `4/9 -> 1/3 -> 4/27` steady recursion, and its
-   two-channel Lean adapter are formalized.  The preconditioned-Schur
-   certificates supply the `960 -> 1920` and `1920 -> 3840` bridges, while the
-   strict
-   `||T_13||<10/3` power certificate removes most of the prime-block loss.  The
-   centered Archimedean symbol decay is now interval-certified; the remaining
-   analytic work is concentrated in the prime previous/middle crossblocks,
-   shell coercivity, their relative channel normalization, and the concrete
+   `N=20 -> 120 -> 240 -> 480 -> 960 -> 1920 -> 3840`, prove the previous-core
+   channel uniformly and certify the thirteen remaining finite middle-channel
+   bridges through `K=15,728,640`; the new scalar-composition certificate gives
+   the middle-channel coefficient `2/27` for every integer
+   `K>=31,457,280`.  Then pass the resulting `q=999/1000` finite-support
+   inequality to the closed high complement uniformly on compact domains with
+   right endpoint `< 0`.  The exact `1/666` reserve, the optimized
+   `4/9 -> 1/3 -> 4/27` steady recursion, and its two-channel Lean adapter are
+   formalized.  The preconditioned-Schur certificates supply the
+   `960 -> 1920` and `1920 -> 3840` bridges, while the strict
+   `||T_13||<10/3` power certificate and centered Archimedean envelope close the
+   eventual middle-channel scalar budget.  The remaining analytic work is
+   concentrated in the prime previous-core crossblock, the finite middle
+   bridges, their relative channel normalization, and the concrete
    Hilbert-compression adapter;
 3. prove a cutoff-uniform upper bound for the absolute first spectral moment
    consumed by the new far-left theorem;
@@ -1274,9 +1362,11 @@ preconditioned-Schur interval certificates close `960 -> 1920` at
 uses reserve `1/3` and per-channel budget `2/27`.  The remaining
 `3840 -> 7680` midpoint shell clears that target,
 and the exact-rational/Arb sixth-power certificate proves the sharper prime
-operator bound `||T_13||<10/3`.  The uniform analytic channel bound,
-closed-form passage, uniform moment bound, and limiting resolvent construction
-remain the dominant proof boundary.
+operator bound `||T_13||<10/3`.  The new Arb composition closes the
+middle-channel budget for all `K>=31,457,280`, leaving thirteen finite
+middle-channel bridges plus the all-scale previous-core channel.  That channel,
+the closed-form passage, the uniform moment bound, and the limiting resolvent
+construction remain the dominant proof boundary.
 
 ## 10. Local Lean replay
 
