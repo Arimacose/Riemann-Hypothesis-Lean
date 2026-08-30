@@ -25,6 +25,7 @@ on:
       - 'research/riemann-cvs-numerics/certify_recursive_relative_energy_shells.py'
       - 'research/riemann-cvs-numerics/certify_preconditioned_relative_shell.py'
       - 'research/riemann-cvs-numerics/certify_direct_parity_relative_shell.py'
+      - 'research/riemann-cvs-numerics/certify_odd_fixed_base_channel.py'
       - 'research/riemann-cvs-numerics/probe_relative_shell_budget.py'
       - 'research/riemann-cvs-numerics/probe_dyadic_shell_scaling.py'
       - 'research/riemann-cvs-numerics/probe_previous_core_dyadic_channels.py'
@@ -58,6 +59,7 @@ on:
       - 'research/riemann-cvs-numerics/certify_recursive_relative_energy_shells.py'
       - 'research/riemann-cvs-numerics/certify_preconditioned_relative_shell.py'
       - 'research/riemann-cvs-numerics/certify_direct_parity_relative_shell.py'
+      - 'research/riemann-cvs-numerics/certify_odd_fixed_base_channel.py'
       - 'research/riemann-cvs-numerics/probe_relative_shell_budget.py'
       - 'research/riemann-cvs-numerics/probe_dyadic_shell_scaling.py'
       - 'research/riemann-cvs-numerics/probe_previous_core_dyadic_channels.py'
@@ -221,6 +223,8 @@ jobs:
           #print axioms RiemannCvs.BoundaryWeylSchurTail.dyadicChannelBudget_sum_le_two
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCoupling_of_dyadicChannelBudgets
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCoupling_of_finiteException_and_dyadicChannelBudgets
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.v23OddFixedBaseBudget_allocation
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCoupling_of_v23OddFixedBaseAndDyadicBudgets
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCoupling_of_twoChannelBudgets
           #print axioms RiemannCvs.BoundaryWeylSchurTail.fourNinthsShell_of_twoChannelReference
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCoupling_of_scaledFormNonnegative
@@ -496,6 +500,25 @@ jobs:
             --candidate-leading 1/27 \
             --json-out research/riemann-cvs-numerics/artifacts/v23_c13_previous_core_to_N3840_dyadic_channels.json
 
+      - name: Certify the exceptional odd fixed-base channel
+        shell: bash
+        run: |
+          set -euo pipefail
+          python research/riemann-cvs-numerics/certify_odd_fixed_base_channel.py \
+            --c 13 \
+            --base-cutoff 20 \
+            --middle-cutoff 1920 \
+            --new-cutoff 3840 \
+            --prec 256 \
+            --shift-gain 1/1024 \
+            --reference-q 249/250 \
+            --exception-budget 1/384 \
+            --candidate-regular-leading 1/30 \
+            --previous-channel-budget 2/27 \
+            --threads 4 \
+            --validate-cutoff 12 \
+            --json-out research/riemann-cvs-numerics/artifacts/v23_c13_odd_base20_to_N3840_interval.json
+
       - name: Replay the corrected finite Arb parity certificate
         shell: bash
         run: |
@@ -566,6 +589,9 @@ jobs:
             research/riemann-cvs-numerics/artifacts/v23_c13_N120_to_N240_shell_midpoint_smoke.json
             research/riemann-cvs-numerics/artifacts/v23_c13_q996_N1920_to_N3840_four_ninths_scaling.json
             research/riemann-cvs-numerics/artifacts/v23_c13_previous_core_to_N3840_dyadic_channels.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_odd_base20_to_N3840_interval.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_odd_base20_to_N3840_interval_base_preconditioner.npy
+            research/riemann-cvs-numerics/artifacts/v23_c13_odd_base20_to_N3840_interval_schur_preconditioner.npy
             research/riemann-cvs-numerics/artifacts/v23_c13_N20_parity_gap.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N20_boundary_weyl_cumulative.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N12_boundary_weyl_compact_margin.json

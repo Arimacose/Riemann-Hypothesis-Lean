@@ -189,8 +189,16 @@ by about `0.000142`, so the selected source split keeps that base as a finite
 channel and applies the geometric target to the dyadic tail.  The Lean theorem
 `relativeCoupling_of_finiteException_and_dyadicChannelBudgets` implements this
 split without a factor-two loss: a certified exceptional coefficient plus
-twice the leading dyadic coefficient need only fit below `2/27`.  These values
-are route-selection data, not interval certificates.  This is followed by
+twice the leading dyadic coefficient need only fit below `2/27`.  The
+multichannel table remains route-selection data, but the singled-out odd base
+is now an interval certificate: direct Arb parity formulas and exact-dyadic
+congruences prove its coefficient is below `1/384`, with `20/20` positive base
+rows, `38400/38400` verified-solve residual intervals containing zero, and
+`1920/1920` positive Schur rows.  Choosing regular leading coefficient `1/30`
+then gives exact allocation `133/1920` and positive slack `83/17280` below
+`2/27`; `relativeCoupling_of_v23OddFixedBaseAndDyadicBudgets` is the matching
+Lean adapter.  The regular all-scale envelope and its energy normalization
+remain source inputs.  This is followed by
 convergence of the
 finite-support energies to the closed tail form.  The scalar induction,
 finite-product lower bound, and strict order-limit passage are kernel-checked;

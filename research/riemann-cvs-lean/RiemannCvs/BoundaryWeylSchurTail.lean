@@ -898,6 +898,53 @@ theorem relativeCoupling_of_finiteException_and_dyadicChannelBudgets
     exact hCombined.trans hTotalBudget
   · exact hRelative
 
+/-- Exact scalar budget retained after assigning `1/384` to the exceptional
+odd fixed base and `1/30` as the leading coefficient of the regular dyadic
+family.  The positive remainder is the slack left inside the previous-channel
+allocation `2/27`. -/
+theorem v23OddFixedBaseBudget_allocation :
+    (2 / 27 : ℝ) -
+      ((1 / 384 : ℝ) + 2 * (1 / 30 : ℝ)) = 83 / 17280 := by
+  norm_num
+
+/-- V23 specialization of the finite-exception/dyadic adapter.  A rigorous
+`1/384` estimate for the odd fixed base and a regular envelope with leading
+coefficient `1/30` combine strictly inside the previous-core budget `2/27`.
+
+The finite interval certificate supplies `hExceptionRelative`; the remaining
+source-level separated-band estimate supplies `hBudgetEnvelope` and
+`hRelative`. -/
+theorem relativeCoupling_of_v23OddFixedBaseAndDyadicBudgets
+    (exceptionEnergy exceptionCross : ℝ)
+    (energy cross budget : ℕ → ℝ)
+    (n : ℕ) (tail : ℝ)
+    (hExceptionEnergy : 0 ≤ exceptionEnergy)
+    (hExceptionRelative :
+      exceptionCross ^ 2 ≤ (1 / 384 : ℝ) * exceptionEnergy * tail)
+    (hEnergy : ∀ i ∈ Finset.range n, 0 ≤ energy i)
+    (hBudget : ∀ i ∈ Finset.range n, 0 ≤ budget i)
+    (hTail : 0 ≤ tail)
+    (hBudgetEnvelope : ∀ i ∈ Finset.range n,
+      budget i ≤ (1 / 30 : ℝ) * (1 / (2 : ℝ)) ^ i)
+    (hRelative : ∀ i ∈ Finset.range n,
+      (cross i) ^ 2 ≤ budget i * energy i * tail) :
+    (exceptionCross + ∑ i ∈ Finset.range n, cross i) ^ 2 ≤
+      (2 / 27 : ℝ) *
+        (exceptionEnergy + ∑ i ∈ Finset.range n, energy i) * tail := by
+  apply relativeCoupling_of_finiteException_and_dyadicChannelBudgets
+    exceptionEnergy exceptionCross (1 / 384 : ℝ)
+    energy cross budget n tail (1 / 30 : ℝ) (2 / 27 : ℝ)
+    hExceptionEnergy
+  · norm_num
+  · exact hExceptionRelative
+  · exact hEnergy
+  · exact hBudget
+  · exact hTail
+  · norm_num
+  · exact hBudgetEnvelope
+  · norm_num
+  · exact hRelative
+
 /-- Combine fixed-low/shell and high-core/shell estimates into one relative
 coupling bound.  The factor two is the division-free inequality
 `(a+b)^2 ≤ 2*a^2 + 2*b^2`; consequently each channel may consume at most half

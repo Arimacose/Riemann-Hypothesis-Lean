@@ -1330,6 +1330,39 @@ finite budget, while the remaining analytic proof targets the unchanged
 that exceptional budget and prove the structured dyadic estimates and energy
 normalization; the Lean summation and recombination are complete.
 
+The tracked `certify_odd_fixed_base_channel.py` now closes that finite exception
+at the first certified transition.  It evaluates the direct odd-parity Arb
+formula for base modes `[1,20]`, their crossblock to `[1921,3840]`, and the
+shifted new-shell block.  At 256-bit precision it proves
+
+```text
+C_[1,20](s,t)^2
+  < (1/384) * [(249/250) H_[1,20](s,s)] * H_[1921,3840](t,t).
+```
+
+The certificate independently proves the `20 x 20` scaled base positive,
+checks all `38,400/38,400` Arb verified-solve residual entries contain zero,
+and proves all `1,920/1,920` rows of the exact-dyadic preconditioned Schur
+complement have strictly positive Gershgorin margins.  A canonical cutoff-12
+replay additionally requires every direct-minus-canonical interval entry to
+contain exact zero.  Floating Cholesky selects the two bases only; both stored
+NumPy bases are embedded as exact dyadic Arb matrices before positivity is
+checked.
+
+The selected conditional regular leading coefficient is now `1/30`, not the
+saturated generic value `1/27`.  The exact allocation is
+
+```text
+1/384 + 2*(1/30) = 133/1920,
+2/27 - 133/1920 = 83/17280 > 0.
+```
+
+Lean records the equality in `v23OddFixedBaseBudget_allocation` and packages the
+result as `relativeCoupling_of_v23OddFixedBaseAndDyadicBudgets`.  This closes
+the finite odd base channel for `1920 -> 3840`; the regular all-scale estimate
+`q_i <= (1/30)*2^(-i)` and the comparison between the sum of shell energies and
+the recursive core remain the next source-level obligations.
+
 The finite-support-to-closed-value order passage is now explicit in Lean.
 `recursiveShellEnergy_nonnegative_nat` propagates nonnegativity through every
 finite shell chain.  `recursiveShellEnergy_limit_nonnegative` passes this
@@ -1468,8 +1501,11 @@ The following are still explicit proof obligations:
    the analytic layer must now prove a positive uniform floor for those
    products from the separated-band previous-core estimates.  The finite- and
    dyadic-channel Cauchy adapters further reduce the previous-core coefficient
-   `2/27` to a shell-distance envelope with leading coefficient `1/27` and
-   squared decay `2^(-i)`.  The preconditioned-Schur certificates supply the
+   `2/27` to a shell-distance envelope.  The generic route permits leading
+   coefficient `1/27`; after assigning the certified odd fixed base `1/384`,
+   the selected split uses leading coefficient `1/30`, has exact budget slack
+   `83/17280`, and retains squared decay `2^(-i)`.  The preconditioned-Schur
+   certificates supply the
    `960 -> 1920` and `1920 -> 3840` bridges, while the strict
    `||T_13||<10/3` power certificate and centered Archimedean envelope close the
    eventual middle-channel scalar budget.  The remaining analytic work is
