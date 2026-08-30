@@ -60,10 +60,12 @@ The new kernel-checked chain contains:
     closed-form limit; a uniform `rhoStar <= 1` specialization exposes the
     exact remaining dyadic-shell input; a two-channel budget theorem also
     recombines the fixed-low/shell and high-core/shell estimates while exposing
-    the exact factor-two allocation required by `(a+b)^2 <= 2a^2+2b^2`; for
-    the concrete `rho = 1/12`, another theorem proves that the glued core keeps
-    `2/3` of its block-diagonal core-plus-shell reference, so the next shell
-    only needs a recursive-reference coefficient at most `1/18`;
+    the exact factor-two allocation required by `(a+b)^2 <= 2a^2+2b^2`; the
+    rigorous `rho = 1/12` bridge keeps `2/3` of its block-diagonal reference.
+    For the steady tail, the balanced choice `rhoStar = 4/9` is now proved to
+    keep `1/3`, and it maximizes the reusable budget
+    `rhoStar * reserve = 4/27`.  A packaged theorem therefore reduces every
+    later shell to two separate channel coefficients of at most `2/27`;
 12. a normalized far-left estimate
     `|G_N(-t) - 1/t| <= moment/t²`, derived from total residue one and a first
     absolute spectral-moment budget;
@@ -98,14 +100,27 @@ midpoint probe, cross-checked entrywise against the canonical Arb construction
 at `N = 120`, now reaches two shells beyond the rigorous frontier.  For
 `1920 -> 3840` the direct `q₀` coefficients are about `0.03547` and `0.04975`;
 for `3840 -> 7680` they are about `0.01982` and `0.03208`.  Both sectors remain
-below the already certified rational candidate `rhoStar = 1/12`, while the
-reference-reserve route is still above its `1/666` threshold.  These are
-midpoint scaling data rather than interval certificates; they select the
-concrete uniform target `rhoStar = 1/12` for the analytic tail theorem.  The
-more relevant recursive dyadic references are already smaller than `1/18` at
-the two measured post-frontier shells: approximately `0.03544/0.04768` for
-`1920 -> 3840` and `0.02016/0.03068` for `3840 -> 7680`.  This matches the
-new `2/3` reserve invariant and identifies a repeatable induction shape.  The
+below `1/12`, while the independent `1/666` reference route remains too
+narrow.  These are midpoint scaling data rather than interval certificates.
+Optimizing the balanced recursive coefficient changes the preferred uniform
+target to `rhoStar = 4/9`: it leaves reserve `1/3` and the maximal reusable
+reference budget `4/27`.  The two-channel theorem assigns `2/27` to each
+source block.  At `1920 -> 3840`, the measured previous/middle channel
+coefficients are about `0.00635/0.03440` in the even sector and
+`0.02855/0.03454` in the odd sector.  At `3840 -> 7680` they are about
+`0.00474/0.01727` and `0.01734/0.01744`.  All eight values are below `2/27`,
+with the tightest observed slack still about `0.03953`.  The combined
+recursive-reference coefficients are about `0.03544/0.04768` and
+`0.02016/0.03068`, all far below `4/27`.  This identifies the repeatable
+steady induction shape `2/27 + 2/27 -> 4/27 -> 4/9 -> 1/3`.  Two rigorous
+analytic-constant audits now sharpen the source side of this target.  Exact
+rational path geometry and Arb weights for all `415642` admissible sixth-power
+paths prove the prime translation norm `‖T_13‖ < 10/3`.  The digamma remainder,
+trigamma series, and geometric corrections prove, for every `n >= 960`,
+`0 <= S_n <= 4/5` and
+`-(W_R)_(n,n) >= log n - 19/20`.  These replace the old global prime and
+Archimedean constants; the remaining step is their sharp block-relative use,
+not another finite-cutoff extrapolation.  The
 finite certificate is valid at the endpoint, but the real-valued
 finite-to-limit resolvent comparison must be applied on compact subintervals
 whose right endpoint is strictly negative: the certified lowest even pole
@@ -129,12 +144,13 @@ with some `q < 1`: this removes the boundary vector entirely and is now the
 preferred target.  The finite recursive chain through `N = 480` preserves
 the concrete `q = 999/1000` benchmark, while the stricter `q₀ = 249/250`
 certificate now reaches `N = 1920` and exposes a `1/666` reference-energy
-reserve for that benchmark.  Beyond this finite bridge, the analytic
-obligation is now preferentially the uniform direct core-relative estimate
-`rhoStar = 1/12` for every dyadic shell from `N = 960` onward, or alternatively
-an eventual estimate
-`kappa_K ≤ rho/666` once the reference coupling has decayed enough, followed
-by convergence of the finite-support energies to the closed tail form.  The
-scalar induction and order-limit passage for that last step are kernel-checked;
-the source-specific form convergence and uniform matrix estimate remain open.
+reserve for that benchmark.  Beyond this finite bridge, the preferred
+analytic obligation is now the component-wise dyadic estimate: for every
+dyadic `K >= 960`, both the old-core/new-shell and middle-shell/new-shell
+relative coefficients are at most `2/27`.  The packaged `rhoStar = 4/9`
+theorem then supplies the direct recursive shell bound and renews a `1/3`
+reserve automatically.  This is followed by convergence of the finite-support
+energies to the closed tail form.  The scalar induction and order-limit
+passage are kernel-checked; the source-specific form convergence and uniform
+two-channel matrix estimate remain open.
 -/

@@ -746,67 +746,190 @@ core K   reference even   reference odd   direct q0 even   direct q0 odd
 ```
 
 Thus every measured direct `q0=249/250` coefficient from `K=960` onward lies
-below the already certified rational candidate `rhoStar=1/12`.  The two new
-post-frontier probes are:
+below the already certified rational candidate `rho=1/12`.  That coefficient
+is an excellent finite bridge, but it is not the best repeatable steady
+coefficient.  Write a balanced shell coefficient as `rho=u^2`.  The glued
+energy retains a `(1-u)` fraction of its block-diagonal reference, so the
+budget available for the next shell is
+
+```text
+u^2 * (1-u) <= 4/27,
+```
+
+with equality at `u=2/3`.  The optimal rational steady choice is therefore
+
+```text
+rhoStar = 4/9,  retained reserve = 1/3,
+combined next-shell budget = 4/27.
+```
+
+`balancedShellBudget_le_fourTwentySevenths` proves the scalar optimization in
+Lean.  `fourNinthsShell_oneThirdReserve` proves that a `4/9` relative shell
+retains the `1/3` reserve, and
+`fourNinthsShell_of_twoChannelReference` packages the repeatable step.  Its
+two channel hypotheses each use only `2/27`; the generic two-channel theorem
+combines them to the `4/27` reference budget, converts this to the direct
+`4/9` coefficient, and renews the same `1/3` reserve.
+
+The rigorously certified `960 -> 1920` coefficient `1/12` retains `2/3` of its
+reference, hence in particular supplies the weaker `1/3` reserve needed to
+enter this optimized steady recursion.  The two post-frontier probes were
+replayed with the new target as follows:
 
 ```powershell
 python research/riemann-cvs-numerics/probe_dyadic_shell_scaling.py `
   --c 13 --low-cutoff 20 --previous-cutoff 960 `
   --core-cutoff 1920 --shell-cutoff 3840 `
   --prec 160 --shift-gain 1/1024 --reference-q 999/1000 `
-  --dyadic-reference-q 249/250 --dyadic-reserve 2/3 `
-  --direct-q 249/250 --reserve 1/666 --candidate-rho 1/12 `
+  --dyadic-reference-q 249/250 --dyadic-reserve 1/3 `
+  --direct-q 249/250 --reserve 1/666 --candidate-rho 4/9 `
   --validate-cutoff 120 --json-out <N1920-to-N3840.json>
 
 python research/riemann-cvs-numerics/probe_dyadic_shell_scaling.py `
   --c 13 --low-cutoff 20 --previous-cutoff 1920 `
   --core-cutoff 3840 --shell-cutoff 7680 `
   --prec 160 --shift-gain 1/1024 --reference-q 999/1000 `
-  --dyadic-reference-q 249/250 --dyadic-reserve 2/3 `
-  --direct-q 249/250 --reserve 1/666 --candidate-rho 1/12 `
+  --dyadic-reference-q 249/250 --dyadic-reserve 1/3 `
+  --direct-q 249/250 --reserve 1/666 --candidate-rho 4/9 `
   --validate-cutoff 120 --json-out <N3840-to-N7680.json>
 ```
 
 Their local JSON SHA-256 values are respectively
-`D95D52FC74AD00B153F83052A8023016801CC5B7F706B21B6FBC79725D500151`
+`9031C77C7FCE637AE0669A69F9D28A8B20B0C1A133CB7B78269C998679AF1495`
 and
-`0EE4F389B87B62AAE097C95B03E480D2A4C4EEDCED0405DA0A028C86D0E9D904`.
-The tracked probe script SHA-256 is
-`8E2C7BC1771501F7386494EF8CEAA57BE071421F170D41AA0F34FD3B002A8C69`.
+`F1A695E4029376669C1C81D978F6853FE708252EFD2148C528A8EB0C2CD4ED2A`.
+The tracked probe script SHA-256 for both artifacts is
+`A62DDEAA0A9404B13BB0D03340C3F910FE993781A60F1D0D7FB4D926CB4B8E01`.
 
-The direct `rho=1/12` certificate itself leaves a much stronger recursive
-reserve than the independent `q0<q` comparison.  The Lean theorem
-`oneTwelfthShell_balancedReserve` proves exactly
+The component-wise midpoint measurements are:
 
 ```text
-cross^2 <= (1/12) * core * tail
-  ==> (2/3) * (core + tail) <= core + 2*cross + tail.
+new shell       sector  previous-core channel  middle-shell channel  combined
+1920 -> 3840    even    0.00634837851          0.03440346842         0.03543241333
+1920 -> 3840    odd     0.02854236720          0.03453827359         0.04767400009
+3840 -> 7680    even    0.00473830225          0.01726922679         0.02015208633
+3840 -> 7680    odd     0.01733024036          0.01743311006         0.03067107119
+per-channel sufficient upper bound                           2/27 = 0.07407407407
+combined available budget                                   4/27 = 0.14814814815
 ```
 
-Hence, after the rigorous `960 -> 1920` shell, the `N=1920` core controls
+Every measured channel has substantial slack, including the first odd sector.
+These outputs remain midpoint diagnostics rather than interval certificates;
+their role is to select a rational theorem target with room for analytic
+majorants.
+
+### Prime-translation power certificate
+
+The tracked script `certify_prime_translation_power_bound.py` improves the
+prime-operator constant used in those analytic majorants.  For
 
 ```text
-(2/3) * diag(R_q0(960), H_[960,1920]).
+T_13 = sum_(q<13) Lambda(q)/sqrt(q) * (U_log(q) + U_log(q)^*),
 ```
 
-To attach the next shell with the same `rho=1/12`, it is enough to bound the
-coupling against this dyadic reference by
+it enumerates every length-six multiplicative path.  A path is active exactly
+when the maximum of its exact rational partial products is less than thirteen
+times the minimum.  Thus all interval endpoints are sorted as rational
+numbers, while only the positive logarithmic weights require Arb enclosures.
+The canonical 256-bit replay checks
 
 ```text
-(1/12) * (2/3) = 1/18.
+admissible paths at depths 0..6: 1, 16, 148, 1168, 8612, 60716, 415642
+balanced start/end events:       415642 / 415642
+open rational intervals:         2471
+largest row-sum interval starts:  log(441/440)
+largest sixth-power row sum:      1321.765395642150687267590536885896...
+target (10/3)^6:                  1371.742112482853223593964334705075...
 ```
 
-The optimized probe measures exactly this recursive coefficient:
+The largest row-sum enclosure has radius below `1.74e-71`.  The symmetric
+Schur test for the positive kernel of `T_13^6`, followed by self-adjoint
+spectral calculus, therefore gives the strict operator consequence
 
 ```text
-new shell       dyadic reference                           even          odd
-1920 -> 3840    diag(R_q0(960), H_[960,1920])              0.03543241    0.04767400
-3840 -> 7680    diag(R_q0(1920), H_[1920,3840])            0.02015209    0.03067107
-required upper bound                                         0.05555556    0.05555556
+||T_13|| < 10/3.
 ```
 
-Both midpoint probes therefore fit the repeatable `1/18 -> 1/12 -> 2/3`
-induction shape, with the tighter first odd-sector slack about `0.00788156`.
+A separate 384-bit replay found the same path counts, same maximizing rational
+interval, and same first 50 midpoint digits, with radius below `5.09e-110`.
+The tracked script SHA-256 is
+`7ADA5E51136814E35EE8811F286971BBD9EBC519941FC8E335420C81DDE49307`;
+the 256-bit and 384-bit JSON SHA-256 values are respectively
+`CF6ED73D830E703F8644239C75B8315ED119ADDF4D74ECDC0C5BF30CE0393FC6`
+and
+`E22E5E44A833B841977259A0CE28E953519592CB6B30E1EBCDF13E98F824F003`.
+This replaces the earlier triangle bound near `9.94` by a strict bound below
+`3.334`.  The finite path certificate is rigorous; using it in the full CvS
+tail still requires the stated translation representation and Schur/spectral
+adapter, which remain explicit source-level inputs rather than hidden numeric
+assumptions.
+
+### Archimedean all-mode tail envelope
+
+The tracked `certify_archimedean_tail_envelope.py` removes two more coarse
+constants from the post-`N=1920` analysis.  For
+
+```text
+y = pi*n/log(13),  z = 1/4 + i*y,
+S_n = Im(psi(z))/2 - 2*y*g_s(n),
+```
+
+the source proof truncates the digamma expansion before its Bernoulli sum.
+[DLMF 5.11.2 and its complex remainder bound](https://dlmf.nist.gov/5.11)
+give an error at most `sqrt(2)/(6*y^2)` in this sector.  The absolutely
+convergent trigamma series gives
+
+```text
+Re(psi'(1/4+i*y)) >= -(1/y + 1/y^2).
+```
+
+Finally, if `e_k=exp(-(2k+1/2)L)`, the exact geometric sums
+`C=sum e_k` and `B=sum (2k+1/2)e_k` imply
+
+```text
+g_cc <= 2*C,
+g_x1 <= B/(2*y)^2,
+|g_x2| <= C/(2*y)^2,
+2*y*g_s <= C/(2*y).
+```
+
+All error majorants decrease after `n=960`, while `atan(4*y)` increases.  The
+256-bit Arb audit at the endpoint proves the uniform constants
+
+```text
+for every integer n >= 960:
+  0 <= S_n <= 4/5,
+  -(W_R)_nn >= log(n) - 19/20.
+
+proved diagonal constant: -0.9473913542475865348897965532052193...
+target constant:          -0.95
+strict slack:               0.0026086457524134651102034467947807...
+
+proved S lower:             0.7851731290996126271701508678397670...
+proved S upper:             0.7856108654974296661809649367091011...
+upper slack below 4/5:      0.0143891345025703338190350632908989...
+```
+
+The script also reconstructs the canonical source formula at `n=960`; it
+finds `S_960 = 0.7853858312089333...` and
+`-(W_R)_(960,960)-log(960) = -0.9419387381934217...`, both strictly inside
+the analytic envelope.  A 384-bit replay reproduces the displayed midpoint
+digits while reducing the diagonal-constant radius from below `7.04e-76` to
+below `2.09e-114`.
+
+The tracked script SHA-256 is
+`107731D4DB2B0C8443FDE4ED5196C3EC6936A3B1BBB40D163F6A7D0F84904773`;
+the 256-bit and 384-bit JSON SHA-256 values are respectively
+`C93A2B4D12287948C7C695C4428EAE5025CDCE12C4AB291FC7B17A84EBEE0CC4`
+and
+`B834F8F8F2040CC9CA5FB9B269CCB5796F82D23CF633840F9BEFD1C92D2E5299`.
+This all-mode envelope is a source-level analytic lemma with interval-audited
+constants; its remaining use is to combine the sharp symbol variation and the
+prime translation bound into the two relative `2/27` channel estimates.  The
+new Lean theorem `relativeCoupling_of_coerciveNormBounds` is the exact adapter:
+ordinary low/high coercive floors, a rectangular operator-norm bound, and the
+scalar budget `epsilon^2 <= q*lowGap*highGap` imply the required relative
+energy inequality without another informal division step.
 
 The same measurements make the route choice sharper.  At `K=3840`, the
 reference coefficients remain about `13.37` and `16.14` times the exact
@@ -818,20 +941,22 @@ D_L + B_L = 28.8619855743363547...
 ```
 
 for `c=13`, so their raw high-floor lower bound turns positive only beyond a
-cutoff of order `3.42e12`.  The preferred next theorem is therefore the
-recursive dyadic-reference estimate
+cutoff of order `3.42e12`.  The new prime constant improves that scale but does
+not by itself control the archimedean channel sharply enough.  The preferred
+next theorem is therefore the two-channel recursive dyadic-reference estimate
 
 ```text
-C_[K,2K -> 4K](s,t)^2
-  <= (1/18) * diag(R_q0(K), H_[K,2K])(s,s) * H_[2K,4K](t,t)
+|C_previous(s,t)|^2
+  <= (2/27) * R_q0(K)(s,s) * H_[2K,4K](t,t),
+|C_middle(s,t)|^2
+  <= (2/27) * H_[K,2K](s,s) * H_[2K,4K](t,t)
 for every dyadic K >= 960.
 ```
 
-Combined with `oneTwelfthShell_balancedReserve` and
-`relativeShell_of_referenceReserve`, this produces the uniform direct
-`rhoStar=1/12` estimate for the enlarged core.  It avoids extrapolating the
-coarse bounded-perturbation constant and avoids waiting for the independent
-reference coefficient to cross `1/666`.
+Combined with `fourNinthsShell_of_twoChannelReference`, these estimates produce
+the uniform direct `rhoStar=4/9` step and renew the `1/3` reserve.  This avoids
+extrapolating the coarse bounded-perturbation constant and avoids waiting for
+the independent reference coefficient to cross `1/666`.
 
 The finite-support-to-closed-value order passage is now explicit in Lean.
 `recursiveShellEnergy_nonnegative_nat` propagates nonnegativity through every
@@ -840,12 +965,13 @@ order to any real limit of the finite-support form values, and
 `recursiveShellEnergy_limit_nonnegative_of_uniformRho` specializes the result
 to one uniform coefficient `rhoStar <= 1`.  Consequently the remaining
 operator input is sharply separated into two source facts: the uniform
-dyadic-reference `1/18` matrix estimate above and convergence of the
+per-channel `2/27` estimates above and convergence of the
 finite-support energies to the closed CvS tail form.  The new theorem
 `relativeCoupling_of_twoChannelBudgets` further splits the first source fact:
 the fixed-low/shell and high-core/shell cross terms may be bounded separately,
-provided each consumes at most half of the final `rhoStar` budget.  This is the
-concrete component-wise route to improve on the coarse global `B_L` norm.
+provided each consumes at most half of the available `4/27` reference budget.
+This is the concrete component-wise route to improve on the coarse global
+`B_L` norm.
 
 `BoundaryWeylFarLeft.lean` closes the algebraic part of the exterior
 normalization.  If all finite poles are nonnegative, the total residue is one,
@@ -957,16 +1083,17 @@ The following are still explicit proof obligations:
 1. instantiate the characteristic-polynomial identification for the concrete
    self-adjoint CvS blocks from a Lean-side ordered eigenvalue enumeration;
 2. after the rigorously checked chain
-   `N=20 -> 120 -> 240 -> 480 -> 960 -> 1920`, prove either one uniform direct
-   core-relative coefficient below one on every remaining dyadic shell or an
-   eventual reference-energy estimate
-   `kappa_K <= rho/666`; pass the resulting `q=999/1000` finite-support
-   inequality to the closed high complement uniformly on compact domains with
-   right endpoint `< 0`.  The exact `1/666` reserve is already formalized; the
-   direct preconditioned-Schur certificate supplies the `960 -> 1920` bridge.
-   The older `a/gamma/epsilon` and restricted `errorSpace` budgets remain
-   fallback interfaces, and the relative form inequality is the preferred
-   route;
+   `N=20 -> 120 -> 240 -> 480 -> 960 -> 1920`, prove the two uniform dyadic
+   channel bounds with coefficient `2/27` for every dyadic `K>=960`, or an
+   eventual reference-energy estimate `kappa_K <= rho/666`; pass the resulting
+   `q=999/1000` finite-support inequality to the closed high complement
+   uniformly on compact domains with right endpoint `< 0`.  The exact `1/666`
+   reserve, the optimized `4/9 -> 1/3 -> 4/27` steady recursion, and its
+   two-channel Lean adapter are formalized.  The direct preconditioned-Schur
+   certificate supplies the `960 -> 1920` bridge, while the strict
+   `||T_13||<10/3` power certificate removes most of the prime-block loss.  The
+   remaining analytic work is concentrated in the archimedean tail symbol,
+   shell coercivity, and their relative channel normalization;
 3. prove a cutoff-uniform upper bound for the absolute first spectral moment
    consumed by the new far-left theorem;
 4. keep the V22 central-mode functional distinct from the Sylvester boundary
@@ -984,10 +1111,11 @@ comparison through `20 -> 120 -> 240 -> 480 -> 960 -> 1920` throughout
 finite displacement, characteristic-product, residue-normalization,
 determinant-ratio, quantitative Abel, energy-normalized monotonicity, and
 recursive shell and reference-reserve adapters are now formalized.  The
-midpoint probe selected `rho=1/12`, and the preconditioned-Schur interval
-certificate now closes `960 -> 1920` while confirming that the conservative
-`1/666` reserve is an eventual rather than immediate route.  The uniform
-later-shell bound,
+preconditioned-Schur interval certificate closes `960 -> 1920` at
+`rho=1/12`; the optimized steady recursion uses `rhoStar=4/9`, reserve `1/3`,
+and per-channel budget `2/27`.  Two later midpoint shells clear that target,
+and the exact-rational/Arb sixth-power certificate proves the sharper prime
+operator bound `||T_13||<10/3`.  The uniform analytic channel bound,
 closed-form passage, uniform moment bound, and limiting resolvent construction
 remain the dominant proof boundary.
 

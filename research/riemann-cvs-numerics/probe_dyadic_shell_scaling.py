@@ -25,8 +25,10 @@ against the recursive dyadic reference
 
     diag(R_q(previous_cutoff), H_[previous_cutoff,core_cutoff]).
 
-A preceding ``rho=1/12`` shell controls two thirds of exactly this reference,
-so the next ``rho=1/12`` shell needs a reference coefficient at most ``1/18``.
+The optimized repeatable choice ``rho=4/9`` controls one third of exactly this
+reference, so the next ``rho=4/9`` shell needs a combined reference coefficient
+at most ``4/27``.  Splitting the cross term into its previous-core and
+middle-shell channels gives the convenient target ``2/27`` for each channel.
 
 An optional small-cutoff replay compares every directly assembled parity entry
 with the canonical Arb full-matrix construction.  This guards the optimized
@@ -389,6 +391,27 @@ def _probe_sector(
         previous_cholesky = np.linalg.cholesky(previous_core)
         middle_cholesky = np.linalg.cholesky(middle_shell)
         dyadic_cholesky_seconds = time.time() - dyadic_started
+        previous_channel_kappa, previous_channel_linear_algebra = (
+            _whitened_largest_singular_squared(
+                core_cholesky_blocks=[
+                    (slice(0, previous_dimension), previous_cholesky)
+                ],
+                coupling=coupling[:previous_dimension, :],
+                shell_cholesky=shell_cholesky,
+            )
+        )
+        middle_channel_kappa, middle_channel_linear_algebra = (
+            _whitened_largest_singular_squared(
+                core_cholesky_blocks=[
+                    (
+                        slice(0, core_dimension - previous_dimension),
+                        middle_cholesky,
+                    )
+                ],
+                coupling=coupling[previous_dimension:, :],
+                shell_cholesky=shell_cholesky,
+            )
+        )
         dyadic_kappa, dyadic_linear_algebra = (
             _whitened_largest_singular_squared(
                 core_cholesky_blocks=[
@@ -409,21 +432,50 @@ def _probe_sector(
             "new_shell_dimension": full_dimension - core_dimension,
             "q": str(dyadic_reference_q),
             "kappa_midpoint": dyadic_kappa,
+            "previous_channel_kappa_midpoint": previous_channel_kappa,
+            "middle_channel_kappa_midpoint": middle_channel_kappa,
+            "channel_kappa_sum_midpoint": (
+                previous_channel_kappa + middle_channel_kappa
+            ),
             "cholesky_seconds": round(dyadic_cholesky_seconds, 3),
             "linear_algebra": dyadic_linear_algebra,
+            "previous_channel_linear_algebra": (
+                previous_channel_linear_algebra
+            ),
+            "middle_channel_linear_algebra": middle_channel_linear_algebra,
         }
         if dyadic_reserve is not None and candidate_rho is not None:
             required_budget = dyadic_reserve * candidate_rho
+            per_channel_budget = required_budget / 2
             dyadic_reference.update(
                 {
                     "reserve": str(dyadic_reserve),
                     "candidate_rho": str(candidate_rho),
                     "required_budget": str(required_budget),
+                    "two_channel_per_channel_budget": str(
+                        per_channel_budget
+                    ),
                     "midpoint_below_required_budget": (
                         dyadic_kappa < float(required_budget)
                     ),
+                    "previous_channel_below_two_channel_budget": (
+                        previous_channel_kappa < float(per_channel_budget)
+                    ),
+                    "middle_channel_below_two_channel_budget": (
+                        middle_channel_kappa < float(per_channel_budget)
+                    ),
+                    "two_channel_midpoint_sufficient": (
+                        previous_channel_kappa < float(per_channel_budget)
+                        and middle_channel_kappa < float(per_channel_budget)
+                    ),
                     "required_budget_slack_midpoint": (
                         float(required_budget) - dyadic_kappa
+                    ),
+                    "previous_channel_budget_slack_midpoint": (
+                        float(per_channel_budget) - previous_channel_kappa
+                    ),
+                    "middle_channel_budget_slack_midpoint": (
+                        float(per_channel_budget) - middle_channel_kappa
                     ),
                 }
             )
@@ -590,7 +642,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--dyadic-reserve",
-        default="2/3",
+        default="1/3",
         help="core reserve against the dyadic reference; empty string omits",
     )
     parser.add_argument(

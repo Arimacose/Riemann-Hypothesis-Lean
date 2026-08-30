@@ -373,6 +373,57 @@ theorem relativeCoupling_of_formGrowth
     _ ≤ q * (low * high) := hScaled
     _ = q * low * high := by ring
 
+/-- Convert ordinary coercive norm bounds and an operator-norm coupling bound
+into the dimensionless relative-energy inequality used by the recursive shell
+route.  This is the direct adapter for analytic estimates of a shell floor and
+of the corresponding rectangular block norm. -/
+theorem relativeCoupling_of_coerciveNormBounds
+    (lowEnergy highEnergy cross lowGap highGap epsilon q
+      lowNorm highNorm : ℝ)
+    (hLowGap : 0 ≤ lowGap)
+    (hHighGap : 0 ≤ highGap)
+    (hEpsilon : 0 ≤ epsilon)
+    (hq : 0 ≤ q)
+    (hLowEnergy : lowGap * lowNorm ^ 2 ≤ lowEnergy)
+    (hHighEnergy : highGap * highNorm ^ 2 ≤ highEnergy)
+    (hCross : |cross| ≤ epsilon * lowNorm * highNorm)
+    (hLowNorm : 0 ≤ lowNorm)
+    (hHighNorm : 0 ≤ highNorm)
+    (hBudget : epsilon ^ 2 ≤ q * lowGap * highGap) :
+    cross ^ 2 ≤ q * lowEnergy * highEnergy := by
+  have hCouplingNonnegative :
+      0 ≤ epsilon * lowNorm * highNorm := by positivity
+  have hCrossSq :
+      cross ^ 2 ≤ (epsilon * lowNorm * highNorm) ^ 2 := by
+    have hAbsSq := (sq_le_sq₀ (abs_nonneg cross) hCouplingNonnegative).2
+      hCross
+    simpa only [sq_abs] using hAbsSq
+  have hLowReference : 0 ≤ lowGap * lowNorm ^ 2 := by positivity
+  have hHighReference : 0 ≤ highGap * highNorm ^ 2 := by positivity
+  have hLowEnergyNonnegative : 0 ≤ lowEnergy :=
+    hLowReference.trans hLowEnergy
+  have hReferenceProduct :
+      (lowGap * lowNorm ^ 2) * (highGap * highNorm ^ 2) ≤
+        lowEnergy * highEnergy := by
+    calc
+      (lowGap * lowNorm ^ 2) * (highGap * highNorm ^ 2) ≤
+          lowEnergy * (highGap * highNorm ^ 2) :=
+        mul_le_mul_of_nonneg_right hLowEnergy hHighReference
+      _ ≤ lowEnergy * highEnergy :=
+        mul_le_mul_of_nonneg_left hHighEnergy hLowEnergyNonnegative
+  have hBudgetScaled := mul_le_mul_of_nonneg_right hBudget
+    (mul_nonneg (sq_nonneg lowNorm) (sq_nonneg highNorm))
+  have hScaledReference := mul_le_mul_of_nonneg_left hReferenceProduct hq
+  calc
+    cross ^ 2 ≤ (epsilon * lowNorm * highNorm) ^ 2 := hCrossSq
+    _ = epsilon ^ 2 * (lowNorm ^ 2 * highNorm ^ 2) := by ring
+    _ ≤ (q * lowGap * highGap) *
+        (lowNorm ^ 2 * highNorm ^ 2) := hBudgetScaled
+    _ = q * ((lowGap * lowNorm ^ 2) *
+        (highGap * highNorm ^ 2)) := by ring
+    _ ≤ q * (lowEnergy * highEnergy) := hScaledReference
+    _ = q * lowEnergy * highEnergy := by ring
+
 /-- Two nonnegative energy blocks glue whenever the square of their cross term
 does not exceed the product of the diagonal energies.  This is the scalar
 determinant step used by the recursive finite-shell certificate. -/
@@ -414,6 +465,47 @@ theorem oneTwelfthShell_balancedReserve
       _ ≤ ((core + tail) / 6) ^ 2 := by
         nlinarith [sq_nonneg (core - tail)]
   have hAbs : |cross| ≤ |(core + tail) / 6| :=
+    (sq_le_sq).mp hTargetSq
+  rw [abs_of_nonneg hSum] at hAbs
+  have hLower := (abs_le.mp hAbs).1
+  nlinarith
+
+/-- The reusable balanced-shell budget `u² * (1-u)` is at most `4/27` for
+every nonnegative `u`; equality is attained at `u = 2/3`.  This is the scalar
+optimization behind the steady coefficient `rho = u² = 4/9`. -/
+theorem balancedShellBudget_le_fourTwentySevenths
+    (u : ℝ) (hu : 0 ≤ u) :
+    u ^ 2 * (1 - u) ≤ (4 / 27 : ℝ) := by
+  have hLinear : 0 ≤ u + 1 / 3 := by positivity
+  have hFactor : 0 ≤ (u - 2 / 3) ^ 2 * (u + 1 / 3) :=
+    mul_nonneg (sq_nonneg _) hLinear
+  nlinarith
+
+/-- The balanced rational shell coefficient `rho = 4/9` leaves exactly one
+third of the block-diagonal core-plus-tail reference.
+
+Among coefficients of the form `rho = u^2`, the corresponding balanced
+reserve is `1-u`, so the reusable next-shell budget is `u^2 * (1-u)`.  Its
+maximum occurs at `u = 2/3`, giving the exact rational pair
+
+`rho = 4/9`, `reserve = 1/3`, `rho * reserve = 4/27`.
+
+This coefficient is deliberately weaker than the rigorous finite
+`rho = 1/12` bridge through `N = 1920`, but it leaves a substantially larger
+repeatable budget for every later dyadic shell. -/
+theorem fourNinthsShell_oneThirdReserve
+    (core tail cross : ℝ)
+    (hCore : 0 ≤ core)
+    (hTail : 0 ≤ tail)
+    (hRelative : cross ^ 2 ≤ (4 / 9 : ℝ) * core * tail) :
+    (1 / 3 : ℝ) * (core + tail) ≤ core + 2 * cross + tail := by
+  have hSum : 0 ≤ (core + tail) / 3 := by positivity
+  have hTargetSq : cross ^ 2 ≤ ((core + tail) / 3) ^ 2 := by
+    calc
+      cross ^ 2 ≤ (4 / 9 : ℝ) * core * tail := hRelative
+      _ ≤ ((core + tail) / 3) ^ 2 := by
+        nlinarith [sq_nonneg (core - tail)]
+  have hAbs : |cross| ≤ |(core + tail) / 3| :=
     (sq_le_sq).mp hTargetSq
   rw [abs_of_nonneg hSum] at hAbs
   have hLower := (abs_le.mp hAbs).1
@@ -598,6 +690,51 @@ theorem relativeCoupling_of_twoChannelBudgets
         2 * (rhoHigh * coreHigh * tail) := by linarith
     _ ≤ rho * coreLow * tail + rho * coreHigh * tail := by linarith
     _ = rho * (coreLow + coreHigh) * tail := by ring
+
+/-- Optimized steady-state dyadic shell package for the post-`N=1920` route.
+
+Each of the two reference channels may spend `2/27`.  The generic two-channel
+lemma combines them into the reference coefficient `4/27`; a one-third
+reserve then converts that reference estimate into the direct coefficient
+`4/9`.  The second conclusion renews the same one-third reserve, so the package
+can be iterated without changing constants. -/
+theorem fourNinthsShell_of_twoChannelReference
+    (referenceLow referenceHigh core tail crossLow crossHigh : ℝ)
+    (hReferenceLow : 0 ≤ referenceLow)
+    (hReferenceHigh : 0 ≤ referenceHigh)
+    (hTail : 0 ≤ tail)
+    (hReserveCore :
+      (1 / 3 : ℝ) * (referenceLow + referenceHigh) ≤ core)
+    (hLowRelative :
+      crossLow ^ 2 ≤ (2 / 27 : ℝ) * referenceLow * tail)
+    (hHighRelative :
+      crossHigh ^ 2 ≤ (2 / 27 : ℝ) * referenceHigh * tail) :
+    (crossLow + crossHigh) ^ 2 ≤ (4 / 9 : ℝ) * core * tail ∧
+      (1 / 3 : ℝ) * (core + tail) ≤
+        core + 2 * (crossLow + crossHigh) + tail := by
+  have hReference : 0 ≤ referenceLow + referenceHigh :=
+    add_nonneg hReferenceLow hReferenceHigh
+  have hReferenceRelative :
+      (crossLow + crossHigh) ^ 2 ≤
+        (4 / 27 : ℝ) * (referenceLow + referenceHigh) * tail :=
+    relativeCoupling_of_twoChannelBudgets
+      referenceLow referenceHigh tail crossLow crossHigh
+      (2 / 27 : ℝ) (2 / 27 : ℝ) (4 / 27 : ℝ)
+      hReferenceLow hReferenceHigh hTail (by norm_num) (by norm_num)
+      hLowRelative hHighRelative
+  have hRelative :
+      (crossLow + crossHigh) ^ 2 ≤ (4 / 9 : ℝ) * core * tail :=
+    relativeShell_of_referenceReserve
+      (referenceLow + referenceHigh) core tail (crossLow + crossHigh)
+      (1 / 3 : ℝ) (4 / 27 : ℝ) (4 / 9 : ℝ)
+      hReference hTail (by norm_num) hReserveCore (by norm_num)
+      hReferenceRelative
+  have hReserveNonnegative :
+      0 ≤ (1 / 3 : ℝ) * (referenceLow + referenceHigh) := by positivity
+  have hCore : 0 ≤ core := hReserveNonnegative.trans hReserveCore
+  exact ⟨hRelative,
+    fourNinthsShell_oneThirdReserve
+      core tail (crossLow + crossHigh) hCore hTail hRelative⟩
 
 /-- Recover a relative coupling inequality from nonnegativity of the scaled
 two-block form for every scalar multiple of the low vector.  Algebraically,
