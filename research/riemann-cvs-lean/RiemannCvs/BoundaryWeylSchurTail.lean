@@ -42,8 +42,10 @@ variable [SeminormedAddCommGroup H] [InnerProductSpace ℝ H]
 
 /-- A centered multiplier of norm at most `delta` has commutator norm at most
 twice `delta` against a contraction.  In the CvS tail application the
-multiplier is `M_(S - π/4)` and the contraction is the normalized discrete
-Hilbert transform. -/
+multiplier is `M_(S - π/4)` on the positive-positive Loewner block and the
+contraction is the normalized discrete Hilbert transform.  The reflected
+parity block has a separate leading Hankel kernel and is not erased by this
+centering step. -/
 theorem commutator_norm_le_two_mul_of_norm_bounds
     (A B : E →L[ℝ] E) (delta : ℝ)
     (hDelta : 0 ≤ delta)
@@ -63,9 +65,9 @@ theorem commutator_norm_le_two_mul_of_norm_bounds
         (mul_le_mul hB hA (norm_nonneg A) (by norm_num))
     _ = 2 * delta := by ring
 
-/-- Numerical specialization used by the certified Archimedean tail: a
-centered multiplier bound `1 / (4*N)` yields the commutator bound
-`1 / (2*N)`. -/
+/-- Numerical specialization used by the same-sign part of the certified
+Archimedean tail: a centered multiplier bound `1 / (4*N)` yields the
+commutator bound `1 / (2*N)`. -/
 theorem commutator_norm_le_one_div_two_mul
     (A B : E →L[ℝ] E) (N : ℝ)
     (hN : 0 < N)

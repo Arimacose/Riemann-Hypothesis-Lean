@@ -124,14 +124,19 @@ trigamma series, and geometric corrections prove, for every `n >= 960`,
 `0 <= S_n <= 4/5` and
 `|S_n - π/4| <= 1/(4*n)`, as well as
 `-(W_R)_(n,n) >= log n - 19/20`.  Since constants disappear from a
-commutator, the normalized Hilbert-transform representation gives the
-tail-to-tail Archimedean norm bound `1/(2*N)` once its concrete compression
-adapter is instantiated.  The generic operator-norm step and its exact
-`1/(4*N) -> 1/(2*N)` specialization are proved in
-`BoundaryWeylSchurTail`.  Thus the old global Archimedean amplitude is no
-longer the limiting constant; the prime previous/middle crossblocks and their
-block-relative normalization are now the tight source terms, rather than
-another finite-cutoff extrapolation.  The
+commutator, the positive-positive Loewner remainder is at most `1/(2*N)`.
+The reflected parity block is different: `S_(-n)=-S_n` leaves the explicit
+leading Hankel kernel `±1/(2*(k+l))`.  Integral Schur bounds put its norm below
+`log(3/2)/2` on one dyadic block and below
+`sqrt(log(5/3)*log(4/3))/2` between adjacent dyadic blocks.  Adding the
+centered reflected remainder gives, at `N=1920`, respective rigorous source
+bounds about `0.203035` and `0.191976`.  The generic same-sign operator-norm
+step and its exact `1/(4*N) -> 1/(2*N)` specialization are proved in
+`BoundaryWeylSchurTail`; the Hankel Schur estimates remain explicit
+source-level inputs.  Thus the old global Archimedean amplitude is replaced by
+a small structured dyadic term.  The prime previous/middle crossblocks and
+their block-relative normalization are now the tight source terms, rather
+than another finite-cutoff extrapolation.  The
 finite certificate is valid at the endpoint, but the real-valued
 finite-to-limit resolvent comparison must be applied on compact subintervals
 whose right endpoint is strictly negative: the certified lowest even pole

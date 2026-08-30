@@ -42,9 +42,15 @@ Every omitted correction decreases in magnitude as ``n`` grows, while
 constant inequalities at ``N0``.  Arb is used for every transcendental and
 rational comparison.  The script also reconstructs the exact source formulas
 at the endpoint as an independent wiring check.  Together with the exact
-Hilbert-commutator identity and the contraction bound for the normalized
-discrete Hilbert transform, the centered estimate gives the conditional
-tail-to-tail operator bound ``||(W_R)_off|| <= 1/(2*N)`` on modes ``n>=N``.
+parity formulas, the centered estimate splits the off-diagonal tail into
+
+* the scale-invariant leading Hankel kernel ``1/(2*(k+l))`` coming from
+  ``S_{+n} -> pi/4`` and ``S_{-n} -> -pi/4``; and
+* a centered remainder whose same-sign commutator is ``O(1/N)`` and whose
+  reflected part is dominated entrywise by a rank-one ``O(1/(k*l))`` kernel.
+
+Integral Schur bounds for the leading kernel on dyadic blocks are also emitted.
+In particular, centering does not remove the reflected Hankel term.
 """
 
 from __future__ import annotations
@@ -193,7 +199,49 @@ def certify(
     )
     centered_upper_pass = bool(centered_upper_scaled < centered_target)
     centered_lower_pass = bool(centered_lower_scaled < centered_target)
-    centered_commutator_coefficient = 2 * centered_target
+    centered_same_sign_commutator_coefficient = 2 * centered_target
+    centered_reflected_tail_coefficient = centered_target / pi
+    centered_same_sign_at_n0 = (
+        centered_same_sign_commutator_coefficient / n0
+    )
+    centered_reflected_at_n0 = (
+        centered_reflected_tail_coefficient / (n0 - 1)
+    )
+    centered_parity_remainder_at_n0 = (
+        centered_same_sign_at_n0 + centered_reflected_at_n0
+    )
+
+    # For the leading parity Hankel kernel 1/(2*(k+l)), decreasing-sum
+    # integral comparisons give the following scale-independent Schur bounds.
+    # On [N,2N] the maximum row sum is below log(3/2)/2.  Between
+    # [N,2N] and [2N,4N], the row and column sums are respectively below
+    # log(5/3)/2 and log(4/3)/2.
+    leading_hankel_internal_bound = (arb(3) / 2).log() / 2
+    leading_hankel_cross_row_bound = (arb(5) / 3).log() / 2
+    leading_hankel_cross_column_bound = (arb(4) / 3).log() / 2
+    leading_hankel_cross_norm_bound = (
+        leading_hankel_cross_row_bound
+        * leading_hankel_cross_column_bound
+    ).sqrt()
+    dyadic_internal_arch_bound_at_n0 = (
+        leading_hankel_internal_bound + centered_parity_remainder_at_n0
+    )
+    dyadic_cross_arch_bound_at_n0 = (
+        leading_hankel_cross_norm_bound + centered_parity_remainder_at_n0
+    )
+    induction_start = 2 * n0
+    centered_parity_remainder_at_induction_start = (
+        centered_same_sign_commutator_coefficient / induction_start
+        + centered_reflected_tail_coefficient / (induction_start - 1)
+    )
+    dyadic_internal_arch_bound_at_induction_start = (
+        leading_hankel_internal_bound
+        + centered_parity_remainder_at_induction_start
+    )
+    dyadic_cross_arch_bound_at_induction_start = (
+        leading_hankel_cross_norm_bound
+        + centered_parity_remainder_at_induction_start
+    )
 
     # Reconstruct the exact endpoint formulas used by the canonical matrix
     # builder.  This is not needed by the monotone envelope proof, but catches
@@ -245,9 +293,13 @@ def certify(
         "proved_centered_symbol_envelope": (
             f"abs(S_n - pi/4) <= ({centered_decay})/n"
         ),
-        "conditional_tail_commutator_norm_envelope": (
-            "given the exact commutator identity and ||H||<=1, on modes "
-            f"n>=N, ||[M_S,H]|| <= ({2 * centered_decay})/N"
+        "conditional_same_sign_commutator_norm_envelope": (
+            "for the positive-positive Loewner block, given ||H||<=1, "
+            f"the centered commutator norm is <= ({2 * centered_decay})/N"
+        ),
+        "parity_archimedean_decomposition": (
+            "S_signed(-n)=-S_n: each parity block is the leading Hankel "
+            "kernel +/- 1/(2*(k+l)) plus the centered O(1/N) remainder"
         ),
         "proved_diagonal_envelope": (
             f"-(W_R)_nn >= log(n) - {diagonal_offset}"
@@ -275,8 +327,17 @@ def certify(
                 "are maximal at n0"
             ),
             (
-                "[M_S,H]=[M_(S-pi/4),H] and ||H||=1, so the "
-                "centered symbol envelope gives the tail norm bound"
+                "on the positive-positive block, constants disappear from "
+                "the Hilbert commutator, giving the same-sign O(1/N) bound"
+            ),
+            (
+                "S_signed(-n)=-S_n, so the reflected parity block retains "
+                "the leading kernel 1/(2*(k+l)); centering does not remove it"
+            ),
+            (
+                "the reflected centered remainder is entrywise at most "
+                "centered_decay/(pi*k*l), and integral Schur comparisons "
+                "give the reported dyadic leading-Hankel bounds"
             ),
         ],
         "constants": {
@@ -344,14 +405,72 @@ def certify(
             "lower_slack": _ball_record(
                 centered_target - centered_lower_scaled
             ),
-            "tail_commutator_norm_coefficient": _ball_record(
-                centered_commutator_coefficient
+            "same_sign_commutator_norm_coefficient": _ball_record(
+                centered_same_sign_commutator_coefficient
             ),
             "operator_consequence": (
-                "given the exact Hilbert-commutator adapter, for every "
-                "N>=n0 the Archimedean off-diagonal compression to modes "
-                f"n>=N has norm at most ({2 * centered_decay})/N"
+                "given the normalized Hilbert-transform adapter, the "
+                "positive-positive centered Loewner block on modes n>=N "
+                f"has norm at most ({2 * centered_decay})/N"
             ),
+        },
+        "dyadic_parity_operator_audit": {
+            "leading_hankel_kernel": "1/(2*(k+l))",
+            "warning": (
+                "this reflected leading term survives centering because "
+                "S_signed(-n)=-S_n"
+            ),
+            "leading_internal_block_norm_upper": _ball_record(
+                leading_hankel_internal_bound
+            ),
+            "leading_adjacent_cross_row_sum_upper": _ball_record(
+                leading_hankel_cross_row_bound
+            ),
+            "leading_adjacent_cross_column_sum_upper": _ball_record(
+                leading_hankel_cross_column_bound
+            ),
+            "leading_adjacent_cross_norm_upper": _ball_record(
+                leading_hankel_cross_norm_bound
+            ),
+            "centered_same_sign_remainder_at_n0": _ball_record(
+                centered_same_sign_at_n0
+            ),
+            "centered_reflected_remainder_at_n0": _ball_record(
+                centered_reflected_at_n0
+            ),
+            "centered_total_parity_remainder_at_n0": _ball_record(
+                centered_parity_remainder_at_n0
+            ),
+            "dyadic_internal_arch_norm_upper_at_n0": _ball_record(
+                dyadic_internal_arch_bound_at_n0
+            ),
+            "dyadic_adjacent_cross_arch_norm_upper_at_n0": _ball_record(
+                dyadic_cross_arch_bound_at_n0
+            ),
+            "induction_start_mode": 2 * minimum_mode,
+            "centered_total_parity_remainder_at_induction_start": (
+                _ball_record(centered_parity_remainder_at_induction_start)
+            ),
+            "dyadic_internal_arch_norm_upper_at_induction_start": (
+                _ball_record(dyadic_internal_arch_bound_at_induction_start)
+            ),
+            "dyadic_adjacent_cross_arch_norm_upper_at_induction_start": (
+                _ball_record(dyadic_cross_arch_bound_at_induction_start)
+            ),
+            "bounds": [
+                (
+                    "internal [N,2N] leading norm < log(3/2)/2"
+                ),
+                (
+                    "cross [N,2N]x[2N,4N] leading norm < "
+                    "sqrt(log(5/3)*log(4/3))/2"
+                ),
+                (
+                    "for N>=n0, total centered parity remainder norm <= "
+                    f"({2 * centered_decay})/N + "
+                    f"({centered_decay})/(pi*(N-1))"
+                ),
+            ],
         },
         "source_formula_endpoint_replay": {
             "mode": minimum_mode,
@@ -420,9 +539,15 @@ def main() -> int:
                 "proved_centered_symbol_envelope": result[
                     "proved_centered_symbol_envelope"
                 ],
-                "conditional_tail_commutator_norm_envelope": result[
-                    "conditional_tail_commutator_norm_envelope"
+                "conditional_same_sign_commutator_norm_envelope": result[
+                    "conditional_same_sign_commutator_norm_envelope"
                 ],
+                "parity_archimedean_decomposition": result[
+                    "parity_archimedean_decomposition"
+                ],
+                "dyadic_adjacent_cross_arch_norm_upper_at_n0": result[
+                    "dyadic_parity_operator_audit"
+                ]["dyadic_adjacent_cross_arch_norm_upper_at_n0"],
                 "proved_diagonal_envelope": result[
                     "proved_diagonal_envelope"
                 ],

@@ -999,27 +999,66 @@ The canonical source endpoint has centered error
 `1.2332188514957847568e-5`, compared with the certified endpoint allowance
 `1/3840 = 0.00026041666...`.
 
-Constants disappear from the Loewner commutator:
+For the positive-positive Loewner block, constants disappear from the
+commutator:
 
 ```text
 [M_S,H] = [M_(S-pi/4),H].
 ```
 
-On a tail beginning at `N`, the multiplier norm is at most `1/(4*N)` and the
-compressed normalized discrete Hilbert transform has norm at most one.  Hence
-the conditional source-level operator consequence is
+On positive modes beginning at `N`, the centered multiplier norm is at most
+`1/(4*N)` and the compressed normalized discrete Hilbert transform has norm
+at most one.  Hence the same-sign centered part satisfies
 
 ```text
-||(W_R)_off,tail|| <= 1/(2*N).
+||same-sign centered Loewner block|| <= 1/(2*N).
 ```
 
-At the uniform-induction start `N=1920`, this is at most `1/3840`, replacing
-the previous triangle estimate `2*||S||_infinity <= 8/5`.  Lean theorem
+Lean theorem
 `commutator_norm_le_two_mul_of_norm_bounds` proves the general contraction
 commutator bound, while `commutator_norm_le_one_div_two_mul` checks the exact
-`1/(4*N) -> 1/(2*N)` specialization.  The remaining concrete adapter is the
-identification of the CvS tail compression with these multiplication and
-Hilbert operators; no further asymptotic estimate for `S_n` is consumed.
+`1/(4*N) -> 1/(2*N)` specialization.
+
+The reflection term must be retained.  The canonical source uses
+`S_signed(-n)=-S_n`, so for positive `k,l` the centered parity decomposition is
+
+```text
+reflected leading term:   +/- 1/(2*(k+l)),
+same-sign remainder:      norm <= 1/(2*N),
+reflected remainder:      entry <= 1/(4*pi*k*l).
+```
+
+Thus the old global `8/5` estimate is not replaced by `1/(2*N)` for the whole
+parity block.  Instead, it is replaced by one explicit scale-invariant Hankel
+kernel plus a genuinely decaying remainder.  Decreasing-sum integral bounds
+and the rectangular Schur test give
+
+```text
+leading norm on [N,2N]:
+  < log(3/2)/2
+  = 0.2027325540540821909890065577321746...
+
+leading norm from [N,2N] to [2N,4N]:
+  < sqrt(log(5/3)*log(4/3))/2
+  = 0.1916737945745804846575712563836145...
+```
+
+The reflected centered remainder is rank-one dominated.  Combining it with
+the same-sign commutator gives, for `N>=960`,
+
+```text
+centered parity remainder norm
+  <= 1/(2*N) + 1/(4*pi*(N-1)).
+```
+
+At the uniform-induction start `N=1920`, the remainder is below
+`0.0003018848644498598234589761412296...`; consequently the total internal
+and adjacent-cross Archimedean bounds are respectively
+`0.2030344389185320508124655338734042...` and
+`0.1919756794390303444810302325248441...`.  This corrected decomposition is
+the quantity to combine with the prime block.  The remaining concrete adapter
+is the identification of the CvS parity compression with the same-sign
+commutator and reflected Hankel pieces.
 
 The script also reconstructs the canonical source formula at `n=960`; it
 finds `S_960 = 0.7853858312089333...` and
@@ -1029,16 +1068,17 @@ digits while reducing the diagonal-constant radius from below `7.04e-76` to
 below `2.09e-114`.
 
 The tracked script SHA-256 is
-`24B778E497CB18AD0E6CDFD42840DDB7F0F9845D01CF4EB5BCDBF27C780DE007`;
+`7E407A0BA4745B1FB70821E91465D260539211F69F71FB7FB3E89911E3F428EB`;
 the 256-bit and 384-bit JSON SHA-256 values are respectively
-`E1BB0C78738A8D56723D2E91E911792FF19054EB0D243DB0411EFB1D2696E65F`
+`3511F196BB074E95AF6A5E589F31D1FD4151C64A1C9947A15076404765102E85`
 and
-`DAB0B98F84358566EF5701BE70FC1230BEBBE0F4F45E4705A8628BD5EFB70B2E`.
+`462545FA0FC71C840718B54BB761F8197025AB97AB6B1CB1DFC254A2564EDEC1`.
 This all-mode envelope is a source-level analytic lemma with interval-audited
-constants.  Its centered variation now removes the Archimedean amplitude from
-the tight budget; the remaining use is to combine the small commutator term
-with a cancellation-sensitive prime translation estimate in the two relative
-`2/27` channels.  The
+constants.  Its centered variation replaces the coarse Archimedean amplitude
+by the explicit dyadic Hankel constants near `0.2031/0.1920` plus a decaying
+remainder; the remaining use is to combine this structured term with a
+cancellation-sensitive prime translation estimate in the two relative `2/27`
+channels.  The
 new Lean theorem `relativeCoupling_of_coerciveNormBounds` is the exact adapter:
 ordinary low/high coercive floors, a rectangular operator-norm bound, and the
 scalar budget `epsilon^2 <= q*lowGap*highGap` imply the required relative
