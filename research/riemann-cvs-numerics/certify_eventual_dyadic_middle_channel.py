@@ -217,7 +217,7 @@ def certify(
     prime_certificate: Path,
     archimedean_certificate: Path,
     start_mode: int,
-    finite_frontier: int,
+    certified_matrix_frontier: int,
     shift_gain: Fraction,
     channel_target: Fraction,
     max_doublings: int,
@@ -227,8 +227,14 @@ def certify(
         raise ValueError("c must exceed one")
     if start_mode < 2:
         raise ValueError("start_mode must be at least two")
-    if finite_frontier < start_mode:
-        raise ValueError("finite_frontier must be at least start_mode")
+    if start_mode % 2:
+        raise ValueError("start_mode must be even")
+    if certified_matrix_frontier != 2 * start_mode:
+        raise ValueError(
+            "certified_matrix_frontier must equal 2*start_mode: the existing "
+            "matrix step has two-channel parameter K=start_mode/2, while "
+            "start_mode is the first open adjacent-shell channel"
+        )
     if max_doublings <= 0:
         raise ValueError("max_doublings must be strictly positive")
     if precision < 128:
@@ -259,12 +265,6 @@ def certify(
         raise ValueError(
             "start_mode lies below the certified Archimedean induction range"
         )
-    if finite_frontier % start_mode != 0:
-        raise ValueError("finite_frontier/start_mode must be an integer power of two")
-    ratio = finite_frontier // start_mode
-    if ratio <= 0 or ratio & (ratio - 1):
-        raise ValueError("finite_frontier/start_mode must be an exact power of two")
-
     pi = arb.pi()
     L = arb(c).log()
     prime_bound = _fraction_arb(prime_norm)
@@ -357,8 +357,8 @@ def certify(
         raise RuntimeError("no strict eventual threshold found within max_doublings")
 
     first_passing_mode = int(threshold_row["mode"])
-    if first_passing_mode < finite_frontier:
-        raise RuntimeError("eventual threshold lies below the finite frontier")
+    if first_passing_mode < start_mode:
+        raise RuntimeError("eventual threshold lies below the first open channel")
     before = checked[:-1]
     if not all(
         item["comparison_to_channel_target"] == "strictly_above"
@@ -367,7 +367,7 @@ def certify(
         raise RuntimeError("a pre-threshold comparison is not strictly above")
 
     bridge_modes: list[int] = []
-    mode = finite_frontier
+    mode = start_mode
     while mode < first_passing_mode:
         bridge_modes.append(mode)
         mode *= 2
@@ -391,7 +391,7 @@ def certify(
             "spectral_shift_gain": str(shift_gain),
             "per_channel_target": str(channel_target),
             "start_mode": start_mode,
-            "finite_frontier": finite_frontier,
+            "certified_matrix_frontier": certified_matrix_frontier,
             "minimum_archimedean_mode": minimum_mode,
             "archimedean_induction_start": induction_start,
         },
@@ -461,8 +461,11 @@ def certify(
         "checked_dyadic_rows": checked,
         "finite_reduction": {
             "already_certified_transition": (
-                f"N={start_mode} to N={finite_frontier}"
+                f"N={certified_matrix_frontier // 2} to "
+                f"N={certified_matrix_frontier}"
             ),
+            "last_certified_two_channel_mode": start_mode // 2,
+            "first_open_middle_channel_mode": start_mode,
             "remaining_middle_channel_bridge_start_modes": bridge_modes,
             "remaining_middle_channel_bridge_count": len(bridge_modes),
             "eventual_middle_channel_range_start": first_passing_mode,
@@ -519,7 +522,9 @@ def main() -> int:
     parser.add_argument("--prime-certificate", type=Path, required=True)
     parser.add_argument("--archimedean-certificate", type=Path, required=True)
     parser.add_argument("--start-mode", type=int, default=1920)
-    parser.add_argument("--finite-frontier", type=int, default=3840)
+    parser.add_argument(
+        "--certified-matrix-frontier", type=int, default=3840
+    )
     parser.add_argument("--shift-gain", default="1/1024")
     parser.add_argument("--channel-target", default="2/27")
     parser.add_argument("--max-doublings", type=int, default=32)
@@ -532,7 +537,7 @@ def main() -> int:
         prime_certificate=args.prime_certificate.resolve(),
         archimedean_certificate=args.archimedean_certificate.resolve(),
         start_mode=args.start_mode,
-        finite_frontier=args.finite_frontier,
+        certified_matrix_frontier=args.certified_matrix_frontier,
         shift_gain=_positive_fraction(args.shift_gain, "shift_gain"),
         channel_target=_positive_fraction(
             args.channel_target, "channel_target"

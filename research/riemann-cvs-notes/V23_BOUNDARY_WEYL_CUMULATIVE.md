@@ -1153,20 +1153,22 @@ threshold for the stated coarse global bounds.  An independent 384-bit replay
 reproduces the first 60 midpoint digits; the threshold-radius drops from below
 `1.89e-77` to below `5.54e-116`.
 
-Together with the already certified `1920 -> 3840` transition, this reduces the
-middle-channel tail to the following thirteen finite start modes:
+The already certified `1920 -> 3840` matrix transition is the `K=960`
+two-channel instance.  The first open adjacent-shell channel is therefore
+`K=1920`, and the eventual bound reduces the remaining middle-channel tail to
+the following fourteen finite start modes:
 
 ```text
-3840, 7680, 15360, 30720, 61440, 122880, 245760,
+1920, 3840, 7680, 15360, 30720, 61440, 122880, 245760,
 491520, 983040, 1966080, 3932160, 7864320, 15728640.
 ```
 
 The tracked script SHA-256 is
-`48DCC1321A7C549F940E327CA94343E6705837C4234368652C75839B613CA99D`.
+`34ADF5285523722DC3B46E02A7D0AB0C87ECC0D6BE69802D53A7D54865FB52E4`.
 It verifies that both input JSON files have `PASS` status, match the current
 prime/Archimedean script hashes, and were generated from the same current Git
 commit before composing them.  This result is deliberately channel-specific:
-the previous-core channel, the thirteen finite middle-channel bridges, and the
+the previous-core channel, the fourteen finite middle-channel bridges, and the
 concrete Hilbert/parity compression adapters remain separate obligations.
 
 The same measurements make the route choice sharper.  At `K=3840`, the
@@ -1192,7 +1194,7 @@ next theorem is therefore the remaining recursive dyadic-reference estimate
 |C_middle(s,t)|^2
   <= (2/27) * H_[K,2K](s,s) * H_[2K,4K](t,t)
 for the previous channel at every dyadic K >= 1920 and for the middle channel
-at the thirteen finite bridge modes below 31,457,280.
+at the fourteen finite bridge modes below 31,457,280.
 ```
 
 Combined with `fourNinthsShell_of_twoChannelReference`, these estimates produce
@@ -1326,7 +1328,7 @@ The following are still explicit proof obligations:
    self-adjoint CvS blocks from a Lean-side ordered eigenvalue enumeration;
 2. after the rigorously checked chain
    `N=20 -> 120 -> 240 -> 480 -> 960 -> 1920 -> 3840`, prove the previous-core
-   channel uniformly and certify the thirteen remaining finite middle-channel
+   channel uniformly and certify the fourteen remaining finite middle-channel
    bridges through `K=15,728,640`; the new scalar-composition certificate gives
    the middle-channel coefficient `2/27` for every integer
    `K>=31,457,280`.  Then pass the resulting `q=999/1000` finite-support
@@ -1363,7 +1365,7 @@ uses reserve `1/3` and per-channel budget `2/27`.  The remaining
 `3840 -> 7680` midpoint shell clears that target,
 and the exact-rational/Arb sixth-power certificate proves the sharper prime
 operator bound `||T_13||<10/3`.  The new Arb composition closes the
-middle-channel budget for all `K>=31,457,280`, leaving thirteen finite
+middle-channel budget for all `K>=31,457,280`, leaving fourteen finite
 middle-channel bridges plus the all-scale previous-core channel.  That channel,
 the closed-form passage, the uniform moment bound, and the limiting resolvent
 construction remain the dominant proof boundary.

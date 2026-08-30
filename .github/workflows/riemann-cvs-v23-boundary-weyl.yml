@@ -337,7 +337,7 @@ jobs:
             --prime-certificate research/riemann-cvs-numerics/artifacts/v23_c13_prime_translation_power6.json \
             --archimedean-certificate research/riemann-cvs-numerics/artifacts/v23_c13_N960_archimedean_tail.json \
             --start-mode 1920 \
-            --finite-frontier 3840 \
+            --certified-matrix-frontier 3840 \
             --shift-gain 1/1024 \
             --channel-target 2/27 \
             --prec 256 \
@@ -347,7 +347,7 @@ jobs:
             --prime-certificate research/riemann-cvs-numerics/artifacts/v23_c13_prime_translation_power6.json \
             --archimedean-certificate research/riemann-cvs-numerics/artifacts/v23_c13_N960_archimedean_tail_384bit.json \
             --start-mode 1920 \
-            --finite-frontier 3840 \
+            --certified-matrix-frontier 3840 \
             --shift-gain 1/1024 \
             --channel-target 2/27 \
             --prec 384 \
