@@ -698,11 +698,10 @@ odd:  Schur dimension 960, strict Gershgorin rows 960 / 960,
 Every one of the `961 * 960` even and `960 * 960` odd verified-solve residual
 entries contains zero.  The JSON artifact SHA-256 is
 `427529EC13BD33695546C948E0AC29CC88594EB9E6948C8C6F69A61AFFFD2C45`.
-The strict finite `q_0=249/250` frontier is therefore `N=1920`, and positive
-diagonal growth propagates the result from `x=-1/1024` to every more negative
-parameter.  What remains is either a uniform direct core-relative estimate
-below one after this enlarged chain or an eventual cutoff beyond which the
-reference coefficient finally fits inside the `1/666` reserve.
+This first established the strict finite `q_0=249/250` frontier at `N=1920`,
+and positive diagonal growth propagates the result from `x=-1/1024` to every
+more negative parameter.  The direct-parity interval certificate below now
+advances that frontier once more, to `N=3840`.
 
 ### Post-`N=1920` dyadic scaling and the closed-form adapter
 
@@ -817,6 +816,75 @@ Every measured channel has substantial slack, including the first odd sector.
 These outputs remain midpoint diagnostics rather than interval certificates;
 their role is to select a rational theorem target with room for analytic
 majorants.
+
+### Direct-parity interval certificate through `N=3840`
+
+The tracked certifier `certify_direct_parity_relative_shell.py` now turns the
+first post-`N=1920` probe into a rigorous interval certificate without
+allocating the full `7681` by `7681` signed-mode matrix.  It constructs only
+the exact Arb core, coupling, and shell blocks in one parity sector at a time.
+Before forming any matrix entry it preserves the cancellation of the complete
+prime-power sum in the one-dimensional sequences
+
+```text
+P_n = sum_(q<=13) Lambda(q)/sqrt(q) * sin(2*pi*n*log(q)/log(13)),
+D_n = sum_(q<=13) 2*Lambda(q)/sqrt(q)*(1-log(q)/log(13))
+      * cos(2*pi*n*log(q)/log(13)).
+```
+
+The exact parity formulas then use `P_n` off the diagonal and `D_n` on the
+diagonal.  This avoids both the full reflection duplication and a
+component-wise triangle inequality over the prime powers.  A canonical replay
+at cutoff `120` compares direct-minus-canonical Arb balls entry by entry.  All
+`14641` even and `14400` odd difference intervals contain exact zero at both
+256 and 384 bits.
+
+The production command is
+
+```powershell
+python research/riemann-cvs-numerics/certify_direct_parity_relative_shell.py `
+  --c 13 --low-cutoff 20 --core-cutoff 1920 --shell-cutoff 3840 `
+  --prec 256 --shift-gain 1/1024 --q-upper 249/250 `
+  --rho-upper 4/9 --threads 16 `
+  --core-certificate <N1920-certificate.json> `
+  --validate-cutoff 120 --json-out <N3840-certificate.json>
+```
+
+The input validator checks the `N=1920` JSON, its source-script hash, both
+sibling exact-dyadic preconditioners, all verified residual counts, and both
+strict Gershgorin transcripts.  The new 256-bit run then proves
+
+```text
+sector  core dimension  shell dimension  residuals containing zero  strict rows
+even    1921            1920             3688320 / 3688320          1920 / 1920
+odd     1920            1920             3686400 / 3686400          1920 / 1920
+```
+
+The minimum preconditioned Gershgorin margin midpoints are respectively
+`0.9999999999999988` and `0.9999999999999990`; their maximum radii are
+`5.755702846280617e-67` and `9.362788957387741e-66`.  A separate 384-bit replay
+uses the same byte-for-byte preconditioners and reduces those maximum radii to
+`2.162832078123934e-105` and `3.438515796253990e-104`.  The common
+preconditioner SHA-256 values are
+
+```text
+even  92D229EEF58648E410FCCDB7858F1B44D8268F6F74A6A475853C960596A6ACBD
+odd   4407803835A7563DAC93008DA5A3555273E2D4249BA3930B5BC1B72BBDFFC461
+```
+
+The local 256-bit and 384-bit JSON SHA-256 values are respectively
+`399087C684EFEDACFD3488D0F6A6A60F0C4E270EE42AC373F5AD8162959EB26F`
+and
+`163FE89519364EA1521E954E854EF070CE2D76BDDB72C9D8DF649EA525E1191A`;
+the tracked script SHA-256 is
+`257040825FF61DE8E985F8446B8640CB34456F35368C0EC8C63CCD18A6C56C8D`.
+
+Consequently the strict finite `q0=249/250` frontier is now `N=3840` for
+`x<=-1/1024`.  The coefficient `rhoStar=4/9` also enters exactly through the
+Lean theorem `fourNinthsShell_oneThirdReserve`, so this finite step renews the
+`1/3` reference reserve.  It does not supply an all-cutoff estimate.  The next
+uniform two-channel obligation can, however, start at dyadic `K=1920` rather
+than `K=960`; the already certified direct step covers the `K=960` instance.
 
 ### Prime-translation power certificate
 
@@ -950,7 +1018,7 @@ next theorem is therefore the two-channel recursive dyadic-reference estimate
   <= (2/27) * R_q0(K)(s,s) * H_[2K,4K](t,t),
 |C_middle(s,t)|^2
   <= (2/27) * H_[K,2K](s,s) * H_[2K,4K](t,t)
-for every dyadic K >= 960.
+for every dyadic K >= 1920.
 ```
 
 Combined with `fourNinthsShell_of_twoChannelReference`, these estimates produce
@@ -1083,14 +1151,15 @@ The following are still explicit proof obligations:
 1. instantiate the characteristic-polynomial identification for the concrete
    self-adjoint CvS blocks from a Lean-side ordered eigenvalue enumeration;
 2. after the rigorously checked chain
-   `N=20 -> 120 -> 240 -> 480 -> 960 -> 1920`, prove the two uniform dyadic
-   channel bounds with coefficient `2/27` for every dyadic `K>=960`, or an
-   eventual reference-energy estimate `kappa_K <= rho/666`; pass the resulting
+   `N=20 -> 120 -> 240 -> 480 -> 960 -> 1920 -> 3840`, prove the two uniform
+   dyadic channel bounds with coefficient `2/27` for every dyadic `K>=1920`,
+   or an eventual reference-energy estimate `kappa_K <= rho/666`; pass the resulting
    `q=999/1000` finite-support inequality to the closed high complement
    uniformly on compact domains with right endpoint `< 0`.  The exact `1/666`
    reserve, the optimized `4/9 -> 1/3 -> 4/27` steady recursion, and its
-   two-channel Lean adapter are formalized.  The direct preconditioned-Schur
-   certificate supplies the `960 -> 1920` bridge, while the strict
+   two-channel Lean adapter are formalized.  The preconditioned-Schur
+   certificates supply the `960 -> 1920` and `1920 -> 3840` bridges, while the
+   strict
    `||T_13||<10/3` power certificate removes most of the prime-block loss.  The
    remaining analytic work is concentrated in the archimedean tail symbol,
    shell coercivity, and their relative channel normalization;
@@ -1105,15 +1174,16 @@ The following are still explicit proof obligations:
 
 The cumulative certificate closes the finite `(13,20)` numerical hypothesis,
 and the recursive relative-energy certificates extend the checked Schur
-comparison through `20 -> 120 -> 240 -> 480 -> 960 -> 1920` throughout
+comparison through `20 -> 120 -> 240 -> 480 -> 960 -> 1920 -> 3840` throughout
 `x <= -1/1024`; the last two stages use `q_0=249/250`, while comparison with
 `q=999/1000` leaves the exact `1/666` reference-energy reserve.  The exact
 finite displacement, characteristic-product, residue-normalization,
 determinant-ratio, quantitative Abel, energy-normalized monotonicity, and
 recursive shell and reference-reserve adapters are now formalized.  The
-preconditioned-Schur interval certificate closes `960 -> 1920` at
-`rho=1/12`; the optimized steady recursion uses `rhoStar=4/9`, reserve `1/3`,
-and per-channel budget `2/27`.  Two later midpoint shells clear that target,
+preconditioned-Schur interval certificates close `960 -> 1920` at
+`rho=1/12` and `1920 -> 3840` at `rhoStar=4/9`; the optimized steady recursion
+uses reserve `1/3` and per-channel budget `2/27`.  The remaining
+`3840 -> 7680` midpoint shell clears that target,
 and the exact-rational/Arb sixth-power certificate proves the sharper prime
 operator bound `||T_13||<10/3`.  The uniform analytic channel bound,
 closed-form passage, uniform moment bound, and limiting resolvent construction
@@ -1144,5 +1214,7 @@ lake env lean RiemannCvs/V23BoundaryWeylMainline.lean
 
 The V23 workflow additionally rejects proof placeholders and user-declared
 axioms/constants, prints the axiom dependencies of every new terminal theorem,
-replays the corrected V22 finite Arb parity certificate, and emits the new
-cumulative-residue interval certificate as a downloadable regression artifact.
+replays the corrected V22 finite Arb parity certificate, certifies the direct
+parity shell through `N=3840`, and emits its JSON and exact-dyadic
+preconditioners together with the cumulative-residue interval certificate as
+downloadable regression artifacts.

@@ -24,6 +24,7 @@ on:
       - 'research/riemann-cvs-numerics/certify_relative_energy_coupling.py'
       - 'research/riemann-cvs-numerics/certify_recursive_relative_energy_shells.py'
       - 'research/riemann-cvs-numerics/certify_preconditioned_relative_shell.py'
+      - 'research/riemann-cvs-numerics/certify_direct_parity_relative_shell.py'
       - 'research/riemann-cvs-numerics/probe_relative_shell_budget.py'
       - 'research/riemann-cvs-numerics/probe_dyadic_shell_scaling.py'
       - 'research/riemann-cvs-numerics/certify_prime_translation_power_bound.py'
@@ -54,6 +55,7 @@ on:
       - 'research/riemann-cvs-numerics/certify_relative_energy_coupling.py'
       - 'research/riemann-cvs-numerics/certify_recursive_relative_energy_shells.py'
       - 'research/riemann-cvs-numerics/certify_preconditioned_relative_shell.py'
+      - 'research/riemann-cvs-numerics/certify_direct_parity_relative_shell.py'
       - 'research/riemann-cvs-numerics/probe_relative_shell_budget.py'
       - 'research/riemann-cvs-numerics/probe_dyadic_shell_scaling.py'
       - 'research/riemann-cvs-numerics/certify_prime_translation_power_bound.py'
@@ -250,7 +252,7 @@ jobs:
 
   numeric-regression:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
@@ -372,6 +374,24 @@ jobs:
             --core-certificate research/riemann-cvs-numerics/artifacts/v23_c13_q996_N480_to_N960_shell.json \
             --json-out research/riemann-cvs-numerics/artifacts/v23_c13_q996_N960_to_N1920_preconditioned_shell.json
 
+      - name: Certify the direct-parity V23 shell through N3840
+        shell: bash
+        run: |
+          set -euo pipefail
+          python research/riemann-cvs-numerics/certify_direct_parity_relative_shell.py \
+            --c 13 \
+            --low-cutoff 20 \
+            --core-cutoff 1920 \
+            --shell-cutoff 3840 \
+            --prec 256 \
+            --shift-gain 1/1024 \
+            --q-upper 249/250 \
+            --rho-upper 4/9 \
+            --threads 4 \
+            --core-certificate research/riemann-cvs-numerics/artifacts/v23_c13_q996_N960_to_N1920_preconditioned_shell.json \
+            --validate-cutoff 120 \
+            --json-out research/riemann-cvs-numerics/artifacts/v23_c13_q996_N1920_to_N3840_direct.json
+
       - name: Smoke-test the relative-shell midpoint probe
         shell: bash
         run: |
@@ -472,6 +492,9 @@ jobs:
             research/riemann-cvs-numerics/artifacts/v23_c13_q996_N960_to_N1920_preconditioned_shell.json
             research/riemann-cvs-numerics/artifacts/v23_c13_q996_N960_to_N1920_preconditioned_shell_even_preconditioner.npy
             research/riemann-cvs-numerics/artifacts/v23_c13_q996_N960_to_N1920_preconditioned_shell_odd_preconditioner.npy
+            research/riemann-cvs-numerics/artifacts/v23_c13_q996_N1920_to_N3840_direct.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_q996_N1920_to_N3840_direct_even_preconditioner.npy
+            research/riemann-cvs-numerics/artifacts/v23_c13_q996_N1920_to_N3840_direct_odd_preconditioner.npy
             research/riemann-cvs-numerics/artifacts/v23_c13_N120_to_N240_shell_midpoint_smoke.json
             research/riemann-cvs-numerics/artifacts/v23_c13_q996_N1920_to_N3840_four_ninths_scaling.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N20_parity_gap.json

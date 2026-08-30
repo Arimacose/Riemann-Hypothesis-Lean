@@ -89,19 +89,23 @@ reference-energy reserve coefficient `1/666`.  A midpoint diagnostic at
 `960 -> 1920` selects the direct coefficient `rho = 1/12`; a fourth rigorous
 certificate then validates that shell at 256 bits by an Arb verified solve,
 an exact Schur enclosure, a fixed invertible dyadic congruence, and `960/960`
-strictly positive preconditioned Gershgorin rows in each parity sector.
-Positive diagonal growth extends all five finite stages through `N = 1920` to
-every `x ≤ -1/1024`.  This is evidence for, and a scalable inductive interface
-toward, the all-cutoff target rather than a replacement for its operator proof.
+strictly positive preconditioned Gershgorin rows in each parity sector.  A fifth
+direct-parity certificate avoids the full signed-mode matrix and validates
+`1920 -> 3840` with the optimized `rhoStar = 4/9`: both 256-bit and 384-bit
+replays have `1920/1920` strict rows in each sector, and both precisions select
+the same byte-for-byte exact-dyadic preconditioners.  Positive diagonal growth
+extends all six finite stages through `N = 3840` to every `x ≤ -1/1024`.  This
+is evidence for, and a scalable inductive interface toward, the all-cutoff
+target rather than a replacement for its operator proof.
 The same diagnostic finds reference coefficients about `0.04327` and
 `0.05486`, far above `1/666`; thus the balanced reserve is an eventual-tail
 interface rather than the immediate `960 -> 1920` bound.  A direct-parity
 midpoint probe, cross-checked entrywise against the canonical Arb construction
-at `N = 120`, now reaches two shells beyond the rigorous frontier.  For
-`1920 -> 3840` the direct `q₀` coefficients are about `0.03547` and `0.04975`;
-for `3840 -> 7680` they are about `0.01982` and `0.03208`.  Both sectors remain
-below `1/12`, while the independent `1/666` reference route remains too
-narrow.  These are midpoint scaling data rather than interval certificates.
+at `N = 120`, selected the next two shells.  Its `1920 -> 3840` direct
+coefficient is now replaced by the rigorous `4/9` certificate above.  The
+remaining `3840 -> 7680` direct `q₀` coefficients are about `0.01982` and
+`0.03208`; those two values, and the component-wise channel splits below,
+remain midpoint scaling data rather than interval certificates.
 Optimizing the balanced recursive coefficient changes the preferred uniform
 target to `rhoStar = 4/9`: it leaves reserve `1/3` and the maximal reusable
 reference budget `4/27`.  The two-channel theorem assigns `2/27` to each
@@ -143,10 +147,10 @@ source estimate may instead prove the dimensionless relative-energy inequality
 with some `q < 1`: this removes the boundary vector entirely and is now the
 preferred target.  The finite recursive chain through `N = 480` preserves
 the concrete `q = 999/1000` benchmark, while the stricter `q₀ = 249/250`
-certificate now reaches `N = 1920` and exposes a `1/666` reference-energy
+certificate now reaches `N = 3840` and exposes a `1/666` reference-energy
 reserve for that benchmark.  Beyond this finite bridge, the preferred
 analytic obligation is now the component-wise dyadic estimate: for every
-dyadic `K >= 960`, both the old-core/new-shell and middle-shell/new-shell
+dyadic `K >= 1920`, both the old-core/new-shell and middle-shell/new-shell
 relative coefficients are at most `2/27`.  The packaged `rhoStar = 4/9`
 theorem then supplies the direct recursive shell bound and renews a `1/3`
 reserve automatically.  This is followed by convergence of the finite-support
