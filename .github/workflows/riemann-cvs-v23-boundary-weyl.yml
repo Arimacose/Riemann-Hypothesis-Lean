@@ -25,6 +25,7 @@ on:
       - 'research/riemann-cvs-numerics/certify_recursive_relative_energy_shells.py'
       - 'research/riemann-cvs-numerics/certify_preconditioned_relative_shell.py'
       - 'research/riemann-cvs-numerics/probe_relative_shell_budget.py'
+      - 'research/riemann-cvs-numerics/probe_dyadic_shell_scaling.py'
       - 'research/riemann-cvs-numerics/certify_boundary_weyl_cumulative.py'
       - 'research/riemann-cvs-numerics/certify_parity_gap.py'
       - 'research/riemann-cvs-notes/V23_BOUNDARY_WEYL_CUMULATIVE.md'
@@ -52,6 +53,7 @@ on:
       - 'research/riemann-cvs-numerics/certify_recursive_relative_energy_shells.py'
       - 'research/riemann-cvs-numerics/certify_preconditioned_relative_shell.py'
       - 'research/riemann-cvs-numerics/probe_relative_shell_budget.py'
+      - 'research/riemann-cvs-numerics/probe_dyadic_shell_scaling.py'
       - 'research/riemann-cvs-numerics/certify_boundary_weyl_cumulative.py'
       - 'research/riemann-cvs-numerics/certify_parity_gap.py'
       - 'research/riemann-cvs-notes/V23_BOUNDARY_WEYL_CUMULATIVE.md'
@@ -191,14 +193,19 @@ jobs:
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeSchurResponseBudget
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCoupling_of_formGrowth
           #print axioms RiemannCvs.BoundaryWeylSchurTail.twoBlockEnergy_nonnegative
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.oneTwelfthShell_balancedReserve
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCouplingSlack_lowReserve
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCouplingSlack_highReserve
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCouplingSlack_balancedReserve
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCouplingSlack_balancedLowerBound
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCouplingSlack_v23BalancedLowerBound
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeShell_of_referenceReserve
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCoupling_of_twoChannelBudgets
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCoupling_of_scaledFormNonnegative
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCoupling_of_recursiveShell
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.recursiveShellEnergy_nonnegative_nat
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.recursiveShellEnergy_limit_nonnegative
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.recursiveShellEnergy_limit_nonnegative_of_uniformRho
           #print axioms RiemannCvs.BoundaryWeylSchurTail.boundaryWeylRelativeEnergyBudget
           #print axioms RiemannCvs.BoundaryWeylSchurTail.boundaryWeyl_mono_of_relativeEnergyCoupling
           #print axioms RiemannCvs.BoundaryWeylSchurTail.boundaryWeyl_pos_of_relativeEnergyCoupling
@@ -352,6 +359,27 @@ jobs:
             --candidate-rho 1/3 \
             --json-out research/riemann-cvs-numerics/artifacts/v23_c13_N120_to_N240_shell_midpoint_smoke.json
 
+      - name: Probe post-N1920 dyadic-shell scaling
+        shell: bash
+        run: |
+          set -euo pipefail
+          python research/riemann-cvs-numerics/probe_dyadic_shell_scaling.py \
+            --c 13 \
+            --low-cutoff 20 \
+            --previous-cutoff 960 \
+            --core-cutoff 1920 \
+            --shell-cutoff 3840 \
+            --prec 160 \
+            --shift-gain 1/1024 \
+            --reference-q 999/1000 \
+            --dyadic-reference-q 249/250 \
+            --dyadic-reserve 2/3 \
+            --direct-q 249/250 \
+            --reserve 1/666 \
+            --candidate-rho 1/12 \
+            --validate-cutoff 120 \
+            --json-out research/riemann-cvs-numerics/artifacts/v23_c13_q996_N1920_to_N3840_dyadic_scaling.json
+
       - name: Replay the corrected finite Arb parity certificate
         shell: bash
         run: |
@@ -412,6 +440,7 @@ jobs:
             research/riemann-cvs-numerics/artifacts/v23_c13_q996_N960_to_N1920_preconditioned_shell_even_preconditioner.npy
             research/riemann-cvs-numerics/artifacts/v23_c13_q996_N960_to_N1920_preconditioned_shell_odd_preconditioner.npy
             research/riemann-cvs-numerics/artifacts/v23_c13_N120_to_N240_shell_midpoint_smoke.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_q996_N1920_to_N3840_dyadic_scaling.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N20_parity_gap.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N20_boundary_weyl_cumulative.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N12_boundary_weyl_compact_margin.json

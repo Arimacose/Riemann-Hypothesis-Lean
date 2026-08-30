@@ -394,6 +394,31 @@ theorem twoBlockEnergy_nonnegative
       nlinarith [sq_nonneg (coreEnergy + cross)]
     exact le_of_mul_le_mul_left hMul hCorePos
 
+/-- Exact reserve left by the V23 shell coefficient `rho = 1/12`.
+
+The relative determinant bound implies that the glued energy controls two
+thirds of the block-diagonal core-plus-tail reference.  This turns the next
+dyadic-shell target into a reference coefficient of at most
+`(1/12) * (2/3) = 1/18`, a much larger usable reserve than the independent
+`1/666` gap between `q₀` and the final benchmark `q`. -/
+theorem oneTwelfthShell_balancedReserve
+    (core tail cross : ℝ)
+    (hCore : 0 ≤ core)
+    (hTail : 0 ≤ tail)
+    (hRelative : cross ^ 2 ≤ (1 / 12 : ℝ) * core * tail) :
+    (2 / 3 : ℝ) * (core + tail) ≤ core + 2 * cross + tail := by
+  have hSum : 0 ≤ (core + tail) / 6 := by positivity
+  have hTargetSq : cross ^ 2 ≤ ((core + tail) / 6) ^ 2 := by
+    calc
+      cross ^ 2 ≤ (1 / 12 : ℝ) * core * tail := hRelative
+      _ ≤ ((core + tail) / 6) ^ 2 := by
+        nlinarith [sq_nonneg (core - tail)]
+  have hAbs : |cross| ≤ |(core + tail) / 6| :=
+    (sq_le_sq).mp hTargetSq
+  rw [abs_of_nonneg hSum] at hAbs
+  have hLower := (abs_le.mp hAbs).1
+  nlinarith
+
 /-- A tighter relative coefficient `q₀` leaves a direct low-channel reserve
 when the same form is evaluated with a larger coefficient `q`. -/
 theorem relativeCouplingSlack_lowReserve
@@ -524,6 +549,56 @@ theorem relativeShell_of_referenceReserve
     _ = rho * (reserve * reference) * tail := by ring
     _ ≤ rho * core * tail := hCoreTail
 
+/-- Combine fixed-low/shell and high-core/shell estimates into one relative
+coupling bound.  The factor two is the division-free inequality
+`(a+b)^2 ≤ 2*a^2 + 2*b^2`; consequently each channel may consume at most half
+of the desired final coefficient.
+
+This is the component-wise interface for the post-N1920 analysis: estimate the
+decaying coupling from the fixed low block separately from the adjacent
+high-mode coupling, then reassemble the whole core/shell estimate required by
+`relativeCoupling_of_recursiveShell`. -/
+theorem relativeCoupling_of_twoChannelBudgets
+    (coreLow coreHigh tail crossLow crossHigh rhoLow rhoHigh rho : ℝ)
+    (hCoreLow : 0 ≤ coreLow)
+    (hCoreHigh : 0 ≤ coreHigh)
+    (hTail : 0 ≤ tail)
+    (hLowBudget : 2 * rhoLow ≤ rho)
+    (hHighBudget : 2 * rhoHigh ≤ rho)
+    (hLowRelative : crossLow ^ 2 ≤ rhoLow * coreLow * tail)
+    (hHighRelative : crossHigh ^ 2 ≤ rhoHigh * coreHigh * tail) :
+    (crossLow + crossHigh) ^ 2 ≤
+      rho * (coreLow + coreHigh) * tail := by
+  have hSquare :
+      (crossLow + crossHigh) ^ 2 ≤
+        2 * crossLow ^ 2 + 2 * crossHigh ^ 2 := by
+    nlinarith [sq_nonneg (crossLow - crossHigh)]
+  have hLowScaled :
+      2 * crossLow ^ 2 ≤ 2 * (rhoLow * coreLow * tail) :=
+    mul_le_mul_of_nonneg_left hLowRelative (by norm_num)
+  have hHighScaled :
+      2 * crossHigh ^ 2 ≤ 2 * (rhoHigh * coreHigh * tail) :=
+    mul_le_mul_of_nonneg_left hHighRelative (by norm_num)
+  have hLowCore : 2 * rhoLow * coreLow ≤ rho * coreLow :=
+    mul_le_mul_of_nonneg_right hLowBudget hCoreLow
+  have hHighCore : 2 * rhoHigh * coreHigh ≤ rho * coreHigh :=
+    mul_le_mul_of_nonneg_right hHighBudget hCoreHigh
+  have hLowTail :
+      2 * (rhoLow * coreLow * tail) ≤ rho * coreLow * tail := by
+    have := mul_le_mul_of_nonneg_right hLowCore hTail
+    nlinarith
+  have hHighTail :
+      2 * (rhoHigh * coreHigh * tail) ≤ rho * coreHigh * tail := by
+    have := mul_le_mul_of_nonneg_right hHighCore hTail
+    nlinarith
+  calc
+    (crossLow + crossHigh) ^ 2 ≤
+        2 * crossLow ^ 2 + 2 * crossHigh ^ 2 := hSquare
+    _ ≤ 2 * (rhoLow * coreLow * tail) +
+        2 * (rhoHigh * coreHigh * tail) := by linarith
+    _ ≤ rho * coreLow * tail + rho * coreHigh * tail := by linarith
+    _ = rho * (coreLow + coreHigh) * tail := by ring
+
 /-- Recover a relative coupling inequality from nonnegativity of the scaled
 two-block form for every scalar multiple of the low vector.  Algebraically,
 this is the converse discriminant direction to `twoBlockEnergy_nonnegative`. -/
@@ -627,6 +702,85 @@ theorem relativeCoupling_of_recursiveShell
   nlinarith [hGlue]
 
 end RecursiveShell
+
+/-- Nonnegativity propagates through any finite chain of scalar shell energies
+whose relative determinant coefficients are at most one.
+
+For a concrete dyadic decomposition, `energy n` is the relative energy of the
+core through the `n`-th shell, while `tail n` and `cross n` are the diagonal
+and cross energies of the next shell.  This theorem packages the induction
+that was previously implicit in repeated uses of
+`relativeCoupling_of_recursiveShell`. -/
+theorem recursiveShellEnergy_nonnegative_nat
+    (energy tail cross rho : ℕ → ℝ)
+    (hBase : 0 ≤ energy 0)
+    (hTail : ∀ n, 0 ≤ tail n)
+    (hRho : ∀ n, rho n ≤ 1)
+    (hRelative : ∀ n,
+      (cross n) ^ 2 ≤ rho n * energy n * tail n)
+    (hStep : ∀ n,
+      energy (n + 1) = energy n + 2 * cross n + tail n) :
+    ∀ n, 0 ≤ energy n := by
+  intro n
+  induction n with
+  | zero => exact hBase
+  | succ n ih =>
+      have hTailN : 0 ≤ tail n := hTail n
+      have hProduct : 0 ≤ energy n * tail n := mul_nonneg ih hTailN
+      have hRhoProduct :
+          rho n * (energy n * tail n) ≤ energy n * tail n := by
+        simpa only [one_mul] using
+          (mul_le_mul_of_nonneg_right (hRho n) hProduct)
+      have hDet : (cross n) ^ 2 ≤ energy n * tail n := by
+        calc
+          (cross n) ^ 2 ≤ rho n * energy n * tail n := hRelative n
+          _ = rho n * (energy n * tail n) := by ring
+          _ ≤ energy n * tail n := hRhoProduct
+      have hGlue := twoBlockEnergy_nonnegative
+        (energy n) (tail n) (cross n) ih hTailN hDet
+      rw [hStep n]
+      exact hGlue
+
+/-- If recursively glued finite-support energies converge to a closed-form
+energy, the closed value is nonnegative.  The analytic operator layer only has
+to supply convergence of the finite-support form values; the order passage is
+now internal. -/
+theorem recursiveShellEnergy_limit_nonnegative
+    (energy tail cross rho : ℕ → ℝ)
+    (limit : ℝ)
+    (hBase : 0 ≤ energy 0)
+    (hTail : ∀ n, 0 ≤ tail n)
+    (hRho : ∀ n, rho n ≤ 1)
+    (hRelative : ∀ n,
+      (cross n) ^ 2 ≤ rho n * energy n * tail n)
+    (hStep : ∀ n,
+      energy (n + 1) = energy n + 2 * cross n + tail n)
+    (hTendsto : Filter.Tendsto energy Filter.atTop (nhds limit)) :
+    0 ≤ limit := by
+  apply ge_of_tendsto hTendsto
+  exact Filter.Eventually.of_forall
+    (recursiveShellEnergy_nonnegative_nat
+      energy tail cross rho hBase hTail hRho hRelative hStep)
+
+/-- Uniform-coefficient specialization used by the post-N1920 dyadic-shell
+target.  A single `rhoStar ≤ 1` estimate for every later shell, together with
+convergence of the finite-support energies, proves nonnegativity of the closed
+tail value. -/
+theorem recursiveShellEnergy_limit_nonnegative_of_uniformRho
+    (energy tail cross : ℕ → ℝ)
+    (limit rhoStar : ℝ)
+    (hBase : 0 ≤ energy 0)
+    (hTail : ∀ n, 0 ≤ tail n)
+    (hRhoStar : rhoStar ≤ 1)
+    (hRelative : ∀ n,
+      (cross n) ^ 2 ≤ rhoStar * energy n * tail n)
+    (hStep : ∀ n,
+      energy (n + 1) = energy n + 2 * cross n + tail n)
+    (hTendsto : Filter.Tendsto energy Filter.atTop (nhds limit)) :
+    0 ≤ limit := by
+  exact recursiveShellEnergy_limit_nonnegative
+    energy tail cross (fun _ => rhoStar) limit
+    hBase hTail (fun _ => hRhoStar) hRelative hStep hTendsto
 
 /-- Relative-energy boundary-Weyl error estimate.
 

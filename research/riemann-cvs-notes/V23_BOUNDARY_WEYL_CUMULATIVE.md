@@ -704,6 +704,149 @@ parameter.  What remains is either a uniform direct core-relative estimate
 below one after this enlarged chain or an eventual cutoff beyond which the
 reference coefficient finally fits inside the `1/666` reserve.
 
+### Post-`N=1920` dyadic scaling and the closed-form adapter
+
+The tracked diagnostic `probe_dyadic_shell_scaling.py` removes a scalability
+bottleneck from the exploratory step.  Instead of constructing the full
+`(2*N+1)`-dimensional Arb matrix and only then compressing parity, it evaluates
+the exact reflection formulas at Arb midpoints:
+
+```text
+A_even[k,l] = A[k,l] + A[k,-l],
+A_odd [k,l] = A[k,l] - A[k,-l].
+```
+
+Only the two parity blocks are retained.  A mandatory small-cutoff replay
+compares every optimized entry with the canonical full Arb construction.  At
+`N=120`, 160-bit closed-form precision, the maximum absolute midpoint errors
+are
+
+```text
+even  7.549516567451064e-14,
+odd   7.549516567451064e-14,
+```
+
+against a validation tolerance of approximately `5.98e-10`.  Replaying the
+known `960 -> 1920` shell recovers the previous direct and reference ratios to
+about `1e-15`, providing an independent check on the direct-parity formulas.
+All dense factorization and singular-value calculations still discard Arb
+radii, so every output is explicitly marked `MIDPOINT_DIAGNOSTIC_ONLY` and
+`rigorous_certificate = false`.
+
+The measured dyadic sequence is
+
+```text
+core K   reference even   reference odd   direct q0 even   direct q0 odd
+120      0.1382792604     0.2356840325    0.1762065127     0.2802822985
+240      0.1495856749     0.1415268586    0.1481195772     0.1707009640
+480      0.05654910850    0.07360485824   0.05518331660    0.1181968752
+960      0.04326543020    0.05485286505   0.04317011018    0.07807620269
+1920     0.03560377115    0.03841029645   0.03546731664    0.04974799255
+3840     0.02008164012    0.02422753707   0.01981884246    0.03207483716
+```
+
+Thus every measured direct `q0=249/250` coefficient from `K=960` onward lies
+below the already certified rational candidate `rhoStar=1/12`.  The two new
+post-frontier probes are:
+
+```powershell
+python research/riemann-cvs-numerics/probe_dyadic_shell_scaling.py `
+  --c 13 --low-cutoff 20 --previous-cutoff 960 `
+  --core-cutoff 1920 --shell-cutoff 3840 `
+  --prec 160 --shift-gain 1/1024 --reference-q 999/1000 `
+  --dyadic-reference-q 249/250 --dyadic-reserve 2/3 `
+  --direct-q 249/250 --reserve 1/666 --candidate-rho 1/12 `
+  --validate-cutoff 120 --json-out <N1920-to-N3840.json>
+
+python research/riemann-cvs-numerics/probe_dyadic_shell_scaling.py `
+  --c 13 --low-cutoff 20 --previous-cutoff 1920 `
+  --core-cutoff 3840 --shell-cutoff 7680 `
+  --prec 160 --shift-gain 1/1024 --reference-q 999/1000 `
+  --dyadic-reference-q 249/250 --dyadic-reserve 2/3 `
+  --direct-q 249/250 --reserve 1/666 --candidate-rho 1/12 `
+  --validate-cutoff 120 --json-out <N3840-to-N7680.json>
+```
+
+Their local JSON SHA-256 values are respectively
+`D95D52FC74AD00B153F83052A8023016801CC5B7F706B21B6FBC79725D500151`
+and
+`0EE4F389B87B62AAE097C95B03E480D2A4C4EEDCED0405DA0A028C86D0E9D904`.
+The tracked probe script SHA-256 is
+`8E2C7BC1771501F7386494EF8CEAA57BE071421F170D41AA0F34FD3B002A8C69`.
+
+The direct `rho=1/12` certificate itself leaves a much stronger recursive
+reserve than the independent `q0<q` comparison.  The Lean theorem
+`oneTwelfthShell_balancedReserve` proves exactly
+
+```text
+cross^2 <= (1/12) * core * tail
+  ==> (2/3) * (core + tail) <= core + 2*cross + tail.
+```
+
+Hence, after the rigorous `960 -> 1920` shell, the `N=1920` core controls
+
+```text
+(2/3) * diag(R_q0(960), H_[960,1920]).
+```
+
+To attach the next shell with the same `rho=1/12`, it is enough to bound the
+coupling against this dyadic reference by
+
+```text
+(1/12) * (2/3) = 1/18.
+```
+
+The optimized probe measures exactly this recursive coefficient:
+
+```text
+new shell       dyadic reference                           even          odd
+1920 -> 3840    diag(R_q0(960), H_[960,1920])              0.03543241    0.04767400
+3840 -> 7680    diag(R_q0(1920), H_[1920,3840])            0.02015209    0.03067107
+required upper bound                                         0.05555556    0.05555556
+```
+
+Both midpoint probes therefore fit the repeatable `1/18 -> 1/12 -> 2/3`
+induction shape, with the tighter first odd-sector slack about `0.00788156`.
+
+The same measurements make the route choice sharper.  At `K=3840`, the
+reference coefficients remain about `13.37` and `16.14` times the exact
+`1/666` reserve.  The elementary log-tail constants are also too conservative
+at this scale: equations (8) and (10) of `EXPLICIT_LOG_TAIL_THEOREM.md` give
+
+```text
+D_L + B_L = 28.8619855743363547...
+```
+
+for `c=13`, so their raw high-floor lower bound turns positive only beyond a
+cutoff of order `3.42e12`.  The preferred next theorem is therefore the
+recursive dyadic-reference estimate
+
+```text
+C_[K,2K -> 4K](s,t)^2
+  <= (1/18) * diag(R_q0(K), H_[K,2K])(s,s) * H_[2K,4K](t,t)
+for every dyadic K >= 960.
+```
+
+Combined with `oneTwelfthShell_balancedReserve` and
+`relativeShell_of_referenceReserve`, this produces the uniform direct
+`rhoStar=1/12` estimate for the enlarged core.  It avoids extrapolating the
+coarse bounded-perturbation constant and avoids waiting for the independent
+reference coefficient to cross `1/666`.
+
+The finite-support-to-closed-value order passage is now explicit in Lean.
+`recursiveShellEnergy_nonnegative_nat` propagates nonnegativity through every
+finite shell chain.  `recursiveShellEnergy_limit_nonnegative` passes this
+order to any real limit of the finite-support form values, and
+`recursiveShellEnergy_limit_nonnegative_of_uniformRho` specializes the result
+to one uniform coefficient `rhoStar <= 1`.  Consequently the remaining
+operator input is sharply separated into two source facts: the uniform
+dyadic-reference `1/18` matrix estimate above and convergence of the
+finite-support energies to the closed CvS tail form.  The new theorem
+`relativeCoupling_of_twoChannelBudgets` further splits the first source fact:
+the fixed-low/shell and high-core/shell cross terms may be bounded separately,
+provided each consumes at most half of the final `rhoStar` budget.  This is the
+concrete component-wise route to improve on the coarse global `B_L` norm.
+
 `BoundaryWeylFarLeft.lean` closes the algebraic part of the exterior
 normalization.  If all finite poles are nonnegative, the total residue is one,
 and
