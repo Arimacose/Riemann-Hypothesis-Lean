@@ -485,6 +485,38 @@ theorem twoBlockEnergy_nonnegative
       nlinarith [sq_nonneg (coreEnergy + cross)]
     exact le_of_mul_le_mul_left hMul hCorePos
 
+/-- A relative shell coefficient `u²` retains the balanced reserve `1-u`.
+
+Unlike the fixed `rho = 4/9` specialization below, this form permits a
+scale-dependent sequence `u n`.  It is the scalar input for retaining a
+positive product of reserves along an infinite dyadic shell chain. -/
+theorem sqShell_oneSubReserve
+    (core tail cross u : ℝ)
+    (hCore : 0 ≤ core)
+    (hTail : 0 ≤ tail)
+    (hU : 0 ≤ u)
+    (hRelative : cross ^ 2 ≤ u ^ 2 * core * tail) :
+    (1 - u) * (core + tail) ≤ core + 2 * cross + tail := by
+  have hProduct : core * tail ≤ ((core + tail) / 2) ^ 2 := by
+    nlinarith [sq_nonneg (core - tail)]
+  have hScaled :
+      u ^ 2 * (core * tail) ≤ u ^ 2 * (((core + tail) / 2) ^ 2) :=
+    mul_le_mul_of_nonneg_left hProduct (sq_nonneg u)
+  have hTargetSq :
+      cross ^ 2 ≤ (u * ((core + tail) / 2)) ^ 2 := by
+    calc
+      cross ^ 2 ≤ u ^ 2 * core * tail := hRelative
+      _ = u ^ 2 * (core * tail) := by ring
+      _ ≤ u ^ 2 * (((core + tail) / 2) ^ 2) := hScaled
+      _ = (u * ((core + tail) / 2)) ^ 2 := by ring
+  have hTargetNonnegative : 0 ≤ u * ((core + tail) / 2) := by
+    positivity
+  have hAbs : |cross| ≤ |u * ((core + tail) / 2)| :=
+    (sq_le_sq).mp hTargetSq
+  rw [abs_of_nonneg hTargetNonnegative] at hAbs
+  have hLower := (abs_le.mp hAbs).1
+  nlinarith
+
 /-- Exact reserve left by the V23 shell coefficient `rho = 1/12`.
 
 The relative determinant bound implies that the glued energy controls two
@@ -917,6 +949,135 @@ theorem recursiveShellEnergy_nonnegative_nat
         (energy n) (tail n) (cross n) ih hTailN hDet
       rw [hStep n]
       exact hGlue
+
+/-- Variable shell coefficients preserve the finite product of their balanced
+reserves.  If the `n`-th relative coefficient is `(u n)²`, then after `n`
+shells the glued energy controls
+
+`(∏ i in range n, (1-u i)) * energy 0`.
+
+This avoids the artificial exponential loss caused by replacing every actual
+coefficient by the fixed worst-case value `4/9`. -/
+theorem recursiveShellEnergy_ge_reserveProduct
+    (energy tail cross u : ℕ → ℝ)
+    (hBase : 0 ≤ energy 0)
+    (hTail : ∀ n, 0 ≤ tail n)
+    (hUNonnegative : ∀ n, 0 ≤ u n)
+    (hUOne : ∀ n, u n ≤ 1)
+    (hRelative : ∀ n,
+      (cross n) ^ 2 ≤ (u n) ^ 2 * energy n * tail n)
+    (hStep : ∀ n,
+      energy (n + 1) = energy n + 2 * cross n + tail n) :
+    ∀ n,
+      (∏ i ∈ Finset.range n, (1 - u i)) * energy 0 ≤ energy n := by
+  have hUSq : ∀ n, (u n) ^ 2 ≤ 1 := by
+    intro n
+    have hProduct :=
+      mul_nonneg (hUNonnegative n) (sub_nonneg.mpr (hUOne n))
+    nlinarith
+  have hEnergyNonnegative : ∀ n, 0 ≤ energy n :=
+    recursiveShellEnergy_nonnegative_nat
+      energy tail cross (fun n => (u n) ^ 2)
+      hBase hTail hUSq hRelative hStep
+  intro n
+  induction n with
+  | zero => simp
+  | succ n ih =>
+      have hOneSubU : 0 ≤ 1 - u n := sub_nonneg.mpr (hUOne n)
+      have hReserve :
+          (1 - u n) * (energy n + tail n) ≤ energy (n + 1) := by
+        rw [hStep n]
+        exact sqShell_oneSubReserve
+          (energy n) (tail n) (cross n) (u n)
+          (hEnergyNonnegative n) (hTail n) (hUNonnegative n) (hRelative n)
+      have hTailScaled :
+          (1 - u n) * energy n ≤
+            (1 - u n) * (energy n + tail n) :=
+        mul_le_mul_of_nonneg_left
+          (le_add_of_nonneg_right (hTail n)) hOneSubU
+      have hIHScaled :
+          (1 - u n) *
+              ((∏ i ∈ Finset.range n, (1 - u i)) * energy 0) ≤
+            (1 - u n) * energy n :=
+        mul_le_mul_of_nonneg_left ih hOneSubU
+      calc
+        (∏ i ∈ Finset.range (n + 1), (1 - u i)) * energy 0 =
+            (1 - u n) *
+              ((∏ i ∈ Finset.range n, (1 - u i)) * energy 0) := by
+                rw [Finset.prod_range_succ]
+                ring
+        _ ≤ (1 - u n) * energy n := hIHScaled
+        _ ≤ (1 - u n) * (energy n + tail n) := hTailScaled
+        _ ≤ energy (n + 1) := hReserve
+
+/-- A uniform lower bound on the finite reserve products yields a uniform
+lower bound on every recursively glued shell energy.  The analytic layer may
+now prove a positive product floor separately from the finite shell algebra. -/
+theorem recursiveShellEnergy_ge_of_reserveProductLowerBound
+    (energy tail cross u : ℕ → ℝ)
+    (reserveFloor : ℝ)
+    (hBase : 0 ≤ energy 0)
+    (hTail : ∀ n, 0 ≤ tail n)
+    (hUNonnegative : ∀ n, 0 ≤ u n)
+    (hUOne : ∀ n, u n ≤ 1)
+    (hRelative : ∀ n,
+      (cross n) ^ 2 ≤ (u n) ^ 2 * energy n * tail n)
+    (hStep : ∀ n,
+      energy (n + 1) = energy n + 2 * cross n + tail n)
+    (hReserveProduct : ∀ n,
+      reserveFloor ≤ ∏ i ∈ Finset.range n, (1 - u i)) :
+    ∀ n, reserveFloor * energy 0 ≤ energy n := by
+  intro n
+  have hProductBound := recursiveShellEnergy_ge_reserveProduct
+    energy tail cross u hBase hTail hUNonnegative hUOne hRelative hStep n
+  exact (mul_le_mul_of_nonneg_right (hReserveProduct n) hBase).trans
+    hProductBound
+
+/-- The same uniform reserve-product floor passes to any closed-form limit of
+the finite shell energies. -/
+theorem recursiveShellEnergy_limit_ge_of_reserveProductLowerBound
+    (energy tail cross u : ℕ → ℝ)
+    (reserveFloor limit : ℝ)
+    (hBase : 0 ≤ energy 0)
+    (hTail : ∀ n, 0 ≤ tail n)
+    (hUNonnegative : ∀ n, 0 ≤ u n)
+    (hUOne : ∀ n, u n ≤ 1)
+    (hRelative : ∀ n,
+      (cross n) ^ 2 ≤ (u n) ^ 2 * energy n * tail n)
+    (hStep : ∀ n,
+      energy (n + 1) = energy n + 2 * cross n + tail n)
+    (hReserveProduct : ∀ n,
+      reserveFloor ≤ ∏ i ∈ Finset.range n, (1 - u i))
+    (hTendsto : Filter.Tendsto energy Filter.atTop (nhds limit)) :
+    reserveFloor * energy 0 ≤ limit := by
+  apply ge_of_tendsto hTendsto
+  exact Filter.Eventually.of_forall
+    (recursiveShellEnergy_ge_of_reserveProductLowerBound
+      energy tail cross u reserveFloor hBase hTail hUNonnegative hUOne
+      hRelative hStep hReserveProduct)
+
+/-- A positive reserve-product floor and a positive initial energy force the
+closed recursively glued energy to remain strictly positive. -/
+theorem recursiveShellEnergy_limit_pos_of_reserveProductLowerBound
+    (energy tail cross u : ℕ → ℝ)
+    (reserveFloor limit : ℝ)
+    (hReserveFloor : 0 < reserveFloor)
+    (hBase : 0 < energy 0)
+    (hTail : ∀ n, 0 ≤ tail n)
+    (hUNonnegative : ∀ n, 0 ≤ u n)
+    (hUOne : ∀ n, u n ≤ 1)
+    (hRelative : ∀ n,
+      (cross n) ^ 2 ≤ (u n) ^ 2 * energy n * tail n)
+    (hStep : ∀ n,
+      energy (n + 1) = energy n + 2 * cross n + tail n)
+    (hReserveProduct : ∀ n,
+      reserveFloor ≤ ∏ i ∈ Finset.range n, (1 - u i))
+    (hTendsto : Filter.Tendsto energy Filter.atTop (nhds limit)) :
+    0 < limit := by
+  have hLower := recursiveShellEnergy_limit_ge_of_reserveProductLowerBound
+    energy tail cross u reserveFloor limit (le_of_lt hBase) hTail
+    hUNonnegative hUOne hRelative hStep hReserveProduct hTendsto
+  exact (mul_pos hReserveFloor hBase).trans_le hLower
 
 /-- If recursively glued finite-support energies converge to a closed-form
 energy, the closed value is nonnegative.  The analytic operator layer only has

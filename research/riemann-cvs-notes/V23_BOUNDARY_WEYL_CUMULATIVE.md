@@ -1202,6 +1202,49 @@ the uniform direct `rhoStar=4/9` step and renew the `1/3` reserve.  This avoids
 extrapolating the coarse bounded-perturbation constant and avoids waiting for
 the independent reference coefficient to cross `1/666`.
 
+### Variable reserve products instead of repeated worst-case loss
+
+The fixed `rhoStar=4/9` theorem remains a convenient sufficient package, but
+iterating only its `1/3` reserve would introduce an artificial exponential
+loss.  The scalar shell algebra now retains the actual scale-dependent
+coefficient.  If the `n`-th gluing step satisfies
+
+```text
+cross_n^2 <= u_n^2 * E_n * T_n,       0 <= u_n <= 1,
+E_(n+1) = E_n + 2*cross_n + T_n,
+```
+
+then the new theorem `sqShell_oneSubReserve` gives the one-step estimate
+
+```text
+(1-u_n) * (E_n+T_n) <= E_(n+1).
+```
+
+Consequently `recursiveShellEnergy_ge_reserveProduct` proves, for every finite
+shell count `n`,
+
+```text
+[product_(i<n) (1-u_i)] * E_0 <= E_n.
+```
+
+Finally, `recursiveShellEnergy_ge_of_reserveProductLowerBound` separates the
+remaining analytic obligation exactly: any uniform scalar floor
+
+```text
+reserveFloor <= product_(i<n) (1-u_i)
+```
+
+immediately yields `reserveFloor * E_0 <= E_n` at every finite stage.  Thus the
+theorems `recursiveShellEnergy_limit_ge_of_reserveProductLowerBound` and
+`recursiveShellEnergy_limit_pos_of_reserveProductLowerBound` pass that lower
+bound to a convergent closed-form energy and make it strictly positive whenever
+`reserveFloor>0` and `E_0>0`.  The next separated-band estimate may therefore
+use the measured scale-dependent previous-core coefficients instead of
+replacing each one by `4/9`.  Positivity of a uniform reserve floor is not
+inferred from the finite algebra.  It remains a concrete analytic target, for
+example via a summable upper envelope for the `u_i` and a separate
+positive-product lemma.
+
 The finite-support-to-closed-value order passage is now explicit in Lean.
 `recursiveShellEnergy_nonnegative_nat` propagates nonnegativity through every
 finite shell chain.  `recursiveShellEnergy_limit_nonnegative` passes this
@@ -1335,7 +1378,11 @@ The following are still explicit proof obligations:
    inequality to the closed high complement uniformly on compact domains with
    right endpoint `< 0`.  The exact `1/666` reserve, the optimized
    `4/9 -> 1/3 -> 4/27` steady recursion, and its two-channel Lean adapter are
-   formalized.  The preconditioned-Schur certificates supply the
+   formalized.  The variable route `u_n^2 -> (1-u_n)` and the finite reserve-
+   product induction and its strict closed-limit passage are also formalized;
+   the analytic layer must now prove a positive uniform floor for those
+   products from the separated-band previous-core estimates.  The
+   preconditioned-Schur certificates supply the
    `960 -> 1920` and `1920 -> 3840` bridges, while the strict
    `||T_13||<10/3` power certificate and centered Archimedean envelope close the
    eventual middle-channel scalar budget.  The remaining analytic work is
@@ -1361,7 +1408,9 @@ determinant-ratio, quantitative Abel, energy-normalized monotonicity, and
 recursive shell and reference-reserve adapters are now formalized.  The
 preconditioned-Schur interval certificates close `960 -> 1920` at
 `rho=1/12` and `1920 -> 3840` at `rhoStar=4/9`; the optimized steady recursion
-uses reserve `1/3` and per-channel budget `2/27`.  The remaining
+uses reserve `1/3` and per-channel budget `2/27`, while the variable-reserve
+theorems retain `product_(i<n)(1-u_i)` when sharper scale-dependent
+coefficients are available.  The remaining
 `3840 -> 7680` midpoint shell clears that target,
 and the exact-rational/Arb sixth-power certificate proves the sharper prime
 operator bound `||T_13||<10/3`.  The new Arb composition closes the

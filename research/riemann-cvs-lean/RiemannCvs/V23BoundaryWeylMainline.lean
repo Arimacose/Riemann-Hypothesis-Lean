@@ -58,12 +58,18 @@ The new kernel-checked chain contains:
     energies now have an explicit natural-number induction theorem, and if
     those finite-support energies converge, their nonnegativity passes to the
     closed-form limit; a uniform `rhoStar <= 1` specialization exposes the
-    exact remaining dyadic-shell input; a two-channel budget theorem also
+    exact remaining dyadic-shell input; a variable-coefficient refinement now
+    turns an actual coefficient `u_n^2` into reserve `1-u_n` and propagates the
+    finite reserve product `prod_{i<n}(1-u_i)`, so the analytic layer may prove
+    one positive product floor without paying a fixed reserve at every scale;
+    this lower bound, and strict positivity when the base energy is positive,
+    now pass directly to any convergent closed-form limit;
+    a two-channel budget theorem also
     recombines the fixed-low/shell and high-core/shell estimates while exposing
     the exact factor-two allocation required by `(a+b)^2 <= 2a^2+2b^2`; the
     rigorous `rho = 1/12` bridge keeps `2/3` of its block-diagonal reference.
-    For the steady tail, the balanced choice `rhoStar = 4/9` is now proved to
-    keep `1/3`, and it maximizes the reusable budget
+    For the steady tail, the balanced choice `rhoStar = 4/9` is also proved to
+    keep `1/3`, and it maximizes the reusable fixed-coefficient budget
     `rhoStar * reserve = 4/27`.  A packaged theorem therefore reduces every
     later shell to two separate channel coefficients of at most `2/27`;
 12. a normalized far-left estimate
@@ -160,13 +166,19 @@ with some `q < 1`: this removes the boundary vector entirely and is now the
 preferred target.  The finite recursive chain through `N = 480` preserves
 the concrete `q = 999/1000` benchmark, while the stricter `q₀ = 249/250`
 certificate now reaches `N = 3840` and exposes a `1/666` reference-energy
-reserve for that benchmark.  Beyond this finite bridge, the preferred
-analytic obligation is now the component-wise dyadic estimate: for every
-dyadic `K >= 1920`, both the old-core/new-shell and middle-shell/new-shell
-relative coefficients are at most `2/27`.  The packaged `rhoStar = 4/9`
-theorem then supplies the direct recursive shell bound and renews a `1/3`
-reserve automatically.  This is followed by convergence of the finite-support
-energies to the closed tail form.  The scalar induction and order-limit
-passage are kernel-checked; the source-specific form convergence and uniform
-prime-dominated two-channel matrix estimate remain open.
+reserve for that benchmark.  Beyond this finite bridge, the
+middle-shell/new-shell estimate is certified for every integer
+`K >= 31,457,280`, leaving fourteen finite middle-channel bridges from
+`K=1920` through `K=15,728,640`.  The old-core/new-shell channel remains open
+at every dyadic scale.  The fixed `2/27 + 2/27 -> 4/9` package is still a
+sufficient route, but the new variable-reserve theorem also permits the
+actual relative coefficient `u_K^2` at each scale and retains the finite
+product of `1-u_K`; proving a positive uniform floor for those products
+avoids the artificial exponential loss of repeatedly substituting the
+worst-case `1/3` reserve.  This is followed by convergence of the
+finite-support energies to the closed tail form.  The scalar induction,
+finite-product lower bound, and strict order-limit passage are kernel-checked;
+the separated-band previous-core estimate, the fourteen finite middle
+bridges, a positive product floor, and the source-specific form convergence
+remain open.
 -/

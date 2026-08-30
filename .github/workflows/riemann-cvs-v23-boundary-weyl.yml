@@ -204,6 +204,7 @@ jobs:
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCoupling_of_formGrowth
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCoupling_of_coerciveNormBounds
           #print axioms RiemannCvs.BoundaryWeylSchurTail.twoBlockEnergy_nonnegative
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.sqShell_oneSubReserve
           #print axioms RiemannCvs.BoundaryWeylSchurTail.oneTwelfthShell_balancedReserve
           #print axioms RiemannCvs.BoundaryWeylSchurTail.balancedShellBudget_le_fourTwentySevenths
           #print axioms RiemannCvs.BoundaryWeylSchurTail.fourNinthsShell_oneThirdReserve
@@ -218,6 +219,10 @@ jobs:
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCoupling_of_scaledFormNonnegative
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCoupling_of_recursiveShell
           #print axioms RiemannCvs.BoundaryWeylSchurTail.recursiveShellEnergy_nonnegative_nat
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.recursiveShellEnergy_ge_reserveProduct
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.recursiveShellEnergy_ge_of_reserveProductLowerBound
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.recursiveShellEnergy_limit_ge_of_reserveProductLowerBound
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.recursiveShellEnergy_limit_pos_of_reserveProductLowerBound
           #print axioms RiemannCvs.BoundaryWeylSchurTail.recursiveShellEnergy_limit_nonnegative
           #print axioms RiemannCvs.BoundaryWeylSchurTail.recursiveShellEnergy_limit_nonnegative_of_uniformRho
           #print axioms RiemannCvs.BoundaryWeylSchurTail.boundaryWeylRelativeEnergyBudget
