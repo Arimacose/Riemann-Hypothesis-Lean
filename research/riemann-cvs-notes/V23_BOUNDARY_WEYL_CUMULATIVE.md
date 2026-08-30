@@ -1312,6 +1312,24 @@ geometric envelope on the dyadic tail.  This entire table remains float64
 linear algebra after Arb midpoint assembly; it selects the next interval and
 analytic estimates and does not upgrade them to a proof.
 
+That selected split now has an exact Lean interface rather than an informal
+recombination step.  The theorem
+`relativeCoupling_of_exception_and_finsetChannelBudgets` inserts one separately
+certified channel into the same weighted Cauchy family, so it does not incur the
+factor-two loss from `(a+b)^2 <= 2*a^2+2*b^2`.  Its dyadic specialization
+`relativeCoupling_of_finiteException_and_dyadicChannelBudgets` closes the final
+coefficient `rho` whenever
+
+```text
+q_exception + 2*q_leading <= rho.
+```
+
+Thus an interval certificate for the odd `[1,20]` block may consume its actual
+finite budget, while the remaining analytic proof targets the unchanged
+`q_i <= q_leading*2^(-i)` envelope.  What remains at source level is to certify
+that exceptional budget and prove the structured dyadic estimates and energy
+normalization; the Lean summation and recombination are complete.
+
 The finite-support-to-closed-value order passage is now explicit in Lean.
 `recursiveShellEnergy_nonnegative_nat` propagates nonnegativity through every
 finite shell chain.  `recursiveShellEnergy_limit_nonnegative` passes this

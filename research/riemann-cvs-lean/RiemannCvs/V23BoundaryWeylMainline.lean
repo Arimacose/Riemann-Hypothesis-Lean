@@ -186,8 +186,11 @@ certified `1920 -> 3840` transition gives aggregate previous-core coefficients
 about `0.00760` and `0.01171` in the even and odd sectors, both well below
 `2/27`; the pure geometric envelope misses only the odd fixed base `[1,20]`,
 by about `0.000142`, so the selected source split keeps that base as a finite
-channel and applies the geometric target to the dyadic tail.  These values are
-route-selection data, not interval certificates.  This is followed by
+channel and applies the geometric target to the dyadic tail.  The Lean theorem
+`relativeCoupling_of_finiteException_and_dyadicChannelBudgets` implements this
+split without a factor-two loss: a certified exceptional coefficient plus
+twice the leading dyadic coefficient need only fit below `2/27`.  These values
+are route-selection data, not interval certificates.  This is followed by
 convergence of the
 finite-support energies to the closed tail form.  The scalar induction,
 finite-product lower bound, and strict order-limit passage are kernel-checked;

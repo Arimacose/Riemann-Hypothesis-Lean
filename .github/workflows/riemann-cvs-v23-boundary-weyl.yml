@@ -217,8 +217,10 @@ jobs:
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCouplingSlack_v23BalancedLowerBound
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeShell_of_referenceReserve
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCoupling_of_finsetChannelBudgets
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCoupling_of_exception_and_finsetChannelBudgets
           #print axioms RiemannCvs.BoundaryWeylSchurTail.dyadicChannelBudget_sum_le_two
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCoupling_of_dyadicChannelBudgets
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCoupling_of_finiteException_and_dyadicChannelBudgets
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCoupling_of_twoChannelBudgets
           #print axioms RiemannCvs.BoundaryWeylSchurTail.fourNinthsShell_of_twoChannelReference
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCoupling_of_scaledFormNonnegative

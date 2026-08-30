@@ -759,6 +759,62 @@ theorem relativeCoupling_of_finsetChannelBudgets
     _ ≤ rho * ((∑ i ∈ s, energy i) * tail) := hScale
     _ = rho * (∑ i ∈ s, energy i) * tail := by ring
 
+/-- Add one separately certified channel to an arbitrary finite channel family
+without paying the factor-two loss from the elementary two-term square bound.
+The exceptional channel and the regular family instead share the same weighted
+Cauchy--Schwarz budget.  This is the interface used when a fixed low block does
+not obey the eventual dyadic envelope. -/
+theorem relativeCoupling_of_exception_and_finsetChannelBudgets
+    {ι : Type*}
+    (s : Finset ι)
+    (energy cross budget : ι → ℝ)
+    (tail rho exceptionEnergy exceptionCross exceptionBudget : ℝ)
+    (hExceptionEnergy : 0 ≤ exceptionEnergy)
+    (hExceptionBudget : 0 ≤ exceptionBudget)
+    (hExceptionRelative :
+      exceptionCross ^ 2 ≤ exceptionBudget * exceptionEnergy * tail)
+    (hEnergy : ∀ i ∈ s, 0 ≤ energy i)
+    (hBudget : ∀ i ∈ s, 0 ≤ budget i)
+    (hTail : 0 ≤ tail)
+    (hBudgetSum : exceptionBudget + (∑ i ∈ s, budget i) ≤ rho)
+    (hRelative : ∀ i ∈ s,
+      (cross i) ^ 2 ≤ budget i * energy i * tail) :
+    (exceptionCross + ∑ i ∈ s, cross i) ^ 2 ≤
+      rho * (exceptionEnergy + ∑ i ∈ s, energy i) * tail := by
+  classical
+  let channels : Finset (Option ι) := insert none (s.image some)
+  let energy' : Option ι → ℝ := fun i => i.elim exceptionEnergy energy
+  let cross' : Option ι → ℝ := fun i => i.elim exceptionCross cross
+  let budget' : Option ι → ℝ := fun i => i.elim exceptionBudget budget
+  have hEnergyAll : ∀ i ∈ channels, 0 ≤ energy' i := by
+    intro i hi
+    cases i with
+    | none => simpa [energy'] using hExceptionEnergy
+    | some i =>
+        have hi' : i ∈ s := by simpa [channels] using hi
+        simpa [energy'] using hEnergy i hi'
+  have hBudgetAll : ∀ i ∈ channels, 0 ≤ budget' i := by
+    intro i hi
+    cases i with
+    | none => simpa [budget'] using hExceptionBudget
+    | some i =>
+        have hi' : i ∈ s := by simpa [channels] using hi
+        simpa [budget'] using hBudget i hi'
+  have hBudgetSumAll : (∑ i ∈ channels, budget' i) ≤ rho := by
+    simpa [channels, budget'] using hBudgetSum
+  have hRelativeAll : ∀ i ∈ channels,
+      (cross' i) ^ 2 ≤ budget' i * energy' i * tail := by
+    intro i hi
+    cases i with
+    | none => simpa [cross', budget', energy'] using hExceptionRelative
+    | some i =>
+        have hi' : i ∈ s := by simpa [channels] using hi
+        simpa [cross', budget', energy'] using hRelative i hi'
+  have hAll := relativeCoupling_of_finsetChannelBudgets
+    channels energy' cross' budget' tail rho
+    hEnergyAll hBudgetAll hTail hBudgetSumAll hRelativeAll
+  simpa [channels, cross', energy'] using hAll
+
 /-- A dyadically decaying coefficient envelope has total budget at most twice
 its leading coefficient.  This is the scalar summation needed when separated
 shell norms lose one factor `1/2` per dyadic scale in squared norm. -/
@@ -800,6 +856,46 @@ theorem relativeCoupling_of_dyadicChannelBudgets
     hEnergy hBudget hTail
   · exact (dyadicChannelBudget_sum_le_two
       budget n leading hLeading hBudgetEnvelope).trans hTotalBudget
+  · exact hRelative
+
+/-- Package one fixed exceptional channel together with a geometrically
+decaying dyadic family.  The exception consumes `exceptionBudget`, while the
+entire regular family consumes at most `2 * leading`; only their sum must fit
+inside the final coefficient `rho`.  In particular, one fixed base block may
+be interval-certified separately without weakening the dyadic tail envelope. -/
+theorem relativeCoupling_of_finiteException_and_dyadicChannelBudgets
+    (exceptionEnergy exceptionCross exceptionBudget : ℝ)
+    (energy cross budget : ℕ → ℝ)
+    (n : ℕ) (tail leading rho : ℝ)
+    (hExceptionEnergy : 0 ≤ exceptionEnergy)
+    (hExceptionBudget : 0 ≤ exceptionBudget)
+    (hExceptionRelative :
+      exceptionCross ^ 2 ≤ exceptionBudget * exceptionEnergy * tail)
+    (hEnergy : ∀ i ∈ Finset.range n, 0 ≤ energy i)
+    (hBudget : ∀ i ∈ Finset.range n, 0 ≤ budget i)
+    (hTail : 0 ≤ tail)
+    (hLeading : 0 ≤ leading)
+    (hBudgetEnvelope : ∀ i ∈ Finset.range n,
+      budget i ≤ leading * (1 / (2 : ℝ)) ^ i)
+    (hTotalBudget : exceptionBudget + 2 * leading ≤ rho)
+    (hRelative : ∀ i ∈ Finset.range n,
+      (cross i) ^ 2 ≤ budget i * energy i * tail) :
+    (exceptionCross + ∑ i ∈ Finset.range n, cross i) ^ 2 ≤
+      rho * (exceptionEnergy + ∑ i ∈ Finset.range n, energy i) * tail := by
+  apply relativeCoupling_of_exception_and_finsetChannelBudgets
+    (Finset.range n) energy cross budget tail rho
+    exceptionEnergy exceptionCross exceptionBudget
+    hExceptionEnergy hExceptionBudget hExceptionRelative
+    hEnergy hBudget hTail
+  · have hDyadic := add_le_add_left
+      (dyadicChannelBudget_sum_le_two
+        budget n leading hLeading hBudgetEnvelope)
+      exceptionBudget
+    have hCombined :
+        exceptionBudget + (∑ i ∈ Finset.range n, budget i) ≤
+          exceptionBudget + 2 * leading := by
+      simpa [add_comm] using hDyadic
+    exact hCombined.trans hTotalBudget
   · exact hRelative
 
 /-- Combine fixed-low/shell and high-core/shell estimates into one relative
