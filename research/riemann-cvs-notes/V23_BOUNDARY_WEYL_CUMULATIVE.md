@@ -1283,6 +1283,35 @@ envelope for the structured total crossblock (or an explicit allocation among
 the prime, Archimedean, and pole pieces).  Those source estimates remain open;
 the finite summation and budget conversion are now kernel-checked.
 
+The tracked `probe_previous_core_dyadic_channels.py` exercises this interface
+at the already certified `1920 -> 3840` transition, which is the generic
+two-channel instance with `K=960`.  It splits the previous core through `960`
+into
+
+```text
+[0,20], [21,120], [121,240], [241,480], [481,960]
+```
+
+and measures each coupling to the new shell `[1921,3840]` against its own
+block-diagonal energy and the new-shell energy.  Ordered from the most recent
+historical shell (distance zero) back to the fixed base, the midpoint squared
+coefficients are
+
+```text
+even: 0.002790073, 0.001504689, 0.000895220, 0.001176739, 0.001227540
+odd:  0.003046025, 0.001732819, 0.000986091, 0.003482023, 0.002456279
+sum:  0.007594261 (even), 0.011703238 (odd).
+```
+
+Both sums are far below `2/27`, with midpoint slacks about `0.06648` and
+`0.06237`.  The simple `q_i <= (1/27)*2^(-i)` envelope holds for every listed
+channel except the odd fixed base `[1,20]`: at distance four it exceeds the
+candidate by about `0.000141464`.  The route decision is therefore explicit:
+keep that fixed base as a separately certified finite channel and use the
+geometric envelope on the dyadic tail.  This entire table remains float64
+linear algebra after Arb midpoint assembly; it selects the next interval and
+analytic estimates and does not upgrade them to a proof.
+
 The finite-support-to-closed-value order passage is now explicit in Lean.
 `recursiveShellEnergy_nonnegative_nat` propagates nonnegativity through every
 finite shell chain.  `recursiveShellEnergy_limit_nonnegative` passes this

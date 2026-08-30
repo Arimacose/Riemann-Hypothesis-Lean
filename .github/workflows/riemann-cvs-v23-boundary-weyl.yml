@@ -27,6 +27,7 @@ on:
       - 'research/riemann-cvs-numerics/certify_direct_parity_relative_shell.py'
       - 'research/riemann-cvs-numerics/probe_relative_shell_budget.py'
       - 'research/riemann-cvs-numerics/probe_dyadic_shell_scaling.py'
+      - 'research/riemann-cvs-numerics/probe_previous_core_dyadic_channels.py'
       - 'research/riemann-cvs-numerics/certify_prime_translation_power_bound.py'
       - 'research/riemann-cvs-numerics/certify_archimedean_tail_envelope.py'
       - 'research/riemann-cvs-numerics/certify_eventual_dyadic_middle_channel.py'
@@ -59,6 +60,7 @@ on:
       - 'research/riemann-cvs-numerics/certify_direct_parity_relative_shell.py'
       - 'research/riemann-cvs-numerics/probe_relative_shell_budget.py'
       - 'research/riemann-cvs-numerics/probe_dyadic_shell_scaling.py'
+      - 'research/riemann-cvs-numerics/probe_previous_core_dyadic_channels.py'
       - 'research/riemann-cvs-numerics/certify_prime_translation_power_bound.py'
       - 'research/riemann-cvs-numerics/certify_archimedean_tail_envelope.py'
       - 'research/riemann-cvs-numerics/certify_eventual_dyadic_middle_channel.py'
@@ -477,6 +479,21 @@ jobs:
             --validate-cutoff 120 \
             --json-out research/riemann-cvs-numerics/artifacts/v23_c13_q996_N1920_to_N3840_four_ninths_scaling.json
 
+      - name: Probe multiscale previous-core dyadic channels
+        shell: bash
+        run: |
+          set -euo pipefail
+          python research/riemann-cvs-numerics/probe_previous_core_dyadic_channels.py \
+            --c 13 \
+            --historical-cutoffs 20 120 240 480 960 \
+            --middle-cutoff 1920 \
+            --new-cutoff 3840 \
+            --prec 160 \
+            --shift-gain 1/1024 \
+            --reference-q 249/250 \
+            --candidate-leading 1/27 \
+            --json-out research/riemann-cvs-numerics/artifacts/v23_c13_previous_core_to_N3840_dyadic_channels.json
+
       - name: Replay the corrected finite Arb parity certificate
         shell: bash
         run: |
@@ -546,6 +563,7 @@ jobs:
             research/riemann-cvs-numerics/artifacts/v23_c13_q996_N1920_to_N3840_direct_odd_preconditioner.npy
             research/riemann-cvs-numerics/artifacts/v23_c13_N120_to_N240_shell_midpoint_smoke.json
             research/riemann-cvs-numerics/artifacts/v23_c13_q996_N1920_to_N3840_four_ninths_scaling.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_previous_core_to_N3840_dyadic_channels.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N20_parity_gap.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N20_boundary_weyl_cumulative.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N12_boundary_weyl_compact_margin.json
