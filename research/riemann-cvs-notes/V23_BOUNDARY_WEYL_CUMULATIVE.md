@@ -652,16 +652,57 @@ The JSON explicitly records `MIDPOINT_DIAGNOSTIC_ONLY` and
 `A2F775129E3B9C7811B309AC335D3B95DEF4355EC418575EB2B6BCC59C55A6BD`.
 Thus the immediate `1/666` reference route is quantitatively the wrong bound
 for this shell, while the direct `q_0` shell ratio remains below the rational
-candidate `rho=1/12`.  The next rigorous finite target is therefore
+candidate `rho=1/12`.
 
-```text
-N = 960 -> 1920, q_0 = 249/250, rho = 1/12,
+That candidate is now discharged by the tracked rigorous certifier
+`certify_preconditioned_relative_shell.py`:
+
+```powershell
+python research/riemann-cvs-numerics/certify_preconditioned_relative_shell.py `
+  --c 13 --low-cutoff 20 --core-cutoff 960 --shell-cutoff 1920 `
+  --prec 256 --shift-gain 1/1024 --q-upper 249/250 --rho-upper 1/12 `
+  --core-certificate <N960-certificate.json> `
+  --json-out <N1920-certificate.json>
 ```
 
-followed by either a uniform direct core-relative estimate below one or an
-eventual cutoff beyond which the reference coefficient finally fits inside
-the `1/666` reserve.  This separates a verified algebraic reserve from the
-additional quantitative decay needed to use it.
+The script first validates and hashes the earlier positive-core artifact.  It
+then uses Arb's verified preconditioned solve to enclose
+
+```text
+X = ((1/12) * R_(249/250)(960))^-1 C
+```
+
+and the exact Schur complement `S = H_shell - C^T X`.  A floating Cholesky
+factor selects a basis only; every selected float is embedded as an exact
+dyadic number with zero Arb radius.  The resulting fixed upper-triangular
+matrix `P` has a strictly positive diagonal, so it is invertible.  Arb then
+encloses the exact congruence `P^T S P`, and every Gershgorin lower margin is
+proved strictly positive.  Thus `S`, and hence the full recursive-shell
+matrix, is positive definite without a Python-level LDL on the 1920-dimensional
+matrix.
+
+At 256 bits the strict result is
+
+```text
+even: Schur dimension 960, strict Gershgorin rows 960 / 960,
+  transcript dc1b6b9545fbe484c2751b9a8760494bca0f00044120f6f1251e765587720a3a,
+  maximum margin radius 1.4422482957167404e-66,
+  preconditioner 985150B4B2831153AE83AF308F6233D09129A9C00B18F10B9C2D09DFE4BDA452,
+
+odd:  Schur dimension 960, strict Gershgorin rows 960 / 960,
+  transcript 6dd72042444dca9f628634f00ace414be83f971c1d29830456f014366c5632c6,
+  maximum margin radius 2.1709399961456847e-64,
+  preconditioner A6CA29BFE2D8236BA0E8AF779C51B98925B8F9ED1596A83383DC457948AF8494.
+```
+
+Every one of the `961 * 960` even and `960 * 960` odd verified-solve residual
+entries contains zero.  The JSON artifact SHA-256 is
+`427529EC13BD33695546C948E0AC29CC88594EB9E6948C8C6F69A61AFFFD2C45`.
+The strict finite `q_0=249/250` frontier is therefore `N=1920`, and positive
+diagonal growth propagates the result from `x=-1/1024` to every more negative
+parameter.  What remains is either a uniform direct core-relative estimate
+below one after this enlarged chain or an eventual cutoff beyond which the
+reference coefficient finally fits inside the `1/666` reserve.
 
 `BoundaryWeylFarLeft.lean` closes the algebraic part of the exterior
 normalization.  If all finite poles are nonnegative, the total residue is one,
@@ -772,17 +813,17 @@ The following are still explicit proof obligations:
 
 1. instantiate the characteristic-polynomial identification for the concrete
    self-adjoint CvS blocks from a Lean-side ordered eigenvalue enumeration;
-2. convert the midpoint candidate for `N=960 -> 1920` into a rigorous
-   `q_0=249/250`, `rho=1/12` interval certificate, then prove either one
-   uniform direct core-relative coefficient below one on every remaining
-   dyadic shell or an eventual reference-energy estimate
+2. after the rigorously checked chain
+   `N=20 -> 120 -> 240 -> 480 -> 960 -> 1920`, prove either one uniform direct
+   core-relative coefficient below one on every remaining dyadic shell or an
+   eventual reference-energy estimate
    `kappa_K <= rho/666`; pass the resulting `q=999/1000` finite-support
    inequality to the closed high complement uniformly on compact domains with
-   right endpoint `< 0`.  The exact `1/666` reserve is already formalized, but
-   the midpoint diagnostic shows that it is not the immediate `960 -> 1920`
-   bound.  The older `a/gamma/epsilon` and restricted `errorSpace` budgets
-   remain fallback interfaces, and the relative form inequality is the
-   preferred route;
+   right endpoint `< 0`.  The exact `1/666` reserve is already formalized; the
+   direct preconditioned-Schur certificate supplies the `960 -> 1920` bridge.
+   The older `a/gamma/epsilon` and restricted `errorSpace` budgets remain
+   fallback interfaces, and the relative form inequality is the preferred
+   route;
 3. prove a cutoff-uniform upper bound for the absolute first spectral moment
    consumed by the new far-left theorem;
 4. keep the V22 central-mode functional distinct from the Sylvester boundary
@@ -794,15 +835,16 @@ The following are still explicit proof obligations:
 
 The cumulative certificate closes the finite `(13,20)` numerical hypothesis,
 and the recursive relative-energy certificates extend the checked Schur
-comparison through `20 -> 120 -> 240 -> 480 -> 960` throughout
-`x <= -1/1024`; the last stage uses `q_0=249/250` and leaves the exact `1/666`
-reference-energy reserve for `q=999/1000`.  The exact
+comparison through `20 -> 120 -> 240 -> 480 -> 960 -> 1920` throughout
+`x <= -1/1024`; the last two stages use `q_0=249/250`, while comparison with
+`q=999/1000` leaves the exact `1/666` reference-energy reserve.  The exact
 finite displacement, characteristic-product, residue-normalization,
 determinant-ratio, quantitative Abel, energy-normalized monotonicity, and
 recursive shell and reference-reserve adapters are now formalized.  The
-midpoint-only `960 -> 1920` probe selects `rho=1/12` for the next direct
-certificate and rules out immediate use of the conservative `1/666` reserve.
-That next interval certificate, the uniform later-shell bound,
+midpoint probe selected `rho=1/12`, and the preconditioned-Schur interval
+certificate now closes `960 -> 1920` while confirming that the conservative
+`1/666` reserve is an eventual rather than immediate route.  The uniform
+later-shell bound,
 closed-form passage, uniform moment bound, and limiting resolvent construction
 remain the dominant proof boundary.
 

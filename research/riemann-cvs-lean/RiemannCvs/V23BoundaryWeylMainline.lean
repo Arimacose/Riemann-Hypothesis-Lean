@@ -74,15 +74,17 @@ strictly positive.  A third 900-bit certificate tightens the coefficient to
 `q₀ = 249/250` through `N = 480` and attaches `480 -> 960` with
 `rho < 1/7`, again with every even and odd pivot strictly positive.  Comparing
 this certificate with the final `q = 999/1000` form leaves the exact balanced
-reference-energy reserve coefficient `1/666`.  Positive diagonal growth
-extends all four finite stages to every `x ≤ -1/1024`.  This is evidence for,
-and a scalable inductive interface toward, the all-cutoff target rather than
-a replacement for its operator proof.  A separate midpoint-only diagnostic at
-`960 -> 1920` finds direct `q₀` shell ratios about `0.04318` and `0.07808`, so
-`rho = 1/12` is the next rational interval-certificate candidate.  The same
-diagnostic finds reference coefficients about `0.04327` and `0.05486`, far
-above `1/666`; thus the balanced reserve is an eventual-tail interface rather
-than the immediate next-shell bound.  The
+reference-energy reserve coefficient `1/666`.  A midpoint diagnostic at
+`960 -> 1920` selects the direct coefficient `rho = 1/12`; a fourth rigorous
+certificate then validates that shell at 256 bits by an Arb verified solve,
+an exact Schur enclosure, a fixed invertible dyadic congruence, and `960/960`
+strictly positive preconditioned Gershgorin rows in each parity sector.
+Positive diagonal growth extends all five finite stages through `N = 1920` to
+every `x ≤ -1/1024`.  This is evidence for, and a scalable inductive interface
+toward, the all-cutoff target rather than a replacement for its operator proof.
+The same diagnostic finds reference coefficients about `0.04327` and
+`0.05486`, far above `1/666`; thus the balanced reserve is an eventual-tail
+interface rather than the immediate `960 -> 1920` bound.  The
 finite certificate is valid at the endpoint, but the real-valued
 finite-to-limit resolvent comparison must be applied on compact subintervals
 whose right endpoint is strictly negative: the certified lowest even pole
@@ -105,11 +107,10 @@ source estimate may instead prove the dimensionless relative-energy inequality
 with some `q < 1`: this removes the boundary vector entirely and is now the
 preferred target.  The finite recursive chain through `N = 480` preserves
 the concrete `q = 999/1000` benchmark, while the stricter `q₀ = 249/250`
-certificate reaches `N = 960` and exposes a `1/666` reference-energy reserve
-for that benchmark.  The next finite obligation is to turn the midpoint
-`960 -> 1920`, `q₀ = 249/250`, `rho = 1/12` candidate into an interval
-certificate.  Beyond that bridge, the analytic obligation is either a uniform
-direct core-relative coefficient below one, or an eventual estimate
+certificate now reaches `N = 1920` and exposes a `1/666` reference-energy
+reserve for that benchmark.  Beyond this finite bridge, the analytic
+obligation is either a uniform direct core-relative coefficient below one, or
+an eventual estimate
 `kappa_K ≤ rho/666` once the reference coupling has decayed enough, followed
 by passage from finite-support vectors to the closed tail operator.
 -/

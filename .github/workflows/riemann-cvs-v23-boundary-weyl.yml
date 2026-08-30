@@ -23,6 +23,8 @@ on:
       - 'research/riemann-cvs-numerics/audit_log_tail_structure.py'
       - 'research/riemann-cvs-numerics/certify_relative_energy_coupling.py'
       - 'research/riemann-cvs-numerics/certify_recursive_relative_energy_shells.py'
+      - 'research/riemann-cvs-numerics/certify_preconditioned_relative_shell.py'
+      - 'research/riemann-cvs-numerics/probe_relative_shell_budget.py'
       - 'research/riemann-cvs-numerics/certify_boundary_weyl_cumulative.py'
       - 'research/riemann-cvs-numerics/certify_parity_gap.py'
       - 'research/riemann-cvs-notes/V23_BOUNDARY_WEYL_CUMULATIVE.md'
@@ -48,6 +50,8 @@ on:
       - 'research/riemann-cvs-numerics/audit_log_tail_structure.py'
       - 'research/riemann-cvs-numerics/certify_relative_energy_coupling.py'
       - 'research/riemann-cvs-numerics/certify_recursive_relative_energy_shells.py'
+      - 'research/riemann-cvs-numerics/certify_preconditioned_relative_shell.py'
+      - 'research/riemann-cvs-numerics/probe_relative_shell_budget.py'
       - 'research/riemann-cvs-numerics/certify_boundary_weyl_cumulative.py'
       - 'research/riemann-cvs-numerics/certify_parity_gap.py'
       - 'research/riemann-cvs-notes/V23_BOUNDARY_WEYL_CUMULATIVE.md'
@@ -314,6 +318,22 @@ jobs:
             --target-q 999/1000 \
             --json-out research/riemann-cvs-numerics/artifacts/v23_c13_q996_N480_to_N960_shell.json
 
+      - name: Certify the preconditioned V23 shell through N1920
+        shell: bash
+        run: |
+          set -euo pipefail
+          python research/riemann-cvs-numerics/certify_preconditioned_relative_shell.py \
+            --c 13 \
+            --low-cutoff 20 \
+            --core-cutoff 960 \
+            --shell-cutoff 1920 \
+            --prec 256 \
+            --shift-gain 1/1024 \
+            --q-upper 249/250 \
+            --rho-upper 1/12 \
+            --core-certificate research/riemann-cvs-numerics/artifacts/v23_c13_q996_N480_to_N960_shell.json \
+            --json-out research/riemann-cvs-numerics/artifacts/v23_c13_q996_N960_to_N1920_preconditioned_shell.json
+
       - name: Smoke-test the relative-shell midpoint probe
         shell: bash
         run: |
@@ -388,6 +408,9 @@ jobs:
             research/riemann-cvs-numerics/artifacts/v23_c13_N20_to_N120_relative_energy.json
             research/riemann-cvs-numerics/artifacts/v23_c13_recursive_relative_energy_shells.json
             research/riemann-cvs-numerics/artifacts/v23_c13_q996_N480_to_N960_shell.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_q996_N960_to_N1920_preconditioned_shell.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_q996_N960_to_N1920_preconditioned_shell_even_preconditioner.npy
+            research/riemann-cvs-numerics/artifacts/v23_c13_q996_N960_to_N1920_preconditioned_shell_odd_preconditioner.npy
             research/riemann-cvs-numerics/artifacts/v23_c13_N120_to_N240_shell_midpoint_smoke.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N20_parity_gap.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N20_boundary_weyl_cumulative.json
