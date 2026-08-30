@@ -1245,6 +1245,44 @@ inferred from the finite algebra.  It remains a concrete analytic target, for
 example via a summable upper envelope for the `u_i` and a separate
 positive-product lemma.
 
+### Multiscale Cauchy summation for the previous-core channel
+
+Treating all modes below `K` as one previous-core block hides the geometric
+separation between old dyadic shells and the new shell `[2K,4K]`.  The new Lean
+theorem `relativeCoupling_of_finsetChannelBudgets` exposes that structure.  For
+a finite shell family, suppose
+
+```text
+C_previous = sum_i C_i,
+C_i^2 <= q_i * E_i * T,
+q_i >= 0, E_i >= 0, T >= 0.
+```
+
+Weighted Cauchy--Schwarz now gives the sharp aggregate form
+
+```text
+C_previous^2 <= [sum_i q_i] * [sum_i E_i] * T.
+```
+
+Thus the number of earlier shells causes no extra factor.  The companion
+theorem `dyadicChannelBudget_sum_le_two` proves
+
+```text
+q_i <= q_0 * 2^(-i)  for i<n
+    ==> sum_(i<n) q_i <= 2*q_0,
+```
+
+and `relativeCoupling_of_dyadicChannelBudgets` packages both steps.  To fit the
+existing previous-channel allocation `2/27`, it is therefore sufficient to
+prove a shell-distance envelope with leading squared coefficient at most
+`1/27`.  This replaces one opaque old-core matrix norm by three explicit
+source obligations: identify the cross form as the sum of its dyadic-shell
+pieces, prove that a fixed reserve times the sum of their nonnegative energies
+is controlled by the recursive core, and establish the `2^(-i)` coefficient
+envelope for the structured total crossblock (or an explicit allocation among
+the prime, Archimedean, and pole pieces).  Those source estimates remain open;
+the finite summation and budget conversion are now kernel-checked.
+
 The finite-support-to-closed-value order passage is now explicit in Lean.
 `recursiveShellEnergy_nonnegative_nat` propagates nonnegativity through every
 finite shell chain.  `recursiveShellEnergy_limit_nonnegative` passes this
@@ -1381,8 +1419,10 @@ The following are still explicit proof obligations:
    formalized.  The variable route `u_n^2 -> (1-u_n)` and the finite reserve-
    product induction and its strict closed-limit passage are also formalized;
    the analytic layer must now prove a positive uniform floor for those
-   products from the separated-band previous-core estimates.  The
-   preconditioned-Schur certificates supply the
+   products from the separated-band previous-core estimates.  The finite- and
+   dyadic-channel Cauchy adapters further reduce the previous-core coefficient
+   `2/27` to a shell-distance envelope with leading coefficient `1/27` and
+   squared decay `2^(-i)`.  The preconditioned-Schur certificates supply the
    `960 -> 1920` and `1920 -> 3840` bridges, while the strict
    `||T_13||<10/3` power certificate and centered Archimedean envelope close the
    eventual middle-channel scalar budget.  The remaining analytic work is

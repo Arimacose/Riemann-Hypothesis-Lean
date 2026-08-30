@@ -63,7 +63,10 @@ The new kernel-checked chain contains:
     finite reserve product `prod_{i<n}(1-u_i)`, so the analytic layer may prove
     one positive product floor without paying a fixed reserve at every scale;
     this lower bound, and strict positivity when the base energy is positive,
-    now pass directly to any convergent closed-form limit;
+    now pass directly to any convergent closed-form limit; a multichannel
+    weighted-Cauchy adapter also combines an arbitrary finite family of earlier
+    dyadic shells with aggregate coefficient `sum q_i`, and a `q_i <= q_0/2^i`
+    envelope costs at most `2*q_0`, independently of the number of shells;
     a two-channel budget theorem also
     recombines the fixed-low/shell and high-core/shell estimates while exposing
     the exact factor-two allocation required by `(a+b)^2 <= 2a^2+2b^2`; the
@@ -175,10 +178,13 @@ sufficient route, but the new variable-reserve theorem also permits the
 actual relative coefficient `u_K^2` at each scale and retains the finite
 product of `1-u_K`; proving a positive uniform floor for those products
 avoids the artificial exponential loss of repeatedly substituting the
-worst-case `1/3` reserve.  This is followed by convergence of the
+worst-case `1/3` reserve.  Independently, the new finite-channel theorem
+reduces the previous-core source estimate to dyadic shell budgets whose sum is
+at most `2/27`; a squared-norm envelope `q_i <= (1/27)/2^i` is sufficient for
+that channel at every depth.  This is followed by convergence of the
 finite-support energies to the closed tail form.  The scalar induction,
 finite-product lower bound, and strict order-limit passage are kernel-checked;
-the separated-band previous-core estimate, the fourteen finite middle
-bridges, a positive product floor, and the source-specific form convergence
-remain open.
+the source-specific separated-band envelope and shell-energy decomposition,
+the fourteen finite middle bridges, a positive product floor, and the
+source-specific form convergence remain open.
 -/

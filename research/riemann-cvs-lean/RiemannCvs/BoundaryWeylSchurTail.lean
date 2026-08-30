@@ -713,6 +713,95 @@ theorem relativeShell_of_referenceReserve
     _ = rho * (reserve * reference) * tail := by ring
     _ ≤ rho * core * tail := hCoreTail
 
+/-- Combine a finite family of shell channels using the sum of their relative
+coefficients.  If channel `i` has cross term `cross i`, reference energy
+`energy i`, and coefficient `budget i`, weighted Cauchy--Schwarz gives one
+aggregate coefficient `sum budget` rather than a factor equal to the number of
+channels.
+
+This is the multiscale adapter for the previous-core channel: decompose the
+old core into dyadic shells, prove a distance-dependent budget for each shell,
+and add those budgets before applying the recursive reserve theorem. -/
+theorem relativeCoupling_of_finsetChannelBudgets
+    {ι : Type*}
+    (s : Finset ι)
+    (energy cross budget : ι → ℝ)
+    (tail rho : ℝ)
+    (hEnergy : ∀ i ∈ s, 0 ≤ energy i)
+    (hBudget : ∀ i ∈ s, 0 ≤ budget i)
+    (hTail : 0 ≤ tail)
+    (hBudgetSum : (∑ i ∈ s, budget i) ≤ rho)
+    (hRelative : ∀ i ∈ s,
+      (cross i) ^ 2 ≤ budget i * energy i * tail) :
+    (∑ i ∈ s, cross i) ^ 2 ≤
+      rho * (∑ i ∈ s, energy i) * tail := by
+  have hCauchy :
+      (∑ i ∈ s, cross i) ^ 2 ≤
+        (∑ i ∈ s, budget i) * ∑ i ∈ s, energy i * tail := by
+    exact Finset.sum_sq_le_sum_mul_sum_of_sq_le_mul
+      s hBudget
+      (fun i hi => mul_nonneg (hEnergy i hi) hTail)
+      (fun i hi => by simpa [mul_assoc] using hRelative i hi)
+  have hEnergySum : 0 ≤ ∑ i ∈ s, energy i :=
+    Finset.sum_nonneg hEnergy
+  have hEnergyTail :
+      (∑ i ∈ s, energy i * tail) = (∑ i ∈ s, energy i) * tail := by
+    exact (Finset.sum_mul s energy tail).symm
+  have hScale :
+      (∑ i ∈ s, budget i) * ((∑ i ∈ s, energy i) * tail) ≤
+        rho * ((∑ i ∈ s, energy i) * tail) :=
+    mul_le_mul_of_nonneg_right hBudgetSum (mul_nonneg hEnergySum hTail)
+  calc
+    (∑ i ∈ s, cross i) ^ 2 ≤
+        (∑ i ∈ s, budget i) * ∑ i ∈ s, energy i * tail := hCauchy
+    _ = (∑ i ∈ s, budget i) * ((∑ i ∈ s, energy i) * tail) := by
+      rw [hEnergyTail]
+    _ ≤ rho * ((∑ i ∈ s, energy i) * tail) := hScale
+    _ = rho * (∑ i ∈ s, energy i) * tail := by ring
+
+/-- A dyadically decaying coefficient envelope has total budget at most twice
+its leading coefficient.  This is the scalar summation needed when separated
+shell norms lose one factor `1/2` per dyadic scale in squared norm. -/
+theorem dyadicChannelBudget_sum_le_two
+    (budget : ℕ → ℝ) (n : ℕ) (leading : ℝ)
+    (hLeading : 0 ≤ leading)
+    (hBudget : ∀ i ∈ Finset.range n,
+      budget i ≤ leading * (1 / (2 : ℝ)) ^ i) :
+    (∑ i ∈ Finset.range n, budget i) ≤ 2 * leading := by
+  calc
+    (∑ i ∈ Finset.range n, budget i) ≤
+        ∑ i ∈ Finset.range n, leading * (1 / (2 : ℝ)) ^ i := by
+      exact Finset.sum_le_sum hBudget
+    _ = leading * ∑ i ∈ Finset.range n, (1 / (2 : ℝ)) ^ i := by
+      rw [Finset.mul_sum]
+    _ ≤ leading * 2 :=
+      mul_le_mul_of_nonneg_left (sum_geometric_two_le n) hLeading
+    _ = 2 * leading := by ring
+
+/-- Package the finite-channel Cauchy estimate with a dyadic coefficient
+envelope.  A leading coefficient at most half the desired aggregate budget is
+sufficient uniformly in the number of earlier shells. -/
+theorem relativeCoupling_of_dyadicChannelBudgets
+    (energy cross budget : ℕ → ℝ)
+    (n : ℕ) (tail leading rho : ℝ)
+    (hEnergy : ∀ i ∈ Finset.range n, 0 ≤ energy i)
+    (hBudget : ∀ i ∈ Finset.range n, 0 ≤ budget i)
+    (hTail : 0 ≤ tail)
+    (hLeading : 0 ≤ leading)
+    (hBudgetEnvelope : ∀ i ∈ Finset.range n,
+      budget i ≤ leading * (1 / (2 : ℝ)) ^ i)
+    (hTotalBudget : 2 * leading ≤ rho)
+    (hRelative : ∀ i ∈ Finset.range n,
+      (cross i) ^ 2 ≤ budget i * energy i * tail) :
+    (∑ i ∈ Finset.range n, cross i) ^ 2 ≤
+      rho * (∑ i ∈ Finset.range n, energy i) * tail := by
+  apply relativeCoupling_of_finsetChannelBudgets
+    (Finset.range n) energy cross budget tail rho
+    hEnergy hBudget hTail
+  · exact (dyadicChannelBudget_sum_le_two
+      budget n leading hLeading hBudgetEnvelope).trans hTotalBudget
+  · exact hRelative
+
 /-- Combine fixed-low/shell and high-core/shell estimates into one relative
 coupling bound.  The factor two is the division-free inequality
 `(a+b)^2 ≤ 2*a^2 + 2*b^2`; consequently each channel may consume at most half
