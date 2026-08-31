@@ -1227,8 +1227,54 @@ shell count `n`,
 [product_(i<n) (1-u_i)] * E_0 <= E_n.
 ```
 
-Finally, `recursiveShellEnergy_ge_of_reserveProductLowerBound` separates the
-remaining analytic obligation exactly: any uniform scalar floor
+The stronger theorem
+`recursiveShellEnergy_ge_reserveProduct_mul_blockSum` now keeps every diagonal
+shell energy in the reference:
+
+```text
+[product_(i<n) (1-u_i)] * [E_0 + sum_(i<n) T_i] <= E_n.
+```
+
+The induction does not pay an extra reserve at every historical block.  The
+old block sum uses the preceding inequality, while the new tail uses only
+`0 <= product_(i<n)(1-u_i) <= 1`.  Therefore
+`recursiveShellEnergy_ge_reserveFloor_mul_blockSum` turns a uniform product
+floor into
+
+```text
+reserveFloor * [E_0 + sum_(i<n) T_i] <= E_n.
+```
+
+Finally, `relativeShell_of_recursiveBlockSumReserve` composes this exact
+normalization with `relativeShell_of_referenceReserve`: a next-shell source
+estimate against the full block-diagonal reference, with
+`budget <= rho * reserveFloor`, is immediately a coefficient-`rho` estimate
+against the actual recursively glued core.  Thus no additional scalar
+energy-normalization lemma is left between the dyadic channel sum and the
+recursive core; the remaining inputs are the source-specific identification
+of the channel energies and a positive analytic product floor.
+
+The product floor itself is also reduced to a source-level summability target.
+The theorem `reserveProduct_ge_one_sub_partialSum` proves the finite inequality
+
+```text
+1 - sum_(i<n) u_i <= product_(i<n) (1-u_i).
+```
+
+Hence `reserveProduct_ge_one_sub_of_partialSumBound` turns any uniform estimate
+
+```text
+sum_(i<n) u_i <= total
+```
+
+into the explicit floor `1-total`, and
+`reserveProduct_pos_of_partialSum_lt_one` proves that floor is strictly positive
+when `total<1`.  The analytic obligation is therefore the concrete uniform
+partial-sum bound for the source-derived `u_i`, rather than another abstract
+infinite-product argument.
+
+Finally, `recursiveShellEnergy_ge_of_reserveProductLowerBound` consumes any
+uniform scalar floor
 
 ```text
 reserveFloor <= product_(i<n) (1-u_i)
@@ -1240,10 +1286,9 @@ theorems `recursiveShellEnergy_limit_ge_of_reserveProductLowerBound` and
 bound to a convergent closed-form energy and make it strictly positive whenever
 `reserveFloor>0` and `E_0>0`.  The next separated-band estimate may therefore
 use the measured scale-dependent previous-core coefficients instead of
-replacing each one by `4/9`.  Positivity of a uniform reserve floor is not
-inferred from the finite algebra.  It remains a concrete analytic target, for
-example via a summable upper envelope for the `u_i` and a separate
-positive-product lemma.
+replacing each one by `4/9`.  The remaining concrete analytic target is now a
+summable upper envelope whose total is strictly below one; the three product
+lemmas derive the positive floor internally.
 
 ### Multiscale Cauchy summation for the previous-core channel
 
@@ -1533,8 +1578,9 @@ The following are still explicit proof obligations:
    `4/9 -> 1/3 -> 4/27` steady recursion, and its two-channel Lean adapter are
    formalized.  The variable route `u_n^2 -> (1-u_n)` and the finite reserve-
    product induction and its strict closed-limit passage are also formalized;
-   the analytic layer must now prove a positive uniform floor for those
-   products from the separated-band previous-core estimates.  The finite- and
+   the analytic layer must now prove a uniform partial-sum bound below one for
+   the source-derived `u_n`; the new finite-product lemmas then yield the
+   positive floor `1-total`.  The finite- and
    dyadic-channel Cauchy adapters further reduce the previous-core coefficient
    `2/27` to a shell-distance envelope.  The generic route permits leading
    coefficient `1/27`; after assigning the certified odd fixed base `1/384`,
@@ -1546,7 +1592,9 @@ The following are still explicit proof obligations:
    eventual middle-channel scalar budget.  The remaining analytic work is
    concentrated in the prime previous-core crossblock, the finite middle
    bridges, their relative channel normalization, and the concrete
-   Hilbert-compression adapter;
+   Hilbert-compression adapter.  The scalar comparison between the full
+   block-diagonal shell sum and the recursively glued core is now formalized by
+   the reserve-product block-sum theorem and its direct next-shell adapter;
 3. prove a cutoff-uniform upper bound for the absolute first spectral moment
    consumed by the new far-left theorem;
 4. keep the V22 central-mode functional distinct from the Sylvester boundary

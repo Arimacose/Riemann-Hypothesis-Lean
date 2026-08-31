@@ -202,12 +202,20 @@ two common reverse-Schur solves, and exact-dyadic congruences now also certify
 all nine regular source bands: five even bands with budget sum `31/480`, and
 four odd bands with sum `1/16`.  Their exact finite slacks inside `2/27` are
 `41/4320` in the even sector and, after adding the odd `1/384` exception,
-`31/3456` in the odd sector.  The regular envelope at every later scale and
-the comparison of the separated band energies with the recursive core energy
-remain source inputs.  This is followed by convergence of the
+`31/3456` in the odd sector.  The scalar normalization is now stronger than
+the initial-block estimate: the same finite reserve product controls the
+initial energy plus the sum of every historical shell energy, and a direct
+adapter converts a source estimate against that full block-diagonal sum into
+one relative to the recursively glued core.  The regular envelope at every
+later scale, the source-specific identification of those separated band
+energies with the scalar shell decomposition, and a uniform coefficient
+partial-sum bound strictly below one remain analytic inputs.  The scalar
+product lemmas turn that last bound into the explicit positive floor
+`1-total`.  This is followed by convergence of the
 finite-support energies to the closed tail form.  The scalar induction,
-finite-product lower bound, and strict order-limit passage are kernel-checked;
-the source-specific separated-band envelope and shell-energy decomposition,
-the fourteen finite middle bridges, a positive product floor, and the
-source-specific form convergence remain open.
+full block-sum normalization, finite-product floor adapter, and strict
+order-limit passage are kernel-checked; the source-specific separated-band
+envelope and shell-energy identification, the fourteen finite middle
+bridges, the summable coefficient bound, and source-specific form convergence
+remain open.
 -/

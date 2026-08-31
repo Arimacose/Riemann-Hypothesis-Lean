@@ -1260,6 +1260,228 @@ theorem recursiveShellEnergy_ge_reserveProduct
         _ ≤ (1 - u n) * (energy n + tail n) := hTailScaled
         _ ≤ energy (n + 1) := hReserve
 
+/-- Finite reserve products admit the elementary union-bound lower estimate
+
+`1 - sum i in range n, u i ≤ prod i in range n, (1-u i)`
+
+whenever every `u i` lies in `[0,1]`.  This is the scalar bridge from a
+summable envelope for the actual shell coefficients to a positive uniform
+reserve-product floor. -/
+theorem reserveProduct_ge_one_sub_partialSum
+    (u : ℕ → ℝ)
+    (hUNonnegative : ∀ i, 0 ≤ u i)
+    (hUOne : ∀ i, u i ≤ 1) :
+    ∀ n,
+      1 - (∑ i ∈ Finset.range n, u i) ≤
+        ∏ i ∈ Finset.range n, (1 - u i) := by
+  intro n
+  induction n with
+  | zero => simp
+  | succ n ih =>
+      have hSumNonnegative :
+          0 ≤ ∑ i ∈ Finset.range n, u i :=
+        Finset.sum_nonneg (fun i _ => hUNonnegative i)
+      have hOneSubU : 0 ≤ 1 - u n := sub_nonneg.mpr (hUOne n)
+      have hIHScaled :
+          (1 - ∑ i ∈ Finset.range n, u i) * (1 - u n) ≤
+            (∏ i ∈ Finset.range n, (1 - u i)) * (1 - u n) :=
+        mul_le_mul_of_nonneg_right ih hOneSubU
+      rw [Finset.sum_range_succ, Finset.prod_range_succ]
+      calc
+        1 - ((∑ i ∈ Finset.range n, u i) + u n) ≤
+            (1 - ∑ i ∈ Finset.range n, u i) * (1 - u n) := by
+          nlinarith [mul_nonneg hSumNonnegative (hUNonnegative n)]
+        _ ≤ (∏ i ∈ Finset.range n, (1 - u i)) * (1 - u n) :=
+          hIHScaled
+
+/-- A uniform upper bound on all finite coefficient sums gives the explicit
+uniform reserve-product floor `1-total`. -/
+theorem reserveProduct_ge_one_sub_of_partialSumBound
+    (u : ℕ → ℝ)
+    (total : ℝ)
+    (hUNonnegative : ∀ i, 0 ≤ u i)
+    (hUOne : ∀ i, u i ≤ 1)
+    (hPartialSum : ∀ n,
+      (∑ i ∈ Finset.range n, u i) ≤ total) :
+    ∀ n,
+      1 - total ≤ ∏ i ∈ Finset.range n, (1 - u i) := by
+  intro n
+  have hOneSubSum :
+      1 - total ≤ 1 - ∑ i ∈ Finset.range n, u i :=
+    sub_le_sub_left (hPartialSum n) 1
+  exact hOneSubSum.trans
+    (reserveProduct_ge_one_sub_partialSum u hUNonnegative hUOne n)
+
+/-- If the finite sums of the actual shell coefficients are uniformly bounded
+by some `total < 1`, every finite reserve product has the same strictly
+positive lower bound `1-total`. -/
+theorem reserveProduct_pos_of_partialSum_lt_one
+    (u : ℕ → ℝ)
+    (total : ℝ)
+    (hUNonnegative : ∀ i, 0 ≤ u i)
+    (hUOne : ∀ i, u i ≤ 1)
+    (hPartialSum : ∀ n,
+      (∑ i ∈ Finset.range n, u i) ≤ total)
+    (hTotalOne : total < 1) :
+    ∀ n, 0 < ∏ i ∈ Finset.range n, (1 - u i) := by
+  intro n
+  exact (sub_pos.mpr hTotalOne).trans_le
+    (reserveProduct_ge_one_sub_of_partialSumBound
+      u total hUNonnegative hUOne hPartialSum n)
+
+/-- The reserve product controls the entire block-diagonal reference accumulated
+through the first `n` shells, not only the initial block.
+
+More precisely, the common finite product
+
+`prod i in range n, (1 - u i)`
+
+may be placed in front of `energy 0 + sum i in range n, tail i`.  At the
+induction step the already accumulated blocks use the induction hypothesis,
+while the new tail uses that every earlier reserve factor lies in `[0,1]`.
+This is the scalar normalization needed to compare a previous-core dyadic
+channel sum with the recursively glued core energy. -/
+theorem recursiveShellEnergy_ge_reserveProduct_mul_blockSum
+    (energy tail cross u : ℕ → ℝ)
+    (hBase : 0 ≤ energy 0)
+    (hTail : ∀ n, 0 ≤ tail n)
+    (hUNonnegative : ∀ n, 0 ≤ u n)
+    (hUOne : ∀ n, u n ≤ 1)
+    (hRelative : ∀ n,
+      (cross n) ^ 2 ≤ (u n) ^ 2 * energy n * tail n)
+    (hStep : ∀ n,
+      energy (n + 1) = energy n + 2 * cross n + tail n) :
+    ∀ n,
+      (∏ i ∈ Finset.range n, (1 - u i)) *
+          (energy 0 + ∑ i ∈ Finset.range n, tail i) ≤ energy n := by
+  have hUSq : ∀ n, (u n) ^ 2 ≤ 1 := by
+    intro n
+    have hProduct :=
+      mul_nonneg (hUNonnegative n) (sub_nonneg.mpr (hUOne n))
+    nlinarith
+  have hEnergyNonnegative : ∀ n, 0 ≤ energy n :=
+    recursiveShellEnergy_nonnegative_nat
+      energy tail cross (fun n => (u n) ^ 2)
+      hBase hTail hUSq hRelative hStep
+  intro n
+  induction n with
+  | zero =>
+      simp only [Finset.range_zero, Finset.prod_empty, Finset.sum_empty,
+        add_zero, one_mul]
+      exact le_rfl
+  | succ n ih =>
+      have hOneSubU : 0 ≤ 1 - u n := sub_nonneg.mpr (hUOne n)
+      have hProductOne :
+          (∏ i ∈ Finset.range n, (1 - u i)) ≤ 1 :=
+        Finset.prod_le_one
+          (fun i _ => sub_nonneg.mpr (hUOne i))
+          (fun i _ => by linarith [hUNonnegative i])
+      have hReserve :
+          (1 - u n) * (energy n + tail n) ≤ energy (n + 1) := by
+        rw [hStep n]
+        exact sqShell_oneSubReserve
+          (energy n) (tail n) (cross n) (u n)
+          (hEnergyNonnegative n) (hTail n) (hUNonnegative n) (hRelative n)
+      have hIHScaled :
+          (1 - u n) *
+              ((∏ i ∈ Finset.range n, (1 - u i)) *
+                (energy 0 + ∑ i ∈ Finset.range n, tail i)) ≤
+            (1 - u n) * energy n :=
+        mul_le_mul_of_nonneg_left ih hOneSubU
+      have hTailProduct :
+          (∏ i ∈ Finset.range n, (1 - u i)) * tail n ≤ tail n := by
+        calc
+          (∏ i ∈ Finset.range n, (1 - u i)) * tail n ≤ 1 * tail n :=
+            mul_le_mul_of_nonneg_right hProductOne (hTail n)
+          _ = tail n := one_mul _
+      have hTailScaled :
+          (1 - u n) *
+              ((∏ i ∈ Finset.range n, (1 - u i)) * tail n) ≤
+            (1 - u n) * tail n :=
+        mul_le_mul_of_nonneg_left hTailProduct hOneSubU
+      calc
+        (∏ i ∈ Finset.range (n + 1), (1 - u i)) *
+              (energy 0 + ∑ i ∈ Finset.range (n + 1), tail i) =
+            (1 - u n) *
+                ((∏ i ∈ Finset.range n, (1 - u i)) *
+                  (energy 0 + ∑ i ∈ Finset.range n, tail i)) +
+              (1 - u n) *
+                ((∏ i ∈ Finset.range n, (1 - u i)) * tail n) := by
+                  rw [Finset.prod_range_succ, Finset.sum_range_succ]
+                  ring
+        _ ≤ (1 - u n) * energy n + (1 - u n) * tail n :=
+          add_le_add hIHScaled hTailScaled
+        _ = (1 - u n) * (energy n + tail n) := by ring
+        _ ≤ energy (n + 1) := hReserve
+
+/-- A uniform lower bound on the finite reserve products therefore controls
+the whole block-diagonal reference with the same floor.  This is the direct
+finite-scale adapter for a sum of previous-core dyadic channel energies. -/
+theorem recursiveShellEnergy_ge_reserveFloor_mul_blockSum
+    (energy tail cross u : ℕ → ℝ)
+    (reserveFloor : ℝ)
+    (hBase : 0 ≤ energy 0)
+    (hTail : ∀ n, 0 ≤ tail n)
+    (hUNonnegative : ∀ n, 0 ≤ u n)
+    (hUOne : ∀ n, u n ≤ 1)
+    (hRelative : ∀ n,
+      (cross n) ^ 2 ≤ (u n) ^ 2 * energy n * tail n)
+    (hStep : ∀ n,
+      energy (n + 1) = energy n + 2 * cross n + tail n)
+    (hReserveProduct : ∀ n,
+      reserveFloor ≤ ∏ i ∈ Finset.range n, (1 - u i)) :
+    ∀ n,
+      reserveFloor * (energy 0 + ∑ i ∈ Finset.range n, tail i) ≤
+        energy n := by
+  intro n
+  have hBlockSumNonnegative :
+      0 ≤ energy 0 + ∑ i ∈ Finset.range n, tail i :=
+    add_nonneg hBase (Finset.sum_nonneg (fun i _ => hTail i))
+  have hProductBound :=
+    recursiveShellEnergy_ge_reserveProduct_mul_blockSum
+      energy tail cross u hBase hTail hUNonnegative hUOne hRelative hStep n
+  exact
+    (mul_le_mul_of_nonneg_right (hReserveProduct n) hBlockSumNonnegative).trans
+      hProductBound
+
+/-- Compose the recursive block-sum normalization directly with a next-shell
+coupling estimate measured against that block-diagonal reference.  Once the
+analytic layer supplies a reserve-product floor and a source-channel budget
+`budget ≤ rho * reserveFloor`, the resulting coupling is relative to the
+actual recursively glued core energy. -/
+theorem relativeShell_of_recursiveBlockSumReserve
+    (energy tail cross u : ℕ → ℝ)
+    (n : ℕ)
+    (newTail newCross reserveFloor budget rho : ℝ)
+    (hBase : 0 ≤ energy 0)
+    (hTail : ∀ j, 0 ≤ tail j)
+    (hUNonnegative : ∀ j, 0 ≤ u j)
+    (hUOne : ∀ j, u j ≤ 1)
+    (hRelative : ∀ j,
+      (cross j) ^ 2 ≤ (u j) ^ 2 * energy j * tail j)
+    (hStep : ∀ j,
+      energy (j + 1) = energy j + 2 * cross j + tail j)
+    (hReserveProduct : ∀ j,
+      reserveFloor ≤ ∏ i ∈ Finset.range j, (1 - u i))
+    (hNewTail : 0 ≤ newTail)
+    (hRho : 0 ≤ rho)
+    (hBudget : budget ≤ rho * reserveFloor)
+    (hNewCross :
+      newCross ^ 2 ≤
+        budget * (energy 0 + ∑ i ∈ Finset.range n, tail i) * newTail) :
+    newCross ^ 2 ≤ rho * energy n * newTail := by
+  apply relativeShell_of_referenceReserve
+    (energy 0 + ∑ i ∈ Finset.range n, tail i)
+    (energy n) newTail newCross reserveFloor budget rho
+  · exact add_nonneg hBase (Finset.sum_nonneg (fun i _ => hTail i))
+  · exact hNewTail
+  · exact hRho
+  · exact recursiveShellEnergy_ge_reserveFloor_mul_blockSum
+      energy tail cross u reserveFloor hBase hTail hUNonnegative hUOne
+      hRelative hStep hReserveProduct n
+  · exact hBudget
+  · exact hNewCross
+
 /-- A uniform lower bound on the finite reserve products yields a uniform
 lower bound on every recursively glued shell energy.  The analytic layer may
 now prove a positive product floor separately from the finite shell algebra. -/
