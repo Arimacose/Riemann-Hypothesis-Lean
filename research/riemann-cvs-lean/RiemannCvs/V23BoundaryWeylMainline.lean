@@ -1,5 +1,6 @@
 import RiemannCvs.V22ZeroModeMainline
 import RiemannCvs.CvSParityDisplacement
+import RiemannCvs.CombinedSymbolDyadicL2
 import RiemannCvs.ObliqueWeylDeterminant
 import RiemannCvs.BoundaryWeylCumulative
 import RiemannCvs.BoundaryWeylUniformLimit
@@ -79,7 +80,14 @@ The new kernel-checked chain contains:
     `|G_N(-t) - 1/t| <= moment/t²`, derived from total residue one and a first
     absolute spectral-moment budget;
 13. the repaired boundary-gap obstruction, continuous no-crossing propagation,
-   and order preservation across rank-one prime events.
+   and order preservation across rank-one prime events;
+14. combined-symbol dyadic `L²` adapters: the exact parity Loewner numerators
+    imply factor-two-separated entry bounds and direct square bounds by
+    `32 * (F(q)^2/q^2 + F(p)^2/q^2)`; rectangular Cauchy then aggregates
+    column-square budgets.  Finite Abel summation plus Mathlib's reciprocal-
+    square tail estimate turns an affine prefix bound into a strict `1/N`
+    shell bound.  The companion endpoint expression is proved antitone for
+    positive natural modes, matching the new Arb start-mode certificate.
 
 The companion Arb audit certifies the cumulative-residue hypotheses for the
 corrected finite `(c,N) = (13,20)` parity blocks, including several negative

@@ -1780,6 +1780,8 @@ lake build RiemannCvs.BoundaryGapNoCrossing
 lake env lean RiemannCvs/BoundaryGapNoCrossing.lean
 lake build RiemannCvs.CvSParityDisplacement
 lake env lean RiemannCvs/CvSParityDisplacement.lean
+lake build RiemannCvs.CombinedSymbolDyadicL2
+lake env lean RiemannCvs/CombinedSymbolDyadicL2.lean
 lake build RiemannCvs.ObliqueWeylDeterminant
 lake env lean RiemannCvs/ObliqueWeylDeterminant.lean
 lake build RiemannCvs.BoundaryWeylCumulative
@@ -1804,3 +1806,106 @@ prime/Archimedean/pole source pieces, and gates the selected regular
 Loewner-plus-pole two-amplitude route.  It emits those JSON records and
 exact-dyadic preconditioners together with the cumulative-residue interval
 certificate as downloadable regression artifacts.
+
+## 11. Combined-symbol dyadic L2 certificate
+
+The source diagnostics show that separating the Archimedean and prime pieces
+before taking norms loses the observed cancellation: two newest
+Archimedean-only transport ratios exceed one half, whereas every combined
+Archimedean/prime Loewner ratio remains below one half.  The analytic route
+therefore keeps the odd symbol
+
+```text
+F_n = S_n + P_n,
+P_n = sum_(q<13) Lambda(q)/sqrt(q)
+        * sin(2*pi*n*log(q)/log(13)).
+```
+
+The `q=13` event is removed exactly because its phase is `2*pi*n` and its sine
+vanishes at every integer mode.  The tracked Archimedean certificate supplies
+
+```text
+abs(S_n-pi/4) <= 1/(4*n)  for every n>=960.
+```
+
+Expanding `(pi/4+P_n)^2`, and applying the finite geometric-sum bound to every
+single, doubled, difference, and sum phase, gives for `1<=r<=N`
+
+```text
+sum_(n=N+1)^(N+r) F_n^2
+  <= r * (main + linearDecay/N + quadraticDecay/N^2)
+       + geometricError.
+```
+
+At `c=13` the Arb constants are
+
+```text
+main =
+  1.886116580218509533713810564865291376175739019504099688831444...
+
+geometricError =
+  49.001298440261990885245030196417120623592790715793902569502416...
+```
+
+Finite Abel summation and the exact Mathlib tail bound
+
+```text
+sum_(N<n<=2N) 1/n^2 <= 1/(2*N)
+```
+
+then yield
+
+```text
+N * sum_(N<n<=2N) F_n^2/n^2
+  <= prefixSlope(N)/2 + geometricError*N/(N+1)^2.
+```
+
+The right side decreases for positive integer `N`.  The new 256-bit and
+384-bit replays both certify at `N=1920`
+
+```text
+scaled weighted upper =
+  0.969210261436421258996629167478848133228926023272532415858561...
+
+strict slack below 1 =
+  0.030789738563578741003370832521151866771073976727467584141438...
+```
+
+Consequently, conditional on the recorded geometric-sum lemma and the
+concrete source identification,
+
+```text
+sum_(N<n<=2N) F_n^2/n^2 < 1/N  for every integer N>=1920.
+```
+
+`CombinedSymbolDyadicL2.lean` now kernel-checks the reusable part of this
+argument.  It includes:
+
+* the factor-two-separated even and odd parity Loewner entry bounds;
+* direct symbol-square entry estimates of the form
+  `entry^2 <= 32*(F(q)^2/q^2+F(p)^2/q^2)`, followed by rectangular finite
+  Cauchy--Schwarz adapters;
+* the exact dyadic reciprocal-square estimate and its shifted form;
+* an Abel upper theorem for affine prefix bounds;
+* `dyadic_weighted_sum_lt_one_div_of_prefix_le_affine`, which turns the strict
+  scaled endpoint inequality into the target `1/N` bound;
+* `dyadicEndpointScaledUpper_antitone` and
+  `dyadicEndpointScaledUpper_lt_one_of_start`, which formalize propagation
+  from the certified start mode to every later natural mode;
+* `dyadic_weighted_sum_lt_one_div_of_start_endpoint`, which packages the
+  certified start endpoint, the all-mode source-prefix input, and the final
+  strict weighted-shell conclusion in one theorem.
+
+The certifier consumes the workflow-produced Archimedean JSON instead of
+restating its result.  It verifies the input status, precision,
+centered-decay coefficient, tracked script hash, and Git SHA before composing
+the new constants.  The workflow replays both precisions and publishes both
+JSON records.
+
+This closes the uniform scalar `L2` source constant, not the complete
+previous-core coefficient.  The next analytic step is to identify the
+separated-band energy with the recursively glued core energy and send the
+weighted symbol square sum through the full Cholesky/energy normalization.
+That step must preserve the combined prime/Archimedean cancellation and the
+strict `0.030789...` endpoint reserve rather than reverting to a
+component-wise triangle estimate.

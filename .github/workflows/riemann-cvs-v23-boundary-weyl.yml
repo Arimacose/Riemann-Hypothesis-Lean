@@ -12,6 +12,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/BoundaryWeylSchurTail.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/BoundaryWeylFarLeft.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/CvSParityDisplacement.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/CombinedSymbolDyadicL2.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V23BoundaryWeylMainline.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V22ZeroModeMainline.lean'
@@ -32,6 +33,7 @@ on:
       - 'research/riemann-cvs-numerics/probe_previous_core_dyadic_channels.py'
       - 'research/riemann-cvs-numerics/certify_prime_translation_power_bound.py'
       - 'research/riemann-cvs-numerics/certify_archimedean_tail_envelope.py'
+      - 'research/riemann-cvs-numerics/certify_combined_symbol_dyadic_l2.py'
       - 'research/riemann-cvs-numerics/certify_eventual_dyadic_middle_channel.py'
       - 'research/riemann-cvs-numerics/certify_boundary_weyl_cumulative.py'
       - 'research/riemann-cvs-numerics/certify_parity_gap.py'
@@ -47,6 +49,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/BoundaryWeylSchurTail.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/BoundaryWeylFarLeft.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/CvSParityDisplacement.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/CombinedSymbolDyadicL2.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V23BoundaryWeylMainline.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V22ZeroModeMainline.lean'
@@ -67,6 +70,7 @@ on:
       - 'research/riemann-cvs-numerics/probe_previous_core_dyadic_channels.py'
       - 'research/riemann-cvs-numerics/certify_prime_translation_power_bound.py'
       - 'research/riemann-cvs-numerics/certify_archimedean_tail_envelope.py'
+      - 'research/riemann-cvs-numerics/certify_combined_symbol_dyadic_l2.py'
       - 'research/riemann-cvs-numerics/certify_eventual_dyadic_middle_channel.py'
       - 'research/riemann-cvs-numerics/certify_boundary_weyl_cumulative.py'
       - 'research/riemann-cvs-numerics/certify_parity_gap.py'
@@ -107,6 +111,8 @@ jobs:
           set -euo pipefail
           lake build RiemannCvs.CvSParityDisplacement
           lake env lean RiemannCvs/CvSParityDisplacement.lean
+          lake build RiemannCvs.CombinedSymbolDyadicL2
+          lake env lean RiemannCvs/CombinedSymbolDyadicL2.lean
           lake build RiemannCvs.ObliqueWeylDeterminant
           lake env lean RiemannCvs/ObliqueWeylDeterminant.lean
 
@@ -138,6 +144,7 @@ jobs:
             RiemannCvs/BoundaryWeylSchurTail.lean
             RiemannCvs/BoundaryWeylFarLeft.lean
             RiemannCvs/CvSParityDisplacement.lean
+            RiemannCvs/CombinedSymbolDyadicL2.lean
             RiemannCvs/ObliqueWeylDeterminant.lean
             RiemannCvs/V23BoundaryWeylMainline.lean
           )
@@ -156,6 +163,32 @@ jobs:
           #print axioms RiemannCvs.CvSParityDisplacement.oddDifferenceKernel_displacement
           #print axioms RiemannCvs.CvSParityDisplacement.oddDifferenceKernel_evenParity_offDiagonal
           #print axioms RiemannCvs.CvSParityDisplacement.oddDifferenceKernel_oddParity_offDiagonal
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.evenWeightedNumerator_abs_le
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.oddWeightedNumerator_abs_le
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.oddDifferenceKernel_evenParity_abs_le
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.oddDifferenceKernel_oddParity_abs_le
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.oddDifferenceKernel_evenParity_abs_le_of_two_mul_le
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.oddDifferenceKernel_oddParity_abs_le_of_two_mul_le
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.oddDifferenceKernel_evenParity_sq_le_of_two_mul_le
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.oddDifferenceKernel_oddParity_sq_le_of_two_mul_le
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.abs_add_sq_le_two_mul_sum_sq
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.oddDifferenceKernel_evenParity_sq_le_symbolSquares_of_two_mul_le
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.oddDifferenceKernel_oddParity_sq_le_symbolSquares_of_two_mul_le
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.rectangular_sum_sq_le_card_mul_columnBudget
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.rectangular_bilinear_sq_le_entry_sq_mul_norms
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.rectangular_bilinear_sq_le_card_mul_columnBudget_mul_norms
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.dyadic_sum_inv_sq_le
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.dyadic_sum_scaled_inv_sq_le
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.weightedSum_le_of_prefix_le_affine
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.dyadic_shifted_weight_sum_eq
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.dyadic_shifted_weight_sum_le
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.dyadic_weighted_sum_le_of_prefix_le_affine
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.dyadic_weighted_sum_lt_one_div_of_prefix_le_affine
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.natCast_div_succ_sq_antitone
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.dyadicEndpointScaledUpper_antitone
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.dyadicEndpointScaledUpper_lt_one_of_start
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.dyadic_weighted_sum_lt_one_div_of_endpoint
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.dyadic_weighted_sum_lt_one_div_of_start_endpoint
           #print axioms RiemannCvs.CvSParityDisplacement.poleKernel_displacement
           #print axioms RiemannCvs.CvSParityDisplacement.parityMatrix_displacement
           #print axioms RiemannCvs.CvSParityDisplacement.parityMatrix_displacement_centralCorrected
@@ -361,6 +394,27 @@ jobs:
             --centered-decay 1/4 \
             --prec 384 \
             --json-out research/riemann-cvs-numerics/artifacts/v23_c13_N960_archimedean_tail_384bit.json
+
+      - name: Certify the combined-symbol dyadic L2 endpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          python research/riemann-cvs-numerics/certify_combined_symbol_dyadic_l2.py \
+            --c 13 \
+            --start-mode 1920 \
+            --centered-decay 1/4 \
+            --target-scaled-upper 1 \
+            --prec 256 \
+            --archimedean-certificate research/riemann-cvs-numerics/artifacts/v23_c13_N960_archimedean_tail.json \
+            --json-out research/riemann-cvs-numerics/artifacts/v23_c13_N1920_combined_symbol_dyadic_l2.json
+          python research/riemann-cvs-numerics/certify_combined_symbol_dyadic_l2.py \
+            --c 13 \
+            --start-mode 1920 \
+            --centered-decay 1/4 \
+            --target-scaled-upper 1 \
+            --prec 384 \
+            --archimedean-certificate research/riemann-cvs-numerics/artifacts/v23_c13_N960_archimedean_tail_384bit.json \
+            --json-out research/riemann-cvs-numerics/artifacts/v23_c13_N1920_combined_symbol_dyadic_l2_384bit.json
 
       - name: Certify the eventual V23 dyadic middle channel
         shell: bash
@@ -631,6 +685,8 @@ jobs:
             research/riemann-cvs-numerics/artifacts/v23_c13_prime_translation_power6.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N960_archimedean_tail.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N960_archimedean_tail_384bit.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_N1920_combined_symbol_dyadic_l2.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_N1920_combined_symbol_dyadic_l2_384bit.json
             research/riemann-cvs-numerics/artifacts/v23_c13_eventual_middle_channel.json
             research/riemann-cvs-numerics/artifacts/v23_c13_eventual_middle_channel_384bit.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N20_to_N120_relative_energy.json
