@@ -316,11 +316,12 @@ def certify(
             "RiemannCvs.CombinedSymbolDyadicL2.summable_archimedeanXTwoGeometricSeries_terms",
             "RiemannCvs.CombinedSymbolDyadicL2.logarithmicArchimedeanDiagonal_neg",
             "RiemannCvs.CombinedSymbolDyadicL2.logarithmicCutoffFreeKernel_actualArchimedean_law",
+            "RiemannCvs.CombinedSymbolDyadicL2.logarithmicCvSBuilderMatrix_eq_kernelRestriction",
         ],
         "conditional_operator_inputs": [
             (
-                "the signed integer restriction of the exact Lean cutoff-free "
-                "kernel is identified entrywise with the finite CvS builder matrix"
+                "the exact centered CvS builder matrix is compressed into the "
+                "displayed even and odd parity shell forms"
             ),
             "the parity shell forms dominate the displayed Euclidean coercive floors",
             "the separated mode bands are identified with the stated finite row and column sets",

@@ -2241,11 +2241,27 @@ interfaces are:
 * `logarithmicArchimedeanDiagonal_neg`;
 * `logarithmicCutoffFreeKernel_actualArchimedean_law`.
 
-Thus the remaining source bridge is no longer a special-function formula:
-identify the signed-integer restriction of this exact Lean kernel entrywise
-with the finite CvS builder matrix, then restrict it to the stated parity shell
-bands and connect the certified coercive floors.  The finite prime loop,
-Archimedean symbol and diagonal formulas, endpoint deletion, rational pole
+The signed-integer finite builder bridge is now exact as well.  Lean defines
+the implementation's signed Archimedean extension, absolute-mode diagonal,
+literal rational pole entry, diagonal/off-diagonal Archimedean branch, complete
+`W_02-W_R-W_p` entry, centered mode `i-N`, and the resulting
+`(2*N+1) x (2*N+1)` matrix.  Oddness of the symbol and evenness of the diagonal
+remove the sign/absolute-value implementation branches, after which every
+entry is definitionally the corresponding restriction of
+`logarithmicCutoffFreeKernel`.  The six theorem interfaces are:
+
+* `signedLogarithmicArchimedeanSymbol_eq`;
+* `logarithmicArchimedeanDiagonal_abs`;
+* `logarithmicCvSPoleEntry_eq_kernel`;
+* `logarithmicCvSArchimedeanEntry_eq_source`;
+* `logarithmicCvSBuilderEntry_eq_cutoffFreeKernel`;
+* `logarithmicCvSBuilderMatrix_eq_kernelRestriction`.
+
+Thus the remaining source bridge starts after the full centered matrix:
+identify its orthonormal even/odd compression with the stated finite parity
+shell forms and connect the certified coercive floors and shell-energy
+decomposition.  The finite prime loop, Archimedean symbol and diagonal
+formulas, signed-integer restriction, endpoint deletion, rational pole
 parameters, subtraction signs, convergence, reflection, and displacement
 algebra no longer belong to those open steps.
 

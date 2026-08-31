@@ -18,9 +18,10 @@ There are eight layers.
 
 1. A source-algebra layer builds the finite prime sine polynomial, defines the
    concrete digamma/geometric Archimedean symbol and diagonal, proves all
-   series convergent and their reflection laws, preserves the exact `1 / π`
-   normalization through the Loewner kernel, and removes the endpoint phase
-   `2 * π * n` on natural Fourier modes.
+   series convergent and their reflection laws, identifies the centered
+   signed-integer finite builder with the exact kernel, preserves the exact
+   `1 / π` normalization, and removes the endpoint phase `2 * π * n` on
+   natural Fourier modes.
 2. Exact finite geometric-sum theorems control every nonresonant shifted
    exponential, sine, and cosine phase sum used by the scalar certificate.
 3. The exact parity formulas from `CvSParityDisplacement` give entry bounds
@@ -1122,6 +1123,116 @@ theorem logarithmicCutoffFreeKernel_actualArchimedean_law
         (logarithmicArchimedeanDiagonal c) c location base) := by
   exact logarithmicCutoffFreeKernel_archimedean_law
     (logarithmicArchimedeanDiagonal c) c location base hc
+
+/-!
+### Exact signed-integer finite-builder restriction
+
+The Python/Arb matrix is indexed by centered signed integers and evaluates the
+Archimedean diagonal at an absolute mode.  The following literal entry and
+matrix definitions prove that those implementation branches are exactly the
+signed-integer restriction of the complete Lean cutoff-free kernel.
+-/
+/-- Signed extension used by the finite Python/Arb builder. -/
+noncomputable def signedLogarithmicArchimedeanSymbol (c x : ℝ) : ℝ :=
+  if 0 ≤ x then logarithmicArchimedeanSymbol c x
+  else -logarithmicArchimedeanSymbol c (-x)
+
+theorem signedLogarithmicArchimedeanSymbol_eq (c x : ℝ) :
+    signedLogarithmicArchimedeanSymbol c x =
+      logarithmicArchimedeanSymbol c x := by
+  by_cases hx : 0 ≤ x
+  · simp [signedLogarithmicArchimedeanSymbol, hx]
+  · simp only [signedLogarithmicArchimedeanSymbol, hx, if_false]
+    rw [logarithmicArchimedeanSymbol_odd c x]
+    ring
+
+theorem logarithmicArchimedeanDiagonal_abs (c x : ℝ) :
+    logarithmicArchimedeanDiagonal c |x| =
+      logarithmicArchimedeanDiagonal c x := by
+  by_cases hx : 0 ≤ x
+  · rw [abs_of_nonneg hx]
+  · rw [abs_of_nonpos (le_of_not_ge hx), logarithmicArchimedeanDiagonal_neg]
+
+/-- Literal rational entry used in the finite cutoff-free builder. -/
+noncomputable def logarithmicCvSPoleEntry (c : ℝ) (n m : ℤ) : ℝ :=
+  (32 * Real.log c * Real.sinh (Real.log c / 4) ^ 2) *
+      ((Real.log c) ^ 2 - 16 * Real.pi ^ 2 * (n : ℝ) * (m : ℝ)) /
+    (((Real.log c) ^ 2 + 16 * Real.pi ^ 2 * (n : ℝ) ^ 2) *
+      ((Real.log c) ^ 2 + 16 * Real.pi ^ 2 * (m : ℝ) ^ 2))
+
+theorem logarithmicCvSPoleEntry_eq_kernel (c : ℝ) (n m : ℤ) :
+    logarithmicCvSPoleEntry c n m =
+      logarithmicPoleKernel c (n : ℝ) (m : ℝ) := by
+  rfl
+
+/-- Literal diagonal/off-diagonal Archimedean branch of the finite builder. -/
+noncomputable def logarithmicCvSArchimedeanEntry
+    (c : ℝ) (n m : ℤ) : ℝ :=
+  if n = m then logarithmicArchimedeanDiagonal c |(n : ℝ)|
+  else
+    (signedLogarithmicArchimedeanSymbol c (m : ℝ) -
+        signedLogarithmicArchimedeanSymbol c (n : ℝ)) /
+      (Real.pi * ((n : ℝ) - (m : ℝ)))
+
+theorem logarithmicCvSArchimedeanEntry_eq_source
+    (c : ℝ) (n m : ℤ) :
+    logarithmicCvSArchimedeanEntry c n m =
+      normalizedLoewnerSourceEntry
+        (logarithmicArchimedeanSymbol c)
+        (logarithmicArchimedeanDiagonal c) (n : ℝ) (m : ℝ) := by
+  by_cases hnm : n = m
+  · subst m
+    simp [logarithmicCvSArchimedeanEntry, normalizedLoewnerSourceEntry,
+      logarithmicArchimedeanDiagonal_abs]
+  · have hcast : (n : ℝ) ≠ (m : ℝ) := by exact_mod_cast hnm
+    simp [logarithmicCvSArchimedeanEntry, normalizedLoewnerSourceEntry,
+      hnm, hcast, signedLogarithmicArchimedeanSymbol_eq]
+
+/-- Literal finite CvS builder entry `W_02 - W_R - W_p`. -/
+noncomputable def logarithmicCvSBuilderEntry
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (n m : ℤ) : ℝ :=
+  logarithmicCvSPoleEntry c n m -
+    (logarithmicCvSArchimedeanEntry c n m +
+      finiteLogarithmicPrimeEntry c location base (n : ℝ) (m : ℝ))
+
+theorem logarithmicCvSBuilderEntry_eq_cutoffFreeKernel
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (n m : ℤ) :
+    logarithmicCvSBuilderEntry c location base n m =
+      logarithmicCutoffFreeKernel
+        (logarithmicArchimedeanSymbol c)
+        (logarithmicArchimedeanDiagonal c)
+        c location base (n : ℝ) (m : ℝ) := by
+  unfold logarithmicCvSBuilderEntry logarithmicCutoffFreeKernel
+    logarithmicArchPrimeEntry
+  rw [logarithmicCvSPoleEntry_eq_kernel,
+    logarithmicCvSArchimedeanEntry_eq_source]
+
+/-- Mode attached to row `i` in the `(2*N+1)` centered finite builder. -/
+def centeredIntegerMode (N : ℕ) (i : Fin (2 * N + 1)) : ℤ :=
+  (i : ℤ) - (N : ℤ)
+
+noncomputable def logarithmicCvSBuilderMatrix
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (N : ℕ) :
+    Matrix (Fin (2 * N + 1)) (Fin (2 * N + 1)) ℝ :=
+  fun i j => logarithmicCvSBuilderEntry c location base
+    (centeredIntegerMode N i) (centeredIntegerMode N j)
+
+theorem logarithmicCvSBuilderMatrix_eq_kernelRestriction
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (N : ℕ)
+    (i j : Fin (2 * N + 1)) :
+    logarithmicCvSBuilderMatrix c location base N i j =
+      logarithmicCutoffFreeKernel
+        (logarithmicArchimedeanSymbol c)
+        (logarithmicArchimedeanDiagonal c)
+        c location base
+        (centeredIntegerMode N i : ℝ)
+        (centeredIntegerMode N j : ℝ) := by
+  exact logarithmicCvSBuilderEntry_eq_cutoffFreeKernel c location base
+    (centeredIntegerMode N i) (centeredIntegerMode N j)
 
 /-- Every strict interior event `1 < q < c` has a positive half-angle sine,
 so its finite geometric sums are nonresonant without numerical phase testing. -/

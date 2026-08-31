@@ -458,6 +458,50 @@ def certify(
                 "RiemannCvs.CombinedSymbolDyadicL2."
                 "logarithmicCutoffFreeKernel_actualArchimedean_law"
             ),
+            "signed_archimedean_symbol": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "signedLogarithmicArchimedeanSymbol"
+            ),
+            "signed_archimedean_symbol_identification": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "signedLogarithmicArchimedeanSymbol_eq"
+            ),
+            "archimedean_diagonal_absolute_mode": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "logarithmicArchimedeanDiagonal_abs"
+            ),
+            "finite_builder_pole_entry": (
+                "RiemannCvs.CombinedSymbolDyadicL2.logarithmicCvSPoleEntry"
+            ),
+            "finite_builder_pole_identification": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "logarithmicCvSPoleEntry_eq_kernel"
+            ),
+            "finite_builder_archimedean_entry": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "logarithmicCvSArchimedeanEntry"
+            ),
+            "finite_builder_archimedean_identification": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "logarithmicCvSArchimedeanEntry_eq_source"
+            ),
+            "finite_builder_entry": (
+                "RiemannCvs.CombinedSymbolDyadicL2.logarithmicCvSBuilderEntry"
+            ),
+            "finite_builder_entry_identification": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "logarithmicCvSBuilderEntry_eq_cutoffFreeKernel"
+            ),
+            "centered_integer_mode": (
+                "RiemannCvs.CombinedSymbolDyadicL2.centeredIntegerMode"
+            ),
+            "finite_builder_matrix": (
+                "RiemannCvs.CombinedSymbolDyadicL2.logarithmicCvSBuilderMatrix"
+            ),
+            "finite_builder_matrix_identification": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "logarithmicCvSBuilderMatrix_eq_kernelRestriction"
+            ),
             "cutoff_endpoint_zero": (
                 "RiemannCvs.CombinedSymbolDyadicL2.logarithmicPrimeEndpoint_term_zero"
             ),

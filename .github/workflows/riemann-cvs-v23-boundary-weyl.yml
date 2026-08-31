@@ -216,6 +216,12 @@ jobs:
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.archimedeanCrossCorrection_neg
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicArchimedeanDiagonal_neg
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicCutoffFreeKernel_actualArchimedean_law
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.signedLogarithmicArchimedeanSymbol_eq
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicArchimedeanDiagonal_abs
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicCvSPoleEntry_eq_kernel
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicCvSArchimedeanEntry_eq_source
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicCvSBuilderEntry_eq_cutoffFreeKernel
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicCvSBuilderMatrix_eq_kernelRestriction
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicPrimePhase_half_sin_pos
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.abs_shifted_logarithmicPrime_sine_sum_le
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.abs_shifted_logarithmicPrime_cosine_sum_le
