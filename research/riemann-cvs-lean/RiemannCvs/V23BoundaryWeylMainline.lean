@@ -264,8 +264,10 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   source argument.  Lean now also defines the literal centered signed-integer
   CvS builder, removes its signed-symbol and absolute-diagonal branches using
   the proved reflection laws, and identifies every finite matrix entry with
-  the exact cutoff-free kernel restriction.  The remaining source bridge is
-  its orthonormal even/odd compression into the stated parity shell bands.
+  the exact cutoff-free kernel restriction.  Its literal finite cosine and sine
+  matrices are now proved equal to the existing orthonormal even and odd parity
+  compressions.  The remaining operator bridge is the shell coordinate map,
+  coercive-floor domination, and recursive shell-energy identification.
   The combined-symbol certificate
   now also rests on a Lean proof of the finite nonresonant geometric-sum bound,
   including arbitrary starting indices and its sine/cosine projections; Arb
@@ -278,10 +280,9 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   tracked cutoff-13 locations `2,3,4,5,7,8,9,11`, and prove all single,
   doubled, pair-difference, and pair-sum denominators symbolically nonzero.
   Arb now supplies their rigorous magnitudes rather than the nonresonance
-  fact.  The remaining
-  source boundary is the analytic CvS digamma/geometric Archimedean
-  value/diagonal identification and the parity shell restriction, not the
-  finite prime, rational pole, or full sign assembly.  The certificate
+  fact.  The analytic CvS digamma/geometric value and diagonal, the finite
+  prime and rational-pole branches, the full sign assembly, and the finite
+  parity compression are now source-identified.  The certificate
   now proves the scalar weighted square budget `<1/N` for every `N>=1920`.
   Fourteen further Lean adapters preserve the concrete `1/pi` Fourier scale,
   turn the old-band weighted budget into an ordinary square sum, close the

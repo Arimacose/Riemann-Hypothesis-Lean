@@ -2257,13 +2257,24 @@ entry is definitionally the corresponding restriction of
 * `logarithmicCvSBuilderEntry_eq_cutoffFreeKernel`;
 * `logarithmicCvSBuilderMatrix_eq_kernelRestriction`.
 
-Thus the remaining source bridge starts after the full centered matrix:
-identify its orthonormal even/odd compression with the stated finite parity
-shell forms and connect the certified coercive floors and shell-energy
-decomposition.  The finite prime loop, Archimedean symbol and diagonal
-formulas, signed-integer restriction, endpoint deletion, rational pole
-parameters, subtraction signs, convergence, reflection, and displacement
-algebra no longer belong to those open steps.
+The orthonormal parity compression is now exact as well.  Lean defines the
+positive-mode indexing together with the literal cosine and sine matrices used
+by the finite builder, and proves entrywise that they are the existing even and
+odd parity matrices of the cutoff-free kernel.  The two new theorem interfaces
+are:
+
+* `logarithmicCvSBuilderEvenMatrix_eq_evenParityMatrix`;
+* `logarithmicCvSBuilderOddMatrix_eq_oddParityMatrix`.
+
+Thus the remaining operator bridge starts after the full centered matrix and
+its parity compression: identify the shell coordinate maps with the certified
+finite row/column bands, prove that the resulting parity forms dominate the
+displayed Euclidean coercive floors, and identify their block-diagonal shell
+energies with the recursive-core energy sum.  The finite prime loop,
+Archimedean symbol and diagonal formulas, signed-integer restriction, parity
+compression, endpoint deletion, rational pole parameters, subtraction signs,
+convergence, reflection, and displacement algebra no longer belong to those
+open steps.
 
 The composite phase conditions are also symbolic now.  For two strict
 interior locations, Lean proves the pair-difference half phase lies in

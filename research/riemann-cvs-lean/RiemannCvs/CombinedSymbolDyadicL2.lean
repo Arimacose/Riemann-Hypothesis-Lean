@@ -19,9 +19,9 @@ There are eight layers.
 1. A source-algebra layer builds the finite prime sine polynomial, defines the
    concrete digamma/geometric Archimedean symbol and diagonal, proves all
    series convergent and their reflection laws, identifies the centered
-   signed-integer finite builder with the exact kernel, preserves the exact
-   `1 / π` normalization, and removes the endpoint phase `2 * π * n` on
-   natural Fourier modes.
+   signed-integer finite builder and its orthonormal parity compression with
+   the exact kernel, preserves the exact `1 / π` normalization, and removes
+   the endpoint phase `2 * π * n` on natural Fourier modes.
 2. Exact finite geometric-sum theorems control every nonresonant shifted
    exponential, sine, and cosine phase sum used by the scalar certificate.
 3. The exact parity formulas from `CvSParityDisplacement` give entry bounds
@@ -1233,6 +1233,72 @@ theorem logarithmicCvSBuilderMatrix_eq_kernelRestriction
         (centeredIntegerMode N j : ℝ) := by
   exact logarithmicCvSBuilderEntry_eq_cutoffFreeKernel c location base
     (centeredIntegerMode N i) (centeredIntegerMode N j)
+
+/-!
+### Exact orthonormal parity compression
+
+The finite cosine and sine matrices used by the operator argument are the
+orthonormal even and odd compressions of the signed-integer builder.  These
+literal definitions close that coordinate conversion entry by entry.
+-/
+noncomputable def positiveIntegerMode {N : ℕ} (i : Fin N) : ℤ :=
+  (i : ℕ) + 1
+
+noncomputable def logarithmicCvSBuilderEvenMatrix
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (N : ℕ) :
+    Matrix (Option (Fin N)) (Option (Fin N)) ℝ :=
+  fun i j =>
+    match i, j with
+    | none, none => logarithmicCvSBuilderEntry c location base 0 0
+    | none, some k => Real.sqrt 2 *
+        logarithmicCvSBuilderEntry c location base 0 (positiveIntegerMode k)
+    | some k, none => Real.sqrt 2 *
+        logarithmicCvSBuilderEntry c location base (positiveIntegerMode k) 0
+    | some k, some l =>
+        logarithmicCvSBuilderEntry c location base
+            (positiveIntegerMode k) (positiveIntegerMode l) +
+          logarithmicCvSBuilderEntry c location base
+            (positiveIntegerMode k) (-positiveIntegerMode l)
+
+noncomputable def logarithmicCvSBuilderOddMatrix
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (N : ℕ) :
+    Matrix (Fin N) (Fin N) ℝ :=
+  fun i j =>
+    logarithmicCvSBuilderEntry c location base
+        (positiveIntegerMode i) (positiveIntegerMode j) -
+      logarithmicCvSBuilderEntry c location base
+        (positiveIntegerMode i) (-positiveIntegerMode j)
+
+theorem logarithmicCvSBuilderEvenMatrix_eq_evenParityMatrix
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (N : ℕ) :
+    logarithmicCvSBuilderEvenMatrix c location base N =
+      CvSParityDisplacement.evenParityMatrix
+        (logarithmicCutoffFreeKernel
+          (logarithmicArchimedeanSymbol c)
+          (logarithmicArchimedeanDiagonal c) c location base)
+        (fun i : Fin N => (positiveIntegerMode i : ℝ)) := by
+  ext i j
+  rcases i with _ | i <;> rcases j with _ | j <;>
+    simp [logarithmicCvSBuilderEvenMatrix,
+      CvSParityDisplacement.evenParityMatrix,
+      logarithmicCvSBuilderEntry_eq_cutoffFreeKernel]
+
+theorem logarithmicCvSBuilderOddMatrix_eq_oddParityMatrix
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (N : ℕ) :
+    logarithmicCvSBuilderOddMatrix c location base N =
+      CvSParityDisplacement.oddParityMatrix
+        (logarithmicCutoffFreeKernel
+          (logarithmicArchimedeanSymbol c)
+          (logarithmicArchimedeanDiagonal c) c location base)
+        (fun i : Fin N => (positiveIntegerMode i : ℝ)) := by
+  ext i j
+  simp [logarithmicCvSBuilderOddMatrix,
+    CvSParityDisplacement.oddParityMatrix,
+    logarithmicCvSBuilderEntry_eq_cutoffFreeKernel]
 
 /-- Every strict interior event `1 < q < c` has a positive half-angle sine,
 so its finite geometric sums are nonresonant without numerical phase testing. -/

@@ -502,6 +502,25 @@ def certify(
                 "RiemannCvs.CombinedSymbolDyadicL2."
                 "logarithmicCvSBuilderMatrix_eq_kernelRestriction"
             ),
+            "positive_integer_mode": (
+                "RiemannCvs.CombinedSymbolDyadicL2.positiveIntegerMode"
+            ),
+            "finite_builder_even_matrix": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "logarithmicCvSBuilderEvenMatrix"
+            ),
+            "finite_builder_odd_matrix": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "logarithmicCvSBuilderOddMatrix"
+            ),
+            "finite_builder_even_parity_identification": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "logarithmicCvSBuilderEvenMatrix_eq_evenParityMatrix"
+            ),
+            "finite_builder_odd_parity_identification": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "logarithmicCvSBuilderOddMatrix_eq_oddParityMatrix"
+            ),
             "cutoff_endpoint_zero": (
                 "RiemannCvs.CombinedSymbolDyadicL2.logarithmicPrimeEndpoint_term_zero"
             ),

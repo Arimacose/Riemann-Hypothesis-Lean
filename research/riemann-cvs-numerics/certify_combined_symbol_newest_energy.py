@@ -317,12 +317,10 @@ def certify(
             "RiemannCvs.CombinedSymbolDyadicL2.logarithmicArchimedeanDiagonal_neg",
             "RiemannCvs.CombinedSymbolDyadicL2.logarithmicCutoffFreeKernel_actualArchimedean_law",
             "RiemannCvs.CombinedSymbolDyadicL2.logarithmicCvSBuilderMatrix_eq_kernelRestriction",
+            "RiemannCvs.CombinedSymbolDyadicL2.logarithmicCvSBuilderEvenMatrix_eq_evenParityMatrix",
+            "RiemannCvs.CombinedSymbolDyadicL2.logarithmicCvSBuilderOddMatrix_eq_oddParityMatrix",
         ],
         "conditional_operator_inputs": [
-            (
-                "the exact centered CvS builder matrix is compressed into the "
-                "displayed even and odd parity shell forms"
-            ),
             "the parity shell forms dominate the displayed Euclidean coercive floors",
             "the separated mode bands are identified with the stated finite row and column sets",
             "the block-diagonal shell energies are identified with the recursive-core energy sum",
