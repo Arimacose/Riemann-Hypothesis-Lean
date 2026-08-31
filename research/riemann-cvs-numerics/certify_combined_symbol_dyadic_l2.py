@@ -18,10 +18,11 @@ integer N>=1, so a strict check at one start mode controls every later mode.
 Arb is used for every transcendental value and strict comparison.
 
 The output is a rigorous constant-composition certificate.  Its proof-level
-use remains conditional on the geometric-sum lemma and on the Lean/source
-identification connecting the concrete CvS symbol to the finite trigonometric
-polynomial.  The companion Lean module formalizes the Abel, dyadic,
-endpoint-monotonicity, and rectangular-Cauchy adapters.
+use remains conditional on the Lean/source identification connecting the
+concrete CvS symbol to the finite trigonometric polynomial.  The companion
+Lean module now formalizes the finite geometric-sum inequality itself, as well
+as the Abel, dyadic, endpoint-monotonicity, and rectangular-Cauchy adapters;
+this script interval-certifies nonresonance of every concrete phase.
 """
 
 from __future__ import annotations
@@ -316,9 +317,22 @@ def certify(
         "combined_symbol": (
             "F_n=S_n+sum_(q<c) log(p)/sqrt(q)*sin(2*pi*n*log(q)/log(c))"
         ),
-        "geometric_sum_lemma": (
-            "abs(sum_{n=a+1}^{b} exp(i*n*phi)) <= 1/abs(sin(phi/2))"
-        ),
+        "geometric_sum_bound": {
+            "statement": ("abs(sum_{n=a+1}^{b} exp(i*n*phi)) <= 1/abs(sin(phi/2))"),
+            "lean_complex_interface": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "norm_shifted_exp_sum_le_inv_abs_sin_half"
+            ),
+            "lean_sine_interface": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "abs_shifted_sine_sum_le_inv_abs_sin_half"
+            ),
+            "lean_cosine_interface": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "abs_shifted_cosine_sum_le_inv_abs_sin_half"
+            ),
+            "concrete_nonresonance_interval_certified": True,
+        },
         "archimedean_input": (f"abs(S_n-pi/4) <= ({centered_decay})/n"),
         "affine_prefix_bound": (
             "sum_{n=N+1}^{N+r} F_n^2 <= "
@@ -372,8 +386,8 @@ def certify(
             ),
         },
         "conclusion": (
-            "conditional on the recorded geometric-sum lemma and concrete "
-            f"source identification, for every integer N>={start_mode}, "
+            "conditional on the concrete source identification, for every "
+            f"integer N>={start_mode}, "
             "sum F_n^2/n^2 over N<n<=2N is "
             f"< {target_scaled_upper}/N"
         ),

@@ -246,6 +246,9 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   checked; the remaining source identification is the analytic equality of the
   concrete CvS entries and diagonal data with those packaged functions, followed
   by their restriction to the stated parity shell bands.  The combined-symbol certificate
+  now also rests on a Lean proof of the finite nonresonant geometric-sum bound,
+  including arbitrary starting indices and its sine/cosine projections; Arb
+  retains only the concrete phase-nonresonance checks.  The certificate
   now proves the scalar weighted square budget `<1/N` for every `N>=1920`.
   Fourteen further Lean adapters preserve the concrete `1/pi` Fourier scale,
   turn the old-band weighted budget into an ordinary square sum, close the

@@ -1,3 +1,5 @@
+import Mathlib.Algebra.Ring.GeomSum
+import Mathlib.Analysis.Complex.Trigonometric
 import Mathlib.Analysis.PSeries
 import RiemannCvs.BoundaryWeylCumulative
 import RiemannCvs.CvSParityDisplacement
@@ -10,24 +12,26 @@ odd Loewner symbol.  This module supplies the kernel-checked algebra that turns
 source estimates for that symbol into dyadic square-sum and rectangular-form
 bounds.
 
-There are seven layers.
+There are eight layers.
 
 1. A source-algebra layer builds the finite prime sine polynomial, proves its
    oddness, combines it with an odd Archimedean symbol, preserves the exact
    `1 / π` normalization through the Loewner kernel, and removes the endpoint
    phase `2 * π * n` on natural Fourier modes.
-2. The exact parity formulas from `CvSParityDisplacement` give entry bounds
+2. Exact finite geometric-sum theorems control every nonresonant shifted
+   exponential, sine, and cosine phase sum used by the scalar certificate.
+3. The exact parity formulas from `CvSParityDisplacement` give entry bounds
    for positive separated modes.
-3. Finite Cauchy--Schwarz converts entry-square budgets into rectangular
+4. Finite Cauchy--Schwarz converts entry-square budgets into rectangular
    bilinear bounds.
-4. The Mathlib reciprocal-square tail estimate gives the exact dyadic factor
+5. The Mathlib reciprocal-square tail estimate gives the exact dyadic factor
    `1 / (2 * N)`.
-5. Finite Abel summation turns an affine prefix bound into a weighted dyadic
+6. Finite Abel summation turns an affine prefix bound into a weighted dyadic
    bound and exposes the strict endpoint expression consumed by the Arb
    certificate.
-6. Rowwise square estimates and rectangular Cauchy--Schwarz send that scalar
+7. Rowwise square estimates and rectangular Cauchy--Schwarz send that scalar
    bound into a matrix Frobenius budget and then into coercive relative energy.
-7. The newest-band specialization closes the constant `24*C`, while the exact
+8. The newest-band specialization closes the constant `24*C`, while the exact
    doubled-shell identity supplies the one-half transport used by the recursive
    channel envelope.
 
@@ -172,6 +176,141 @@ theorem sin_two_pi_nat (n : ℕ) :
     push_cast
     ring]
   exact Real.sin_nat_mul_pi (2 * n)
+
+/-!
+## Exact finite geometric-sum bounds
+
+The Arb square-sum certificate uses the standard bound
+`|∑ exp (i*n*phase)| ≤ 1 / |sin (phase/2)|` for every nonresonant phase.
+The next six results prove the complex geometric identity, preserve an
+arbitrary starting index, and expose the real sine/cosine consequences used
+for the single, doubled, difference, and sum phases in that certificate.
+-/
+
+/-- A nonresonant finite geometric progression on the unit circle is bounded
+by the reciprocal half-angle sine. -/
+theorem norm_geometric_sum_le_inv_abs_sin_half
+    (phase : ℝ) (count : ℕ) (hPhase : Real.sin (phase / 2) ≠ 0) :
+    ‖∑ n ∈ Finset.range count,
+        (Complex.exp (Complex.I * (phase : ℂ))) ^ n‖ ≤
+      1 / |Real.sin (phase / 2)| := by
+  let z : ℂ := Complex.exp (Complex.I * (phase : ℂ))
+  have hz : ‖z‖ = 1 := by
+    simp [z]
+  have hChord : ‖z - 1‖ = 2 * |Real.sin (phase / 2)| := by
+    dsimp [z]
+    rw [Complex.norm_exp_I_mul_ofReal_sub_one]
+    simp [Real.norm_eq_abs]
+  have hGeom := geom_sum_mul z count
+  have hNormEq := congrArg norm hGeom
+  rw [norm_mul, hChord] at hNormEq
+  have hNumerator : ‖z ^ count - 1‖ ≤ 2 := by
+    calc
+      ‖z ^ count - 1‖ ≤ ‖z ^ count‖ + ‖(1 : ℂ)‖ := norm_sub_le _ _
+      _ = 2 := by rw [norm_pow, hz]; norm_num
+  apply (le_div_iff₀ (abs_pos.mpr hPhase)).2
+  nlinarith [norm_nonneg
+    (∑ n ∈ Finset.range count,
+      (Complex.exp (Complex.I * (phase : ℂ))) ^ n)]
+
+/-- Shifting the starting exponent does not enlarge the unit-circle
+geometric-sum bound. -/
+theorem norm_shifted_geometric_sum_le_inv_abs_sin_half
+    (phase : ℝ) (start count : ℕ)
+    (hPhase : Real.sin (phase / 2) ≠ 0) :
+    ‖∑ j ∈ Finset.range count,
+        (Complex.exp (Complex.I * (phase : ℂ))) ^ (start + j)‖ ≤
+      1 / |Real.sin (phase / 2)| := by
+  let z : ℂ := Complex.exp (Complex.I * (phase : ℂ))
+  have hz : ‖z‖ = 1 := by
+    simp [z]
+  calc
+    ‖∑ j ∈ Finset.range count,
+        (Complex.exp (Complex.I * (phase : ℂ))) ^ (start + j)‖ =
+        ‖z ^ start * ∑ j ∈ Finset.range count, z ^ j‖ := by
+          congr 1
+          rw [Finset.mul_sum]
+          apply Finset.sum_congr rfl
+          intro j hj
+          simp only [z, pow_add]
+    _ = ‖∑ j ∈ Finset.range count, z ^ j‖ := by
+      rw [norm_mul, norm_pow, hz]
+      norm_num
+    _ ≤ 1 / |Real.sin (phase / 2)| := by
+      simpa [z] using
+        norm_geometric_sum_le_inv_abs_sin_half phase count hPhase
+
+/-- Integer multiples of a real phase exponentiate to powers of the one-step
+unit-circle phase. -/
+lemma exp_nat_mul_real_phase
+    (phase : ℝ) (n : ℕ) :
+    Complex.exp ((((n : ℕ) : ℝ) * phase : ℝ) * Complex.I) =
+      (Complex.exp (Complex.I * (phase : ℂ))) ^ n := by
+  rw [← Complex.exp_nat_mul]
+  congr 1
+  push_cast
+  ring
+
+/-- Complex-exponential form of the shifted finite geometric-sum bound. -/
+theorem norm_shifted_exp_sum_le_inv_abs_sin_half
+    (phase : ℝ) (start count : ℕ)
+    (hPhase : Real.sin (phase / 2) ≠ 0) :
+    ‖∑ j ∈ Finset.range count,
+        Complex.exp (((((start + j : ℕ) : ℝ) * phase : ℝ)) * Complex.I)‖ ≤
+      1 / |Real.sin (phase / 2)| := by
+  rw [show (∑ j ∈ Finset.range count,
+      Complex.exp (((((start + j : ℕ) : ℝ) * phase : ℝ)) * Complex.I)) =
+      ∑ j ∈ Finset.range count,
+        (Complex.exp (Complex.I * (phase : ℂ))) ^ (start + j) by
+    apply Finset.sum_congr rfl
+    intro j hj
+    exact exp_nat_mul_real_phase phase (start + j)]
+  exact norm_shifted_geometric_sum_le_inv_abs_sin_half
+    phase start count hPhase
+
+/-- Every shifted finite sine sum inherits the nonresonant geometric bound. -/
+theorem abs_shifted_sine_sum_le_inv_abs_sin_half
+    (phase : ℝ) (start count : ℕ)
+    (hPhase : Real.sin (phase / 2) ≠ 0) :
+    |∑ j ∈ Finset.range count,
+        Real.sin (((start + j : ℕ) : ℝ) * phase)| ≤
+      1 / |Real.sin (phase / 2)| := by
+  let z : ℂ := ∑ j ∈ Finset.range count,
+    Complex.exp (((((start + j : ℕ) : ℝ) * phase : ℝ)) * Complex.I)
+  have hIm : z.im = ∑ j ∈ Finset.range count,
+      Real.sin (((start + j : ℕ) : ℝ) * phase) := by
+    dsimp [z]
+    rw [Complex.im_sum]
+    apply Finset.sum_congr rfl
+    intro j hj
+    exact Complex.exp_ofReal_mul_I_im
+      (((start + j : ℕ) : ℝ) * phase)
+  rw [← hIm]
+  exact (Complex.abs_im_le_norm z).trans
+    (norm_shifted_exp_sum_le_inv_abs_sin_half
+      phase start count hPhase)
+
+/-- Every shifted finite cosine sum inherits the nonresonant geometric bound. -/
+theorem abs_shifted_cosine_sum_le_inv_abs_sin_half
+    (phase : ℝ) (start count : ℕ)
+    (hPhase : Real.sin (phase / 2) ≠ 0) :
+    |∑ j ∈ Finset.range count,
+        Real.cos (((start + j : ℕ) : ℝ) * phase)| ≤
+      1 / |Real.sin (phase / 2)| := by
+  let z : ℂ := ∑ j ∈ Finset.range count,
+    Complex.exp (((((start + j : ℕ) : ℝ) * phase : ℝ)) * Complex.I)
+  have hRe : z.re = ∑ j ∈ Finset.range count,
+      Real.cos (((start + j : ℕ) : ℝ) * phase) := by
+    dsimp [z]
+    rw [Complex.re_sum]
+    apply Finset.sum_congr rfl
+    intro j hj
+    exact Complex.exp_ofReal_mul_I_re
+      (((start + j : ℕ) : ℝ) * phase)
+  rw [← hRe]
+  exact (Complex.abs_re_le_norm z).trans
+    (norm_shifted_exp_sum_le_inv_abs_sin_half
+      phase start count hPhase)
 
 /-- The even-parity weighted numerator is controlled by pointwise symbol
 amplitudes. -/

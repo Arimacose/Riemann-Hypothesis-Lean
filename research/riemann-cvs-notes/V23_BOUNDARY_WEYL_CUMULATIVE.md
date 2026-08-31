@@ -1871,7 +1871,8 @@ strict slack below 1 =
   0.030789738563578741003370832521151866771073976727467584141438...
 ```
 
-Consequently, conditional on the recorded geometric-sum lemma and the
+Consequently, after formalizing the geometric-sum inequality in Lean and
+interval-certifying nonresonance of every concrete phase, conditional on the
 concrete source identification,
 
 ```text
@@ -2057,3 +2058,21 @@ their diagonal values with these packaged functions, then identify their
 cosine/sine restrictions with the finite historical-band/new-shell matrices
 used by the relative-energy theorem.  The coercive-floor, recursive block-sum,
 and eight finite newest-band bridges remain separate obligations.
+
+The formerly recorded finite geometric-sum lemma is now also kernel-checked.
+For every real `phase` with `sin (phase/2) != 0`, Lean proves
+
+```text
+norm (sum_(j=0)^(count-1) exp(i*(start+j)*phase))
+  <= 1 / abs(sin(phase/2)),
+```
+
+and derives the same bound for the real sine and cosine sums.  The six public
+interfaces are `norm_geometric_sum_le_inv_abs_sin_half`,
+`norm_shifted_geometric_sum_le_inv_abs_sin_half`,
+`exp_nat_mul_real_phase`, `norm_shifted_exp_sum_le_inv_abs_sin_half`,
+`abs_shifted_sine_sum_le_inv_abs_sin_half`, and
+`abs_shifted_cosine_sum_le_inv_abs_sin_half`.  Arb still certifies that each
+actual single, doubled, pair-difference, and pair-sum phase denominator is
+strictly positive; the universal inequality itself is no longer an external
+mathematical input.

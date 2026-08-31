@@ -173,6 +173,12 @@ jobs:
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.oddDifferenceKernel_fourierNormalized
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.oddDifferenceKernel_fourierNormalized_combined
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.sin_two_pi_nat
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.norm_geometric_sum_le_inv_abs_sin_half
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.norm_shifted_geometric_sum_le_inv_abs_sin_half
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.exp_nat_mul_real_phase
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.norm_shifted_exp_sum_le_inv_abs_sin_half
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.abs_shifted_sine_sum_le_inv_abs_sin_half
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.abs_shifted_cosine_sum_le_inv_abs_sin_half
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.evenWeightedNumerator_abs_le
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.oddWeightedNumerator_abs_le
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.oddDifferenceKernel_evenParity_abs_le
