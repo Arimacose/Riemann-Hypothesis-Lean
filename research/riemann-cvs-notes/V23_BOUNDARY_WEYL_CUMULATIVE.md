@@ -2281,9 +2281,12 @@ six new theorem interfaces are:
 
 Thus the remaining operator bridge starts after the full centered matrix, its
 parity compression, and the certified finite row/column coordinates: prove
-that the resulting parity forms dominate the displayed Euclidean coercive
-floors and identify their block-diagonal shell energies with the recursive-core
-energy sum.  The finite prime loop, Archimedean symbol and diagonal formulas,
+the concrete diagonal and perturbation component bounds and identify the
+block-diagonal shell energies with the recursive-core energy sum.  The
+universal coercive algebra is now formalized by
+`coerciveFloor_of_componentBounds`: a diagonal form lower bound and finitely
+many absolute perturbation bounds imply exactly the displayed Euclidean floor
+after adding the shift.  The finite prime loop, Archimedean symbol and diagonal formulas,
 signed-integer restriction, parity compression, band restriction, endpoint
 deletion, rational pole parameters, subtraction signs, convergence,
 reflection, and displacement algebra no longer belong to those open steps.

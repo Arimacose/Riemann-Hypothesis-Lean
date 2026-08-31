@@ -2351,6 +2351,39 @@ The following adapters turn the dyadic symbol-square estimate into finite
 matrix, coercive-energy, newest-band, and exact half-transport budgets.
 -/
 
+/-- A finite family of absolute perturbation bounds yields the exact coercive
+floor used by the relative-energy adapters.  This separates the concrete CvS
+component estimates from the universal real-algebra step. -/
+theorem coerciveFloor_of_componentBounds
+    {ι : Type*} [Fintype ι]
+    (energy diagonal normSq diagonalFloor shift floor : ℝ)
+    (error errorBound : ι → ℝ)
+    (hNormSq : 0 ≤ normSq)
+    (hEnergy :
+      energy = diagonal + (∑ i, error i) + shift * normSq)
+    (hDiagonal : diagonalFloor * normSq ≤ diagonal)
+    (hError : ∀ i, |error i| ≤ errorBound i * normSq)
+    (hFloor :
+      floor ≤ diagonalFloor - (∑ i, errorBound i) + shift) :
+    floor * normSq ≤ energy := by
+  have hEach : ∀ i, -(errorBound i * normSq) ≤ error i := by
+    intro i
+    exact neg_le_of_abs_le (hError i)
+  have hErrorSum :
+      (∑ i, -(errorBound i * normSq)) ≤ ∑ i, error i := by
+    exact Finset.sum_le_sum fun i _hi => hEach i
+  have hErrorLower :
+      -(∑ i, errorBound i) * normSq ≤ ∑ i, error i := by
+    calc
+      -(∑ i, errorBound i) * normSq =
+          ∑ i, -(errorBound i * normSq) := by
+        rw [← Finset.sum_neg_distrib, Finset.sum_mul]
+        simp only [neg_mul]
+      _ ≤ ∑ i, error i := hErrorSum
+  have hFloorScaled := mul_le_mul_of_nonneg_right hFloor hNormSq
+  rw [hEnergy]
+  nlinarith
+
 /-- Scaling the concrete symbol scales its dyadic square budget by the exact
 square of the normalization factor.  In the CvS source identification this
 retains the Fourier normalization `1 / π` as `1 / π²`. -/

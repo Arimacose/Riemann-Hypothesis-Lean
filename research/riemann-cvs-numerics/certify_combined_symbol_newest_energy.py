@@ -301,6 +301,7 @@ def certify(
             "therefore give the q_next<=q_previous/2 envelope"
         ),
         "lean_interfaces_prepared": [
+            "RiemannCvs.CombinedSymbolDyadicL2.coerciveFloor_of_componentBounds",
             "RiemannCvs.CombinedSymbolDyadicL2.scaled_shifted_symbolSquareBudget",
             "RiemannCvs.CombinedSymbolDyadicL2.shifted_symbolSquare_sum_le_four_mul",
             "RiemannCvs.CombinedSymbolDyadicL2.rectangularSymbolSquareBudget_four_mul_le_twentyFour_mul",
@@ -327,7 +328,7 @@ def certify(
             "RiemannCvs.CombinedSymbolDyadicL2.logarithmicCvSBuilderOddNewestBand_eq_oddParityRestriction",
         ],
         "conditional_operator_inputs": [
-            "the parity shell forms dominate the displayed Euclidean coercive floors",
+            "the concrete parity component forms satisfy the recorded diagonal and absolute-error bounds",
             "the block-diagonal shell energies are identified with the recursive-core energy sum",
         ],
         "git_sha": head,
