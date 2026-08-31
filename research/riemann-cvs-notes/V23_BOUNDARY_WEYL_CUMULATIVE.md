@@ -2327,12 +2327,21 @@ cutoff-13 target
 -logarithmicArchimedeanDiagonal(13,x) >= log(x) - 19/20
 ```
 
-for every `x>=960` follows from the two analytic remainder premises at `x` and
-one scalar comparison at the single endpoint `x=960`.  A shell adapter sends
+for every `x>=960` follows from the two analytic inputs at `x` and one scalar
+comparison at the single endpoint `x=960`.  A shell adapter sends
 this directly to the literal CvS diagonal floor `log(old)-19/20` whenever
 `old>=960`.  Thus the all-mode scalar monotonicity and every geometric term are
-closed; what remains in this diagonal branch is the DLMF norm-remainder theorem,
-the trigamma-series floor theorem, and the one certified endpoint inequality.
+closed.  The elementary trigamma floor inequality is now closed as well: if
+
+```text
+sum_{n>=0} 1/(n + 1/4 + i*y)^2 = psi'(1/4+i*y),
+```
+
+then terms with `n<ceil(y)` are each at least `-1/y^2`, while all later real
+parts are nonnegative.  Since `ceil(y)<=y+1`, Lean derives
+`T_floor<=Re psi'`.  What remains in this diagonal branch is therefore the
+DLMF norm-remainder theorem, the canonical trigamma `HasSum` identity, and the
+one certified endpoint inequality.
 
 The twenty public interfaces are:
 
@@ -2356,6 +2365,14 @@ The twenty public interfaces are:
 * `neg_logarithmicArchimedeanDiagonal_ge_log_sub_of_asymptotic_bounds`;
 * `c13_neg_logarithmicArchimedeanDiagonal_ge_log_sub_nineteenTwentieth`;
 * `c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth`.
+
+The elementary trigamma-series reduction adds five public interfaces:
+
+* `archimedeanTrigammaSeriesTerm`;
+* `archimedeanTrigammaSeriesTerm_re`;
+* `archimedeanTrigammaSeriesFloor_le_of_hasSum`;
+* `c13_neg_logarithmicArchimedeanDiagonal_ge_log_sub_nineteenTwentieth_of_trigammaSeries`;
+* `c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth_of_trigammaSeries`.
 
 The signed-integer finite builder bridge is now exact as well.  Lean defines
 the implementation's signed Archimedean extension, absolute-mode diagonal,

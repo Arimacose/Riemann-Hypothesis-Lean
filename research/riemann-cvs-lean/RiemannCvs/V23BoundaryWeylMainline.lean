@@ -315,9 +315,10 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   alongside the diagonal bound.  The diagonal self-entry is also rewritten to
   the literal Archimedean diagonal used by the interval certificate, while
   `CombinedSymbolDyadicL2` now closes all geometric corrections, derives the
-  real digamma floor from a DLMF-form complex norm remainder, packages the
-  trigamma series floor, proves the remaining error antitone, and reduces the
-  cutoff-13 all-mode floor to one scalar endpoint comparison at mode `960`.
+  real digamma floor from a DLMF-form complex norm remainder, reduces the
+  trigamma real floor to its canonical `HasSum` identity, proves the remaining
+  error antitone, and reduces the cutoff-13 all-mode floor to one scalar endpoint
+  comparison at mode `960`.
   The combined-symbol certificate
   now also rests on a Lean proof of the finite nonresonant geometric-sum bound,
   including arbitrary starting indices and its sine/cosine projections; Arb
@@ -1506,6 +1507,56 @@ theorem c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth
       (n : ℝ) hMode (by simpa [n] using hDigammaRemainder j)
         (by simpa [n] using hTrigamma j) hEndpoint
   linarith
+
+/-- The literal cutoff-13 shell route with the trigamma premise expressed as
+the canonical complex `HasSum` identity on every shell mode.  The elementary
+real-part estimate is discharged by
+`archimedeanTrigammaSeriesFloor_le_of_hasSum`. -/
+theorem c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth_of_trigammaSeries
+    (old shell : ℕ) (hOld : 960 ≤ old)
+    (hDigammaRemainder : ∀ j : Fin shell,
+      ‖Complex.digamma
+            (archimedeanArgument 13
+              (finGlobalShellPositiveMode old shell j : ℝ)) -
+          (Complex.log
+              (archimedeanArgument 13
+                (finGlobalShellPositiveMode old shell j : ℝ)) -
+            1 / (2 *
+              archimedeanArgument 13
+                (finGlobalShellPositiveMode old shell j : ℝ)))‖ ≤
+        Real.sqrt 2 /
+          (6 * archimedeanAsymptoticHeight 13
+            (finGlobalShellPositiveMode old shell j : ℝ) ^ 2))
+    (hTrigammaSeries : ∀ j : Fin shell,
+      HasSum
+        (archimedeanTrigammaSeriesTerm 13
+          (finGlobalShellPositiveMode old shell j : ℝ))
+        (deriv Complex.digamma
+          (archimedeanArgument 13
+            (finGlobalShellPositiveMode old shell j : ℝ))))
+    (hEndpoint : -(19 / 20 : ℝ) ≤
+      archimedeanDiagonalAsymptoticConstant 13 -
+        archimedeanDiagonalAsymptoticError 13 960) :
+    ∀ j : Fin shell,
+      Real.log (old : ℝ) - 19 / 20 ≤
+        -logarithmicCvSArchimedeanEntry 13
+          (finGlobalShellPositiveMode old shell j)
+          (finGlobalShellPositiveMode old shell j) := by
+  apply c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth
+    old shell hOld hDigammaRemainder
+  · intro j
+    have hModeNat : 0 < old + 1 + (j : ℕ) := by omega
+    have hModeInt :
+        (0 : ℤ) < finGlobalShellPositiveMode old shell j := by
+      dsimp [finGlobalShellPositiveMode]
+      exact_mod_cast hModeNat
+    have hModePos :
+        0 < (finGlobalShellPositiveMode old shell j : ℝ) := by
+      exact_mod_cast hModeInt
+    exact archimedeanTrigammaSeriesFloor_le_of_hasSum
+      13 (finGlobalShellPositiveMode old shell j : ℝ)
+        (by norm_num) hModePos (hTrigammaSeries j)
+  · exact hEndpoint
 
 theorem logarithmicCvSPoleEntry_even_factorization (c : ℝ) (n m : ℤ) :
     logarithmicCvSPoleEntry c n m + logarithmicCvSPoleEntry c n (-m) =

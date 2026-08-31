@@ -47,8 +47,9 @@ and simultaneous-reflection invariance are also proved, so the finite recursive
   prime-form bound.  The exponential-series mass and first moment are evaluated
   exactly below, closing every geometric correction in the Archimedean symbol
   and diagonal.  Its lower bound is now reduced further to a DLMF-form digamma
-  norm remainder, the real trigamma series floor, and one cutoff-13 endpoint
-  scalar comparison; Lean converts those inputs to the all-mode shell floor.
+  norm remainder, the canonical trigamma `HasSum` identity, and one cutoff-13
+  endpoint scalar comparison; Lean converts those inputs to the all-mode shell
+  floor, including the elementary real-part estimate for the trigamma series.
   The scalar pole-weight tail estimate is now closed by
   pointwise reciprocal-square bounds and a consecutive-shell reindexing.  The
   all-scale shell-tower compatibility, the exact positive-mode component
@@ -1706,6 +1707,130 @@ noncomputable def archimedeanTrigammaSeriesFloor (c x : ℝ) : ℝ :=
   -(1 / archimedeanAsymptoticHeight c x +
     1 / archimedeanAsymptoticHeight c x ^ 2)
 
+/-- The canonical trigamma series term at the literal Archimedean argument.
+The only analytic input required below is that these terms have sum
+`deriv Complex.digamma (archimedeanArgument c x)`. -/
+noncomputable def archimedeanTrigammaSeriesTerm
+    (c x : ℝ) (n : ℕ) : ℂ :=
+  1 / (archimedeanArgument c x + (n : ℂ)) ^ 2
+
+@[simp] theorem archimedeanTrigammaSeriesTerm_re
+    (c x : ℝ) (n : ℕ) :
+    (archimedeanTrigammaSeriesTerm c x n).re =
+      (((n : ℝ) + 1 / 4) ^ 2 - archimedeanAsymptoticHeight c x ^ 2) /
+        (((n : ℝ) + 1 / 4) ^ 2 + archimedeanAsymptoticHeight c x ^ 2) ^ 2 := by
+  unfold archimedeanTrigammaSeriesTerm
+  rw [Complex.div_re]
+  simp [archimedeanArgument, archimedeanAsymptoticHeight,
+    pow_two, Complex.normSq_apply]
+  ring
+
+private noncomputable def archimedeanTrigammaSeriesLower
+    (c x : ℝ) (n : ℕ) : ℝ :=
+  if n < ⌈archimedeanAsymptoticHeight c x⌉₊ then
+    -(1 / archimedeanAsymptoticHeight c x ^ 2)
+  else 0
+
+private lemma archimedeanTrigammaSeriesLower_le_re
+    (c x : ℝ) (hc : 1 < c) (hx : 0 < x) (n : ℕ) :
+    archimedeanTrigammaSeriesLower c x n ≤
+      (archimedeanTrigammaSeriesTerm c x n).re := by
+  let y := archimedeanAsymptoticHeight c x
+  have hy : 0 < y := archimedeanAsymptoticHeight_pos c x hc hx
+  rw [archimedeanTrigammaSeriesTerm_re]
+  change (if n < ⌈y⌉₊ then -(1 / y ^ 2) else 0) ≤
+    (((n : ℝ) + 1 / 4) ^ 2 - y ^ 2) /
+      (((n : ℝ) + 1 / 4) ^ 2 + y ^ 2) ^ 2
+  by_cases hn : n < ⌈y⌉₊
+  · rw [if_pos hn]
+    have hySq : 0 < y ^ 2 := sq_pos_of_pos hy
+    have hBase : 0 < ((n : ℝ) + 1 / 4) ^ 2 + y ^ 2 := by
+      nlinarith [sq_nonneg ((n : ℝ) + 1 / 4)]
+    have hDen : 0 < (((n : ℝ) + 1 / 4) ^ 2 + y ^ 2) ^ 2 :=
+      sq_pos_of_pos hBase
+    rw [show -(1 / y ^ 2) = (-1 : ℝ) / y ^ 2 by ring]
+    rw [div_le_div_iff₀ hySq hDen]
+    nlinarith [sq_nonneg (((n : ℝ) + 1 / 4) ^ 2)]
+  · rw [if_neg hn]
+    have hCeilNat : ⌈y⌉₊ ≤ n := Nat.le_of_not_gt hn
+    have hCeilReal : y ≤ (⌈y⌉₊ : ℝ) := Nat.le_ceil y
+    have hyn : y ≤ (n : ℝ) := hCeilReal.trans (by exact_mod_cast hCeilNat)
+    have hya : y ≤ (n : ℝ) + 1 / 4 := by linarith
+    have hSq : y ^ 2 ≤ ((n : ℝ) + 1 / 4) ^ 2 :=
+      (sq_le_sq₀ hy.le (by positivity)).2 hya
+    exact div_nonneg (sub_nonneg.mpr hSq) (sq_nonneg _)
+
+private lemma summable_archimedeanTrigammaSeriesLower
+    (c x : ℝ) : Summable (archimedeanTrigammaSeriesLower c x) := by
+  apply summable_of_hasFiniteSupport
+  refine (Finset.range ⌈archimedeanAsymptoticHeight c x⌉₊).finite_toSet.subset ?_
+  intro n hn
+  simp only [Function.mem_support] at *
+  by_contra hmem
+  simp only [Finset.mem_coe, Finset.mem_range] at hmem
+  simp [archimedeanTrigammaSeriesLower,
+    not_lt.mpr (Nat.le_of_not_gt hmem)] at hn
+
+private lemma tsum_archimedeanTrigammaSeriesLower
+    (c x : ℝ) :
+    ∑' n : ℕ, archimedeanTrigammaSeriesLower c x n =
+      -(⌈archimedeanAsymptoticHeight c x⌉₊ : ℝ) /
+        archimedeanAsymptoticHeight c x ^ 2 := by
+  rw [tsum_eq_sum (s := Finset.range ⌈archimedeanAsymptoticHeight c x⌉₊)]
+  · calc
+      ∑ n ∈ Finset.range ⌈archimedeanAsymptoticHeight c x⌉₊,
+          archimedeanTrigammaSeriesLower c x n =
+          ∑ _n ∈ Finset.range ⌈archimedeanAsymptoticHeight c x⌉₊,
+            -(1 / archimedeanAsymptoticHeight c x ^ 2) := by
+            apply Finset.sum_congr rfl
+            intro n hn
+            simp [archimedeanTrigammaSeriesLower, Finset.mem_range.mp hn]
+      _ = -(⌈archimedeanAsymptoticHeight c x⌉₊ : ℝ) /
+          archimedeanAsymptoticHeight c x ^ 2 := by
+            simp
+            ring
+  · intro n hn
+    simp only [Finset.mem_range, not_lt] at hn
+    simp [archimedeanTrigammaSeriesLower, hn]
+
+/-- The elementary part of the trigamma tail estimate.  Terms before
+`ceil y` are bounded below by `-1 / y^2`; every later term is nonnegative.
+Consequently the canonical series identity implies the exact floor used by
+the Archimedean diagonal certificate. -/
+theorem archimedeanTrigammaSeriesFloor_le_of_hasSum
+    (c x : ℝ) (hc : 1 < c) (hx : 0 < x)
+    (hSeries : HasSum (archimedeanTrigammaSeriesTerm c x)
+      (deriv Complex.digamma (archimedeanArgument c x))) :
+    archimedeanTrigammaSeriesFloor c x ≤
+      (deriv Complex.digamma (archimedeanArgument c x)).re := by
+  let y := archimedeanAsymptoticHeight c x
+  have hy : 0 < y := archimedeanAsymptoticHeight_pos c x hc hx
+  have hRe := Complex.hasSum_re hSeries
+  have hCompare :
+      (∑' n : ℕ, archimedeanTrigammaSeriesLower c x n) ≤
+        ∑' n : ℕ, (archimedeanTrigammaSeriesTerm c x n).re :=
+    (summable_archimedeanTrigammaSeriesLower c x).tsum_le_tsum
+      (archimedeanTrigammaSeriesLower_le_re c x hc hx) hRe.summable
+  have hCeil : (⌈y⌉₊ : ℝ) ≤ y + 1 :=
+    (Nat.ceil_lt_add_one hy.le).le
+  have hySq : 0 < y ^ 2 := sq_pos_of_pos hy
+  have hScaled : (⌈y⌉₊ : ℝ) / y ^ 2 ≤ (y + 1) / y ^ 2 :=
+    (div_le_div_iff_of_pos_right hySq).2 hCeil
+  have hAlgebra : (y + 1) / y ^ 2 = 1 / y + 1 / y ^ 2 := by
+    field_simp [ne_of_gt hy]
+  rw [hRe.tsum_eq] at hCompare
+  rw [tsum_archimedeanTrigammaSeriesLower] at hCompare
+  change -(⌈y⌉₊ : ℝ) / y ^ 2 ≤
+    (deriv Complex.digamma (archimedeanArgument c x)).re at hCompare
+  unfold archimedeanTrigammaSeriesFloor
+  change -(1 / y + 1 / y ^ 2) ≤
+    (deriv Complex.digamma (archimedeanArgument c x)).re
+  rw [← hAlgebra]
+  calc
+    -((y + 1) / y ^ 2) ≤ -((⌈y⌉₊ : ℝ) / y ^ 2) := neg_le_neg hScaled
+    _ = -(⌈y⌉₊ : ℝ) / y ^ 2 := by ring
+    _ ≤ (deriv Complex.digamma (archimedeanArgument c x)).re := hCompare
+
 lemma archimedeanArgument_log_re_ge_log_height
     (c x : ℝ) (hc : 1 < c) (hx : 0 < x) :
     Real.log (archimedeanAsymptoticHeight c x) ≤
@@ -1965,6 +2090,29 @@ theorem c13_neg_logarithmicArchimedeanDiagonal_ge_log_sub_nineteenTwentieth
   exact neg_logarithmicArchimedeanDiagonal_ge_log_sub_of_asymptotic_bounds
     13 960 x (19 / 20) (by norm_num) (by norm_num) hx
       hDigammaRemainder hTrigamma hEndpoint
+
+/-- The cutoff-13 diagonal route with the trigamma hypothesis reduced to its
+canonical complex series identity. -/
+theorem c13_neg_logarithmicArchimedeanDiagonal_ge_log_sub_nineteenTwentieth_of_trigammaSeries
+    (x : ℝ) (hx : (960 : ℝ) ≤ x)
+    (hDigammaRemainder :
+      ‖Complex.digamma (archimedeanArgument 13 x) -
+          (Complex.log (archimedeanArgument 13 x) -
+            1 / (2 * archimedeanArgument 13 x))‖ ≤
+        Real.sqrt 2 /
+          (6 * archimedeanAsymptoticHeight 13 x ^ 2))
+    (hTrigammaSeries : HasSum (archimedeanTrigammaSeriesTerm 13 x)
+      (deriv Complex.digamma (archimedeanArgument 13 x)))
+    (hEndpoint : -(19 / 20 : ℝ) ≤
+      archimedeanDiagonalAsymptoticConstant 13 -
+        archimedeanDiagonalAsymptoticError 13 960) :
+    Real.log x - 19 / 20 ≤ -logarithmicArchimedeanDiagonal 13 x := by
+  have hxPos : 0 < x := (by norm_num : (0 : ℝ) < 960).trans_le hx
+  exact c13_neg_logarithmicArchimedeanDiagonal_ge_log_sub_nineteenTwentieth
+    x hx hDigammaRemainder
+      (archimedeanTrigammaSeriesFloor_le_of_hasSum
+        13 x (by norm_num) hxPos hTrigammaSeries)
+      hEndpoint
 
 theorem logarithmicArchimedeanDiagonal_neg (c x : ℝ) :
     logarithmicArchimedeanDiagonal c (-x) =
