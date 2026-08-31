@@ -237,15 +237,20 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   the exact weighted numerators `q*F(q)-p*F(p)` in the even sector and
   `p*F(q)-q*F(p)` in the odd sector, both over `p^2-q^2`.  Thus the remaining
   source estimate targets the combined odd symbol directly and retains the
-  observed prime/Archimedean cancellation.  Eight source-algebra theorems now
+  observed prime/Archimedean cancellation.  Eight initial source-algebra theorems now
   define the finite prime sine polynomial, prove its oddness, combine it with
   any odd Archimedean symbol, commute addition and scalar multiplication with
   the complete diagonal-aware Loewner kernel, preserve the concrete `1/pi`
   normalization, and prove the omitted endpoint phase `sin(2*pi*n)=0` on every
-  natural Fourier mode.  Hence the algebraic combination and normalization are
+  natural Fourier mode.  Four more entrywise theorems expose the actual prime
+  diagonal, identify the literal per-event assembly loop with its finite sum,
+  delete the cutoff event on and off the diagonal, and prove that the complete
+  piecewise prime entry is exactly the normalized Loewner kernel.  A combined
+  actual-diagonal adapter then leaves only the Archimedean source formula.
+  Hence the prime algebra, entrywise identification, and normalization are
   checked; the remaining source identification is the analytic equality of the
-  concrete CvS entries and diagonal data with those packaged functions, followed
-  by their restriction to the stated parity shell bands.  The combined-symbol certificate
+  concrete CvS Archimedean entries and diagonal data with the packaged symbol,
+  followed by restriction to the stated parity shell bands.  The combined-symbol certificate
   now also rests on a Lean proof of the finite nonresonant geometric-sum bound,
   including arbitrary starting indices and its sine/cosine projections; Arb
   retains the composite doubled/difference/sum phase checks.  Nine further
@@ -258,8 +263,9 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   doubled, pair-difference, and pair-sum denominators symbolically nonzero.
   Arb now supplies their rigorous magnitudes rather than the nonresonance
   fact.  The remaining
-  source boundary is the analytic CvS matrix-entry/diagonal identification,
-  not the prime formula itself.  The certificate
+  source boundary is the analytic CvS Archimedean matrix-entry/diagonal
+  identification and the parity shell restriction, not the finite prime
+  formula itself.  The certificate
   now proves the scalar weighted square budget `<1/N` for every `N>=1920`.
   Fourteen further Lean adapters preserve the concrete `1/pi` Fourier scale,
   turn the old-band weighted budget into an ordinary square sum, close the

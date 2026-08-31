@@ -18,9 +18,10 @@ integer N>=1, so a strict check at one start mode controls every later mode.
 Arb is used for every transcendental value and strict comparison.
 
 The output is a rigorous constant-composition certificate.  Its proof-level
-use remains conditional on the Lean/source identification connecting the
-concrete CvS symbol to the finite trigonometric polynomial.  The companion
-Lean module now formalizes the finite geometric-sum inequality itself, the
+use remains conditional on the analytic Archimedean source identification and
+the parity-shell operator bridge.  The companion Lean module now identifies
+the literal finite prime entrywise builder with the normalized logarithmic
+Loewner kernel, formalizes the finite geometric-sum inequality itself, the
 exact logarithmic prime weights and phases, and symbolic nonresonance of every
 single, doubled, pair-difference, and pair-sum phase in the tracked cutoff-13
 event list, as well as the Abel, dyadic, endpoint-monotonicity, and
@@ -331,8 +332,33 @@ def certify(
                 "RiemannCvs.CombinedSymbolDyadicL2."
                 "oddDifferenceKernel_fourierNormalized_logarithmicCombined"
             ),
+            "prime_diagonal": (
+                "RiemannCvs.CombinedSymbolDyadicL2.finiteLogarithmicPrimeDiagonal"
+            ),
+            "prime_entry": (
+                "RiemannCvs.CombinedSymbolDyadicL2.finiteLogarithmicPrimeEntry"
+            ),
+            "prime_event_entry": (
+                "RiemannCvs.CombinedSymbolDyadicL2.logarithmicPrimeEventEntry"
+            ),
+            "prime_entrywise_sum": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "finiteLogarithmicPrimeEntry_eq_sum_eventEntries"
+            ),
+            "prime_entry_kernel_identification": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "finiteLogarithmicPrimeEntry_eq_oddDifferenceKernel"
+            ),
+            "combined_actual_diagonal_adapter": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "oddDifferenceKernel_logarithmicCombined_actualDiagonal"
+            ),
             "cutoff_endpoint_zero": (
                 "RiemannCvs.CombinedSymbolDyadicL2.logarithmicPrimeEndpoint_term_zero"
+            ),
+            "cutoff_endpoint_entry_zero": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "logarithmicPrimeEndpointEventEntry_nat_zero"
             ),
             "strict_interior_single_phase_nonresonance": (
                 "RiemannCvs.CombinedSymbolDyadicL2.logarithmicPrimePhase_half_sin_pos"
@@ -417,7 +443,7 @@ def certify(
             ),
         },
         "conclusion": (
-            "conditional on the concrete source identification, for every "
+            "conditional on the Archimedean source and parity-shell identifications, for every "
             f"integer N>={start_mode}, "
             "sum F_n^2/n^2 over N<n<=2N is "
             f"< {target_scaled_upper}/N"

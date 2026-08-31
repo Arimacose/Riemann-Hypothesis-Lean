@@ -35,9 +35,10 @@ There are eight layers.
    doubled-shell identity supplies the one-half transport used by the recursive
    channel envelope.
 
-The source-specific analytic identification of the concrete Archimedean and
-prime matrix entries, and their affine prefix constants, remains an explicit
-input.  No numerical certificate is promoted to a Lean theorem here.
+The source-specific analytic identification of the concrete Archimedean
+matrix entries and the affine prefix constants remains an explicit input.  The
+finite prime entrywise builder is identified exactly below.  No numerical
+certificate is promoted to a Lean theorem here.
 -/
 
 namespace RiemannCvs.CombinedSymbolDyadicL2
@@ -51,8 +52,9 @@ open scoped BigOperators
 The prime-power contribution is a finite sine polynomial.  The following
 definitions and identities close the purely algebraic part of combining it
 with an odd Archimedean symbol and applying the concrete `1 / π` Fourier
-normalization.  The remaining source task is to connect the analytic CvS
-entries and their diagonal data to these functions.
+normalization.  The finite prime entrywise formula is connected to these
+functions below; the remaining source task is the analytic Archimedean symbol
+and diagonal.
 -/
 
 /-- A finite real sine polynomial, the exact shape of the prime-power part of
@@ -318,8 +320,8 @@ theorem abs_shifted_cosine_sum_le_inv_abs_sin_half
 The abstract finite sine polynomial can now be instantiated with the exact
 weights and phases used by the CvS prime source.  These definitions and
 identities expose the concrete formula to the kernel and certificate layers;
-the analytic equality with the original CvS matrix remains a separate source
-identification.
+the entrywise adapter below proves equality with the original finite prime
+matrix formula.
 -/
 
 /-- The exact von-Mangoldt weight attached to a prime-power location `q=p^k`. -/
@@ -427,6 +429,133 @@ theorem logarithmicPrimeEndpoint_term_zero
         Real.sin (logarithmicPrimePhase c c * (n : ℝ)) = 0 := by
   rw [logarithmicPrimeEndpoint_sine_zero c n hc]
   ring
+
+/-!
+### Exact entrywise prime-source adapter
+
+The numerical CvS builder uses a piecewise formula: an explicit diagonal
+cosine sum and, off the diagonal, a normalized sine divided difference.  The
+following definitions expose that formula literally and prove that it is the
+complete diagonal-aware Loewner kernel of the logarithmic prime symbol.  Thus
+the prime matrix-entry identification is algebraic; the remaining source
+identification is the Archimedean symbol and its diagonal.
+-/
+
+/-- The actual diagonal value of the finite prime-power block. -/
+noncomputable def finiteLogarithmicPrimeDiagonal
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (x : ℝ) : ℝ :=
+  ∑ i, 2 * logarithmicPrimeWeight (location i) (base i) *
+    (1 - Real.log (location i) / Real.log c) *
+    Real.cos (logarithmicPrimePhase c (location i) * x)
+
+/-- Piecewise source formula used to assemble the finite prime-power matrix. -/
+noncomputable def finiteLogarithmicPrimeEntry
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (p q : ℝ) : ℝ :=
+  if p = q then finiteLogarithmicPrimeDiagonal c location base p
+  else
+    ∑ i, logarithmicPrimeWeight (location i) (base i) *
+      (Real.sin (logarithmicPrimePhase c (location i) * q) -
+        Real.sin (logarithmicPrimePhase c (location i) * p)) /
+      (Real.pi * (p - q))
+
+/-- One prime-power event in the entrywise assembly loop. -/
+noncomputable def logarithmicPrimeEventEntry
+    (c location base p q : ℝ) : ℝ :=
+  if p = q then
+    2 * logarithmicPrimeWeight location base *
+      (1 - Real.log location / Real.log c) *
+      Real.cos (logarithmicPrimePhase c location * p)
+  else
+    logarithmicPrimeWeight location base *
+      (Real.sin (logarithmicPrimePhase c location * q) -
+        Real.sin (logarithmicPrimePhase c location * p)) /
+      (Real.pi * (p - q))
+
+/-- The finite source entry is exactly the sum of the eventwise matrix loop. -/
+theorem finiteLogarithmicPrimeEntry_eq_sum_eventEntries
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (p q : ℝ) :
+    finiteLogarithmicPrimeEntry c location base p q =
+      ∑ i, logarithmicPrimeEventEntry c (location i) (base i) p q := by
+  by_cases hpq : p = q
+  · subst q
+    simp [finiteLogarithmicPrimeEntry, finiteLogarithmicPrimeDiagonal,
+      logarithmicPrimeEventEntry]
+  · simp [finiteLogarithmicPrimeEntry, logarithmicPrimeEventEntry, hpq]
+
+/-- The event exactly at the cutoff contributes zero on integer Fourier modes,
+both on and off the diagonal. -/
+theorem logarithmicPrimeEndpointEventEntry_nat_zero
+    (c base : ℝ) (m n : ℕ) (hc : 1 < c) :
+    logarithmicPrimeEventEntry c c base (m : ℝ) (n : ℝ) = 0 := by
+  have hcPos : 0 < c := lt_trans zero_lt_one hc
+  have hcNe : c ≠ 1 := ne_of_gt hc
+  have hLog : Real.log c ≠ 0 :=
+    Real.log_ne_zero_of_pos_of_ne_one hcPos hcNe
+  by_cases hmn : (m : ℝ) = (n : ℝ)
+  · simp [logarithmicPrimeEventEntry, hmn, hLog]
+  · rw [logarithmicPrimeEventEntry, if_neg hmn,
+      logarithmicPrimeEndpoint_sine_zero c n hc,
+      logarithmicPrimeEndpoint_sine_zero c m hc]
+    ring
+
+/-- The literal piecewise prime-source entry is exactly the normalized odd
+Loewner kernel with its actual matrix diagonal. -/
+theorem finiteLogarithmicPrimeEntry_eq_oddDifferenceKernel
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (p q : ℝ) :
+    finiteLogarithmicPrimeEntry c location base p q =
+      CvSParityDisplacement.oddDifferenceKernel
+        (fourierNormalizedSymbol
+          (finiteLogarithmicPrimeSymbol c location base))
+        (finiteLogarithmicPrimeDiagonal c location base) p q := by
+  by_cases hpq : p = q
+  · subst q
+    simp [finiteLogarithmicPrimeEntry,
+      CvSParityDisplacement.oddDifferenceKernel]
+  · simp only [finiteLogarithmicPrimeEntry, hpq, if_false,
+      CvSParityDisplacement.oddDifferenceKernel,
+      fourierNormalizedSymbol, finiteLogarithmicPrimeSymbol,
+      finiteSineSymbol]
+    rw [← Finset.sum_div]
+    simp only [mul_sub, Finset.sum_sub_distrib]
+    field_simp [Real.pi_ne_zero, sub_ne_zero.mpr hpq]
+    simp [mul_comm]
+
+/-- Complete Archimedean-plus-prime source adapter with the actual, already
+normalized matrix diagonal.  After this equality only the Archimedean source
+entry needs an analytic identification. -/
+theorem oddDifferenceKernel_logarithmicCombined_actualDiagonal
+    {ι : Type*} [Fintype ι]
+    (arch archDiagonal : ℝ → ℝ) (c : ℝ)
+    (location base : ι → ℝ) (p q : ℝ) :
+    CvSParityDisplacement.oddDifferenceKernel
+        (fourierNormalizedSymbol
+          (logarithmicCombinedSymbol arch c location base))
+        (fun x => archDiagonal x +
+          finiteLogarithmicPrimeDiagonal c location base x) p q =
+      CvSParityDisplacement.oddDifferenceKernel
+          (fourierNormalizedSymbol arch) archDiagonal p q +
+        finiteLogarithmicPrimeEntry c location base p q := by
+  rw [finiteLogarithmicPrimeEntry_eq_oddDifferenceKernel]
+  have hSymbol :
+      fourierNormalizedSymbol
+          (logarithmicCombinedSymbol arch c location base) =
+        fun x => fourierNormalizedSymbol arch x +
+          fourierNormalizedSymbol
+            (finiteLogarithmicPrimeSymbol c location base) x := by
+    funext x
+    simp only [fourierNormalizedSymbol, logarithmicCombinedSymbol,
+      combinedSineSymbol, finiteLogarithmicPrimeSymbol]
+    ring
+  rw [hSymbol]
+  exact oddDifferenceKernel_add
+    (fourierNormalizedSymbol arch) archDiagonal
+    (fourierNormalizedSymbol
+      (finiteLogarithmicPrimeSymbol c location base))
+    (finiteLogarithmicPrimeDiagonal c location base) p q
 
 /-- Every strict interior event `1 < q < c` has a positive half-angle sine,
 so its finite geometric sums are nonresonant without numerical phase testing. -/

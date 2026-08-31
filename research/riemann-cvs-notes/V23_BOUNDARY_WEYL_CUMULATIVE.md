@@ -2049,15 +2049,16 @@ The new public theorem surface is:
 * `oddDifferenceKernel_fourierNormalized_combined`;
 * `sin_two_pi_nat`.
 
-All eight theorems compile with only `propext`, `Classical.choice`, and
+All eight initial theorems compile with only `propext`, `Classical.choice`, and
 `Quot.sound`, with no `sorryAx`.  This closes the exact finite-sum,
 prime/Archimedean combination, Fourier-normalization, and endpoint-deletion
-algebra.  What still remains in this operator input is source-specific and
-analytic: identify the concrete CvS Archimedean and prime matrix entries and
-their diagonal values with these packaged functions, then identify their
-cosine/sine restrictions with the finite historical-band/new-shell matrices
-used by the relative-energy theorem.  The coercive-floor, recursive block-sum,
-and eight finite newest-band bridges remain separate obligations.
+algebra.  The entrywise prime adapter described below now closes the finite
+prime matrix formula itself.  What still remains in this operator input is
+source-specific and analytic: identify the concrete CvS Archimedean entries
+and their diagonal values with the packaged Archimedean symbol, then identify
+the combined cosine/sine restrictions with the finite historical-band/new-shell
+matrices used by the relative-energy theorem.  The coercive-floor, recursive
+block-sum, and eight finite newest-band bridges remain separate obligations.
 
 The formerly recorded finite geometric-sum lemma is now also kernel-checked.
 For every real `phase` with `sin (phase/2) != 0`, Lean proves
@@ -2107,9 +2108,36 @@ nonresonance premise.  The nine theorem interfaces are:
 * `abs_shifted_logarithmicPrime_sine_sum_le`;
 * `abs_shifted_logarithmicPrime_cosine_sum_le`.
 
-The genuinely open source step is now narrower: prove that the concrete CvS
-Archimedean and prime matrix entries and their diagonal values equal this
-packaged normalized kernel, then restrict it to the finite parity shell bands.
+The finite prime matrix formula is now connected to this symbol literally.
+`finiteLogarithmicPrimeDiagonal` is the cosine diagonal used by the Arb matrix
+builder, `logarithmicPrimeEventEntry` is one iteration of its prime-power loop,
+and `finiteLogarithmicPrimeEntry` is the corresponding piecewise finite sum.
+Lean proves
+
+```text
+finiteLogarithmicPrimeEntry
+  = sum_i logarithmicPrimeEventEntry_i
+  = oddDifferenceKernel(finiteLogarithmicPrimeSymbol/pi,
+      finiteLogarithmicPrimeDiagonal).
+```
+
+The cutoff event is zero as a complete entry on integer Fourier modes: off the
+diagonal both sine values vanish, while on the diagonal the exact factor
+`1-log(c)/log(c)` vanishes.  Finally,
+`oddDifferenceKernel_logarithmicCombined_actualDiagonal` combines this literal
+prime entry with an Archimedean normalized Loewner entry while keeping their
+actual, already normalized matrix diagonals.  The four new public theorem
+interfaces are:
+
+* `finiteLogarithmicPrimeEntry_eq_sum_eventEntries`;
+* `logarithmicPrimeEndpointEventEntry_nat_zero`;
+* `finiteLogarithmicPrimeEntry_eq_oddDifferenceKernel`;
+* `oddDifferenceKernel_logarithmicCombined_actualDiagonal`.
+
+The genuinely open source step is therefore narrower again: prove that the
+concrete CvS Archimedean off-diagonal formula and its digamma/trigamma diagonal
+equal the packaged Archimedean kernel, then restrict the already combined
+kernel to the finite parity shell bands.
 
 The composite phase conditions are also symbolic now.  For two strict
 interior locations, Lean proves the pair-difference half phase lies in
