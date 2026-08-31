@@ -1374,6 +1374,55 @@ The optional `--require-half-transport` flag makes those three midpoint facts
 a workflow regression gate while the JSON retains
 `MIDPOINT_DIAGNOSTIC_ONLY` and `rigorous_certificate=false`.
 
+The source route is now diagnosed one level deeper.  With
+`--source-component-diagnostic`, the probe rebuilds every historical/new-shell
+crossblock as the sum of its prime, Archimedean, and rank-two pole matrices,
+then whitens every piece against the same full shifted historical and new-shell
+energies used for the total coefficient.  All ten first-scale and all twelve
+second-scale crossblocks reconstruct within `6.51e-19` and `4.34e-19`,
+respectively.  Across the ten repeated bands the individual squared-norm ratios
+are
+
+```text
+prime:         0.389818987 .. 0.450288442 < 1/2;
+pole:          0.112974742 .. 0.450298994 < 1/2;
+Archimedean:   0.448724879 .. 0.566870868, with the newest bands above 1/2.
+```
+
+Thus a proof that allocates all three source components independently is too
+coarse.  The full three-piece triangle coefficient divided by the preceding
+total coefficient is about `0.64 .. 0.88` on the regular channels.  The kernel
+formula itself provides the sharper grouping: the prime and Archimedean
+difference quotients share one combined Loewner symbol, while the pole is a
+separate rank-two block.  Keeping that Archimedean/prime Loewner block intact
+gives all ten transport ratios in
+
+```text
+0.415949472 .. 0.457950001 < 1/2.
+```
+
+After adding the pole by the two-piece amplitude triangle, the nine regular
+channels give coefficients relative to the preceding total in
+
+```text
+0.415949472 .. 0.459420916 < 1/2.
+```
+
+The same two-piece bound also proves the diagnostic newest-channel target with
+substantial room:
+
+```text
+first scale:  0.002790073 (even), 0.003048788 (odd) < 1/30;
+second scale: 0.002208681 (even), 0.002367718 (odd) < 1/30.
+```
+
+The only failure is the already separated odd `[1,20]` exception; its two-piece
+triangle deliberately discards the strong cancellation captured by the direct
+interval certificate.  The workflow flag
+`--require-regular-loewner-pole-half-transport` now gates exactly the selected
+route: nine regular two-piece inequalities pass, one declared fixed exception
+is excluded, and the total crossblock regression still passes independently.
+
 Four Lean theorems now encode the exact discrete consequence selected by this
 diagnostic.  `channelBudgetEnvelope_of_newest_and_transport` handles a general
 nonnegative decay factor;
@@ -1387,6 +1436,29 @@ the full triangular envelope follows once the concrete CvS source layer proves
 q_(scale,0) <= 1/30,
 q_(scale+1,distance+1) <= q_(scale,distance)/2.
 ```
+
+Two further Lean theorems encode the newly selected source combination.
+`relativeCoupling_of_twoSourceAmplitudeBounds` proves, against common
+nonnegative energies `E` and `T`,
+
+```text
+C_L^2 <= a^2*E*T,
+C_P^2 <= b^2*E*T
+  ==> (C_L+C_P)^2 <= (a+b)^2*E*T.
+```
+
+Here `C_L` is the combined Archimedean/prime Loewner form and `C_P` is the pole
+form.  `halfTransportRelativeCoupling_of_twoSourceAmplitudeBounds` immediately
+specializes this when
+
+```text
+(a+b)^2 <= previousCoefficient/2,
+```
+
+producing the exact total half-transport hypothesis consumed by the triangular
+induction.  This removes the fixed factor-two loss of the older generic
+two-channel square inequality while preserving the source cancellation that the
+component diagnostic shows is essential.
 
 That selected split now has an exact Lean interface rather than an informal
 recombination step.  The theorem
@@ -1403,9 +1475,10 @@ q_exception + 2*q_leading <= rho.
 Thus the odd `[1,20]` block may consume its separately certified finite budget,
 while the remaining analytic proof targets the unchanged
 `q_i <= q_leading*2^(-i)` envelope.  What remains at source level is the
-structured newest-band and half-transport estimate, together with the concrete
-shell-energy identification; the Lean triangular induction, summation,
-normalization, and recombination are complete.
+structured newest-band estimate, joint Archimedean/prime Loewner amplitude
+transport, the separate rank-two pole amplitude, and the concrete shell-energy
+identification; the Lean source-amplitude combination, triangular induction,
+summation, normalization, and recombination are complete.
 
 The tracked `certify_odd_fixed_base_channel.py` now closes that finite exception
 at the first certified transition.  It evaluates the direct odd-parity Arb
@@ -1624,13 +1697,19 @@ The following are still explicit proof obligations:
    induction reduces that decay to a newest-band `1/30` bound and a one-half
    cross-scale transport inequality.  The two-scale midpoint regression checks
    those targets at `K=960 -> 1920`, with all ten repeated ratios below `1/2`,
-   while keeping its diagnostic status explicit.  The preconditioned-Schur
+   while keeping its diagnostic status explicit.  Its source split rejects the
+   three-independent-component route, retains the combined
+   Archimedean/prime Loewner symbol, and verifies that the Loewner-plus-pole
+   amplitude triangle remains below one half on all nine regular bands.  The
+   two corresponding amplitude lemmas are kernel-checked.  The preconditioned-Schur
    certificates supply the
    `960 -> 1920` and `1920 -> 3840` bridges, while the strict
    `||T_13||<10/3` power certificate and centered Archimedean envelope close the
    eventual middle-channel scalar budget.  The remaining analytic work is
-   concentrated in the prime previous-core crossblock, the finite middle
-   bridges, their relative channel normalization, and the concrete
+   concentrated in a uniform previous-core Loewner-symbol amplitude estimate
+   that preserves the prime/Archimedean cancellation, the separate elementary
+   pole amplitude, the finite middle bridges, their relative channel
+   normalization, and the concrete
    Hilbert-compression adapter.  The scalar comparison between the full
    block-diagonal shell sum and the recursively glued core is now formalized by
    the reserve-product block-sum theorem and its direct next-shell adapter;
@@ -1692,6 +1771,8 @@ axioms/constants, prints the axiom dependencies of every new terminal theorem,
 replays the corrected V22 finite Arb parity certificate, certifies the direct
 parity shell through `N=3840`, verifies the odd fixed-base exception and all
 nine regular first-transition source channels, runs the consecutive
-`N=3840/7680` previous-core transport diagnostics, and emits their JSON and
+`N=3840/7680` previous-core transport diagnostics, reconstructs their
+prime/Archimedean/pole source pieces, and gates the selected regular
+Loewner-plus-pole two-amplitude route.  It emits those JSON records and
 exact-dyadic preconditioners together with the cumulative-residue interval
 certificate as downloadable regression artifacts.

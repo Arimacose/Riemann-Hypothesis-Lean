@@ -180,12 +180,13 @@ product of `1-u_K`; proving a positive uniform floor for those products
 avoids the artificial exponential loss of repeatedly substituting the
 worst-case `1/3` reserve.  Independently, the new finite-channel theorem
 reduces the previous-core source estimate to dyadic shell budgets whose sum is
-at most `2/27`; a squared-norm envelope `q_i <= (1/27)/2^i` is sufficient for
-that channel at every depth.  A tracked midpoint decomposition of the already
+  at most `2/27`; a squared-norm envelope `q_i <= (1/27)/2^i` is sufficient for
+  that channel at every depth, while the selected odd-exception split uses the
+  stricter regular leading value `1/30`.  A tracked midpoint decomposition of the already
 certified `1920 -> 3840` transition gives aggregate previous-core coefficients
 about `0.00760` and `0.01171` in the even and odd sectors, both well below
-`2/27`; the pure geometric envelope misses only the odd fixed base `[1,20]`,
-by about `0.000142`, so the selected source split keeps that base as a finite
+  `2/27`; under the selected `1/30` envelope only the odd fixed base `[1,20]`
+  misses, by about `0.000373`, so the source split keeps that base as a finite
 channel and applies the geometric target to the dyadic tail.  The Lean theorem
 `relativeCoupling_of_finiteException_and_dyadicChannelBudgets` implements this
 split without a factor-two loss: a certified exceptional coefficient plus
@@ -212,17 +213,26 @@ most `1/30`, and transporting an existing band one dyadic scale outward reduces
 its coefficient by at least one half.  Four new Lean theorems propagate those
 inputs through the full triangular channel array, provide the finite-range
 shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
-A two-scale midpoint regression from `K=960` to `K=1920` observes all ten
-repeated-band ratios strictly below `1/2`, but remains route-selection evidence.
-The source-specific proof of that prime/Archimedean/pole transport estimate,
-the identification of separated band energies with the scalar shell
-decomposition, and a uniform coefficient partial-sum bound strictly below one
-remain analytic inputs.  The scalar product lemmas turn the last bound into the
-explicit positive floor `1-total`.  This is followed by convergence of the
-finite-support energies to the closed tail form.  The triangular transport
-induction, full block-sum normalization, finite-product floor adapter, and
-strict order-limit passage are kernel-checked; the source-specific transport
-bound and shell-energy identification, the fourteen finite middle bridges,
-the summable coefficient bound, and source-specific form convergence remain
-open.
+  A two-scale midpoint regression from `K=960` to `K=1920` observes all ten
+  repeated-band ratios strictly below `1/2`, but remains route-selection evidence.
+  The same probe now reconstructs every crossblock as prime, Archimedean, and
+  rank-two pole pieces against the same full energies.  Prime and pole separately
+  decay below one half, while the two newest Archimedean ratios exceed one half;
+  consequently a three-independent-component proof is too coarse.  Retaining
+  the combined Archimedean/prime Loewner symbol gives all ten ratios below one
+  half, and adding the pole by the two-piece amplitude triangle stays below one
+  half for all nine regular channels.  The same two-piece bound puts both newest
+  parity channels below `1/30`; the odd `[1,20]` block remains the certified fixed
+  exception.  Two additional Lean theorems formalize exactly this amplitude
+  triangle and its half-transport specialization.  The source-specific proof of
+  the joint Loewner/pole amplitude bounds, the identification of separated band
+  energies with the scalar shell decomposition, and a uniform coefficient
+  partial-sum bound strictly below one remain analytic inputs.  The scalar product
+  lemmas turn the last bound into the explicit positive floor `1-total`.  This is
+  followed by convergence of the finite-support energies to the closed tail form.
+  The triangular transport induction, two-source amplitude adapter, full
+  block-sum normalization, finite-product floor adapter, and strict order-limit
+  passage are kernel-checked; the source-specific Loewner/pole transport bound
+  and shell-energy identification, the fourteen finite middle bridges, the
+  summable coefficient bound, and source-specific form convergence remain open.
 -/

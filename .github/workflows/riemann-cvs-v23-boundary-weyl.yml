@@ -233,6 +233,8 @@ jobs:
           #print axioms RiemannCvs.BoundaryWeylSchurTail.v23EvenFiniteRegularBudget_allocation
           #print axioms RiemannCvs.BoundaryWeylSchurTail.v23OddFiniteRegularBudget_allocation
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCoupling_of_v23OddFixedBaseAndDyadicBudgets
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCoupling_of_twoSourceAmplitudeBounds
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.halfTransportRelativeCoupling_of_twoSourceAmplitudeBounds
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCoupling_of_twoChannelBudgets
           #print axioms RiemannCvs.BoundaryWeylSchurTail.fourNinthsShell_of_twoChannelReference
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCoupling_of_scaledFormNonnegative
@@ -512,6 +514,7 @@ jobs:
             --shift-gain 1/1024 \
             --reference-q 249/250 \
             --candidate-leading 1/30 \
+            --source-component-diagnostic \
             --json-out research/riemann-cvs-numerics/artifacts/v23_c13_previous_core_to_N3840_dyadic_channels.json
           python research/riemann-cvs-numerics/probe_previous_core_dyadic_channels.py \
             --c 13 \
@@ -527,6 +530,8 @@ jobs:
             --expected-exception-sector odd \
             --expected-exception-modes 1 20 \
             --require-half-transport \
+            --source-component-diagnostic \
+            --require-regular-loewner-pole-half-transport \
             --json-out research/riemann-cvs-numerics/artifacts/v23_c13_previous_core_to_N7680_transport_diagnostic.json
 
       - name: Certify the exceptional odd fixed-base channel

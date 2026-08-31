@@ -1060,6 +1060,106 @@ theorem relativeCoupling_of_v23OddFixedBaseAndDyadicBudgets
   · norm_num
   · exact hRelative
 
+/-- Combine two source pieces measured against the same core/tail energies at
+the amplitude level.  If the individual squared coefficients are `a^2` and
+`b^2`, the exact triangle coefficient is `(a+b)^2`; this avoids the fixed
+factor-two loss of estimating both pieces with a common squared budget.
+
+The post-`N=1920` previous-core route uses `crossFirst` for the combined
+Archimedean/prime Loewner block and `crossSecond` for the rank-two pole block.
+Keeping the first block intact retains the cancellation visible in the source
+difference quotients. -/
+theorem relativeCoupling_of_twoSourceAmplitudeBounds
+    (energy tail crossFirst crossSecond ampFirst ampSecond : ℝ)
+    (hEnergy : 0 ≤ energy)
+    (hTail : 0 ≤ tail)
+    (hAmpFirst : 0 ≤ ampFirst)
+    (hAmpSecond : 0 ≤ ampSecond)
+    (hFirst : crossFirst ^ 2 ≤ ampFirst ^ 2 * energy * tail)
+    (hSecond : crossSecond ^ 2 ≤ ampSecond ^ 2 * energy * tail) :
+    (crossFirst + crossSecond) ^ 2 ≤
+      (ampFirst + ampSecond) ^ 2 * energy * tail := by
+  let z := energy * tail
+  have hz : 0 ≤ z := mul_nonneg hEnergy hTail
+  have hFirst' : crossFirst ^ 2 ≤ ampFirst ^ 2 * z := by
+    simpa [z, mul_assoc] using hFirst
+  have hSecond' : crossSecond ^ 2 ≤ ampSecond ^ 2 * z := by
+    simpa [z, mul_assoc] using hSecond
+  by_cases hFirstZero : ampFirst = 0
+  · subst ampFirst
+    have hCrossFirstZero : crossFirst = 0 := by
+      nlinarith [sq_nonneg crossFirst]
+    subst crossFirst
+    simpa [z, mul_assoc] using hSecond'
+  by_cases hSecondZero : ampSecond = 0
+  · subst ampSecond
+    have hCrossSecondZero : crossSecond = 0 := by
+      nlinarith [sq_nonneg crossSecond]
+    subst crossSecond
+    simpa [z, mul_assoc] using hFirst'
+  have hAmpFirstPos : 0 < ampFirst :=
+    lt_of_le_of_ne hAmpFirst (Ne.symm hFirstZero)
+  have hAmpSecondPos : 0 < ampSecond :=
+    lt_of_le_of_ne hAmpSecond (Ne.symm hSecondZero)
+  have hFirstScaled :
+      ampSecond ^ 2 * crossFirst ^ 2 ≤
+        ampSecond ^ 2 * (ampFirst ^ 2 * z) :=
+    mul_le_mul_of_nonneg_left hFirst' (sq_nonneg ampSecond)
+  have hSecondScaled :
+      ampFirst ^ 2 * crossSecond ^ 2 ≤
+        ampFirst ^ 2 * (ampSecond ^ 2 * z) :=
+    mul_le_mul_of_nonneg_left hSecond' (sq_nonneg ampFirst)
+  have hWeighted :
+      2 * ampFirst * ampSecond * crossFirst * crossSecond ≤
+        2 * (ampFirst * ampSecond) ^ 2 * z := by
+    nlinarith [sq_nonneg (ampFirst * crossSecond -
+      ampSecond * crossFirst)]
+  have hAmpProductPos : 0 < ampFirst * ampSecond :=
+    mul_pos hAmpFirstPos hAmpSecondPos
+  have hMix :
+      2 * crossFirst * crossSecond ≤
+        2 * ampFirst * ampSecond * z := by
+    have hFactored :
+        (ampFirst * ampSecond) *
+            (2 * crossFirst * crossSecond -
+              2 * ampFirst * ampSecond * z) ≤ 0 := by
+      nlinarith [hWeighted]
+    exact sub_nonpos.mp
+      (nonpos_of_mul_nonpos_right hFactored hAmpProductPos)
+  dsimp [z] at *
+  nlinarith
+
+/-- Half-transport adapter for the structured two-source split.  An amplitude
+budget `(a+b)^2 ≤ previousCoefficient/2` turns the two component form bounds
+into the exact coefficient transport consumed by
+`dyadicChannelBudgetEnvelope_of_newest_and_halfTransport`. -/
+theorem halfTransportRelativeCoupling_of_twoSourceAmplitudeBounds
+    (energy tail crossFirst crossSecond ampFirst ampSecond
+      previousCoefficient : ℝ)
+    (hEnergy : 0 ≤ energy)
+    (hTail : 0 ≤ tail)
+    (hAmpFirst : 0 ≤ ampFirst)
+    (hAmpSecond : 0 ≤ ampSecond)
+    (hAmplitudeBudget :
+      (ampFirst + ampSecond) ^ 2 ≤
+        (1 / 2 : ℝ) * previousCoefficient)
+    (hFirst : crossFirst ^ 2 ≤ ampFirst ^ 2 * energy * tail)
+    (hSecond : crossSecond ^ 2 ≤ ampSecond ^ 2 * energy * tail) :
+    (crossFirst + crossSecond) ^ 2 ≤
+      ((1 / 2 : ℝ) * previousCoefficient) * energy * tail := by
+  have hCombined := relativeCoupling_of_twoSourceAmplitudeBounds
+    energy tail crossFirst crossSecond ampFirst ampSecond
+    hEnergy hTail hAmpFirst hAmpSecond hFirst hSecond
+  have hEnergyTail : 0 ≤ energy * tail := mul_nonneg hEnergy hTail
+  have hScaled := mul_le_mul_of_nonneg_right hAmplitudeBudget hEnergyTail
+  calc
+    (crossFirst + crossSecond) ^ 2 ≤
+        (ampFirst + ampSecond) ^ 2 * energy * tail := hCombined
+    _ = (ampFirst + ampSecond) ^ 2 * (energy * tail) := by ring
+    _ ≤ ((1 / 2 : ℝ) * previousCoefficient) *
+        (energy * tail) := hScaled
+    _ = ((1 / 2 : ℝ) * previousCoefficient) * energy * tail := by ring
+
 /-- Combine fixed-low/shell and high-core/shell estimates into one relative
 coupling bound.  The factor two is the division-free inequality
 `(a+b)^2 ≤ 2*a^2 + 2*b^2`; consequently each channel may consume at most half
