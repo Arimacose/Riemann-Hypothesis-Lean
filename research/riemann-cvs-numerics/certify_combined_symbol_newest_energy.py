@@ -308,11 +308,14 @@ def certify(
             "RiemannCvs.CombinedSymbolDyadicL2.rectangularSymbolSquareBudget_two_mul",
             "RiemannCvs.CombinedSymbolDyadicL2.rectangularSymbolSquareBudget_halfTransport",
             "RiemannCvs.CombinedSymbolDyadicL2.rectangular_relativeCoupling_halfTransport_of_shifted_symbolSquareRowBudgets",
+            "RiemannCvs.CombinedSymbolDyadicL2.summable_archimedeanGeometricSeries_terms",
+            "RiemannCvs.CombinedSymbolDyadicL2.logarithmicArchimedeanSymbol_odd",
+            "RiemannCvs.CombinedSymbolDyadicL2.logarithmicCutoffFreeKernel_archimedean_law",
         ],
         "conditional_operator_inputs": [
             (
-                "the concrete digamma/geometric Archimedean closed forms instantiate "
-                "the arch symbol and diagonal of the exact cutoff-free kernel adapter"
+                "the concrete CvS trigamma/geometric diagonal values instantiate "
+                "the archDiagonal argument of the exact cutoff-free kernel adapter"
             ),
             "the parity shell forms dominate the displayed Euclidean coercive floors",
             "the separated mode bands are identified with the stated finite row and column sets",

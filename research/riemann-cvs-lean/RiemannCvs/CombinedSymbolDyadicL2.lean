@@ -1,6 +1,8 @@
 import Mathlib.Algebra.Ring.GeomSum
+import Mathlib.Analysis.Calculus.Deriv.Star
 import Mathlib.Analysis.Complex.Trigonometric
 import Mathlib.Analysis.PSeries
+import Mathlib.Analysis.SpecialFunctions.Gamma.Digamma
 import RiemannCvs.BoundaryWeylCumulative
 import RiemannCvs.CvSParityDisplacement
 
@@ -14,10 +16,10 @@ bounds.
 
 There are eight layers.
 
-1. A source-algebra layer builds the finite prime sine polynomial, proves its
-   oddness, combines it with an odd Archimedean symbol, preserves the exact
-   `1 / π` normalization through the Loewner kernel, and removes the endpoint
-   phase `2 * π * n` on natural Fourier modes.
+1. A source-algebra layer builds the finite prime sine polynomial, defines the
+   concrete digamma/geometric Archimedean symbol, proves convergence and
+   oddness, preserves the exact `1 / π` normalization through the Loewner
+   kernel, and removes the endpoint phase `2 * π * n` on natural Fourier modes.
 2. Exact finite geometric-sum theorems control every nonresonant shifted
    exponential, sine, and cosine phase sum used by the scalar certificate.
 3. The exact parity formulas from `CvSParityDisplacement` give entry bounds
@@ -677,6 +679,162 @@ theorem logarithmicCutoffFreeKernel_law
       (logarithmicCombinedSymbol_odd arch c location base hArch))
   simpa [sub_eq_add_neg] using
     (logarithmicPoleKernel_law c hc).add hRegular.neg
+
+/-!
+### Concrete Archimedean symbol
+
+The numerical source builder evaluates a digamma imaginary part and subtracts
+an exponentially convergent geometric correction.  The definitions below
+record that formula literally, prove convergence for every `c > 1`, establish
+its oddness from complex conjugation, and instantiate the complete cutoff-free
+displacement law without an abstract Archimedean-symbol premise.
+-/
+
+theorem deriv_gamma_conj (s : ℂ) :
+    deriv Complex.Gamma ((starRingEnd ℂ) s) =
+      (starRingEnd ℂ) (deriv Complex.Gamma s) := by
+  have hGamma :
+      (starRingEnd ℂ) ∘ Complex.Gamma ∘ (starRingEnd ℂ) =
+        Complex.Gamma := by
+    funext z
+    simp [Function.comp_apply, Complex.Gamma_conj]
+  have hDeriv := congrArg deriv hGamma
+  rw [deriv_conj_conj] at hDeriv
+  have hs := congrFun hDeriv ((starRingEnd ℂ) s)
+  simpa [Function.comp_apply] using hs.symm
+
+theorem digamma_conj (s : ℂ) :
+    Complex.digamma ((starRingEnd ℂ) s) =
+      (starRingEnd ℂ) (Complex.digamma s) := by
+  rw [Complex.digamma_def, logDeriv_apply, logDeriv_apply,
+    deriv_gamma_conj, Complex.Gamma_conj]
+  exact (map_div₀ (starRingEnd ℂ)
+    (deriv Complex.Gamma s) (Complex.Gamma s)).symm
+
+/-- Fourier frequency used by the Archimedean source at cutoff `c`. -/
+noncomputable def archimedeanFrequency (c x : ℝ) : ℝ :=
+  2 * Real.pi * x / Real.log c
+
+/-- Positive half-integer in the geometric correction series. -/
+noncomputable def archimedeanHalfInteger (k : ℕ) : ℝ :=
+  2 * (k : ℝ) + 1 / 2
+
+/-- The even geometric correction series in the Archimedean sine symbol. -/
+noncomputable def archimedeanGeometricSeries (c x : ℝ) : ℝ :=
+  ∑' k : ℕ, Real.exp (-archimedeanHalfInteger k * Real.log c) /
+    (archimedeanHalfInteger k ^ 2 + archimedeanFrequency c x ^ 2)
+
+theorem summable_archimedeanGeometricSeries_terms
+    (c x : ℝ) (hc : 1 < c) :
+    Summable (fun k : ℕ =>
+      Real.exp (-archimedeanHalfInteger k * Real.log c) /
+        (archimedeanHalfInteger k ^ 2 + archimedeanFrequency c x ^ 2)) := by
+  have hLog : 0 < Real.log c := Real.log_pos hc
+  have hExp : Summable (fun k : ℕ =>
+      Real.exp ((k : ℝ) * (-2 * Real.log c))) :=
+    Real.summable_exp_nat_mul_iff.mpr (by linarith)
+  have hNumerator : Summable (fun k : ℕ =>
+      Real.exp (-archimedeanHalfInteger k * Real.log c)) := by
+    have hEq :
+        (fun k : ℕ =>
+            Real.exp (-archimedeanHalfInteger k * Real.log c)) =
+          fun k : ℕ => Real.exp (-Real.log c / 2) *
+            Real.exp ((k : ℝ) * (-2 * Real.log c)) := by
+      funext k
+      rw [← Real.exp_add]
+      unfold archimedeanHalfInteger
+      congr 1
+      ring
+    rw [hEq]
+    exact hExp.mul_left _
+  refine (hNumerator.mul_left 4).of_nonneg_of_le (fun k => ?_) (fun k => ?_)
+  · positivity
+  · have hHalf : 1 / 2 ≤ archimedeanHalfInteger k := by
+      unfold archimedeanHalfInteger
+      have hk : 0 ≤ (k : ℝ) := Nat.cast_nonneg k
+      linarith
+    have hDen : 0 <
+        archimedeanHalfInteger k ^ 2 + archimedeanFrequency c x ^ 2 := by
+      nlinarith [sq_nonneg (archimedeanFrequency c x)]
+    apply (div_le_iff₀ hDen).2
+    have hExpNonneg :
+        0 ≤ Real.exp (-archimedeanHalfInteger k * Real.log c) := by
+      positivity
+    have hOne : 1 ≤ 4 *
+        (archimedeanHalfInteger k ^ 2 + archimedeanFrequency c x ^ 2) := by
+      nlinarith [sq_nonneg (archimedeanFrequency c x)]
+    calc
+      Real.exp (-archimedeanHalfInteger k * Real.log c) =
+          Real.exp (-archimedeanHalfInteger k * Real.log c) * 1 := by ring
+      _ ≤ Real.exp (-archimedeanHalfInteger k * Real.log c) *
+          (4 * (archimedeanHalfInteger k ^ 2 +
+            archimedeanFrequency c x ^ 2)) :=
+        mul_le_mul_of_nonneg_left hOne hExpNonneg
+      _ = 4 * Real.exp (-archimedeanHalfInteger k * Real.log c) *
+          (archimedeanHalfInteger k ^ 2 + archimedeanFrequency c x ^ 2) := by
+        ring
+
+theorem archimedeanFrequency_neg (c x : ℝ) :
+    archimedeanFrequency c (-x) = -archimedeanFrequency c x := by
+  unfold archimedeanFrequency
+  ring
+
+theorem archimedeanGeometricSeries_neg (c x : ℝ) :
+    archimedeanGeometricSeries c (-x) =
+      archimedeanGeometricSeries c x := by
+  unfold archimedeanGeometricSeries
+  apply tsum_congr
+  intro k
+  rw [archimedeanFrequency_neg]
+  ring
+
+/-- Digamma contribution to the odd Archimedean symbol. -/
+noncomputable def archimedeanDigammaImaginary (c x : ℝ) : ℝ :=
+  (1 / 2) *
+    (Complex.digamma
+      ((1 / 4 : ℂ) +
+        ((Real.pi * x / Real.log c : ℝ) : ℂ) * Complex.I)).im
+
+theorem archimedeanDigammaImaginary_neg (c x : ℝ) :
+    archimedeanDigammaImaginary c (-x) =
+      -archimedeanDigammaImaginary c x := by
+  have hArg :
+      (1 / 4 : ℂ) +
+          ((Real.pi * (-x) / Real.log c : ℝ) : ℂ) * Complex.I =
+        (starRingEnd ℂ) ((1 / 4 : ℂ) +
+          ((Real.pi * x / Real.log c : ℝ) : ℂ) * Complex.I) := by
+    apply Complex.ext
+    · simp
+    · simp
+      ring
+  unfold archimedeanDigammaImaginary
+  rw [hArg, digamma_conj]
+  simp
+
+/-- Concrete real odd symbol used by the cutoff-free Archimedean
+off-diagonal matrix entries. -/
+noncomputable def logarithmicArchimedeanSymbol (c x : ℝ) : ℝ :=
+  archimedeanDigammaImaginary c x -
+    archimedeanFrequency c x * archimedeanGeometricSeries c x
+
+theorem logarithmicArchimedeanSymbol_odd (c : ℝ) :
+    Function.Odd (logarithmicArchimedeanSymbol c) := by
+  intro x
+  rw [logarithmicArchimedeanSymbol, logarithmicArchimedeanSymbol,
+    archimedeanDigammaImaginary_neg, archimedeanFrequency_neg,
+    archimedeanGeometricSeries_neg]
+  ring
+
+theorem logarithmicCutoffFreeKernel_archimedean_law
+    {ι : Type*} [Fintype ι]
+    (archDiagonal : ℝ → ℝ) (c : ℝ)
+    (location base : ι → ℝ) (hc : 1 < c) :
+    CvSParityDisplacement.DisplacementLaw
+      (logarithmicCutoffFreeKernel
+        (logarithmicArchimedeanSymbol c) archDiagonal c location base) := by
+  exact logarithmicCutoffFreeKernel_law
+    (logarithmicArchimedeanSymbol c) archDiagonal c location base
+    (logarithmicArchimedeanSymbol_odd c) hc
 
 /-- Every strict interior event `1 < q < c` has a positive half-angle sine,
 so its finite geometric sums are nonresonant without numerical phase testing. -/

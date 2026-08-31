@@ -252,9 +252,13 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   Archimedean diagonal/off-diagonal entry, instantiate the rational pole with
   scale `32*log(c)*sinh(log(c)/4)^2` and denominators `log(c)^2+16*pi^2*n^2`,
   assemble `T=W_02-W_R-W_p`, and prove its complete displacement law.  The
-  remaining source identification is the analytic equality of the concrete
-  CvS digamma/geometric Archimedean values and diagonal data with the packaged
-  symbol, followed by restriction to the stated parity shell bands.  The combined-symbol certificate
+  concrete Archimedean symbol is now defined by its literal digamma-imaginary
+  part and exponentially convergent geometric correction.  Lean proves the
+  correction series summable for every `c>1`, proves the symbol odd by complex
+  conjugation, and instantiates the full cutoff-free displacement law with it.
+  The remaining source identification is the analytic equality of the concrete
+  CvS trigamma/geometric diagonal data with the supplied diagonal branch,
+  followed by restriction to the stated parity shell bands.  The combined-symbol certificate
   now also rests on a Lean proof of the finite nonresonant geometric-sum bound,
   including arbitrary starting indices and its sine/cosine projections; Arb
   retains the composite doubled/difference/sum phase checks.  Nine further

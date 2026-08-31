@@ -381,6 +381,30 @@ def certify(
             "cutoff_free_displacement": (
                 "RiemannCvs.CombinedSymbolDyadicL2.logarithmicCutoffFreeKernel_law"
             ),
+            "archimedean_frequency": (
+                "RiemannCvs.CombinedSymbolDyadicL2.archimedeanFrequency"
+            ),
+            "archimedean_geometric_series": (
+                "RiemannCvs.CombinedSymbolDyadicL2.archimedeanGeometricSeries"
+            ),
+            "archimedean_geometric_series_summable": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "summable_archimedeanGeometricSeries_terms"
+            ),
+            "archimedean_digamma_imaginary": (
+                "RiemannCvs.CombinedSymbolDyadicL2.archimedeanDigammaImaginary"
+            ),
+            "archimedean_symbol": (
+                "RiemannCvs.CombinedSymbolDyadicL2.logarithmicArchimedeanSymbol"
+            ),
+            "archimedean_symbol_odd": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "logarithmicArchimedeanSymbol_odd"
+            ),
+            "concrete_archimedean_cutoff_free_displacement": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "logarithmicCutoffFreeKernel_archimedean_law"
+            ),
             "cutoff_endpoint_zero": (
                 "RiemannCvs.CombinedSymbolDyadicL2.logarithmicPrimeEndpoint_term_zero"
             ),

@@ -2175,11 +2175,40 @@ cutoff-free displacement law.  The five new theorem interfaces are:
 * `logarithmicCutoffFreeKernel_eq_pole_sub_oddDifferenceKernel`;
 * `logarithmicCutoffFreeKernel_law`.
 
-Thus the remaining analytic identity is now pointwise: instantiate `arch` and
-`archDiagonal` with the digamma/geometric closed forms `S_n` and
-`kappa+2*CC_n+J-(2/L)*XC_n`.  The finite prime loop, endpoint deletion,
-rational pole parameters, subtraction signs, and displacement algebra no
-longer belong to that open step.
+The Archimedean symbol itself is now concrete as well.  With
+
+```text
+omega(c,x) = 2*pi*x/log(c),
+a_k = 2*k + 1/2,
+G(c,x) = sum_(k>=0) exp(-a_k*log(c))/(a_k^2+omega(c,x)^2),
+S(c,x) = (1/2)*Im digamma(1/4+i*pi*x/log(c)) - omega(c,x)*G(c,x),
+```
+
+Lean proves that the series defining `G` is summable for every `c>1` by
+comparison with an explicit geometric series.  Complex conjugation of Gamma,
+its derivative, and digamma then gives oddness of the imaginary digamma term;
+the squared-frequency denominator makes `G` even, so `S(c,-x)=-S(c,x)`.
+Consequently the complete kernel with this concrete symbol satisfies the
+cutoff-free displacement law directly, rather than through an abstract
+odd-symbol hypothesis.  The eight public theorem interfaces are:
+
+* `deriv_gamma_conj`;
+* `digamma_conj`;
+* `summable_archimedeanGeometricSeries_terms`;
+* `archimedeanFrequency_neg`;
+* `archimedeanGeometricSeries_neg`;
+* `archimedeanDigammaImaginary_neg`;
+* `logarithmicArchimedeanSymbol_odd`;
+* `logarithmicCutoffFreeKernel_archimedean_law`.
+
+Thus the remaining pointwise source identity is confined to the actual
+diagonal: instantiate `archDiagonal` with
+`kappa+2*CC_n+J-(2/L)*XC_n` and identify it with the CvS
+trigamma/geometric diagonal branch.  The subsequent operator step restricts
+the already assembled kernel to the finite parity shell bands.  The finite
+prime loop, Archimedean off-diagonal symbol, endpoint deletion, rational pole
+parameters, subtraction signs, convergence, oddness, and displacement algebra
+no longer belong to those open steps.
 
 The composite phase conditions are also symbolic now.  For two strict
 interior locations, Lean proves the pair-difference half phase lies in
