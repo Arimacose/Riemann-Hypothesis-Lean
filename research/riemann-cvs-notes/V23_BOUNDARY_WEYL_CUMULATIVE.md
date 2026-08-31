@@ -2291,6 +2291,72 @@ seventeen public interfaces of this layer are:
 * `archimedeanCrossCorrection_ge`;
 * `neg_logarithmicArchimedeanDiagonal_ge_of_digamma`.
 
+### Digamma/trigamma asymptotic bridge
+
+The next kernel-checked layer now matches the analytic decomposition used by
+`certify_archimedean_tail_envelope.py`.  Put
+
+```text
+y(c,x) = pi*x/log(c),
+D_floor(c,x) = log(y) - (1/8 + sqrt(2)/6)/y^2,
+T_floor(c,x) = -(1/y + 1/y^2).
+```
+
+A complex norm premise for the first digamma asymptotic term,
+
+```text
+||psi(1/4+i*y) - (log(1/4+i*y) - 1/(2*(1/4+i*y)))||
+  <= sqrt(2)/(6*y^2),
+```
+
+now implies `D_floor <= Re psi` inside Lean.  The proof uses
+`Re(log z)=log||z||`, `y<=||z||`, the exact real part of `1/(2z)`, and
+`|Re r|<=||r||`; the formerly informal `1/8` and remainder coefficients are
+therefore wired to the literal complex argument.  Combining this with
+`T_floor <= Re psi'` gives
+
+```text
+-logarithmicArchimedeanDiagonal(c,x)
+  >= log(x) + asymptoticConstant(c) - asymptoticError(c,x).
+```
+
+Lean proves the displayed error antitone for positive modes.  Consequently the
+cutoff-13 target
+
+```text
+-logarithmicArchimedeanDiagonal(13,x) >= log(x) - 19/20
+```
+
+for every `x>=960` follows from the two analytic remainder premises at `x` and
+one scalar comparison at the single endpoint `x=960`.  A shell adapter sends
+this directly to the literal CvS diagonal floor `log(old)-19/20` whenever
+`old>=960`.  Thus the all-mode scalar monotonicity and every geometric term are
+closed; what remains in this diagonal branch is the DLMF norm-remainder theorem,
+the trigamma-series floor theorem, and the one certified endpoint inequality.
+
+The twenty public interfaces are:
+
+* `archimedeanAsymptoticHeight`;
+* `archimedeanArgument_re`;
+* `archimedeanArgument_im`;
+* `archimedeanAsymptoticHeight_pos`;
+* `archimedeanFrequency_eq_two_mul_height`;
+* `archimedeanFrequency_ne_zero_of_pos`;
+* `archimedeanDigammaAsymptoticFloor`;
+* `archimedeanTrigammaSeriesFloor`;
+* `archimedeanArgument_log_re_ge_log_height`;
+* `archimedeanArgument_halfInv_re_le`;
+* `digamma_real_ge_asymptoticFloor_of_norm_remainder`;
+* `archimedeanGeometricFirstMoment_nonneg`;
+* `archimedeanDiagonalAsymptoticConstant`;
+* `archimedeanDiagonalAsymptoticError`;
+* `archimedeanDiagonalAsymptoticError_antitone`;
+* `archimedeanDiagonalAsymptoticLower`;
+* `neg_logarithmicArchimedeanDiagonal_ge_of_asymptotic_bounds`;
+* `neg_logarithmicArchimedeanDiagonal_ge_log_sub_of_asymptotic_bounds`;
+* `c13_neg_logarithmicArchimedeanDiagonal_ge_log_sub_nineteenTwentieth`;
+* `c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth`.
+
 The signed-integer finite builder bridge is now exact as well.  Lean defines
 the implementation's signed Archimedean extension, absolute-mode diagonal,
 literal rational pole entry, diagonal/off-diagonal Archimedean branch, complete

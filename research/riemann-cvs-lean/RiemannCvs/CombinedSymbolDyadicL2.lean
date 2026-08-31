@@ -46,8 +46,10 @@ and simultaneous-reflection invariance are also proved, so the finite recursive
   remaining operator input is the concrete Archimedean diagonal/remainder and
   prime-form bound.  The exponential-series mass and first moment are evaluated
   exactly below, closing every geometric correction in the Archimedean symbol
-  and diagonal; the latter is reduced to real digamma and trigamma bounds.  The
-  scalar pole-weight tail estimate is now closed by
+  and diagonal.  Its lower bound is now reduced further to a DLMF-form digamma
+  norm remainder, the real trigamma series floor, and one cutoff-13 endpoint
+  scalar comparison; Lean converts those inputs to the all-mode shell floor.
+  The scalar pole-weight tail estimate is now closed by
   pointwise reciprocal-square bounds and a consecutive-shell reindexing.  The
   all-scale shell-tower compatibility, the exact positive-mode component
   decomposition, its direct application to the concrete tower-tail energy,
@@ -1655,6 +1657,314 @@ theorem neg_logarithmicArchimedeanDiagonal_ge_of_digamma
   have hCrossScaled := mul_le_mul_of_nonneg_left hCross hFactor
   unfold logarithmicArchimedeanDiagonal
   linarith
+
+/-!
+### Explicit asymptotic bridge for the Archimedean diagonal
+
+The numerical tail certificate uses the first digamma asymptotic term and the
+real trigamma series estimate at `z = 1/4 + i*y`.  The next layer isolates
+those two genuinely analytic statements.  A norm bound for
+`digamma z - (log z - 1/(2*z))` is converted to the exact real floor used by
+the certificate.  The complete diagonal bound is then expressed as
+`log x + constant - error`, the error is proved antitone for positive modes,
+and the cutoff-13 tail comparison is reduced to the single endpoint `x=960`.
+-/
+noncomputable def archimedeanAsymptoticHeight (c x : ℝ) : ℝ :=
+  Real.pi * x / Real.log c
+
+@[simp] theorem archimedeanArgument_re (c x : ℝ) :
+    (archimedeanArgument c x).re = 1 / 4 := by
+  simp [archimedeanArgument]
+
+@[simp] theorem archimedeanArgument_im (c x : ℝ) :
+    (archimedeanArgument c x).im = archimedeanAsymptoticHeight c x := by
+  simp [archimedeanArgument, archimedeanAsymptoticHeight]
+
+lemma archimedeanAsymptoticHeight_pos
+    (c x : ℝ) (hc : 1 < c) (hx : 0 < x) :
+    0 < archimedeanAsymptoticHeight c x := by
+  unfold archimedeanAsymptoticHeight
+  positivity [Real.log_pos hc, Real.pi_pos]
+
+lemma archimedeanFrequency_eq_two_mul_height (c x : ℝ) :
+    archimedeanFrequency c x = 2 * archimedeanAsymptoticHeight c x := by
+  unfold archimedeanFrequency archimedeanAsymptoticHeight
+  ring
+
+lemma archimedeanFrequency_ne_zero_of_pos
+    (c x : ℝ) (hc : 1 < c) (hx : 0 < x) :
+    archimedeanFrequency c x ≠ 0 := by
+  rw [archimedeanFrequency_eq_two_mul_height]
+  exact mul_ne_zero (by norm_num)
+    (ne_of_gt (archimedeanAsymptoticHeight_pos c x hc hx))
+
+noncomputable def archimedeanDigammaAsymptoticFloor (c x : ℝ) : ℝ :=
+  Real.log (archimedeanAsymptoticHeight c x) -
+    (1 / 8 + Real.sqrt 2 / 6) / archimedeanAsymptoticHeight c x ^ 2
+
+noncomputable def archimedeanTrigammaSeriesFloor (c x : ℝ) : ℝ :=
+  -(1 / archimedeanAsymptoticHeight c x +
+    1 / archimedeanAsymptoticHeight c x ^ 2)
+
+lemma archimedeanArgument_log_re_ge_log_height
+    (c x : ℝ) (hc : 1 < c) (hx : 0 < x) :
+    Real.log (archimedeanAsymptoticHeight c x) ≤
+      (Complex.log (archimedeanArgument c x)).re := by
+  rw [Complex.log_re]
+  apply Real.log_le_log (archimedeanAsymptoticHeight_pos c x hc hx)
+  have hIm := Complex.abs_im_le_norm (archimedeanArgument c x)
+  simpa [abs_of_pos (archimedeanAsymptoticHeight_pos c x hc hx)] using hIm
+
+lemma archimedeanArgument_halfInv_re_le
+    (c x : ℝ) (hc : 1 < c) (hx : 0 < x) :
+    (1 / (2 * archimedeanArgument c x) : ℂ).re ≤
+      (1 / 8 : ℝ) / archimedeanAsymptoticHeight c x ^ 2 := by
+  have hy : 0 < archimedeanAsymptoticHeight c x :=
+    archimedeanAsymptoticHeight_pos c x hc hx
+  rw [div_eq_mul_inv, one_mul, Complex.inv_re]
+  simp [Complex.normSq_apply, archimedeanArgument]
+  apply (div_le_div_iff₀ (by positivity) (sq_pos_of_pos hy)).2
+  unfold archimedeanAsymptoticHeight
+  nlinarith [sq_nonneg (Real.pi * x / Real.log c)]
+
+lemma digamma_real_ge_asymptoticFloor_of_norm_remainder
+    (c x : ℝ) (hc : 1 < c) (hx : 0 < x)
+    (hRemainder :
+      ‖Complex.digamma (archimedeanArgument c x) -
+          (Complex.log (archimedeanArgument c x) -
+            1 / (2 * archimedeanArgument c x))‖ ≤
+        Real.sqrt 2 /
+          (6 * archimedeanAsymptoticHeight c x ^ 2)) :
+    archimedeanDigammaAsymptoticFloor c x ≤
+      (Complex.digamma (archimedeanArgument c x)).re := by
+  let z := archimedeanArgument c x
+  let y := archimedeanAsymptoticHeight c x
+  have hy : 0 < y := archimedeanAsymptoticHeight_pos c x hc hx
+  have hLog : Real.log y ≤ (Complex.log z).re := by
+    simpa [z, y] using archimedeanArgument_log_re_ge_log_height c x hc hx
+  have hInv : (1 / (2 * z) : ℂ).re ≤ (1 / 8 : ℝ) / y ^ 2 := by
+    simpa [z, y] using archimedeanArgument_halfInv_re_le c x hc hx
+  let r : ℂ := Complex.digamma z - (Complex.log z - 1 / (2 * z))
+  have hrNorm : ‖r‖ ≤ Real.sqrt 2 / (6 * y ^ 2) := by
+    simpa [r, z, y] using hRemainder
+  have hrRe : -(Real.sqrt 2 / (6 * y ^ 2)) ≤ r.re := by
+    have hneg : -‖r‖ ≤ r.re := by
+      have habs := Complex.abs_re_le_norm r
+      linarith [neg_le_abs r.re]
+    exact (neg_le_neg hrNorm).trans hneg
+  have hIdentity :
+      (Complex.digamma z).re =
+        (Complex.log z).re - (1 / (2 * z) : ℂ).re + r.re := by
+    change (Complex.digamma z).re =
+      (Complex.log z).re - (1 / (2 * z) : ℂ).re +
+        (Complex.digamma z - (Complex.log z - 1 / (2 * z))).re
+    simp only [Complex.sub_re]
+    ring
+  have hError :
+      (1 / 8 + Real.sqrt 2 / 6) / y ^ 2 =
+        (1 / 8 : ℝ) / y ^ 2 + Real.sqrt 2 / (6 * y ^ 2) := by
+    field_simp [ne_of_gt hy]
+  have hFinal :
+      Real.log y - (1 / 8 + Real.sqrt 2 / 6) / y ^ 2 ≤
+        (Complex.digamma z).re := by
+    rw [hIdentity, hError]
+    linarith
+  simpa [archimedeanDigammaAsymptoticFloor, z, y] using hFinal
+
+theorem archimedeanGeometricFirstMoment_nonneg (c : ℝ) (hc : 1 < c) :
+    0 ≤ archimedeanGeometricFirstMoment c := by
+  rw [← tsum_archimedeanExponentialMoment_eq_geometricFirstMoment c hc]
+  apply tsum_nonneg
+  intro k
+  have hHalf : 0 ≤ archimedeanHalfInteger k := by
+    unfold archimedeanHalfInteger
+    positivity
+  exact mul_nonneg hHalf (le_of_lt (Real.exp_pos _))
+noncomputable def archimedeanDiagonalAsymptoticConstant (c : ℝ) : ℝ :=
+  Real.log (Real.pi / Real.log c) -
+    (Complex.digamma (1 / 4 : ℂ)).re -
+    logarithmicArchimedeanKappa c - logarithmicArchimedeanPoleJ c -
+    4 * archimedeanGeometricMass c
+
+noncomputable def archimedeanDiagonalAsymptoticError (c x : ℝ) : ℝ :=
+  let y := archimedeanAsymptoticHeight c x
+  let w := archimedeanFrequency c x
+  (1 / 8 + Real.sqrt 2 / 6) / y ^ 2 +
+    (1 / y + 1 / y ^ 2) / (2 * Real.log c) +
+    2 * archimedeanGeometricFirstMoment c / w ^ 2 +
+    (2 / Real.log c) * archimedeanGeometricMass c / w ^ 2
+
+theorem archimedeanDiagonalAsymptoticError_antitone
+    (c x₀ x : ℝ) (hc : 1 < c) (hx₀ : 0 < x₀) (hxx : x₀ ≤ x) :
+    archimedeanDiagonalAsymptoticError c x ≤
+      archimedeanDiagonalAsymptoticError c x₀ := by
+  have hx : 0 < x := hx₀.trans_le hxx
+  let y₀ := archimedeanAsymptoticHeight c x₀
+  let y := archimedeanAsymptoticHeight c x
+  let w₀ := archimedeanFrequency c x₀
+  let w := archimedeanFrequency c x
+  have hy₀ : 0 < y₀ := archimedeanAsymptoticHeight_pos c x₀ hc hx₀
+  have hy : 0 < y := archimedeanAsymptoticHeight_pos c x hc hx
+  have hy₀y : y₀ ≤ y := by
+    calc
+      y₀ = (Real.pi / Real.log c) * x₀ := by
+        dsimp [y₀, archimedeanAsymptoticHeight]
+        ring
+      _ ≤ (Real.pi / Real.log c) * x :=
+        mul_le_mul_of_nonneg_left hxx (div_nonneg Real.pi_pos.le (Real.log_pos hc).le)
+      _ = y := by
+        dsimp [y, archimedeanAsymptoticHeight]
+        ring
+  have hySq : y₀ ^ 2 ≤ y ^ 2 := by nlinarith
+  have hInvY : 1 / y ≤ 1 / y₀ := one_div_le_one_div_of_le hy₀ hy₀y
+  have hInvYSq : 1 / y ^ 2 ≤ 1 / y₀ ^ 2 :=
+    one_div_le_one_div_of_le (sq_pos_of_pos hy₀) hySq
+  have hw₀ : 0 < w₀ := by
+    dsimp [w₀]
+    rw [archimedeanFrequency_eq_two_mul_height]
+    positivity
+  have hw : 0 < w := by
+    dsimp [w]
+    rw [archimedeanFrequency_eq_two_mul_height]
+    positivity
+  have hw₀w : w₀ ≤ w := by
+    dsimp [w₀, w]
+    simp only [archimedeanFrequency_eq_two_mul_height]
+    linarith
+  have hwSq : w₀ ^ 2 ≤ w ^ 2 := by nlinarith
+  have hA : 0 ≤ (1 / 8 + Real.sqrt 2 / 6 : ℝ) := by positivity
+  have hB : 0 ≤ 2 * archimedeanGeometricFirstMoment c := by
+    positivity [archimedeanGeometricFirstMoment_nonneg c hc]
+  have hC : 0 ≤ (2 / Real.log c) * archimedeanGeometricMass c := by
+    positivity [Real.log_pos hc, archimedeanGeometricMass_nonneg c hc]
+  have hTermA :
+      (1 / 8 + Real.sqrt 2 / 6) / y ^ 2 ≤
+        (1 / 8 + Real.sqrt 2 / 6) / y₀ ^ 2 :=
+    div_le_div_of_nonneg_left hA (sq_pos_of_pos hy₀) hySq
+  have hTermTrigamma :
+      (1 / y + 1 / y ^ 2) / (2 * Real.log c) ≤
+        (1 / y₀ + 1 / y₀ ^ 2) / (2 * Real.log c) := by
+    exact (div_le_div_iff_of_pos_right
+      (mul_pos (by norm_num) (Real.log_pos hc))).2 (add_le_add hInvY hInvYSq)
+  have hTermB :
+      (2 * archimedeanGeometricFirstMoment c) / w ^ 2 ≤
+        (2 * archimedeanGeometricFirstMoment c) / w₀ ^ 2 :=
+    div_le_div_of_nonneg_left hB (sq_pos_of_pos hw₀) hwSq
+  have hTermC :
+      ((2 / Real.log c) * archimedeanGeometricMass c) / w ^ 2 ≤
+        ((2 / Real.log c) * archimedeanGeometricMass c) / w₀ ^ 2 :=
+    div_le_div_of_nonneg_left hC (sq_pos_of_pos hw₀) hwSq
+  unfold archimedeanDiagonalAsymptoticError
+  dsimp only
+  change (1 / 8 + Real.sqrt 2 / 6) / y ^ 2 +
+      (1 / y + 1 / y ^ 2) / (2 * Real.log c) +
+      (2 * archimedeanGeometricFirstMoment c) / w ^ 2 +
+      ((2 / Real.log c) * archimedeanGeometricMass c) / w ^ 2 ≤
+    (1 / 8 + Real.sqrt 2 / 6) / y₀ ^ 2 +
+      (1 / y₀ + 1 / y₀ ^ 2) / (2 * Real.log c) +
+      (2 * archimedeanGeometricFirstMoment c) / w₀ ^ 2 +
+      ((2 / Real.log c) * archimedeanGeometricMass c) / w₀ ^ 2
+  linarith
+noncomputable def archimedeanDiagonalAsymptoticLower (c x : ℝ) : ℝ :=
+  Real.log x + archimedeanDiagonalAsymptoticConstant c -
+    archimedeanDiagonalAsymptoticError c x
+
+theorem neg_logarithmicArchimedeanDiagonal_ge_of_asymptotic_bounds
+    (c x : ℝ) (hc : 1 < c) (hx : 0 < x)
+    (hDigammaRemainder :
+      ‖Complex.digamma (archimedeanArgument c x) -
+          (Complex.log (archimedeanArgument c x) -
+            1 / (2 * archimedeanArgument c x))‖ ≤
+        Real.sqrt 2 /
+          (6 * archimedeanAsymptoticHeight c x ^ 2))
+    (hTrigamma : archimedeanTrigammaSeriesFloor c x ≤
+      (deriv Complex.digamma (archimedeanArgument c x)).re) :
+    archimedeanDiagonalAsymptoticLower c x ≤
+      -logarithmicArchimedeanDiagonal c x := by
+  have hy := archimedeanAsymptoticHeight_pos c x hc hx
+  have hw := archimedeanFrequency_ne_zero_of_pos c x hc hx
+  have hL := Real.log_pos hc
+  have hDigamma := digamma_real_ge_asymptoticFloor_of_norm_remainder
+    c x hc hx hDigammaRemainder
+  have hRaw := neg_logarithmicArchimedeanDiagonal_ge_of_digamma
+    c x (archimedeanDigammaAsymptoticFloor c x)
+      (archimedeanTrigammaSeriesFloor c x) hc hw hDigamma hTrigamma
+  have hRatio : 0 < Real.pi / Real.log c := div_pos Real.pi_pos hL
+  have hHeight : archimedeanAsymptoticHeight c x =
+      (Real.pi / Real.log c) * x := by
+    unfold archimedeanAsymptoticHeight
+    ring
+  have hLogHeight : Real.log (archimedeanAsymptoticHeight c x) =
+      Real.log (Real.pi / Real.log c) + Real.log x := by
+    rw [hHeight, Real.log_mul (ne_of_gt hRatio) (ne_of_gt hx)]
+  calc
+    archimedeanDiagonalAsymptoticLower c x =
+        -logarithmicArchimedeanKappa c - logarithmicArchimedeanPoleJ c +
+          (archimedeanDigammaAsymptoticFloor c x -
+            (Complex.digamma (1 / 4 : ℂ)).re -
+            4 * archimedeanGeometricMass c) +
+          (2 / Real.log c) *
+            ((1 / 4) * archimedeanTrigammaSeriesFloor c x -
+              Real.log c *
+                (archimedeanGeometricFirstMoment c /
+                  archimedeanFrequency c x ^ 2) -
+              archimedeanGeometricMass c /
+                archimedeanFrequency c x ^ 2) := by
+      unfold archimedeanDiagonalAsymptoticLower
+        archimedeanDiagonalAsymptoticConstant
+        archimedeanDiagonalAsymptoticError
+        archimedeanDigammaAsymptoticFloor
+        archimedeanTrigammaSeriesFloor
+      dsimp only
+      rw [hLogHeight]
+      field_simp [ne_of_gt hL, ne_of_gt hy, hw]
+      ring
+    _ ≤ -logarithmicArchimedeanDiagonal c x := hRaw
+
+
+theorem neg_logarithmicArchimedeanDiagonal_ge_log_sub_of_asymptotic_bounds
+    (c x₀ x offset : ℝ) (hc : 1 < c) (hx₀ : 0 < x₀) (hxx : x₀ ≤ x)
+    (hDigammaRemainder :
+      ‖Complex.digamma (archimedeanArgument c x) -
+          (Complex.log (archimedeanArgument c x) -
+            1 / (2 * archimedeanArgument c x))‖ ≤
+        Real.sqrt 2 /
+          (6 * archimedeanAsymptoticHeight c x ^ 2))
+    (hTrigamma : archimedeanTrigammaSeriesFloor c x ≤
+      (deriv Complex.digamma (archimedeanArgument c x)).re)
+    (hEndpoint : -offset ≤
+      archimedeanDiagonalAsymptoticConstant c -
+        archimedeanDiagonalAsymptoticError c x₀) :
+    Real.log x - offset ≤ -logarithmicArchimedeanDiagonal c x := by
+  have hx : 0 < x := hx₀.trans_le hxx
+  have hError := archimedeanDiagonalAsymptoticError_antitone
+    c x₀ x hc hx₀ hxx
+  have hConstant : -offset ≤
+      archimedeanDiagonalAsymptoticConstant c -
+        archimedeanDiagonalAsymptoticError c x := by
+    linarith
+  have hDiagonal := neg_logarithmicArchimedeanDiagonal_ge_of_asymptotic_bounds
+    c x hc hx hDigammaRemainder hTrigamma
+  unfold archimedeanDiagonalAsymptoticLower at hDiagonal
+  linarith
+
+theorem c13_neg_logarithmicArchimedeanDiagonal_ge_log_sub_nineteenTwentieth
+    (x : ℝ) (hx : (960 : ℝ) ≤ x)
+    (hDigammaRemainder :
+      ‖Complex.digamma (archimedeanArgument 13 x) -
+          (Complex.log (archimedeanArgument 13 x) -
+            1 / (2 * archimedeanArgument 13 x))‖ ≤
+        Real.sqrt 2 /
+          (6 * archimedeanAsymptoticHeight 13 x ^ 2))
+    (hTrigamma : archimedeanTrigammaSeriesFloor 13 x ≤
+      (deriv Complex.digamma (archimedeanArgument 13 x)).re)
+    (hEndpoint : -(19 / 20 : ℝ) ≤
+      archimedeanDiagonalAsymptoticConstant 13 -
+        archimedeanDiagonalAsymptoticError 13 960) :
+    Real.log x - 19 / 20 ≤ -logarithmicArchimedeanDiagonal 13 x := by
+  exact neg_logarithmicArchimedeanDiagonal_ge_log_sub_of_asymptotic_bounds
+    13 960 x (19 / 20) (by norm_num) (by norm_num) hx
+      hDigammaRemainder hTrigamma hEndpoint
 
 theorem logarithmicArchimedeanDiagonal_neg (c x : ℝ) :
     logarithmicArchimedeanDiagonal c (-x) =
