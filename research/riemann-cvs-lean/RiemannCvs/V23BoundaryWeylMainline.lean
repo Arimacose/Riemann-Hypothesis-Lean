@@ -248,9 +248,13 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   piecewise prime entry is exactly the normalized Loewner kernel.  A combined
   actual-diagonal adapter then leaves only the Archimedean source formula.
   Hence the prime algebra, entrywise identification, and normalization are
-  checked; the remaining source identification is the analytic equality of the
-  concrete CvS Archimedean entries and diagonal data with the packaged symbol,
-  followed by restriction to the stated parity shell bands.  The combined-symbol certificate
+  checked.  Five further full-source theorems expose the literal normalized
+  Archimedean diagonal/off-diagonal entry, instantiate the rational pole with
+  scale `32*log(c)*sinh(log(c)/4)^2` and denominators `log(c)^2+16*pi^2*n^2`,
+  assemble `T=W_02-W_R-W_p`, and prove its complete displacement law.  The
+  remaining source identification is the analytic equality of the concrete
+  CvS digamma/geometric Archimedean values and diagonal data with the packaged
+  symbol, followed by restriction to the stated parity shell bands.  The combined-symbol certificate
   now also rests on a Lean proof of the finite nonresonant geometric-sum bound,
   including arbitrary starting indices and its sine/cosine projections; Arb
   retains the composite doubled/difference/sum phase checks.  Nine further
@@ -263,9 +267,9 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   doubled, pair-difference, and pair-sum denominators symbolically nonzero.
   Arb now supplies their rigorous magnitudes rather than the nonresonance
   fact.  The remaining
-  source boundary is the analytic CvS Archimedean matrix-entry/diagonal
-  identification and the parity shell restriction, not the finite prime
-  formula itself.  The certificate
+  source boundary is the analytic CvS digamma/geometric Archimedean
+  value/diagonal identification and the parity shell restriction, not the
+  finite prime, rational pole, or full sign assembly.  The certificate
   now proves the scalar weighted square budget `<1/N` for every `N>=1920`.
   Fourteen further Lean adapters preserve the concrete `1/pi` Fourier scale,
   turn the old-band weighted budget into an ordinary square sum, close the

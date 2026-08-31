@@ -310,7 +310,10 @@ def certify(
             "RiemannCvs.CombinedSymbolDyadicL2.rectangular_relativeCoupling_halfTransport_of_shifted_symbolSquareRowBudgets",
         ],
         "conditional_operator_inputs": [
-            "the concrete Archimedean/prime crossblock is the odd Loewner kernel of F/pi",
+            (
+                "the concrete digamma/geometric Archimedean closed forms instantiate "
+                "the arch symbol and diagonal of the exact cutoff-free kernel adapter"
+            ),
             "the parity shell forms dominate the displayed Euclidean coercive floors",
             "the separated mode bands are identified with the stated finite row and column sets",
             "the block-diagonal shell energies are identified with the recursive-core energy sum",

@@ -557,6 +557,127 @@ theorem oddDifferenceKernel_logarithmicCombined_actualDiagonal
       (finiteLogarithmicPrimeSymbol c location base))
     (finiteLogarithmicPrimeDiagonal c location base) p q
 
+/-!
+### Full cutoff-free source assembly
+
+The Archimedean builder has the same literal diagonal/off-diagonal shape as
+the prime block.  The normalized source entry below makes that formula
+explicit.  Adding the already identified prime entry and subtracting both
+from the exact rational `W_{0,2}` pole kernel gives the complete regular
+cutoff-free source convention used by the numerical matrix builder.
+-/
+
+/-- Literal diagonal/off-diagonal source formula for a normalized Loewner
+entry with an already normalized matrix diagonal. -/
+noncomputable def normalizedLoewnerSourceEntry
+    (symbol diagonal : ℝ → ℝ) (p q : ℝ) : ℝ :=
+  if p = q then diagonal p
+  else (symbol q - symbol p) / (Real.pi * (p - q))
+
+theorem normalizedLoewnerSourceEntry_eq_oddDifferenceKernel
+    (symbol diagonal : ℝ → ℝ) (p q : ℝ) :
+    normalizedLoewnerSourceEntry symbol diagonal p q =
+      CvSParityDisplacement.oddDifferenceKernel
+        (fourierNormalizedSymbol symbol) diagonal p q := by
+  by_cases hpq : p = q
+  · subst q
+    simp [normalizedLoewnerSourceEntry,
+      CvSParityDisplacement.oddDifferenceKernel]
+  · simp only [normalizedLoewnerSourceEntry, hpq, if_false,
+      CvSParityDisplacement.oddDifferenceKernel, fourierNormalizedSymbol]
+    field_simp [Real.pi_ne_zero, sub_ne_zero.mpr hpq]
+
+/-- Literal regular source block `W_R + W_p`. -/
+noncomputable def logarithmicArchPrimeEntry
+    {ι : Type*} [Fintype ι]
+    (arch archDiagonal : ℝ → ℝ) (c : ℝ)
+    (location base : ι → ℝ) (p q : ℝ) : ℝ :=
+  normalizedLoewnerSourceEntry arch archDiagonal p q +
+    finiteLogarithmicPrimeEntry c location base p q
+
+theorem logarithmicArchPrimeEntry_eq_oddDifferenceKernel
+    {ι : Type*} [Fintype ι]
+    (arch archDiagonal : ℝ → ℝ) (c : ℝ)
+    (location base : ι → ℝ) (p q : ℝ) :
+    logarithmicArchPrimeEntry arch archDiagonal c location base p q =
+      CvSParityDisplacement.oddDifferenceKernel
+        (fourierNormalizedSymbol
+          (logarithmicCombinedSymbol arch c location base))
+        (fun x => archDiagonal x +
+          finiteLogarithmicPrimeDiagonal c location base x) p q := by
+  unfold logarithmicArchPrimeEntry
+  rw [normalizedLoewnerSourceEntry_eq_oddDifferenceKernel]
+  exact (oddDifferenceKernel_logarithmicCombined_actualDiagonal
+    arch archDiagonal c location base p q).symm
+
+/-- Exact cutoff-dependent rational `W_{0,2}` kernel. -/
+noncomputable def logarithmicPoleKernel (c p q : ℝ) : ℝ :=
+  CvSParityDisplacement.poleKernel
+    (32 * Real.log c * Real.sinh (Real.log c / 4) ^ 2)
+    ((Real.log c) ^ 2) (16 * Real.pi ^ 2) p q
+
+theorem logarithmicPoleKernel_law
+    (c : ℝ) (hc : 1 < c) :
+    CvSParityDisplacement.DisplacementLaw (logarithmicPoleKernel c) := by
+  have hLog : 0 < Real.log c := Real.log_pos hc
+  unfold logarithmicPoleKernel
+  exact CvSParityDisplacement.poleKernel_law
+    (32 * Real.log c * Real.sinh (Real.log c / 4) ^ 2)
+    ((Real.log c) ^ 2) (16 * Real.pi ^ 2)
+    (by positivity) (by positivity)
+
+/-- Literal corrected regular cutoff-free assembly `W_02 - W_R - W_p`. -/
+noncomputable def logarithmicCutoffFreeKernel
+    {ι : Type*} [Fintype ι]
+    (arch archDiagonal : ℝ → ℝ) (c : ℝ)
+    (location base : ι → ℝ) (p q : ℝ) : ℝ :=
+  logarithmicPoleKernel c p q -
+    logarithmicArchPrimeEntry arch archDiagonal c location base p q
+
+theorem logarithmicCutoffFreeKernel_eq_pole_sub_oddDifferenceKernel
+    {ι : Type*} [Fintype ι]
+    (arch archDiagonal : ℝ → ℝ) (c : ℝ)
+    (location base : ι → ℝ) (p q : ℝ) :
+    logarithmicCutoffFreeKernel arch archDiagonal c location base p q =
+      logarithmicPoleKernel c p q -
+        CvSParityDisplacement.oddDifferenceKernel
+          (fourierNormalizedSymbol
+            (logarithmicCombinedSymbol arch c location base))
+          (fun x => archDiagonal x +
+            finiteLogarithmicPrimeDiagonal c location base x) p q := by
+  unfold logarithmicCutoffFreeKernel
+  rw [logarithmicArchPrimeEntry_eq_oddDifferenceKernel]
+
+theorem logarithmicCutoffFreeKernel_law
+    {ι : Type*} [Fintype ι]
+    (arch archDiagonal : ℝ → ℝ) (c : ℝ)
+    (location base : ι → ℝ)
+    (hArch : Function.Odd arch) (hc : 1 < c) :
+    CvSParityDisplacement.DisplacementLaw
+      (logarithmicCutoffFreeKernel arch archDiagonal c location base) := by
+  have hKernel :
+      logarithmicCutoffFreeKernel arch archDiagonal c location base =
+        fun p q => logarithmicPoleKernel c p q -
+          CvSParityDisplacement.oddDifferenceKernel
+            (fourierNormalizedSymbol
+              (logarithmicCombinedSymbol arch c location base))
+            (fun x => archDiagonal x +
+              finiteLogarithmicPrimeDiagonal c location base x) p q := by
+    funext p q
+    exact logarithmicCutoffFreeKernel_eq_pole_sub_oddDifferenceKernel
+      arch archDiagonal c location base p q
+  rw [hKernel]
+  have hRegular := CvSParityDisplacement.oddDifferenceKernel_law
+    (fourierNormalizedSymbol
+      (logarithmicCombinedSymbol arch c location base))
+    (fun x => archDiagonal x +
+      finiteLogarithmicPrimeDiagonal c location base x)
+    (fourierNormalizedSymbol_odd
+      (logarithmicCombinedSymbol arch c location base)
+      (logarithmicCombinedSymbol_odd arch c location base hArch))
+  simpa [sub_eq_add_neg] using
+    (logarithmicPoleKernel_law c hc).add hRegular.neg
+
 /-- Every strict interior event `1 < q < c` has a positive half-angle sine,
 so its finite geometric sums are nonresonant without numerical phase testing. -/
 theorem logarithmicPrimePhase_half_sin_pos

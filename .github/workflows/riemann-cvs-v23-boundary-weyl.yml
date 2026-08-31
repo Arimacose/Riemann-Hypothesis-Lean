@@ -189,6 +189,11 @@ jobs:
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicPrimeEndpointEventEntry_nat_zero
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.finiteLogarithmicPrimeEntry_eq_oddDifferenceKernel
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.oddDifferenceKernel_logarithmicCombined_actualDiagonal
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.normalizedLoewnerSourceEntry_eq_oddDifferenceKernel
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicArchPrimeEntry_eq_oddDifferenceKernel
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicPoleKernel_law
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicCutoffFreeKernel_eq_pole_sub_oddDifferenceKernel
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicCutoffFreeKernel_law
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicPrimePhase_half_sin_pos
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.abs_shifted_logarithmicPrime_sine_sum_le
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.abs_shifted_logarithmicPrime_cosine_sum_le

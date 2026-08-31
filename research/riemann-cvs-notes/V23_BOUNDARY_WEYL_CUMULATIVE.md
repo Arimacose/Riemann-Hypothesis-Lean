@@ -2139,6 +2139,48 @@ concrete CvS Archimedean off-diagonal formula and its digamma/trigamma diagonal
 equal the packaged Archimedean kernel, then restrict the already combined
 kernel to the finite parity shell bands.
 
+The full cutoff-free sign and pole assembly is now exact as well.
+`normalizedLoewnerSourceEntry` records the literal Archimedean branch used by
+the matrix builder: its diagonal is supplied directly, while its off-diagonal
+entry is `(S(q)-S(p))/(pi*(p-q))`.  Lean identifies it with
+`oddDifferenceKernel(S/pi, diagonal)`.  The regular block
+`logarithmicArchPrimeEntry` is this entry plus the finite prime entry above.
+
+The rational source is instantiated without a symbolic placeholder:
+
+```text
+logarithmicPoleKernel(c,p,q)
+  = poleKernel(
+      32*log(c)*sinh(log(c)/4)^2,
+      log(c)^2,
+      16*pi^2,
+      p,q).
+```
+
+For `c>1`, its two denominator parameters satisfy the positivity hypotheses,
+so the pole displacement law follows.  The exact source sign convention is
+then defined by
+
+```text
+logarithmicCutoffFreeKernel = W_02 - (W_R + W_p).
+```
+
+Lean proves this is the rational pole minus the normalized combined odd
+Loewner kernel and, whenever the Archimedean symbol is odd, proves the full
+cutoff-free displacement law.  The five new theorem interfaces are:
+
+* `normalizedLoewnerSourceEntry_eq_oddDifferenceKernel`;
+* `logarithmicArchPrimeEntry_eq_oddDifferenceKernel`;
+* `logarithmicPoleKernel_law`;
+* `logarithmicCutoffFreeKernel_eq_pole_sub_oddDifferenceKernel`;
+* `logarithmicCutoffFreeKernel_law`.
+
+Thus the remaining analytic identity is now pointwise: instantiate `arch` and
+`archDiagonal` with the digamma/geometric closed forms `S_n` and
+`kappa+2*CC_n+J-(2/L)*XC_n`.  The finite prime loop, endpoint deletion,
+rational pole parameters, subtraction signs, and displacement algebra no
+longer belong to that open step.
+
 The composite phase conditions are also symbolic now.  For two strict
 interior locations, Lean proves the pair-difference half phase lies in
 `(-pi,0)`.  For a pair sum, the sine is positive when `q*r<c`, negative when

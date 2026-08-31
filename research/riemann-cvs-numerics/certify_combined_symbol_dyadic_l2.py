@@ -353,6 +353,34 @@ def certify(
                 "RiemannCvs.CombinedSymbolDyadicL2."
                 "oddDifferenceKernel_logarithmicCombined_actualDiagonal"
             ),
+            "normalized_loewner_source_entry": (
+                "RiemannCvs.CombinedSymbolDyadicL2.normalizedLoewnerSourceEntry"
+            ),
+            "normalized_loewner_source_identification": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "normalizedLoewnerSourceEntry_eq_oddDifferenceKernel"
+            ),
+            "arch_prime_entry": (
+                "RiemannCvs.CombinedSymbolDyadicL2.logarithmicArchPrimeEntry"
+            ),
+            "arch_prime_entry_identification": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "logarithmicArchPrimeEntry_eq_oddDifferenceKernel"
+            ),
+            "pole_kernel": ("RiemannCvs.CombinedSymbolDyadicL2.logarithmicPoleKernel"),
+            "pole_displacement": (
+                "RiemannCvs.CombinedSymbolDyadicL2.logarithmicPoleKernel_law"
+            ),
+            "cutoff_free_kernel": (
+                "RiemannCvs.CombinedSymbolDyadicL2.logarithmicCutoffFreeKernel"
+            ),
+            "cutoff_free_kernel_identification": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "logarithmicCutoffFreeKernel_eq_pole_sub_oddDifferenceKernel"
+            ),
+            "cutoff_free_displacement": (
+                "RiemannCvs.CombinedSymbolDyadicL2.logarithmicCutoffFreeKernel_law"
+            ),
             "cutoff_endpoint_zero": (
                 "RiemannCvs.CombinedSymbolDyadicL2.logarithmicPrimeEndpoint_term_zero"
             ),
