@@ -730,6 +730,8 @@ jobs:
             research/riemann-cvs-numerics/artifacts/v23_c13_N960_archimedean_tail_384bit.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N1920_combined_symbol_dyadic_l2.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N1920_combined_symbol_dyadic_l2_384bit.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_combined_symbol_newest_energy.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_combined_symbol_newest_energy_384bit.json
             research/riemann-cvs-numerics/artifacts/v23_c13_eventual_middle_channel.json
             research/riemann-cvs-numerics/artifacts/v23_c13_eventual_middle_channel_384bit.json
             research/riemann-cvs-numerics/artifacts/v23_c13_N20_to_N120_relative_energy.json
