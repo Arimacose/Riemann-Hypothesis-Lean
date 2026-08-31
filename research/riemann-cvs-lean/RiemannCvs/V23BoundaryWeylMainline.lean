@@ -316,9 +316,10 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   the literal Archimedean diagonal used by the interval certificate, while
   `CombinedSymbolDyadicL2` now closes all geometric corrections, derives the
   real digamma floor from a DLMF-form complex norm remainder, reduces the
-  trigamma real floor to its canonical `HasSum` identity, proves the remaining
-  error antitone, and reduces the cutoff-13 all-mode floor to one scalar endpoint
-  comparison at mode `960`.
+  trigamma real floor to decay of the shifted digamma derivative through a
+  differentiated shift equation and finite telescoping, proves the remaining
+  error antitone, and reduces the cutoff-13 all-mode floor to one scalar
+  endpoint comparison at mode `960`.
   The combined-symbol certificate
   now also rests on a Lean proof of the finite nonresonant geometric-sum bound,
   including arbitrary starting indices and its sine/cosine projections; Arb
@@ -365,6 +366,8 @@ namespace RiemannCvs.V23BoundaryWeylMainline
 
 open RiemannCvs.CombinedSymbolDyadicL2
 open RiemannCvs.BoundaryWeylSchurTail
+open Filter
+open scoped Topology
 
 /-!
 ## Concrete historical/newest block forms
@@ -1455,9 +1458,10 @@ theorem logarithmicCvSArchimedeanShellDiagonal_ge
 
 /-!
 The cutoff-13 asymptotic envelope now feeds the literal shell diagonal.  For
-an old cutoff at least `960`, the diagonal floor is `log old - 19/20`; the only
-remaining diagonal premises are the DLMF norm remainder, the real trigamma
-series floor on each shell mode, and one scalar endpoint comparison at `960`.
+an old cutoff at least `960`, the diagonal floor is `log old - 19/20`; the
+narrowest diagonal premises are the DLMF norm remainder, decay of the shifted
+digamma derivative on each shell mode, and one scalar endpoint comparison at
+`960`.
 -/
 theorem c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth
     (old shell : ℕ) (hOld : 960 ≤ old)
@@ -1557,6 +1561,46 @@ theorem c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth_
       13 (finGlobalShellPositiveMode old shell j : ℝ)
         (by norm_num) hModePos (hTrigammaSeries j)
   · exact hEndpoint
+
+/-- The literal cutoff-13 shell route with the canonical trigamma series
+discharged by decay of the shifted digamma derivative at every shell mode. -/
+theorem c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth_of_trigammaTail
+    (old shell : ℕ) (hOld : 960 ≤ old)
+    (hDigammaRemainder : ∀ j : Fin shell,
+      ‖Complex.digamma
+            (archimedeanArgument 13
+              (finGlobalShellPositiveMode old shell j : ℝ)) -
+          (Complex.log
+              (archimedeanArgument 13
+                (finGlobalShellPositiveMode old shell j : ℝ)) -
+            1 / (2 *
+              archimedeanArgument 13
+                (finGlobalShellPositiveMode old shell j : ℝ)))‖ ≤
+        Real.sqrt 2 /
+          (6 * archimedeanAsymptoticHeight 13
+            (finGlobalShellPositiveMode old shell j : ℝ) ^ 2))
+    (hTrigammaTail : ∀ j : Fin shell,
+      Tendsto (fun N : ℕ =>
+        deriv Complex.digamma
+          (archimedeanArgument 13
+            (finGlobalShellPositiveMode old shell j : ℝ) + (N : ℂ)))
+        atTop (𝓝 0))
+    (hEndpoint : -(19 / 20 : ℝ) ≤
+      archimedeanDiagonalAsymptoticConstant 13 -
+        archimedeanDiagonalAsymptoticError 13 960) :
+    ∀ j : Fin shell,
+      Real.log (old : ℝ) - 19 / 20 ≤
+        -logarithmicCvSArchimedeanEntry 13
+          (finGlobalShellPositiveMode old shell j)
+          (finGlobalShellPositiveMode old shell j) := by
+  exact
+    c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth_of_trigammaSeries
+      old shell hOld hDigammaRemainder
+        (fun j =>
+          archimedeanTrigammaSeries_hasSum_of_tendsto_deriv_digamma
+            13 (finGlobalShellPositiveMode old shell j : ℝ)
+              (hTrigammaTail j))
+        hEndpoint
 
 theorem logarithmicCvSPoleEntry_even_factorization (c : ℝ) (n m : ℤ) :
     logarithmicCvSPoleEntry c n m + logarithmicCvSPoleEntry c n (-m) =

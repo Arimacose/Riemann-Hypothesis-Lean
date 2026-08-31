@@ -2339,9 +2339,26 @@ sum_{n>=0} 1/(n + 1/4 + i*y)^2 = psi'(1/4+i*y),
 
 then terms with `n<ceil(y)` are each at least `-1/y^2`, while all later real
 parts are nonnegative.  Since `ceil(y)<=y+1`, Lean derives
-`T_floor<=Re psi'`.  What remains in this diagonal branch is therefore the
-DLMF norm-remainder theorem, the canonical trigamma `HasSum` identity, and the
-one certified endpoint inequality.
+`T_floor<=Re psi'`.  Lean now also derives the canonical trigamma `HasSum`
+identity from the single shifted-derivative limit
+
+```text
+psi'(z+N) -> 0  as N -> infinity,    Re(z)>0.
+```
+
+Indeed, analyticity and nonvanishing of `Gamma` on the right half-plane make
+`digamma=Gamma'/Gamma` analytic there.  Differentiating
+`psi(z+1)=psi(z)+1/z` and telescoping gives the exact finite identity
+
+```text
+sum_{n<N} 1/(z+n)^2 = psi'(z)-psi'(z+N).
+```
+
+Lean separately proves absolute summability by comparison with the shifted
+real p-series.  Thus the former canonical-series premise is discharged by the
+displayed tail limit.  What remains in this diagonal branch is the DLMF
+norm-remainder theorem, that shifted digamma-derivative decay, and the one
+certified endpoint inequality.
 
 The twenty public interfaces are:
 
@@ -2373,6 +2390,19 @@ The elementary trigamma-series reduction adds five public interfaces:
 * `archimedeanTrigammaSeriesFloor_le_of_hasSum`;
 * `c13_neg_logarithmicArchimedeanDiagonal_ge_log_sub_nineteenTwentieth_of_trigammaSeries`;
 * `c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth_of_trigammaSeries`.
+
+The derivative-shift and tail-limit reduction adds nine more public
+interfaces:
+
+* `digamma_analyticAt_of_re_pos`;
+* `digamma_differentiableAt_of_re_pos`;
+* `deriv_digamma_add_one`;
+* `sum_range_one_div_add_sq_eq_deriv_digamma_sub`;
+* `summable_one_div_complex_add_sq`;
+* `hasSum_one_div_complex_add_sq_of_tendsto_deriv_digamma`;
+* `archimedeanTrigammaSeries_hasSum_of_tendsto_deriv_digamma`;
+* `c13_neg_logarithmicArchimedeanDiagonal_ge_log_sub_nineteenTwentieth_of_trigammaTail`;
+* `c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth_of_trigammaTail`.
 
 The signed-integer finite builder bridge is now exact as well.  Lean defines
 the implementation's signed Archimedean extension, absolute-mode diagonal,

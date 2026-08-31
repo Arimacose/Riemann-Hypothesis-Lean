@@ -47,9 +47,10 @@ and simultaneous-reflection invariance are also proved, so the finite recursive
   prime-form bound.  The exponential-series mass and first moment are evaluated
   exactly below, closing every geometric correction in the Archimedean symbol
   and diagonal.  Its lower bound is now reduced further to a DLMF-form digamma
-  norm remainder, the canonical trigamma `HasSum` identity, and one cutoff-13
-  endpoint scalar comparison; Lean converts those inputs to the all-mode shell
-  floor, including the elementary real-part estimate for the trigamma series.
+  norm remainder, decay of the digamma derivative along positive-integer
+  translates, and one cutoff-13 endpoint scalar comparison.  Lean derives the
+  canonical trigamma `HasSum` identity by a differentiated shift equation and
+  finite telescoping, then converts those inputs to the all-mode shell floor.
   The scalar pole-weight tail estimate is now closed by
   pointwise reciprocal-square bounds and a consecutive-shell reindexing.  The
   all-scale shell-tower compatibility, the exact positive-mode component
@@ -63,7 +64,8 @@ and simultaneous-reflection invariance are also proved, so the finite recursive
 namespace RiemannCvs.CombinedSymbolDyadicL2
 
 open Finset
-open scoped BigOperators
+open Filter
+open scoped BigOperators Topology
 
 /-!
 ## Combined-symbol source algebra
@@ -1714,6 +1716,145 @@ noncomputable def archimedeanTrigammaSeriesTerm
     (c x : ℝ) (n : ℕ) : ℂ :=
   1 / (archimedeanArgument c x + (n : ℂ)) ^ 2
 
+/-!
+The canonical series identity itself follows from one precise asymptotic
+statement.  On the open right half-plane, `Gamma` is analytic and nonzero, so
+`digamma = deriv Gamma / Gamma` is analytic.  Differentiating the digamma
+shift equation and telescoping gives
+
+`sum_{n < N} 1 / (z + n)^2 = digamma'(z) - digamma'(z + N)`.
+
+The summands are absolutely summable there.  Hence the sole remaining input
+for the canonical trigamma series is that `digamma'(z + N)` tends to zero.
+-/
+
+private lemma gamma_analyticAt_of_re_pos (z : ℂ) (hz : 0 < z.re) :
+    AnalyticAt ℂ Complex.Gamma z := by
+  let U : Set ℂ := {w | 0 < w.re}
+  have hUOpen : IsOpen U :=
+    Complex.continuous_re.isOpen_preimage _ isOpen_Ioi
+  have hGammaOn : DifferentiableOn ℂ Complex.Gamma U := by
+    intro w hw
+    refine (Complex.differentiableAt_Gamma w ?_).differentiableWithinAt
+    intro m hwm
+    have hneg : w.re = -(m : ℝ) := by
+      simpa using congrArg Complex.re hwm
+    have hwPos : 0 < w.re := hw
+    rw [hneg] at hwPos
+    exact (not_lt_of_ge (neg_nonpos.mpr (Nat.cast_nonneg m))) hwPos
+  exact hGammaOn.analyticAt (hUOpen.mem_nhds hz)
+
+/-- The digamma function is analytic at every point in the open right
+half-plane. -/
+theorem digamma_analyticAt_of_re_pos (z : ℂ) (hz : 0 < z.re) :
+    AnalyticAt ℂ Complex.digamma z := by
+  have hGamma := gamma_analyticAt_of_re_pos z hz
+  rw [Complex.digamma_def]
+  simpa only [logDeriv] using
+    hGamma.deriv.div hGamma (Complex.Gamma_ne_zero_of_re_pos hz)
+
+/-- The differentiability consequence of `digamma_analyticAt_of_re_pos`. -/
+theorem digamma_differentiableAt_of_re_pos (z : ℂ) (hz : 0 < z.re) :
+    DifferentiableAt ℂ Complex.digamma z :=
+  (digamma_analyticAt_of_re_pos z hz).differentiableAt
+
+/-- The derivative form of the digamma shift equation on the right
+half-plane. -/
+theorem deriv_digamma_add_one (z : ℂ) (hz : 0 < z.re) :
+    deriv Complex.digamma (z + 1) =
+      deriv Complex.digamma z - 1 / z ^ 2 := by
+  have hEq :
+      (fun w : ℂ => Complex.digamma (w + 1)) =ᶠ[𝓝 z]
+        (fun w : ℂ => Complex.digamma w + w⁻¹) := by
+    filter_upwards [Complex.continuous_re.isOpen_preimage
+        (Set.Ioi (0 : ℝ)) isOpen_Ioi |>.mem_nhds hz] with w hw
+    apply Complex.digamma_apply_add_one
+    intro m hwm
+    change 0 < w.re at hw
+    have hneg : w.re = -(m : ℝ) := by
+      simpa using congrArg Complex.re hwm
+    rw [hneg] at hw
+    exact (not_lt_of_ge (neg_nonpos.mpr (Nat.cast_nonneg m))) hw
+  have hDeriv := hEq.deriv_eq
+  rw [deriv_comp_add_const] at hDeriv
+  rw [deriv_fun_add (digamma_differentiableAt_of_re_pos z hz)
+      (differentiableAt_inv (Complex.ne_zero_of_re_pos hz)), deriv_inv] at hDeriv
+  rw [hDeriv]
+  ring
+
+/-- Finite telescoping of the differentiated digamma shift equation. -/
+theorem sum_range_one_div_add_sq_eq_deriv_digamma_sub
+    (z : ℂ) (hz : 0 < z.re) (N : ℕ) :
+    (∑ n ∈ Finset.range N, 1 / (z + (n : ℂ)) ^ 2) =
+      deriv Complex.digamma z - deriv Complex.digamma (z + (N : ℂ)) := by
+  induction N with
+  | zero => simp
+  | succ N ih =>
+      rw [Finset.sum_range_succ, ih]
+      have hzN : 0 < (z + (N : ℂ)).re := by
+        simpa using add_pos_of_pos_of_nonneg hz (Nat.cast_nonneg N)
+      have hShift := deriv_digamma_add_one (z + (N : ℂ)) hzN
+      rw [show z + (N : ℂ) + 1 = z + ((N + 1 : ℕ) : ℂ) by
+        push_cast
+        ring] at hShift
+      rw [hShift]
+      ring
+
+/-- The reciprocal-square series is absolutely summable whenever its complex
+shift lies in the right half-plane. -/
+theorem summable_one_div_complex_add_sq (z : ℂ) (hz : 0 < z.re) :
+    Summable (fun n : ℕ => 1 / (z + (n : ℂ)) ^ 2) := by
+  have hMajor : Summable (fun n : ℕ =>
+      1 / |(n : ℝ) + z.re| ^ (2 : ℝ)) :=
+    (Real.summable_one_div_nat_add_rpow z.re 2).2 (by norm_num)
+  refine hMajor.of_norm_bounded ?_
+  intro n
+  have hRePos : 0 < (n : ℝ) + z.re :=
+    add_pos_of_nonneg_of_pos (Nat.cast_nonneg n) hz
+  have hReNorm : (n : ℝ) + z.re ≤ ‖z + (n : ℂ)‖ := by
+    simpa [add_comm] using Complex.re_le_norm (z + (n : ℂ))
+  have hSq : ((n : ℝ) + z.re) ^ 2 ≤ ‖z + (n : ℂ)‖ ^ 2 := by
+    nlinarith [norm_nonneg (z + (n : ℂ))]
+  rw [norm_div, norm_one, norm_pow, Real.rpow_two, abs_of_pos hRePos]
+  exact one_div_le_one_div_of_le (sq_pos_of_pos hRePos) hSq
+
+/-- The canonical reciprocal-square identity, reduced exactly to decay of the
+shifted digamma derivative. -/
+theorem hasSum_one_div_complex_add_sq_of_tendsto_deriv_digamma
+    (z : ℂ) (hz : 0 < z.re)
+    (hTail : Tendsto (fun N : ℕ =>
+      deriv Complex.digamma (z + (N : ℂ))) atTop (𝓝 0)) :
+    HasSum (fun n : ℕ => 1 / (z + (n : ℂ)) ^ 2)
+      (deriv Complex.digamma z) := by
+  refine (Summable.hasSum_iff_tendsto_nat
+    (summable_one_div_complex_add_sq z hz)).2 ?_
+  have hLimit : Tendsto (fun N : ℕ =>
+      deriv Complex.digamma z - deriv Complex.digamma (z + (N : ℂ)))
+      atTop (𝓝 (deriv Complex.digamma z - 0)) :=
+    tendsto_const_nhds.sub hTail
+  have hPartial :
+      (fun N : ℕ => ∑ n ∈ Finset.range N, 1 / (z + (n : ℂ)) ^ 2) =
+        (fun N : ℕ => deriv Complex.digamma z -
+          deriv Complex.digamma (z + (N : ℂ))) := by
+    funext N
+    exact sum_range_one_div_add_sq_eq_deriv_digamma_sub z hz N
+  rw [hPartial]
+  simpa only [sub_zero] using hLimit
+
+/-- The literal Archimedean trigamma series follows from decay of the digamma
+derivative along its positive-integer translates. -/
+theorem archimedeanTrigammaSeries_hasSum_of_tendsto_deriv_digamma
+    (c x : ℝ)
+    (hTail : Tendsto (fun N : ℕ =>
+      deriv Complex.digamma
+        (archimedeanArgument c x + (N : ℂ))) atTop (𝓝 0)) :
+    HasSum (archimedeanTrigammaSeriesTerm c x)
+      (deriv Complex.digamma (archimedeanArgument c x)) := by
+  change HasSum (fun n : ℕ =>
+    1 / (archimedeanArgument c x + (n : ℂ)) ^ 2) _
+  exact hasSum_one_div_complex_add_sq_of_tendsto_deriv_digamma
+    (archimedeanArgument c x) (by simp) hTail
+
 @[simp] theorem archimedeanTrigammaSeriesTerm_re
     (c x : ℝ) (n : ℕ) :
     (archimedeanTrigammaSeriesTerm c x n).re =
@@ -2113,6 +2254,30 @@ theorem c13_neg_logarithmicArchimedeanDiagonal_ge_log_sub_nineteenTwentieth_of_t
       (archimedeanTrigammaSeriesFloor_le_of_hasSum
         13 x (by norm_num) hxPos hTrigammaSeries)
       hEndpoint
+
+/-- The cutoff-13 diagonal route with the canonical trigamma series discharged
+by decay of the shifted digamma derivative. -/
+theorem c13_neg_logarithmicArchimedeanDiagonal_ge_log_sub_nineteenTwentieth_of_trigammaTail
+    (x : ℝ) (hx : (960 : ℝ) ≤ x)
+    (hDigammaRemainder :
+      ‖Complex.digamma (archimedeanArgument 13 x) -
+          (Complex.log (archimedeanArgument 13 x) -
+            1 / (2 * archimedeanArgument 13 x))‖ ≤
+        Real.sqrt 2 /
+          (6 * archimedeanAsymptoticHeight 13 x ^ 2))
+    (hTrigammaTail : Tendsto (fun N : ℕ =>
+      deriv Complex.digamma
+        (archimedeanArgument 13 x + (N : ℂ))) atTop (𝓝 0))
+    (hEndpoint : -(19 / 20 : ℝ) ≤
+      archimedeanDiagonalAsymptoticConstant 13 -
+        archimedeanDiagonalAsymptoticError 13 960) :
+    Real.log x - 19 / 20 ≤ -logarithmicArchimedeanDiagonal 13 x := by
+  exact
+    c13_neg_logarithmicArchimedeanDiagonal_ge_log_sub_nineteenTwentieth_of_trigammaSeries
+      x hx hDigammaRemainder
+        (archimedeanTrigammaSeries_hasSum_of_tendsto_deriv_digamma
+          13 x hTrigammaTail)
+        hEndpoint
 
 theorem logarithmicArchimedeanDiagonal_neg (c x : ℝ) :
     logarithmicArchimedeanDiagonal c (-x) =
