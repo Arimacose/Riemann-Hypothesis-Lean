@@ -1260,7 +1260,7 @@ theorem recursiveShellEnergy_ge_reserveProduct
         _ ≤ (1 - u n) * (energy n + tail n) := hTailScaled
         _ ≤ energy (n + 1) := hReserve
 
-/-- Finite reserve products admit the elementary union-bound lower estimate
+/-- Finite reserve products obey the elementary union-bound lower estimate
 
 `1 - sum i in range n, u i ≤ prod i in range n, (1-u i)`
 
