@@ -1460,6 +1460,34 @@ induction.  This removes the fixed factor-two loss of the older generic
 two-channel square inequality while preserving the source cancellation that the
 component diagnostic shows is essential.
 
+The combined Loewner source now has an exact off-diagonal Lean entry formula as
+well.  For an odd symbol `F`, write
+
+```text
+K_F(p,q) = (F(q)-F(p))/(p-q),
+```
+
+away from the diagonal.  Theorems
+`oddDifferenceKernel_evenParity_offDiagonal` and
+`oddDifferenceKernel_oddParity_offDiagonal` prove, whenever `p != q` and
+`p != -q`,
+
+```text
+K_F(p,q) + K_F(p,-q)
+  = 2*(q*F(q)-p*F(p))/(p^2-q^2),
+
+K_F(p,q) - K_F(p,-q)
+  = 2*(p*F(q)-q*F(p))/(p^2-q^2).
+```
+
+The previous-core/new-shell blocks are disjoint, so these are precisely their
+even and odd crossblock entries and the arbitrary diagonal branch disappears.
+For the selected source grouping, `F` is the combined Archimedean/prime odd
+symbol.  Consequently the next uniform estimate is no longer an unspecified
+matrix-norm bound: it is a weighted divided-difference estimate for the two
+displayed numerators, followed by the separate elementary pole amplitude and
+the already formalized two-source triangle.
+
 That selected split now has an exact Lean interface rather than an informal
 recombination step.  The theorem
 `relativeCoupling_of_exception_and_finsetChannelBudgets` inserts one separately

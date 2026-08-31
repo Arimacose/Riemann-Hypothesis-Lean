@@ -224,12 +224,18 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   half for all nine regular channels.  The same two-piece bound puts both newest
   parity channels below `1/30`; the odd `[1,20]` block remains the certified fixed
   exception.  Two additional Lean theorems formalize exactly this amplitude
-  triangle and its half-transport specialization.  The source-specific proof of
-  the joint Loewner/pole amplitude bounds, the identification of separated band
+  triangle and its half-transport specialization.  Two source-level parity
+  identities now also rewrite every off-diagonal Loewner crossblock entry into
+  the exact weighted numerators `q*F(q)-p*F(p)` in the even sector and
+  `p*F(q)-q*F(p)` in the odd sector, both over `p^2-q^2`.  Thus the remaining
+  source estimate targets the combined odd symbol directly and retains the
+  observed prime/Archimedean cancellation.  The source-specific proof of the
+  joint Loewner/pole amplitude bounds, the identification of separated band
   energies with the scalar shell decomposition, and a uniform coefficient
-  partial-sum bound strictly below one remain analytic inputs.  The scalar product
-  lemmas turn the last bound into the explicit positive floor `1-total`.  This is
-  followed by convergence of the finite-support energies to the closed tail form.
+  partial-sum bound strictly below one remain analytic inputs.  The scalar
+  product lemmas turn the last bound into the explicit positive floor `1-total`.
+  This is followed by convergence of the finite-support energies to the closed
+  tail form.
   The triangular transport induction, two-source amplitude adapter, full
   block-sum normalization, finite-product floor adapter, and strict order-limit
   passage are kernel-checked; the source-specific Loewner/pole transport bound

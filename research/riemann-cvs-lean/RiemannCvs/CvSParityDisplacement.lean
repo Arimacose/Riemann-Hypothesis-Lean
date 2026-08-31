@@ -63,6 +63,48 @@ theorem oddDifferenceKernel_displacement
     rw [hOdd q]
     ring
 
+/-- Off the two reflection diagonals, the even-parity combination of an
+odd-symbol Loewner kernel has the weighted divided-difference numerator
+`q * symbol q - p * symbol p`.  This is the exact entry formula for a
+previous-core/new-shell even crossblock. -/
+theorem oddDifferenceKernel_evenParity_offDiagonal
+    (symbol diagonal : ℝ → ℝ) (p q : ℝ)
+    (hpq : p ≠ q) (hpNegQ : p ≠ -q)
+    (hOdd : Function.Odd symbol) :
+    oddDifferenceKernel symbol diagonal p q +
+        oddDifferenceKernel symbol diagonal p (-q) =
+      2 * (q * symbol q - p * symbol p) / (p ^ 2 - q ^ 2) := by
+  have hpqProduct : p ^ 2 - q ^ 2 ≠ 0 := by
+    rw [sq_sub_sq]
+    have hpPlusQ : p + q ≠ 0 := by
+      simpa using (sub_ne_zero.mpr hpNegQ)
+    exact mul_ne_zero hpPlusQ (sub_ne_zero.mpr hpq)
+  simp only [oddDifferenceKernel, hpq, hpNegQ, if_false]
+  rw [hOdd q]
+  field_simp [hpq, hpNegQ, hpqProduct]
+  ring
+
+/-- Off the two reflection diagonals, the odd-parity combination of an
+odd-symbol Loewner kernel has the weighted divided-difference numerator
+`p * symbol q - q * symbol p`.  This is the exact entry formula for a
+previous-core/new-shell odd crossblock. -/
+theorem oddDifferenceKernel_oddParity_offDiagonal
+    (symbol diagonal : ℝ → ℝ) (p q : ℝ)
+    (hpq : p ≠ q) (hpNegQ : p ≠ -q)
+    (hOdd : Function.Odd symbol) :
+    oddDifferenceKernel symbol diagonal p q -
+        oddDifferenceKernel symbol diagonal p (-q) =
+      2 * (p * symbol q - q * symbol p) / (p ^ 2 - q ^ 2) := by
+  have hpqProduct : p ^ 2 - q ^ 2 ≠ 0 := by
+    rw [sq_sub_sq]
+    have hpPlusQ : p + q ≠ 0 := by
+      simpa using (sub_ne_zero.mpr hpNegQ)
+    exact mul_ne_zero hpPlusQ (sub_ne_zero.mpr hpq)
+  simp only [oddDifferenceKernel, hpq, hpNegQ, if_false]
+  rw [hOdd q]
+  field_simp [hpq, hpNegQ, hpqProduct]
+  ring
+
 /-- Rational pole entry used by the cutoff-free CvS kernel. -/
 noncomputable def poleKernel
     (scale a b : ℝ) (p q : ℝ) : ℝ :=
