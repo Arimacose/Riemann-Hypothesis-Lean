@@ -47,8 +47,9 @@ and simultaneous-reflection invariance are also proved, so the finite recursive
   prime-form bound.  The scalar pole-weight tail estimate is now closed by
   pointwise reciprocal-square bounds and a consecutive-shell reindexing.  The
   all-scale shell-tower compatibility, the exact positive-mode component
-  decomposition, its direct application to the concrete tower-tail energy, and
-  the rank-one reduction and `poleTail` bounds of both pole parity blocks are instantiated in
+  decomposition, its direct application to the concrete tower-tail energy,
+  the rank-one reduction and `poleTail` bounds of both pole parity blocks, and
+  the pole-closed cutoff-13 coercivity consumers are instantiated in
   `V23BoundaryWeylMainline`.  No numerical certificate is promoted to a Lean
   theorem here.
 -/

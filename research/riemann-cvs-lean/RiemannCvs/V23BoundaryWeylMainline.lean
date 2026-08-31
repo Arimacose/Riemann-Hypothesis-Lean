@@ -297,8 +297,8 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   hypothesis.  For any finite positive-mode family, both concrete parity
   matrices are now split exactly into the negative Archimedean main diagonal
   and three error matrices (pole, Archimedean remainder, and prime).  The
-  specialized coercive-floor adapters reduce the operator input to one
-  pointwise diagonal lower bound and three absolute quadratic-form bounds.
+  generic coercive-floor adapters reduce the operator input to one pointwise
+  diagonal lower bound and three absolute quadratic-form bounds.
   The pulled-back right-right block of each actual tower is now identified with
   exactly that positive-mode matrix, including the `4B -> 8B` newest-shell mode
   map, so the same adapters give the coercive floor directly for
@@ -309,10 +309,11 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   sums of squared rational weights by Cauchy--Schwarz.  Pointwise reciprocal-
   square estimates and an exact consecutive-shell reindexing now bound both
   sums by the recorded `scale/(8*pi^2*old)` pole tail; cutoff `13` has direct
-  assumption-free specializations.  Thus only the Archimedean remainder and
-  prime error forms remain alongside the diagonal bound.  The diagonal
-  self-entry is also rewritten to the literal Archimedean diagonal used by the
-  interval certificate.
+  assumption-free specializations.  New cutoff-13 consumers insert that bound
+  automatically for both standalone shells and the actual odd/even matrix
+  towers.  Thus only the Archimedean remainder and prime error forms remain
+  alongside the diagonal bound.  The diagonal self-entry is also rewritten to
+  the literal Archimedean diagonal used by the interval certificate.
   The combined-symbol certificate
   now also rests on a Lean proof of the finite nonresonant geometric-sum bound,
   including arbitrary starting indices and its sine/cosine projections; Arb
@@ -1941,4 +1942,193 @@ theorem c13_logarithmicCvSBuilderEvenShellPoleError_le_poleTail
         finiteVectorEuclideanNormSq x := by
   exact logarithmicCvSBuilderEvenShellPoleError_le_poleTail
     13 (by norm_num) location base old shell hOld x
+/-!
+### Pole-closed cutoff-13 coercivity consumers
+
+These four adapters fill error component zero with the proved cutoff-13
+`poleTail` theorem.  Both a standalone consecutive shell and the actual
+odd/even matrix-tower tail now require only the Archimedean diagonal,
+Archimedean-remainder form, prime form, and final scalar floor comparison.
+-/
+theorem c13_logarithmicCvSBuilderEvenShell_coerciveFloor
+    {ι : Type*} [Fintype ι]
+    (location base : ι → ℝ)
+    (old shell : ℕ) (hOld : old ≠ 0) (x : Fin shell → ℝ)
+    (diagonalFloor shift floor archRemainderBound primeBound : ℝ)
+    (hDiagonal : ∀ i : Fin shell,
+      diagonalFloor ≤ -logarithmicCvSArchimedeanEntry 13
+        (finGlobalShellPositiveMode old shell i)
+        (finGlobalShellPositiveMode old shell i))
+    (hArchRemainder :
+      |finiteMatrixQuadraticEnergy
+          (logarithmicCvSArchimedeanEvenPositiveModeRemainderMatrix
+            13 (finGlobalShellPositiveMode old shell)) x| ≤
+        archRemainderBound * finiteVectorEuclideanNormSq x)
+    (hPrime :
+      |finiteMatrixQuadraticEnergy
+          (finiteLogarithmicPrimeEvenPositiveModeErrorMatrix
+            13 location base (finGlobalShellPositiveMode old shell)) x| ≤
+        primeBound * finiteVectorEuclideanNormSq x)
+    (hFloor : floor ≤ diagonalFloor -
+      (logarithmicCvSPoleScale 13 /
+          (8 * Real.pi ^ 2 * (old : ℝ)) +
+        archRemainderBound + primeBound) + shift) :
+    floor * finiteVectorEuclideanNormSq x ≤
+      finiteMatrixQuadraticEnergy
+          (logarithmicCvSBuilderEvenPositiveModeMatrix
+            13 location base (finGlobalShellPositiveMode old shell)) x +
+        shift * finiteVectorEuclideanNormSq x := by
+  apply logarithmicCvSBuilderEvenPositiveModeMatrix_coerciveFloor
+    13 location base (finGlobalShellPositiveMode old shell) x
+    diagonalFloor shift floor
+    ![logarithmicCvSPoleScale 13 /
+        (8 * Real.pi ^ 2 * (old : ℝ)),
+      archRemainderBound, primeBound]
+  · exact hDiagonal
+  · intro k
+    fin_cases k
+    · simpa [logarithmicCvSBuilderEvenPositiveModeErrorMatrix] using
+        c13_logarithmicCvSBuilderEvenShellPoleError_le_poleTail
+          location base old shell hOld x
+    · simpa [logarithmicCvSBuilderEvenPositiveModeErrorMatrix] using
+        hArchRemainder
+    · simpa [logarithmicCvSBuilderEvenPositiveModeErrorMatrix] using hPrime
+  · simpa [Fin.sum_univ_three] using hFloor
+
+theorem c13_logarithmicCvSBuilderOddShell_coerciveFloor
+    {ι : Type*} [Fintype ι]
+    (location base : ι → ℝ)
+    (old shell : ℕ) (hOld : old ≠ 0) (x : Fin shell → ℝ)
+    (diagonalFloor shift floor archRemainderBound primeBound : ℝ)
+    (hDiagonal : ∀ i : Fin shell,
+      diagonalFloor ≤ -logarithmicCvSArchimedeanEntry 13
+        (finGlobalShellPositiveMode old shell i)
+        (finGlobalShellPositiveMode old shell i))
+    (hArchRemainder :
+      |finiteMatrixQuadraticEnergy
+          (logarithmicCvSArchimedeanOddPositiveModeRemainderMatrix
+            13 (finGlobalShellPositiveMode old shell)) x| ≤
+        archRemainderBound * finiteVectorEuclideanNormSq x)
+    (hPrime :
+      |finiteMatrixQuadraticEnergy
+          (finiteLogarithmicPrimeOddPositiveModeErrorMatrix
+            13 location base (finGlobalShellPositiveMode old shell)) x| ≤
+        primeBound * finiteVectorEuclideanNormSq x)
+    (hFloor : floor ≤ diagonalFloor -
+      (logarithmicCvSPoleScale 13 /
+          (8 * Real.pi ^ 2 * (old : ℝ)) +
+        archRemainderBound + primeBound) + shift) :
+    floor * finiteVectorEuclideanNormSq x ≤
+      finiteMatrixQuadraticEnergy
+          (logarithmicCvSBuilderOddPositiveModeMatrix
+            13 location base (finGlobalShellPositiveMode old shell)) x +
+        shift * finiteVectorEuclideanNormSq x := by
+  apply logarithmicCvSBuilderOddPositiveModeMatrix_coerciveFloor
+    13 location base (finGlobalShellPositiveMode old shell) x
+    diagonalFloor shift floor
+    ![logarithmicCvSPoleScale 13 /
+        (8 * Real.pi ^ 2 * (old : ℝ)),
+      archRemainderBound, primeBound]
+  · exact hDiagonal
+  · intro k
+    fin_cases k
+    · simpa [logarithmicCvSBuilderOddPositiveModeErrorMatrix] using
+        c13_logarithmicCvSBuilderOddShellPoleError_le_poleTail
+          location base old shell hOld x
+    · simpa [logarithmicCvSBuilderOddPositiveModeErrorMatrix] using
+        hArchRemainder
+    · simpa [logarithmicCvSBuilderOddPositiveModeErrorMatrix] using hPrime
+  · simpa [Fin.sum_univ_three] using hFloor
+
+theorem c13_logarithmicCvSBuilderEvenTowerTailEnergy_coerciveFloor
+    {ι : Type*} [Fintype ι]
+    (location base : ι → ℝ)
+    (z : ℕ → ℝ) (size shell : ℕ → ℕ)
+    (hSize : ∀ n, size (n + 1) = size n + shell n)
+    (n : ℕ) (hOld : size n ≠ 0)
+    (diagonalFloor shift floor archRemainderBound primeBound : ℝ)
+    (hDiagonal : ∀ i : Fin (shell n),
+      diagonalFloor ≤ -logarithmicCvSArchimedeanEntry 13
+        (finGlobalShellPositiveMode (size n) (shell n) i)
+        (finGlobalShellPositiveMode (size n) (shell n) i))
+    (hArchRemainder :
+      |finiteMatrixQuadraticEnergy
+          (logarithmicCvSArchimedeanEvenPositiveModeRemainderMatrix
+            13 (finGlobalShellPositiveMode (size n) (shell n)))
+          (finGlobalShellVector z (size n) (shell n))| ≤
+        archRemainderBound * finiteVectorEuclideanNormSq
+          (finGlobalShellVector z (size n) (shell n)))
+    (hPrime :
+      |finiteMatrixQuadraticEnergy
+          (finiteLogarithmicPrimeEvenPositiveModeErrorMatrix
+            13 location base
+            (finGlobalShellPositiveMode (size n) (shell n)))
+          (finGlobalShellVector z (size n) (shell n))| ≤
+        primeBound * finiteVectorEuclideanNormSq
+          (finGlobalShellVector z (size n) (shell n)))
+    (hFloor : floor ≤ diagonalFloor -
+      (logarithmicCvSPoleScale 13 /
+          (8 * Real.pi ^ 2 * (size n : ℝ)) +
+        archRemainderBound + primeBound) + shift) :
+    floor * finiteVectorEuclideanNormSq
+        (finGlobalShellVector z (size n) (shell n)) ≤
+      finiteMatrixTowerTailEnergy
+          (logarithmicCvSBuilderEvenTowerMatrix 13 location base size)
+          (logarithmicCvSBuilderEvenTowerShellVector z size shell)
+          (logarithmicCvSBuilderEvenTowerSplit size shell hSize) n +
+        shift * finiteVectorEuclideanNormSq
+          (finGlobalShellVector z (size n) (shell n)) := by
+  rw [logarithmicCvSBuilderEvenTowerTailEnergy_eq_positiveModeEnergy
+    13 location base z size shell hSize n]
+  exact c13_logarithmicCvSBuilderEvenShell_coerciveFloor
+    location base (size n) (shell n) hOld
+    (finGlobalShellVector z (size n) (shell n))
+    diagonalFloor shift floor archRemainderBound primeBound
+    hDiagonal hArchRemainder hPrime hFloor
+
+theorem c13_logarithmicCvSBuilderOddTowerTailEnergy_coerciveFloor
+    {ι : Type*} [Fintype ι]
+    (location base : ι → ℝ)
+    (z : ℕ → ℝ) (size shell : ℕ → ℕ)
+    (hSize : ∀ n, size (n + 1) = size n + shell n)
+    (n : ℕ) (hOld : size n ≠ 0)
+    (diagonalFloor shift floor archRemainderBound primeBound : ℝ)
+    (hDiagonal : ∀ i : Fin (shell n),
+      diagonalFloor ≤ -logarithmicCvSArchimedeanEntry 13
+        (finGlobalShellPositiveMode (size n) (shell n) i)
+        (finGlobalShellPositiveMode (size n) (shell n) i))
+    (hArchRemainder :
+      |finiteMatrixQuadraticEnergy
+          (logarithmicCvSArchimedeanOddPositiveModeRemainderMatrix
+            13 (finGlobalShellPositiveMode (size n) (shell n)))
+          (finGlobalShellVector z (size n) (shell n))| ≤
+        archRemainderBound * finiteVectorEuclideanNormSq
+          (finGlobalShellVector z (size n) (shell n)))
+    (hPrime :
+      |finiteMatrixQuadraticEnergy
+          (finiteLogarithmicPrimeOddPositiveModeErrorMatrix
+            13 location base
+            (finGlobalShellPositiveMode (size n) (shell n)))
+          (finGlobalShellVector z (size n) (shell n))| ≤
+        primeBound * finiteVectorEuclideanNormSq
+          (finGlobalShellVector z (size n) (shell n)))
+    (hFloor : floor ≤ diagonalFloor -
+      (logarithmicCvSPoleScale 13 /
+          (8 * Real.pi ^ 2 * (size n : ℝ)) +
+        archRemainderBound + primeBound) + shift) :
+    floor * finiteVectorEuclideanNormSq
+        (finGlobalShellVector z (size n) (shell n)) ≤
+      finiteMatrixTowerTailEnergy
+          (logarithmicCvSBuilderOddTowerMatrix 13 location base size)
+          (logarithmicCvSBuilderOddTowerShellVector z size shell)
+          (logarithmicCvSBuilderOddTowerSplit size shell hSize) n +
+        shift * finiteVectorEuclideanNormSq
+          (finGlobalShellVector z (size n) (shell n)) := by
+  rw [logarithmicCvSBuilderOddTowerTailEnergy_eq_positiveModeEnergy
+    13 location base z size shell hSize n]
+  exact c13_logarithmicCvSBuilderOddShell_coerciveFloor
+    location base (size n) (shell n) hOld
+    (finGlobalShellVector z (size n) (shell n))
+    diagonalFloor shift floor archRemainderBound primeBound
+    hDiagonal hArchRemainder hPrime hFloor
 end RiemannCvs.V23BoundaryWeylMainline

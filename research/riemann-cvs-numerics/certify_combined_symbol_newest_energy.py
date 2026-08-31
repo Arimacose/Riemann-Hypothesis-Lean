@@ -415,6 +415,10 @@ def certify(
             "RiemannCvs.V23BoundaryWeylMainline.logarithmicCvSBuilderEvenShellPoleError_le_poleTail",
             "RiemannCvs.V23BoundaryWeylMainline.c13_logarithmicCvSBuilderOddShellPoleError_le_poleTail",
             "RiemannCvs.V23BoundaryWeylMainline.c13_logarithmicCvSBuilderEvenShellPoleError_le_poleTail",
+            "RiemannCvs.V23BoundaryWeylMainline.c13_logarithmicCvSBuilderEvenShell_coerciveFloor",
+            "RiemannCvs.V23BoundaryWeylMainline.c13_logarithmicCvSBuilderOddShell_coerciveFloor",
+            "RiemannCvs.V23BoundaryWeylMainline.c13_logarithmicCvSBuilderEvenTowerTailEnergy_coerciveFloor",
+            "RiemannCvs.V23BoundaryWeylMainline.c13_logarithmicCvSBuilderOddTowerTailEnergy_coerciveFloor",
         ],
         "conditional_operator_inputs": [
             "the concrete Archimedean main diagonal satisfies the recorded pointwise lower bound and the Archimedean-remainder and prime parity forms satisfy the recorded absolute quadratic-form bounds",

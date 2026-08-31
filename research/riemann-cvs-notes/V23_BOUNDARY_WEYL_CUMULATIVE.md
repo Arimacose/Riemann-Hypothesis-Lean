@@ -1998,9 +1998,11 @@ The current JSON has collapsed them to one analytic condition: the concrete
 Archimedean main diagonal must satisfy its pointwise lower bound, and the
 Archimedean-remainder and prime parity forms must satisfy their displayed
 absolute quadratic-form bounds.  The even/odd `poleTail` component is now a
-Lean theorem.  The crossblock, parity compression, block-diagonal recursion,
-and concrete shell-energy identification are kernel-checked below.  The eight
-finite bridges remain.  The certificate still
+Lean theorem, and the cutoff-13 coercivity consumers insert it automatically
+for both a standalone consecutive shell and the actual odd/even matrix towers.
+The crossblock, parity compression, block-diagonal recursion, and concrete
+shell-energy identification are kernel-checked below.  The eight finite bridges
+remain.  The certificate still
 replaces the formerly open all-scale newest-band estimate by a finite list plus
 an explicit all-cutoff theorem and supplies the exact half-transport algebra
 once a historical band has entered its analytic range.
@@ -2438,8 +2440,11 @@ obtain `sum 1/n^2 <= 1/old`.  Consequently both parity pole errors obey
 
 For `c>=1`, `scale(c)>=0`, and the cutoff-13 specializations therefore match
 the certificate's literal `poleTail(N)=scale(13)/(8*pi^2*(N-1))` with
-`old=N-1`.  The pole component of the shell coercive floor is no longer an
-analytic hypothesis.  The Archimedean self-entry is simultaneously identified with
+`old=N-1`.  Two standalone-shell and two matrix-tower coercivity theorems fill
+error component zero with this result and expose only the diagonal,
+Archimedean-remainder, prime, and final scalar-floor premises.  The pole
+component of the shell coercive floor is no longer an analytic hypothesis.
+The Archimedean self-entry is simultaneously identified with
 `logarithmicArchimedeanDiagonal(c,mode)`, so the remaining diagonal inequality
 is stated on exactly the function enclosed by the Arb certificate.
 
