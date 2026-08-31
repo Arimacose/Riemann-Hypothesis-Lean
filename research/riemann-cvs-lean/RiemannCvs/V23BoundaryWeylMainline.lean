@@ -281,7 +281,11 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   symmetry hypothesis is needed.  The actual even and odd CvS matrices are
   pulled back to the proved historical/newest indices, their rectangular
   blocks are identified with the earlier band matrices, and both concrete
-  quadratic forms feed the recursive successor theorem directly.  What remains
+  quadratic forms feed the recursive successor theorem directly.  Symmetry and
+  simultaneous-reflection invariance of the pole and Loewner branches are now
+  proved through the concrete builder and both parity compressions; hence the
+  averaged cross coordinate simplifies exactly to the single rectangular
+  historical/newest bilinear form consumed by the certificate.  What remains
   on this side is the coherent reuse of those blocks and vectors across the
   complete dyadic tower.
   The combined-symbol certificate
@@ -314,8 +318,8 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   `1920,3840,7680,15360,30720,61440,122880,245760`.  This conclusion remains
   conditional on the listed concrete component bounds and all-scale block
   compatibility.  The source-specific proof of the
-  joint Loewner/pole amplitude bounds, the identification of separated band
-  energies with the scalar shell decomposition, and a uniform coefficient
+  joint Loewner/pole amplitude bounds, coherent reuse of the separated band
+  energies through every scalar shell step, and a uniform coefficient
   partial-sum bound strictly below one remain analytic inputs.  The scalar
   product lemmas turn the last bound into the explicit positive floor `1-total`.
   This is followed by convergence of the finite-support energies to the closed
@@ -388,6 +392,76 @@ restriction. -/
         (Sum.inl i) (Sum.inr j) =
       logarithmicCvSBuilderOddNewestBand c location base B i j := by
   rfl
+
+/-- The pulled-back even historical/newest matrix remains symmetric. -/
+theorem logarithmicCvSBuilderEvenHistoricalNewestBlock_symm
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (B : ℕ)
+    (i j : Fin B ⊕ Fin (4 * B)) :
+    logarithmicCvSBuilderEvenHistoricalNewestBlock c location base B i j =
+      logarithmicCvSBuilderEvenHistoricalNewestBlock
+        c location base B j i := by
+  unfold logarithmicCvSBuilderEvenHistoricalNewestBlock
+  exact logarithmicCvSBuilderEvenMatrix_symm _ _ _ _ _ _
+
+/-- The pulled-back odd historical/newest matrix remains symmetric. -/
+theorem logarithmicCvSBuilderOddHistoricalNewestBlock_symm
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (B : ℕ)
+    (i j : Fin B ⊕ Fin (4 * B)) :
+    logarithmicCvSBuilderOddHistoricalNewestBlock c location base B i j =
+      logarithmicCvSBuilderOddHistoricalNewestBlock
+        c location base B j i := by
+  unfold logarithmicCvSBuilderOddHistoricalNewestBlock
+  exact logarithmicCvSBuilderOddMatrix_symm _ _ _ _ _ _
+
+/-- The even recursive cross coordinate is exactly the rectangular
+historical/newest bilinear form used by the scalar certificate. -/
+theorem logarithmicCvSBuilderEvenHistoricalNewestBlock_crossEnergy
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (B : ℕ)
+    (x : Fin B → ℝ) (y : Fin (4 * B) → ℝ) :
+    finiteMatrixBlockCrossEnergy
+        (logarithmicCvSBuilderEvenHistoricalNewestBlock
+          c location base B) x y =
+      ∑ i, ∑ j,
+        x i * logarithmicCvSBuilderEvenNewestBand
+          c location base B i j * y j := by
+  calc
+    finiteMatrixBlockCrossEnergy
+        (logarithmicCvSBuilderEvenHistoricalNewestBlock
+          c location base B) x y =
+      ∑ i, ∑ j, x i *
+        logarithmicCvSBuilderEvenHistoricalNewestBlock c location base B
+          (Sum.inl i) (Sum.inr j) * y j :=
+      finiteMatrixBlockCrossEnergy_eq_leftRight_of_symm _ x y
+        (logarithmicCvSBuilderEvenHistoricalNewestBlock_symm
+          c location base B)
+    _ = _ := by rfl
+
+/-- The odd recursive cross coordinate is exactly the corresponding
+rectangular historical/newest bilinear form. -/
+theorem logarithmicCvSBuilderOddHistoricalNewestBlock_crossEnergy
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (B : ℕ)
+    (x : Fin B → ℝ) (y : Fin (4 * B) → ℝ) :
+    finiteMatrixBlockCrossEnergy
+        (logarithmicCvSBuilderOddHistoricalNewestBlock
+          c location base B) x y =
+      ∑ i, ∑ j,
+        x i * logarithmicCvSBuilderOddNewestBand
+          c location base B i j * y j := by
+  calc
+    finiteMatrixBlockCrossEnergy
+        (logarithmicCvSBuilderOddHistoricalNewestBlock
+          c location base B) x y =
+      ∑ i, ∑ j, x i *
+        logarithmicCvSBuilderOddHistoricalNewestBlock c location base B
+          (Sum.inl i) (Sum.inr j) * y j :=
+      finiteMatrixBlockCrossEnergy_eq_leftRight_of_symm _ x y
+        (logarithmicCvSBuilderOddHistoricalNewestBlock_symm
+          c location base B)
+    _ = _ := by rfl
 
 /-- Exact `base + 2*cross + tail` decomposition of the concrete even parity
 historical/newest form. -/

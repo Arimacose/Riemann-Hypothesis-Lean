@@ -1398,6 +1398,28 @@ noncomputable def finiteMatrixBlockCrossEnergy
     ((∑ i, ∑ j, x i * A (Sum.inl i) (Sum.inr j) * y j) +
       ∑ i, ∑ j, y i * A (Sum.inr i) (Sum.inl j) * x j)
 
+/-- For a symmetric matrix, the averaged cross coordinate is the usual
+left-right rectangular bilinear form. -/
+theorem finiteMatrixBlockCrossEnergy_eq_leftRight_of_symm
+    {ι κ : Type*} [Fintype ι] [Fintype κ]
+    (A : Matrix (ι ⊕ κ) (ι ⊕ κ) ℝ)
+    (x : ι → ℝ) (y : κ → ℝ)
+    (hSymm : ∀ i j, A i j = A j i) :
+    finiteMatrixBlockCrossEnergy A x y =
+      ∑ i, ∑ j, x i * A (Sum.inl i) (Sum.inr j) * y j := by
+  have hReverse :
+      (∑ i, ∑ j, y i * A (Sum.inr i) (Sum.inl j) * x j) =
+        ∑ i, ∑ j, x i * A (Sum.inl i) (Sum.inr j) * y j := by
+    rw [Finset.sum_comm]
+    apply Finset.sum_congr rfl
+    intro i _hi
+    apply Finset.sum_congr rfl
+    intro j _hj
+    rw [hSymm (Sum.inr j) (Sum.inl i)]
+    ring
+  rw [finiteMatrixBlockCrossEnergy, hReverse]
+  ring
+
 /-- Concatenate the two coordinate vectors along a sum-type block index. -/
 noncomputable def finiteMatrixBlockVector
     {ι κ : Type*} (x : ι → ℝ) (y : κ → ℝ) : ι ⊕ κ → ℝ :=

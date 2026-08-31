@@ -40,9 +40,12 @@ There are eight layers.
    channel envelope.
 
 The concrete source builder, its orthonormal parity compression, and the
-newest separated row/column bands are identified exactly below.  The remaining
-operator inputs are the coercive form floors and the recursive shell-energy
-identification.  No numerical certificate is promoted to a Lean theorem here.
+newest separated row/column bands are identified exactly below.  Its symmetry
+and simultaneous-reflection invariance are also proved, so the finite recursive
+cross coordinate is the literal historical/newest rectangular form.  The
+remaining operator inputs are the concrete coercive component bounds and
+compatibility of these local forms across the all-scale shell tower.  No
+numerical certificate is promoted to a Lean theorem here.
 -/
 
 namespace RiemannCvs.CombinedSymbolDyadicL2
@@ -453,6 +456,14 @@ noncomputable def finiteLogarithmicPrimeDiagonal
     (1 - Real.log (location i) / Real.log c) *
     Real.cos (logarithmicPrimePhase c (location i) * x)
 
+/-- The actual finite prime diagonal is even in the Fourier mode. -/
+theorem finiteLogarithmicPrimeDiagonal_even
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) :
+    Function.Even (finiteLogarithmicPrimeDiagonal c location base) := by
+  intro x
+  simp [finiteLogarithmicPrimeDiagonal, mul_neg]
+
 /-- Piecewise source formula used to assemble the finite prime-power matrix. -/
 noncomputable def finiteLogarithmicPrimeEntry
     {ι : Type*} [Fintype ι]
@@ -620,6 +631,16 @@ noncomputable def logarithmicPoleKernel (c p q : ℝ) : ℝ :=
     (32 * Real.log c * Real.sinh (Real.log c / 4) ^ 2)
     ((Real.log c) ^ 2) (16 * Real.pi ^ 2) p q
 
+theorem logarithmicPoleKernel_symm (c p q : ℝ) :
+    logarithmicPoleKernel c p q = logarithmicPoleKernel c q p := by
+  unfold logarithmicPoleKernel
+  exact CvSParityDisplacement.poleKernel_symm _ _ _ _ _
+
+theorem logarithmicPoleKernel_neg_neg (c p q : ℝ) :
+    logarithmicPoleKernel c (-p) (-q) = logarithmicPoleKernel c p q := by
+  unfold logarithmicPoleKernel
+  exact CvSParityDisplacement.poleKernel_neg_neg _ _ _ _ _
+
 theorem logarithmicPoleKernel_law
     (c : ℝ) (hc : 1 < c) :
     CvSParityDisplacement.DisplacementLaw (logarithmicPoleKernel c) := by
@@ -651,6 +672,19 @@ theorem logarithmicCutoffFreeKernel_eq_pole_sub_oddDifferenceKernel
             finiteLogarithmicPrimeDiagonal c location base x) p q := by
   unfold logarithmicCutoffFreeKernel
   rw [logarithmicArchPrimeEntry_eq_oddDifferenceKernel]
+
+/-- The complete cutoff-free source kernel is symmetric before any parity
+compression. -/
+theorem logarithmicCutoffFreeKernel_symm
+    {ι : Type*} [Fintype ι]
+    (arch archDiagonal : ℝ → ℝ) (c : ℝ)
+    (location base : ι → ℝ) (p q : ℝ) :
+    logarithmicCutoffFreeKernel arch archDiagonal c location base p q =
+      logarithmicCutoffFreeKernel arch archDiagonal c location base q p := by
+  rw [logarithmicCutoffFreeKernel_eq_pole_sub_oddDifferenceKernel,
+    logarithmicCutoffFreeKernel_eq_pole_sub_oddDifferenceKernel,
+    logarithmicPoleKernel_symm,
+    CvSParityDisplacement.oddDifferenceKernel_symm]
 
 theorem logarithmicCutoffFreeKernel_law
     {ι : Type*} [Fintype ι]
@@ -1114,6 +1148,44 @@ theorem logarithmicArchimedeanDiagonal_neg (c x : ℝ) :
   unfold logarithmicArchimedeanDiagonal
   rw [archimedeanCosineCorrection_neg, archimedeanCrossCorrection_neg]
 
+/-- The fully concrete cutoff-free kernel is invariant under simultaneous
+reflection of both signed Fourier modes. -/
+theorem logarithmicCutoffFreeKernel_actual_neg_neg
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (p q : ℝ) :
+    logarithmicCutoffFreeKernel
+        (logarithmicArchimedeanSymbol c)
+        (logarithmicArchimedeanDiagonal c)
+        c location base (-p) (-q) =
+      logarithmicCutoffFreeKernel
+        (logarithmicArchimedeanSymbol c)
+        (logarithmicArchimedeanDiagonal c)
+        c location base p q := by
+  have hSymbol : Function.Odd
+      (fourierNormalizedSymbol
+        (logarithmicCombinedSymbol
+          (logarithmicArchimedeanSymbol c) c location base)) :=
+    fourierNormalizedSymbol_odd
+      (logarithmicCombinedSymbol
+        (logarithmicArchimedeanSymbol c) c location base)
+      (logarithmicCombinedSymbol_odd
+        (logarithmicArchimedeanSymbol c) c location base
+        (logarithmicArchimedeanSymbol_odd c))
+  have hPrimeDiagonal : Function.Even
+      (finiteLogarithmicPrimeDiagonal c location base) :=
+    finiteLogarithmicPrimeDiagonal_even c location base
+  have hDiagonal : Function.Even (fun x =>
+      logarithmicArchimedeanDiagonal c x +
+        finiteLogarithmicPrimeDiagonal c location base x) := by
+    intro x
+    change logarithmicArchimedeanDiagonal c (-x) +
+        finiteLogarithmicPrimeDiagonal c location base (-x) = _
+    rw [logarithmicArchimedeanDiagonal_neg, hPrimeDiagonal x]
+  rw [logarithmicCutoffFreeKernel_eq_pole_sub_oddDifferenceKernel,
+    logarithmicCutoffFreeKernel_eq_pole_sub_oddDifferenceKernel,
+    logarithmicPoleKernel_neg_neg,
+    CvSParityDisplacement.oddDifferenceKernel_neg_neg _ _ hSymbol hDiagonal]
+
 theorem logarithmicCutoffFreeKernel_actualArchimedean_law
     {ι : Type*} [Fintype ι]
     (c : ℝ) (location base : ι → ℝ) (hc : 1 < c) :
@@ -1209,6 +1281,33 @@ theorem logarithmicCvSBuilderEntry_eq_cutoffFreeKernel
   rw [logarithmicCvSPoleEntry_eq_kernel,
     logarithmicCvSArchimedeanEntry_eq_source]
 
+theorem logarithmicCvSBuilderEntry_symm
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (n m : ℤ) :
+    logarithmicCvSBuilderEntry c location base n m =
+      logarithmicCvSBuilderEntry c location base m n := by
+  rw [logarithmicCvSBuilderEntry_eq_cutoffFreeKernel,
+    logarithmicCvSBuilderEntry_eq_cutoffFreeKernel]
+  exact logarithmicCutoffFreeKernel_symm _ _ _ _ _ _ _
+
+theorem logarithmicCvSBuilderEntry_neg_neg
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (n m : ℤ) :
+    logarithmicCvSBuilderEntry c location base (-n) (-m) =
+      logarithmicCvSBuilderEntry c location base n m := by
+  rw [logarithmicCvSBuilderEntry_eq_cutoffFreeKernel,
+    logarithmicCvSBuilderEntry_eq_cutoffFreeKernel]
+  simpa using logarithmicCutoffFreeKernel_actual_neg_neg
+    c location base (n : ℝ) (m : ℝ)
+
+theorem logarithmicCvSBuilderEntry_neg_right_eq_neg_left
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (n m : ℤ) :
+    logarithmicCvSBuilderEntry c location base n (-m) =
+      logarithmicCvSBuilderEntry c location base (-n) m := by
+  simpa using logarithmicCvSBuilderEntry_neg_neg
+    c location base (-n) m
+
 /-- Mode attached to row `i` in the `(2*N+1)` centered finite builder. -/
 def centeredIntegerMode (N : ℕ) (i : Fin (2 * N + 1)) : ℤ :=
   (i : ℤ) - (N : ℤ)
@@ -1270,6 +1369,29 @@ noncomputable def logarithmicCvSBuilderOddMatrix
         (positiveIntegerMode i) (positiveIntegerMode j) -
       logarithmicCvSBuilderEntry c location base
         (positiveIntegerMode i) (-positiveIntegerMode j)
+
+/-- The literal orthonormal even compression is a symmetric real matrix. -/
+theorem logarithmicCvSBuilderEvenMatrix_symm
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (N : ℕ)
+    (i j : Option (Fin N)) :
+    logarithmicCvSBuilderEvenMatrix c location base N i j =
+      logarithmicCvSBuilderEvenMatrix c location base N j i := by
+  rcases i with _ | i <;> rcases j with _ | j <;>
+    simp [logarithmicCvSBuilderEvenMatrix,
+      logarithmicCvSBuilderEntry_symm,
+      logarithmicCvSBuilderEntry_neg_right_eq_neg_left]
+
+/-- The literal orthonormal odd compression is a symmetric real matrix. -/
+theorem logarithmicCvSBuilderOddMatrix_symm
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (N : ℕ)
+    (i j : Fin N) :
+    logarithmicCvSBuilderOddMatrix c location base N i j =
+      logarithmicCvSBuilderOddMatrix c location base N j i := by
+  simp [logarithmicCvSBuilderOddMatrix,
+    logarithmicCvSBuilderEntry_symm,
+    logarithmicCvSBuilderEntry_neg_right_eq_neg_left]
 
 theorem logarithmicCvSBuilderEvenMatrix_eq_evenParityMatrix
     {ι : Type*} [Fintype ι]

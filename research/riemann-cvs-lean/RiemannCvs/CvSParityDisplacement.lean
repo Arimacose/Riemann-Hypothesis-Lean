@@ -35,6 +35,39 @@ noncomputable def oddDifferenceKernel
     (symbol diagonal : ℝ → ℝ) (p q : ℝ) : ℝ :=
   if p = q then diagonal p else (symbol q - symbol p) / (p - q)
 
+/-- Every diagonal-aware odd-difference quotient is symmetric in its two
+matrix coordinates. -/
+theorem oddDifferenceKernel_symm
+    (symbol diagonal : ℝ → ℝ) (p q : ℝ) :
+    oddDifferenceKernel symbol diagonal p q =
+      oddDifferenceKernel symbol diagonal q p := by
+  by_cases hpq : p = q
+  · subst q
+    rfl
+  · have hqp : q ≠ p := Ne.symm hpq
+    simp only [oddDifferenceKernel, hpq, hqp, if_false]
+    rw [show q - p = -(p - q) by ring, div_neg]
+    ring
+
+/-- An odd symbol with an even diagonal gives simultaneous-reflection
+invariance of its complete Loewner kernel. -/
+theorem oddDifferenceKernel_neg_neg
+    (symbol diagonal : ℝ → ℝ)
+    (hSymbol : Function.Odd symbol) (hDiagonal : Function.Even diagonal)
+    (p q : ℝ) :
+    oddDifferenceKernel symbol diagonal (-p) (-q) =
+      oddDifferenceKernel symbol diagonal p q := by
+  by_cases hpq : p = q
+  · subst q
+    simp only [oddDifferenceKernel, if_pos]
+    exact hDiagonal p
+  · have hneg : -p ≠ -q := by
+      exact fun h => hpq (neg_injective h)
+    simp only [oddDifferenceKernel, hpq, hneg, if_false]
+    rw [hSymbol p, hSymbol q,
+      show -p - -q = -(p - q) by ring, div_neg]
+    ring
+
 /-- Every odd-symbol difference quotient satisfies the CvS Fourier
 cross-multiplied displacement identity at positive frequencies. -/
 theorem oddDifferenceKernel_displacement
@@ -110,6 +143,20 @@ noncomputable def poleKernel
     (scale a b : ℝ) (p q : ℝ) : ℝ :=
   scale * (a - b * p * q) /
     ((a + b * p ^ 2) * (a + b * q ^ 2))
+
+/-- The rational pole kernel is symmetric in its two coordinates. -/
+theorem poleKernel_symm
+    (scale a b p q : ℝ) :
+    poleKernel scale a b p q = poleKernel scale a b q p := by
+  unfold poleKernel
+  ring
+
+/-- The rational pole kernel is invariant under simultaneous reflection. -/
+theorem poleKernel_neg_neg
+    (scale a b p q : ℝ) :
+    poleKernel scale a b (-p) (-q) = poleKernel scale a b p q := by
+  unfold poleKernel
+  ring
 
 /-- The rational pole entry satisfies the same displacement identity whenever
 `a > 0` and `b ≥ 0`, which are the source-side values `L²` and `16π²`. -/

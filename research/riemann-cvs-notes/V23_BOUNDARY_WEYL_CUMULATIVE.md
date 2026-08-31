@@ -2318,10 +2318,41 @@ the exact block-energy identity.  The eight theorem interfaces are:
 * `recursiveBlockEnergy_succ_eq_evenHistoricalNewestForm`;
 * `recursiveBlockEnergy_succ_eq_oddHistoricalNewestForm`.
 
+The averaged cross is now identified with the certificate's single oriented
+rectangular form.  At the kernel layer, Lean proves symmetry of every
+diagonal-aware odd divided difference and of the rational pole kernel, together
+with simultaneous-reflection invariance under an odd symbol and even diagonal.
+The finite prime diagonal is even, so these facts propagate through the full
+concrete cutoff-free kernel, the signed-integer builder, and both orthonormal
+parity matrices.  The pulled-back historical/newest matrices are therefore
+symmetric.  Applying
+`finiteMatrixBlockCrossEnergy_eq_leftRight_of_symm` removes the average and
+gives exactly
+
+```text
+cross_even(x,y) = sum_i sum_j x_i * evenNewestBand(i,j) * y_j,
+cross_odd (x,y) = sum_i sum_j x_i * oddNewestBand (i,j) * y_j.
+```
+
+The end-to-end interfaces are
+`oddDifferenceKernel_symm`, `oddDifferenceKernel_neg_neg`,
+`poleKernel_symm`, `poleKernel_neg_neg`,
+`finiteLogarithmicPrimeDiagonal_even`,
+`logarithmicCutoffFreeKernel_symm`,
+`logarithmicCutoffFreeKernel_actual_neg_neg`,
+`logarithmicCvSBuilderEntry_symm`,
+`logarithmicCvSBuilderEntry_neg_neg`,
+`logarithmicCvSBuilderEvenMatrix_symm`,
+`logarithmicCvSBuilderOddMatrix_symm`,
+`finiteMatrixBlockCrossEnergy_eq_leftRight_of_symm`, and the concrete
+`logarithmicCvSBuilderEvenHistoricalNewestBlock_crossEnergy` /
+`logarithmicCvSBuilderOddHistoricalNewestBlock_crossEnergy` theorems.
+
 The remaining recursive boundary is therefore the all-scale compatibility
 statement: successive pulled-back forms must reuse the same historical core
 and the concrete shell vectors must assemble into one coherent dyadic tower.
-The local `base`, `tail`, and `cross` algebra is no longer an open step.  The
+The local `base`, `tail`, and literal rectangular `cross` algebra is no longer
+an open step.  The
 finite prime loop, Archimedean symbol and diagonal formulas,
 signed-integer restriction, parity compression, band restriction, endpoint
 deletion, rational pole parameters, subtraction signs, convergence,
