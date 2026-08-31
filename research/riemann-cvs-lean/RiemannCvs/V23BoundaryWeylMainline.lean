@@ -294,8 +294,12 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   concatenation and old-core matrix preservation identities and instantiates
   the generic theorem for both concrete parity energies.  Thus the all-scale
   shell-tower compatibility is closed without another scalar recursion
-  hypothesis; the remaining operator input here is the concrete component
-  coercivity/error bound.
+  hypothesis.  For any finite positive-mode family, both concrete parity
+  matrices are now split exactly into the negative Archimedean main diagonal
+  and three error matrices (pole, Archimedean remainder, and prime).  The
+  specialized coercive-floor adapters reduce the remaining operator input to
+  one pointwise diagonal lower bound and three absolute quadratic-form bounds;
+  neither the matrix decomposition nor its parity signs remain implicit.
   The combined-symbol certificate
   now also rests on a Lean proof of the finite nonresonant geometric-sum bound,
   including arbitrary starting indices and its sine/cosine projections; Arb
@@ -844,4 +848,337 @@ theorem logarithmicCvSBuilderEvenTowerEnergy_eq_recursiveBlockEnergy
     exact logarithmicCvSBuilderEvenMatrix_pullback_inl_inl
       c location base (hSize n) i j
 
+/-!
+## Concrete positive-mode coercive decomposition
+
+For any finite family of signed positive-mode labels, the concrete even and odd
+CvS matrices split exactly into the negative Archimedean main diagonal and
+three error matrices, ordered as rational pole, Archimedean remainder, and
+finite-prime contribution.  The final adapters reduce the recorded coercive
+floor to one pointwise diagonal lower bound and three absolute quadratic-form
+bounds; no matrix decomposition remains implicit.
+-/
+
+open Finset
+open scoped BigOperators
+open RiemannCvs.CombinedSymbolDyadicL2
+open RiemannCvs.BoundaryWeylSchurTail
+
+noncomputable def finiteVectorEuclideanNormSq
+    {ι : Type*} [Fintype ι] (x : ι → ℝ) : ℝ :=
+  ∑ i, x i ^ 2
+
+@[simp] theorem finiteVectorEuclideanNormSq_nonneg
+    {ι : Type*} [Fintype ι] (x : ι → ℝ) :
+    0 ≤ finiteVectorEuclideanNormSq x := by
+  exact Finset.sum_nonneg fun _ _ => sq_nonneg _
+
+theorem finiteMatrixQuadraticEnergy_add
+    {ι : Type*} [Fintype ι]
+    (A B : Matrix ι ι ℝ) (x : ι → ℝ) :
+    finiteMatrixQuadraticEnergy (A + B) x =
+      finiteMatrixQuadraticEnergy A x + finiteMatrixQuadraticEnergy B x := by
+  simp [finiteMatrixQuadraticEnergy, mul_add, add_mul, Finset.sum_add_distrib]
+
+theorem finiteMatrixQuadraticEnergy_sum_finset
+    {ι κ : Type*} [Fintype ι]
+    (s : Finset κ) (E : κ → Matrix ι ι ℝ) (x : ι → ℝ) :
+    finiteMatrixQuadraticEnergy (∑ k ∈ s, E k) x =
+      ∑ k ∈ s, finiteMatrixQuadraticEnergy (E k) x := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => simp [finiteMatrixQuadraticEnergy]
+  | @insert a s ha ih =>
+      simp only [Finset.sum_insert ha]
+      rw [finiteMatrixQuadraticEnergy_add, ih]
+
+theorem finiteMatrixQuadraticEnergy_sum
+    {ι κ : Type*} [Fintype ι] [Fintype κ]
+    (E : κ → Matrix ι ι ℝ) (x : ι → ℝ) :
+    finiteMatrixQuadraticEnergy (∑ k, E k) x =
+      ∑ k, finiteMatrixQuadraticEnergy (E k) x := by
+  simpa using finiteMatrixQuadraticEnergy_sum_finset (Finset.univ : Finset κ) E x
+
+theorem finiteMatrixQuadraticEnergy_componentFloor
+    {ι κ : Type*} [Fintype ι] [Fintype κ]
+    (A diagonal : Matrix ι ι ℝ)
+    (errorMatrix : κ → Matrix ι ι ℝ)
+    (x : ι → ℝ)
+    (diagonalFloor shift floor : ℝ)
+    (errorBound : κ → ℝ)
+    (hDecomp : A = diagonal + ∑ k, errorMatrix k)
+    (hDiagonal :
+      diagonalFloor * finiteVectorEuclideanNormSq x ≤
+        finiteMatrixQuadraticEnergy diagonal x)
+    (hError : ∀ k,
+      |finiteMatrixQuadraticEnergy (errorMatrix k) x| ≤
+        errorBound k * finiteVectorEuclideanNormSq x)
+    (hFloor :
+      floor ≤ diagonalFloor - (∑ k, errorBound k) + shift) :
+    floor * finiteVectorEuclideanNormSq x ≤
+      finiteMatrixQuadraticEnergy A x +
+        shift * finiteVectorEuclideanNormSq x := by
+  apply coerciveFloor_of_componentBounds
+    (finiteMatrixQuadraticEnergy A x + shift * finiteVectorEuclideanNormSq x)
+    (finiteMatrixQuadraticEnergy diagonal x)
+    (finiteVectorEuclideanNormSq x)
+    diagonalFloor shift floor
+    (fun k => finiteMatrixQuadraticEnergy (errorMatrix k) x)
+    errorBound
+  · exact finiteVectorEuclideanNormSq_nonneg x
+  · rw [hDecomp, finiteMatrixQuadraticEnergy_add,
+      finiteMatrixQuadraticEnergy_sum]
+  · exact hDiagonal
+  · exact hError
+  · exact hFloor
+
+open Finset
+open scoped BigOperators
+open RiemannCvs.CombinedSymbolDyadicL2
+open RiemannCvs.BoundaryWeylSchurTail
+
+noncomputable def logarithmicCvSBuilderEvenPositiveModeMatrix
+    {ι κ : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (mode : κ → ℤ) :
+    Matrix κ κ ℝ :=
+  fun i j =>
+    logarithmicCvSBuilderEntry c location base (mode i) (mode j) +
+      logarithmicCvSBuilderEntry c location base (mode i) (-mode j)
+
+noncomputable def logarithmicCvSBuilderOddPositiveModeMatrix
+    {ι κ : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (mode : κ → ℤ) :
+    Matrix κ κ ℝ :=
+  fun i j =>
+    logarithmicCvSBuilderEntry c location base (mode i) (mode j) -
+      logarithmicCvSBuilderEntry c location base (mode i) (-mode j)
+
+noncomputable def logarithmicCvSArchimedeanPositiveModeDiagonalMatrix
+    {κ : Type*} [DecidableEq κ]
+    (c : ℝ) (mode : κ → ℤ) : Matrix κ κ ℝ :=
+  fun i j =>
+    if i = j then
+      -logarithmicCvSArchimedeanEntry c (mode i) (mode i)
+    else 0
+
+noncomputable def logarithmicCvSPoleEvenPositiveModeMatrix
+    {κ : Type*} (c : ℝ) (mode : κ → ℤ) : Matrix κ κ ℝ :=
+  fun i j =>
+    logarithmicCvSPoleEntry c (mode i) (mode j) +
+      logarithmicCvSPoleEntry c (mode i) (-mode j)
+
+noncomputable def logarithmicCvSPoleOddPositiveModeMatrix
+    {κ : Type*} (c : ℝ) (mode : κ → ℤ) : Matrix κ κ ℝ :=
+  fun i j =>
+    logarithmicCvSPoleEntry c (mode i) (mode j) -
+      logarithmicCvSPoleEntry c (mode i) (-mode j)
+
+noncomputable def logarithmicCvSArchimedeanEvenPositiveModeRemainderMatrix
+    {κ : Type*} [DecidableEq κ]
+    (c : ℝ) (mode : κ → ℤ) : Matrix κ κ ℝ :=
+  fun i j =>
+    -(if i = j then 0 else
+        logarithmicCvSArchimedeanEntry c (mode i) (mode j)) -
+      logarithmicCvSArchimedeanEntry c (mode i) (-mode j)
+
+noncomputable def logarithmicCvSArchimedeanOddPositiveModeRemainderMatrix
+    {κ : Type*} [DecidableEq κ]
+    (c : ℝ) (mode : κ → ℤ) : Matrix κ κ ℝ :=
+  fun i j =>
+    -(if i = j then 0 else
+        logarithmicCvSArchimedeanEntry c (mode i) (mode j)) +
+      logarithmicCvSArchimedeanEntry c (mode i) (-mode j)
+
+noncomputable def finiteLogarithmicPrimeEvenPositiveModeErrorMatrix
+    {ι κ : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (mode : κ → ℤ) :
+    Matrix κ κ ℝ :=
+  fun i j =>
+    -(finiteLogarithmicPrimeEntry c location base (mode i : ℝ) (mode j : ℝ) +
+      finiteLogarithmicPrimeEntry c location base (mode i : ℝ) (-mode j : ℝ))
+
+noncomputable def finiteLogarithmicPrimeOddPositiveModeErrorMatrix
+    {ι κ : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (mode : κ → ℤ) :
+    Matrix κ κ ℝ :=
+  fun i j =>
+    -(finiteLogarithmicPrimeEntry c location base (mode i : ℝ) (mode j : ℝ) -
+      finiteLogarithmicPrimeEntry c location base (mode i : ℝ) (-mode j : ℝ))
+
+noncomputable def logarithmicCvSBuilderEvenPositiveModeErrorMatrix
+    {ι κ : Type*} [Fintype ι] [DecidableEq κ]
+    (c : ℝ) (location base : ι → ℝ) (mode : κ → ℤ) :
+    Fin 3 → Matrix κ κ ℝ :=
+  ![logarithmicCvSPoleEvenPositiveModeMatrix c mode,
+    logarithmicCvSArchimedeanEvenPositiveModeRemainderMatrix c mode,
+    finiteLogarithmicPrimeEvenPositiveModeErrorMatrix c location base mode]
+
+noncomputable def logarithmicCvSBuilderOddPositiveModeErrorMatrix
+    {ι κ : Type*} [Fintype ι] [DecidableEq κ]
+    (c : ℝ) (location base : ι → ℝ) (mode : κ → ℤ) :
+    Fin 3 → Matrix κ κ ℝ :=
+  ![logarithmicCvSPoleOddPositiveModeMatrix c mode,
+    logarithmicCvSArchimedeanOddPositiveModeRemainderMatrix c mode,
+    finiteLogarithmicPrimeOddPositiveModeErrorMatrix c location base mode]
+
+theorem logarithmicCvSBuilderEvenPositiveModeMatrix_decomposition
+    {ι κ : Type*} [Fintype ι] [Fintype κ] [DecidableEq κ]
+    (c : ℝ) (location base : ι → ℝ) (mode : κ → ℤ) :
+    logarithmicCvSBuilderEvenPositiveModeMatrix c location base mode =
+      logarithmicCvSArchimedeanPositiveModeDiagonalMatrix c mode +
+        ∑ k, logarithmicCvSBuilderEvenPositiveModeErrorMatrix
+          c location base mode k := by
+  ext i j
+  by_cases hij : i = j
+  · subst j
+    simp [Fin.sum_univ_three,
+      logarithmicCvSBuilderEvenPositiveModeMatrix,
+      logarithmicCvSArchimedeanPositiveModeDiagonalMatrix,
+      logarithmicCvSBuilderEvenPositiveModeErrorMatrix,
+      logarithmicCvSPoleEvenPositiveModeMatrix,
+      logarithmicCvSArchimedeanEvenPositiveModeRemainderMatrix,
+      finiteLogarithmicPrimeEvenPositiveModeErrorMatrix,
+      logarithmicCvSBuilderEntry]
+    ring
+  · simp [Fin.sum_univ_three,
+      logarithmicCvSBuilderEvenPositiveModeMatrix,
+      logarithmicCvSArchimedeanPositiveModeDiagonalMatrix,
+      logarithmicCvSBuilderEvenPositiveModeErrorMatrix,
+      logarithmicCvSPoleEvenPositiveModeMatrix,
+      logarithmicCvSArchimedeanEvenPositiveModeRemainderMatrix,
+      finiteLogarithmicPrimeEvenPositiveModeErrorMatrix,
+      logarithmicCvSBuilderEntry, hij]
+    ring
+
+theorem logarithmicCvSBuilderOddPositiveModeMatrix_decomposition
+    {ι κ : Type*} [Fintype ι] [Fintype κ] [DecidableEq κ]
+    (c : ℝ) (location base : ι → ℝ) (mode : κ → ℤ) :
+    logarithmicCvSBuilderOddPositiveModeMatrix c location base mode =
+      logarithmicCvSArchimedeanPositiveModeDiagonalMatrix c mode +
+        ∑ k, logarithmicCvSBuilderOddPositiveModeErrorMatrix
+          c location base mode k := by
+  ext i j
+  by_cases hij : i = j
+  · subst j
+    simp [Fin.sum_univ_three,
+      logarithmicCvSBuilderOddPositiveModeMatrix,
+      logarithmicCvSArchimedeanPositiveModeDiagonalMatrix,
+      logarithmicCvSBuilderOddPositiveModeErrorMatrix,
+      logarithmicCvSPoleOddPositiveModeMatrix,
+      logarithmicCvSArchimedeanOddPositiveModeRemainderMatrix,
+      finiteLogarithmicPrimeOddPositiveModeErrorMatrix,
+      logarithmicCvSBuilderEntry]
+    ring
+  · simp [Fin.sum_univ_three,
+      logarithmicCvSBuilderOddPositiveModeMatrix,
+      logarithmicCvSArchimedeanPositiveModeDiagonalMatrix,
+      logarithmicCvSBuilderOddPositiveModeErrorMatrix,
+      logarithmicCvSPoleOddPositiveModeMatrix,
+      logarithmicCvSArchimedeanOddPositiveModeRemainderMatrix,
+      finiteLogarithmicPrimeOddPositiveModeErrorMatrix,
+      logarithmicCvSBuilderEntry, hij]
+    ring
+
+theorem logarithmicCvSBuilderEvenMatrix_some_eq_positiveModeMatrix
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (N : ℕ) :
+    (fun i j : Fin N =>
+      logarithmicCvSBuilderEvenMatrix c location base N (some i) (some j)) =
+      logarithmicCvSBuilderEvenPositiveModeMatrix
+        c location base (fun i : Fin N => positiveIntegerMode i) := by
+  rfl
+
+theorem logarithmicCvSBuilderOddMatrix_eq_positiveModeMatrix
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (N : ℕ) :
+    logarithmicCvSBuilderOddMatrix c location base N =
+      logarithmicCvSBuilderOddPositiveModeMatrix
+        c location base (fun i : Fin N => positiveIntegerMode i) := by
+  rfl
+
+theorem logarithmicCvSArchimedeanPositiveModeDiagonalMatrix_energy
+    {κ : Type*} [Fintype κ] [DecidableEq κ]
+    (c : ℝ) (mode : κ → ℤ) (x : κ → ℝ) :
+    finiteMatrixQuadraticEnergy
+        (logarithmicCvSArchimedeanPositiveModeDiagonalMatrix c mode) x =
+      ∑ i, (-logarithmicCvSArchimedeanEntry c (mode i) (mode i)) * x i ^ 2 := by
+  unfold finiteMatrixQuadraticEnergy
+    logarithmicCvSArchimedeanPositiveModeDiagonalMatrix
+  apply Finset.sum_congr rfl
+  intro i _hi
+  simp
+  ring
+
+theorem logarithmicCvSArchimedeanPositiveModeDiagonalMatrix_ge
+    {κ : Type*} [Fintype κ] [DecidableEq κ]
+    (c : ℝ) (mode : κ → ℤ) (x : κ → ℝ) (diagonalFloor : ℝ)
+    (hDiagonal : ∀ i : κ,
+      diagonalFloor ≤ -logarithmicCvSArchimedeanEntry c (mode i) (mode i)) :
+    diagonalFloor * finiteVectorEuclideanNormSq x ≤
+      finiteMatrixQuadraticEnergy
+        (logarithmicCvSArchimedeanPositiveModeDiagonalMatrix c mode) x := by
+  rw [logarithmicCvSArchimedeanPositiveModeDiagonalMatrix_energy]
+  unfold finiteVectorEuclideanNormSq
+  rw [Finset.mul_sum]
+  apply Finset.sum_le_sum
+  intro i _hi
+  exact mul_le_mul_of_nonneg_right (hDiagonal i) (sq_nonneg (x i))
+
+theorem logarithmicCvSBuilderEvenPositiveModeMatrix_coerciveFloor
+    {ι κ : Type*} [Fintype ι] [Fintype κ] [DecidableEq κ]
+    (c : ℝ) (location base : ι → ℝ) (mode : κ → ℤ) (x : κ → ℝ)
+    (diagonalFloor shift floor : ℝ) (errorBound : Fin 3 → ℝ)
+    (hDiagonal : ∀ i : κ,
+      diagonalFloor ≤ -logarithmicCvSArchimedeanEntry c (mode i) (mode i))
+    (hError : ∀ k,
+      |finiteMatrixQuadraticEnergy
+          (logarithmicCvSBuilderEvenPositiveModeErrorMatrix
+            c location base mode k) x| ≤
+        errorBound k * finiteVectorEuclideanNormSq x)
+    (hFloor : floor ≤ diagonalFloor - (∑ k, errorBound k) + shift) :
+    floor * finiteVectorEuclideanNormSq x ≤
+      finiteMatrixQuadraticEnergy
+          (logarithmicCvSBuilderEvenPositiveModeMatrix
+            c location base mode) x +
+        shift * finiteVectorEuclideanNormSq x := by
+  apply finiteMatrixQuadraticEnergy_componentFloor
+    (logarithmicCvSBuilderEvenPositiveModeMatrix c location base mode)
+    (logarithmicCvSArchimedeanPositiveModeDiagonalMatrix c mode)
+    (logarithmicCvSBuilderEvenPositiveModeErrorMatrix c location base mode)
+    x diagonalFloor shift floor errorBound
+  · exact logarithmicCvSBuilderEvenPositiveModeMatrix_decomposition
+      c location base mode
+  · exact logarithmicCvSArchimedeanPositiveModeDiagonalMatrix_ge
+      c mode x diagonalFloor hDiagonal
+  · exact hError
+  · exact hFloor
+
+theorem logarithmicCvSBuilderOddPositiveModeMatrix_coerciveFloor
+    {ι κ : Type*} [Fintype ι] [Fintype κ] [DecidableEq κ]
+    (c : ℝ) (location base : ι → ℝ) (mode : κ → ℤ) (x : κ → ℝ)
+    (diagonalFloor shift floor : ℝ) (errorBound : Fin 3 → ℝ)
+    (hDiagonal : ∀ i : κ,
+      diagonalFloor ≤ -logarithmicCvSArchimedeanEntry c (mode i) (mode i))
+    (hError : ∀ k,
+      |finiteMatrixQuadraticEnergy
+          (logarithmicCvSBuilderOddPositiveModeErrorMatrix
+            c location base mode k) x| ≤
+        errorBound k * finiteVectorEuclideanNormSq x)
+    (hFloor : floor ≤ diagonalFloor - (∑ k, errorBound k) + shift) :
+    floor * finiteVectorEuclideanNormSq x ≤
+      finiteMatrixQuadraticEnergy
+          (logarithmicCvSBuilderOddPositiveModeMatrix
+            c location base mode) x +
+        shift * finiteVectorEuclideanNormSq x := by
+  apply finiteMatrixQuadraticEnergy_componentFloor
+    (logarithmicCvSBuilderOddPositiveModeMatrix c location base mode)
+    (logarithmicCvSArchimedeanPositiveModeDiagonalMatrix c mode)
+    (logarithmicCvSBuilderOddPositiveModeErrorMatrix c location base mode)
+    x diagonalFloor shift floor errorBound
+  · exact logarithmicCvSBuilderOddPositiveModeMatrix_decomposition
+      c location base mode
+  · exact logarithmicCvSArchimedeanPositiveModeDiagonalMatrix_ge
+      c mode x diagonalFloor hDiagonal
+  · exact hError
+  · exact hFloor
 end RiemannCvs.V23BoundaryWeylMainline

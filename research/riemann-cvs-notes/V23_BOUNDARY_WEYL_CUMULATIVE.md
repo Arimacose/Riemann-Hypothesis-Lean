@@ -2369,10 +2369,29 @@ The interfaces are `finiteMatrixQuadraticEnergy_pullback`,
 `finiteMatrixTowerEnergy_succ`, and
 `finiteMatrixTowerEnergy_eq_recursiveBlockEnergy`.
 
-The remaining recursive boundary is therefore the concrete dyadic
-instantiation of two explicit hypotheses: the index equivalences must preserve
-the old core matrix, and the vectors must concatenate through those
-equivalences.  No separate scalar shell recursion remains.
+The concrete dyadic instantiation is now closed as well.  `Fin` initial
+segments split into old prefix plus shell, and a manually kernel-checked
+`Option Fin` equivalence carries the zero mode through the even tower.  Lean
+proves vector concatenation and old-core matrix preservation for both towers,
+then instantiates `finiteMatrixTowerEnergy_eq_recursiveBlockEnergy` for the
+actual odd and even CvS matrices.  No separate scalar shell recursion or tower
+compatibility hypothesis remains.
+
+The positive-mode coercive decomposition is now explicit for an arbitrary
+finite mode map `mode : kappa -> Int`, so it applies to initial segments,
+historical bands, and new shells.  Each concrete even/odd builder matrix is
+proved equal to the negative Archimedean main diagonal plus exactly three error
+matrices, in the fixed order pole, Archimedean remainder, prime.  The main
+diagonal energy is reduced to a coordinate sum, and the two specialized
+coercive-floor theorems consume only:
+
+1. the pointwise lower bound for `-logarithmicCvSArchimedeanEntry(c,n,n)`;
+2. absolute quadratic-form bounds for the three displayed error matrices; and
+3. the final scalar floor comparison.
+
+Thus matrix splitting, parity/reflection signs, summation of the three errors,
+and passage from pointwise diagonal control to a form lower bound are no longer
+part of the analytic obligation.
 The local `base`, `tail`, and literal rectangular `cross` algebra is no longer
 an open step.  The
 finite prime loop, Archimedean symbol and diagonal formulas,
