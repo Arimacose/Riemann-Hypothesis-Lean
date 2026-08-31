@@ -1359,6 +1359,65 @@ theorem relativeCoupling_of_recursiveShell
 
 end RecursiveShell
 
+/-!
+### Exact finite block coordinates
+
+The scalar recursion below is consumed by finite CvS matrices.  These
+definitions make the coordinate convention explicit: the cross coordinate is
+the average of the two oriented rectangular blocks, so the decomposition is
+exact even before symmetry of the concrete matrix is invoked.
+-/
+
+/-- Quadratic energy of a finite real matrix in coordinates. -/
+noncomputable def finiteMatrixQuadraticEnergy
+    {ι : Type*} [Fintype ι]
+    (A : Matrix ι ι ℝ) (x : ι → ℝ) : ℝ :=
+  ∑ i, ∑ j, x i * A i j * x j
+
+/-- Left-left coordinate of a matrix indexed by a binary block sum. -/
+noncomputable def finiteMatrixBlockBaseEnergy
+    {ι κ : Type*} [Fintype ι] [Fintype κ]
+    (A : Matrix (ι ⊕ κ) (ι ⊕ κ) ℝ) (x : ι → ℝ) : ℝ :=
+  ∑ i, ∑ j, x i * A (Sum.inl i) (Sum.inl j) * x j
+
+/-- Right-right coordinate of a matrix indexed by a binary block sum. -/
+noncomputable def finiteMatrixBlockTailEnergy
+    {ι κ : Type*} [Fintype ι] [Fintype κ]
+    (A : Matrix (ι ⊕ κ) (ι ⊕ κ) ℝ) (y : κ → ℝ) : ℝ :=
+  ∑ i, ∑ j, y i * A (Sum.inr i) (Sum.inr j) * y j
+
+/-- Cross coordinate of a binary block matrix.  Averaging the left-right and
+right-left orientations makes the subsequent `base + 2*cross + tail`
+identity unconditional; for a symmetric matrix this is the usual rectangular
+bilinear form. -/
+noncomputable def finiteMatrixBlockCrossEnergy
+    {ι κ : Type*} [Fintype ι] [Fintype κ]
+    (A : Matrix (ι ⊕ κ) (ι ⊕ κ) ℝ)
+    (x : ι → ℝ) (y : κ → ℝ) : ℝ :=
+  (1 / 2 : ℝ) *
+    ((∑ i, ∑ j, x i * A (Sum.inl i) (Sum.inr j) * y j) +
+      ∑ i, ∑ j, y i * A (Sum.inr i) (Sum.inl j) * x j)
+
+/-- Concatenate the two coordinate vectors along a sum-type block index. -/
+noncomputable def finiteMatrixBlockVector
+    {ι κ : Type*} (x : ι → ℝ) (y : κ → ℝ) : ι ⊕ κ → ℝ :=
+  Sum.elim x y
+
+/-- Exact finite block-form identity with no hidden symmetry hypothesis. -/
+theorem finiteMatrixQuadraticEnergy_blockVector
+    {ι κ : Type*} [Fintype ι] [Fintype κ]
+    (A : Matrix (ι ⊕ κ) (ι ⊕ κ) ℝ)
+    (x : ι → ℝ) (y : κ → ℝ) :
+    finiteMatrixQuadraticEnergy A (finiteMatrixBlockVector x y) =
+      finiteMatrixBlockBaseEnergy A x +
+        2 * finiteMatrixBlockCrossEnergy A x y +
+          finiteMatrixBlockTailEnergy A y := by
+  simp [finiteMatrixQuadraticEnergy, finiteMatrixBlockVector,
+    finiteMatrixBlockBaseEnergy, finiteMatrixBlockCrossEnergy,
+    finiteMatrixBlockTailEnergy, Fintype.sum_sum_type,
+    Finset.sum_add_distrib]
+  ring
+
 /-- Canonical scalar energy obtained by adjoining one shell at a time. -/
 noncomputable def recursiveBlockEnergy
     (base : ℝ) (tail cross : ℕ → ℝ) : ℕ → ℝ
@@ -1373,6 +1432,24 @@ noncomputable def recursiveBlockEnergy
     (base : ℝ) (tail cross : ℕ → ℝ) (n : ℕ) :
     recursiveBlockEnergy base tail cross (n + 1) =
       recursiveBlockEnergy base tail cross n + 2 * cross n + tail n := rfl
+
+/-- If one scalar recursion step is identified with the left-left,
+right-right, and cross coordinates of a concrete finite matrix, its successor
+is exactly that matrix's full quadratic energy. -/
+theorem recursiveBlockEnergy_succ_eq_finiteMatrixQuadraticEnergy
+    {ι κ : Type*} [Fintype ι] [Fintype κ]
+    (base : ℝ) (tail cross : ℕ → ℝ) (n : ℕ)
+    (A : Matrix (ι ⊕ κ) (ι ⊕ κ) ℝ)
+    (x : ι → ℝ) (y : κ → ℝ)
+    (hBase :
+      recursiveBlockEnergy base tail cross n =
+        finiteMatrixBlockBaseEnergy A x)
+    (hTail : tail n = finiteMatrixBlockTailEnergy A y)
+    (hCross : cross n = finiteMatrixBlockCrossEnergy A x y) :
+    recursiveBlockEnergy base tail cross (n + 1) =
+      finiteMatrixQuadraticEnergy A (finiteMatrixBlockVector x y) := by
+  rw [recursiveBlockEnergy_succ, hBase, hTail, hCross]
+  exact (finiteMatrixQuadraticEnergy_blockVector A x y).symm
 
 /-- The canonical recursive energy is exactly the initial block plus all
 diagonal-shell and doubled cross contributions accumulated so far. -/

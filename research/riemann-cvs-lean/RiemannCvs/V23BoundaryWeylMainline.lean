@@ -272,11 +272,18 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   parity submatrices.  A finite-component coercivity theorem now derives the
   displayed Euclidean floor from one diagonal lower bound and absolute bounds
   for all perturbation forms.  The remaining operator bridge is the concrete
-  CvS component bounds and recursive shell-energy identification.  On the
+  CvS component bounds and all-scale shell-tower compatibility.  On the
   recursive side, `recursiveBlockEnergy` now gives the canonical `E+2*C+T`
   recursion, its finite-sum formula is proved, and the reserve-product plus
-  next-shell adapters no longer ask for a separate recursion hypothesis; only
-  the actual finite block-form coordinate identification remains.
+  next-shell adapters no longer ask for a separate recursion hypothesis.
+  The finite matrix quadratic form is now split exactly as `base+2*cross+tail`
+  on a sum-type index, with the two oriented crossblocks averaged so no hidden
+  symmetry hypothesis is needed.  The actual even and odd CvS matrices are
+  pulled back to the proved historical/newest indices, their rectangular
+  blocks are identified with the earlier band matrices, and both concrete
+  quadratic forms feed the recursive successor theorem directly.  What remains
+  on this side is the coherent reuse of those blocks and vectors across the
+  complete dyadic tower.
   The combined-symbol certificate
   now also rests on a Lean proof of the finite nonresonant geometric-sum bound,
   including arbitrary starting indices and its sine/cosine projections; Arb
@@ -305,8 +312,8 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   `0.0003953180565250889...`.  Hence this analytic route reduces the newest
   channel below that threshold to the eight finite cutoffs
   `1920,3840,7680,15360,30720,61440,122880,245760`.  This conclusion remains
-  conditional on the listed concrete component bounds and actual block-form
-  coordinate identification.  The source-specific proof of the
+  conditional on the listed concrete component bounds and all-scale block
+  compatibility.  The source-specific proof of the
   joint Loewner/pole amplitude bounds, the identification of separated band
   energies with the scalar shell decomposition, and a uniform coefficient
   partial-sum bound strictly below one remain analytic inputs.  The scalar
@@ -319,3 +326,171 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   and shell-energy identification, the fourteen finite middle bridges, the
   summable coefficient bound, and source-specific form convergence remain open.
 -/
+
+namespace RiemannCvs.V23BoundaryWeylMainline
+
+open RiemannCvs.CombinedSymbolDyadicL2
+open RiemannCvs.BoundaryWeylSchurTail
+
+/-!
+## Concrete historical/newest block forms
+
+The separated historical rows and newest columns already have exact finite
+indices in `CombinedSymbolDyadicL2`.  Pulling the full parity matrices back to
+their sum type supplies a literal two-block matrix, so the generic recursive
+energy coordinates apply without an informal reindexing step.
+-/
+
+/-- Even-parity builder restricted to the historical and newest positive-mode
+bands, with the two bands represented by the two summands of the index. -/
+noncomputable def logarithmicCvSBuilderEvenHistoricalNewestBlock
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (B : ℕ) :
+    Matrix (Fin B ⊕ Fin (4 * B)) (Fin B ⊕ Fin (4 * B)) ℝ :=
+  fun i j =>
+    logarithmicCvSBuilderEvenMatrix c location base (8 * B)
+      (Sum.elim
+        (fun k => some (historicalBandIndex B k))
+        (fun k => some (newestShellIndex B k)) i)
+      (Sum.elim
+        (fun k => some (historicalBandIndex B k))
+        (fun k => some (newestShellIndex B k)) j)
+
+/-- Odd-parity counterpart of
+`logarithmicCvSBuilderEvenHistoricalNewestBlock`. -/
+noncomputable def logarithmicCvSBuilderOddHistoricalNewestBlock
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (B : ℕ) :
+    Matrix (Fin B ⊕ Fin (4 * B)) (Fin B ⊕ Fin (4 * B)) ℝ :=
+  fun i j =>
+    logarithmicCvSBuilderOddMatrix c location base (8 * B)
+      (Sum.elim (historicalBandIndex B) (newestShellIndex B) i)
+      (Sum.elim (historicalBandIndex B) (newestShellIndex B) j)
+
+/-- The left-right block is exactly the previously identified even newest-band
+restriction. -/
+@[simp] theorem logarithmicCvSBuilderEvenHistoricalNewestBlock_inl_inr
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (B : ℕ)
+    (i : Fin B) (j : Fin (4 * B)) :
+    logarithmicCvSBuilderEvenHistoricalNewestBlock c location base B
+        (Sum.inl i) (Sum.inr j) =
+      logarithmicCvSBuilderEvenNewestBand c location base B i j := by
+  rfl
+
+/-- The left-right block is exactly the previously identified odd newest-band
+restriction. -/
+@[simp] theorem logarithmicCvSBuilderOddHistoricalNewestBlock_inl_inr
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (B : ℕ)
+    (i : Fin B) (j : Fin (4 * B)) :
+    logarithmicCvSBuilderOddHistoricalNewestBlock c location base B
+        (Sum.inl i) (Sum.inr j) =
+      logarithmicCvSBuilderOddNewestBand c location base B i j := by
+  rfl
+
+/-- Exact `base + 2*cross + tail` decomposition of the concrete even parity
+historical/newest form. -/
+theorem logarithmicCvSBuilderEvenHistoricalNewestBlock_energy
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (B : ℕ)
+    (x : Fin B → ℝ) (y : Fin (4 * B) → ℝ) :
+    finiteMatrixQuadraticEnergy
+        (logarithmicCvSBuilderEvenHistoricalNewestBlock
+          c location base B)
+        (finiteMatrixBlockVector x y) =
+      finiteMatrixBlockBaseEnergy
+          (logarithmicCvSBuilderEvenHistoricalNewestBlock
+            c location base B) x +
+        2 * finiteMatrixBlockCrossEnergy
+          (logarithmicCvSBuilderEvenHistoricalNewestBlock
+            c location base B) x y +
+        finiteMatrixBlockTailEnergy
+          (logarithmicCvSBuilderEvenHistoricalNewestBlock
+            c location base B) y := by
+  exact finiteMatrixQuadraticEnergy_blockVector
+    (logarithmicCvSBuilderEvenHistoricalNewestBlock c location base B) x y
+
+/-- Exact `base + 2*cross + tail` decomposition of the concrete odd parity
+historical/newest form. -/
+theorem logarithmicCvSBuilderOddHistoricalNewestBlock_energy
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (B : ℕ)
+    (x : Fin B → ℝ) (y : Fin (4 * B) → ℝ) :
+    finiteMatrixQuadraticEnergy
+        (logarithmicCvSBuilderOddHistoricalNewestBlock
+          c location base B)
+        (finiteMatrixBlockVector x y) =
+      finiteMatrixBlockBaseEnergy
+          (logarithmicCvSBuilderOddHistoricalNewestBlock
+            c location base B) x +
+        2 * finiteMatrixBlockCrossEnergy
+          (logarithmicCvSBuilderOddHistoricalNewestBlock
+            c location base B) x y +
+        finiteMatrixBlockTailEnergy
+          (logarithmicCvSBuilderOddHistoricalNewestBlock
+            c location base B) y := by
+  exact finiteMatrixQuadraticEnergy_blockVector
+    (logarithmicCvSBuilderOddHistoricalNewestBlock c location base B) x y
+
+/-- Once the three displayed concrete even coordinates are assigned to one
+recursive step, the successor energy is definitionally the full pulled-back
+CvS quadratic form. -/
+theorem recursiveBlockEnergy_succ_eq_evenHistoricalNewestForm
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location eventBase : ι → ℝ) (B : ℕ)
+    (base : ℝ) (tail cross : ℕ → ℝ) (n : ℕ)
+    (x : Fin B → ℝ) (y : Fin (4 * B) → ℝ)
+    (hBase :
+      recursiveBlockEnergy base tail cross n =
+        finiteMatrixBlockBaseEnergy
+          (logarithmicCvSBuilderEvenHistoricalNewestBlock
+            c location eventBase B) x)
+    (hTail :
+      tail n = finiteMatrixBlockTailEnergy
+        (logarithmicCvSBuilderEvenHistoricalNewestBlock
+          c location eventBase B) y)
+    (hCross :
+      cross n = finiteMatrixBlockCrossEnergy
+        (logarithmicCvSBuilderEvenHistoricalNewestBlock
+          c location eventBase B) x y) :
+    recursiveBlockEnergy base tail cross (n + 1) =
+      finiteMatrixQuadraticEnergy
+        (logarithmicCvSBuilderEvenHistoricalNewestBlock
+          c location eventBase B)
+        (finiteMatrixBlockVector x y) := by
+  exact recursiveBlockEnergy_succ_eq_finiteMatrixQuadraticEnergy
+    base tail cross n
+    (logarithmicCvSBuilderEvenHistoricalNewestBlock
+      c location eventBase B) x y hBase hTail hCross
+
+/-- Odd-parity specialization of the exact recursive finite-form adapter. -/
+theorem recursiveBlockEnergy_succ_eq_oddHistoricalNewestForm
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location eventBase : ι → ℝ) (B : ℕ)
+    (base : ℝ) (tail cross : ℕ → ℝ) (n : ℕ)
+    (x : Fin B → ℝ) (y : Fin (4 * B) → ℝ)
+    (hBase :
+      recursiveBlockEnergy base tail cross n =
+        finiteMatrixBlockBaseEnergy
+          (logarithmicCvSBuilderOddHistoricalNewestBlock
+            c location eventBase B) x)
+    (hTail :
+      tail n = finiteMatrixBlockTailEnergy
+        (logarithmicCvSBuilderOddHistoricalNewestBlock
+          c location eventBase B) y)
+    (hCross :
+      cross n = finiteMatrixBlockCrossEnergy
+        (logarithmicCvSBuilderOddHistoricalNewestBlock
+          c location eventBase B) x y) :
+    recursiveBlockEnergy base tail cross (n + 1) =
+      finiteMatrixQuadraticEnergy
+        (logarithmicCvSBuilderOddHistoricalNewestBlock
+          c location eventBase B)
+        (finiteMatrixBlockVector x y) := by
+  exact recursiveBlockEnergy_succ_eq_finiteMatrixQuadraticEnergy
+    base tail cross n
+    (logarithmicCvSBuilderOddHistoricalNewestBlock
+      c location eventBase B) x y hBase hTail hCross
+
+end RiemannCvs.V23BoundaryWeylMainline

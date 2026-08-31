@@ -2281,8 +2281,8 @@ six new theorem interfaces are:
 
 Thus the remaining operator bridge starts after the full centered matrix, its
 parity compression, and the certified finite row/column coordinates: prove
-the concrete diagonal and perturbation component bounds and identify the
-block-diagonal shell energies with the recursive-core energy sum.  The
+the concrete diagonal and perturbation component bounds and make the finite
+two-block coordinates coherent across the full dyadic tower.  The
 universal coercive algebra is now formalized by
 `coerciveFloor_of_componentBounds`: a diagonal form lower bound and finitely
 many absolute perturbation bounds imply exactly the displayed Euclidean floor
@@ -2292,9 +2292,37 @@ formula is proved by `recursiveBlockEnergy_eq_base_add_sum`, and the reserve
 and next-shell adapters
 `recursiveBlockEnergy_ge_reserveProduct_mul_blockSum` and
 `relativeShell_of_recursiveBlockEnergyReserve` consume that recursion without
-an extra step hypothesis.  The remaining recursive boundary is therefore the
-identification of the actual finite block forms with these `base`, `tail`, and
-`cross` coordinates.  The finite prime loop, Archimedean symbol and diagonal formulas,
+an extra step hypothesis.
+
+The finite block-coordinate algebra is now exact too.  Lean defines the full
+finite matrix quadratic energy and its left-left `base`, right-right `tail`,
+and averaged two-orientation `cross` coordinates on a sum-type index.  It proves
+
+```text
+Q(blockVector x y) = base(x) + 2*cross(x,y) + tail(y)
+```
+
+without assuming matrix symmetry, then proves that any identified scalar
+recursion step is exactly this full quadratic form.  The concrete even and odd
+CvS parity matrices are pulled back to `Fin B ⊕ Fin (4B)` through the already
+proved historical/newest indices; their left-right blocks reduce definitionally
+to the certified rectangular newest-band matrices, and both full forms satisfy
+the exact block-energy identity.  The eight theorem interfaces are:
+
+* `finiteMatrixQuadraticEnergy_blockVector`;
+* `recursiveBlockEnergy_succ_eq_finiteMatrixQuadraticEnergy`;
+* `logarithmicCvSBuilderEvenHistoricalNewestBlock_inl_inr`;
+* `logarithmicCvSBuilderOddHistoricalNewestBlock_inl_inr`;
+* `logarithmicCvSBuilderEvenHistoricalNewestBlock_energy`;
+* `logarithmicCvSBuilderOddHistoricalNewestBlock_energy`;
+* `recursiveBlockEnergy_succ_eq_evenHistoricalNewestForm`;
+* `recursiveBlockEnergy_succ_eq_oddHistoricalNewestForm`.
+
+The remaining recursive boundary is therefore the all-scale compatibility
+statement: successive pulled-back forms must reuse the same historical core
+and the concrete shell vectors must assemble into one coherent dyadic tower.
+The local `base`, `tail`, and `cross` algebra is no longer an open step.  The
+finite prime loop, Archimedean symbol and diagonal formulas,
 signed-integer restriction, parity compression, band restriction, endpoint
 deletion, rational pole parameters, subtraction signs, convergence,
 reflection, and displacement algebra no longer belong to those open steps.
