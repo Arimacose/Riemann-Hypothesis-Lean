@@ -1995,12 +1995,12 @@ tail is consequently reduced to eight finite bridge cutoffs:
 
 This scalar composition was introduced with four concrete operator inputs.
 The current JSON has collapsed them to one analytic condition: the concrete
-Archimedean main diagonal must satisfy its pointwise lower bound, the explicit
-even/odd pole weight-square sums must satisfy the recorded `poleTail` scalar
-bound, and the Archimedean-remainder and prime parity forms must satisfy their
-displayed absolute quadratic-form bounds.  The crossblock, parity compression,
-block-diagonal recursion, and concrete shell-energy identification are now
-kernel-checked below.  The eight finite bridges remain.  The certificate still
+Archimedean main diagonal must satisfy its pointwise lower bound, and the
+Archimedean-remainder and prime parity forms must satisfy their displayed
+absolute quadratic-form bounds.  The even/odd `poleTail` component is now a
+Lean theorem.  The crossblock, parity compression, block-diagonal recursion,
+and concrete shell-energy identification are kernel-checked below.  The eight
+finite bridges remain.  The certificate still
 replaces the formerly open all-scale newest-band estimate by a finite list plus
 an explicit all-cutoff theorem and supplies the exact half-transport algebra
 once a historical band has entered its analytic range.
@@ -2389,10 +2389,9 @@ diagonal energy is reduced to a coordinate sum, and the two specialized
 coercive-floor theorems consume only:
 
 1. the pointwise lower bound for `-logarithmicCvSArchimedeanEntry(c,n,n)`;
-2. the scalar even/odd pole weight-square tail bounds;
-3. absolute quadratic-form bounds for the Archimedean-remainder and prime
+2. absolute quadratic-form bounds for the Archimedean-remainder and prime
    matrices; and
-4. the final scalar floor comparison.
+3. the final scalar floor comparison.
 
 Thus matrix splitting, parity/reflection signs, summation of the three errors,
 and passage from pointwise diagonal control to a form lower bound are no longer
@@ -2420,9 +2419,27 @@ Cauchy--Schwarz yields the absolute bounds consumed by error component zero:
 |Q_pole,odd (x)| <= |2*scale| * (sum v_i^2) * ||x||_2^2.
 ```
 
-Thus the pole obligation has been reduced from a matrix inequality to the
-scalar tail estimates for those two explicit weight sums.  The Archimedean
-self-entry is simultaneously identified with
+Those scalar estimates are now closed.  Lean proves, for every positive
+integer mode `n`,
+
+```text
+oddWeight(c,n)^2  <= 1/(16*pi^2*n^2),
+evenWeight(c,n)^2 <= 1/(64*pi^2*n^2).
+```
+
+It reindexes the consecutive shell modes `old+1,...,old+shell` as
+`Ioc old (old+shell)` and applies Mathlib's reciprocal-square tail estimate to
+obtain `sum 1/n^2 <= 1/old`.  Consequently both parity pole errors obey
+
+```text
+|Q_pole,shell(x)|
+  <= |scale(c)|/(8*pi^2*old) * ||x||_2^2.
+```
+
+For `c>=1`, `scale(c)>=0`, and the cutoff-13 specializations therefore match
+the certificate's literal `poleTail(N)=scale(13)/(8*pi^2*(N-1))` with
+`old=N-1`.  The pole component of the shell coercive floor is no longer an
+analytic hypothesis.  The Archimedean self-entry is simultaneously identified with
 `logarithmicArchimedeanDiagonal(c,mode)`, so the remaining diagonal inequality
 is stated on exactly the function enclosed by the Arb certificate.
 

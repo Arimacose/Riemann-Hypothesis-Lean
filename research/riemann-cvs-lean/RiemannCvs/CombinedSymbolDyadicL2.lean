@@ -44,10 +44,11 @@ newest separated row/column bands are identified exactly below.  Its symmetry
 and simultaneous-reflection invariance are also proved, so the finite recursive
   cross coordinate is the literal historical/newest rectangular form.  The
   remaining operator input is the concrete Archimedean diagonal/remainder and
-  prime-form bound together with a scalar pole-weight tail estimate.  The
+  prime-form bound.  The scalar pole-weight tail estimate is now closed by
+  pointwise reciprocal-square bounds and a consecutive-shell reindexing.  The
   all-scale shell-tower compatibility, the exact positive-mode component
   decomposition, its direct application to the concrete tower-tail energy, and
-  the rank-one reduction of both pole parity blocks are instantiated in
+  the rank-one reduction and `poleTail` bounds of both pole parity blocks are instantiated in
   `V23BoundaryWeylMainline`.  No numerical certificate is promoted to a Lean
   theorem here.
 -/

@@ -297,8 +297,8 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   hypothesis.  For any finite positive-mode family, both concrete parity
   matrices are now split exactly into the negative Archimedean main diagonal
   and three error matrices (pole, Archimedean remainder, and prime).  The
-  specialized coercive-floor adapters reduce the remaining operator input to
-  one pointwise diagonal lower bound and three absolute quadratic-form bounds.
+  specialized coercive-floor adapters reduce the operator input to one
+  pointwise diagonal lower bound and three absolute quadratic-form bounds.
   The pulled-back right-right block of each actual tower is now identified with
   exactly that positive-mode matrix, including the `4B -> 8B` newest-shell mode
   map, so the same adapters give the coercive floor directly for
@@ -306,9 +306,13 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   decomposition, nor its parity signs remain implicit.  The pole error is now
   factored further: the even and odd parity pole blocks are explicit rank-one
   forms, so their absolute quadratic-form bounds follow from finite scalar
-  sums of squared rational weights by Cauchy--Schwarz.  The diagonal self-entry
-  is also rewritten to the literal Archimedean diagonal used by the interval
-  certificate.
+  sums of squared rational weights by Cauchy--Schwarz.  Pointwise reciprocal-
+  square estimates and an exact consecutive-shell reindexing now bound both
+  sums by the recorded `scale/(8*pi^2*old)` pole tail; cutoff `13` has direct
+  assumption-free specializations.  Thus only the Archimedean remainder and
+  prime error forms remain alongside the diagonal bound.  The diagonal
+  self-entry is also rewritten to the literal Archimedean diagonal used by the
+  interval certificate.
   The combined-symbol certificate
   now also rests on a Lean proof of the finite nonresonant geometric-sum bound,
   including arbitrary starting indices and its sine/cosine projections; Arb
@@ -336,10 +340,11 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   `0.0329380152768082444...`, with strict slack
   `0.0003953180565250889...`.  Hence this analytic route reduces the newest
   channel below that threshold to the eight finite cutoffs
-  `1920,3840,7680,15360,30720,61440,122880,245760`.  This conclusion remains
-  conditional on the listed concrete component bounds.  The source-specific
-  proof of the joint Loewner/pole amplitude bounds and a uniform coefficient
-  partial-sum bound strictly below one remain analytic inputs.  The scalar
+  `1920,3840,7680,15360,30720,61440,122880,245760`.  This conclusion now
+  retains only the concrete Archimedean diagonal/remainder and prime-form
+  bounds.  The source-specific previous-core proof of the joint Loewner/pole
+  amplitude bounds and a uniform coefficient partial-sum bound strictly below
+  one remain analytic inputs.  The scalar
   product lemmas turn the last bound into the explicit positive floor `1-total`.
   This is followed by convergence of the finite-support energies to the closed
   tail form.
@@ -1601,4 +1606,339 @@ theorem logarithmicCvSBuilderOddPositiveModePoleError_abs_le
           finiteVectorEuclideanNormSq x := by
   simpa [logarithmicCvSBuilderOddPositiveModeErrorMatrix] using
     logarithmicCvSPoleOddPositiveModeMatrix_abs_energy_le c mode x
+/-!
+### Consecutive-shell `poleTail` closure
+
+The two rational weights satisfy pointwise reciprocal-square bounds.  Reindexing
+any consecutive finite shell as `Ioc old (old + shell)` and applying Mathlib's
+reciprocal-square tail estimate closes both parity pole forms by the exact
+`scale / (8 * pi^2 * old)` quantity used by the cutoff-13 Arb composition.
+-/
+private theorem sq_second_div_sq_add_sq_le_inv_sq
+    (a b : ℝ) (hb : 0 < b) :
+    (b / (a ^ 2 + b ^ 2)) ^ 2 ≤ 1 / b ^ 2 := by
+  have hDen : 0 < a ^ 2 + b ^ 2 := by positivity
+  rw [div_pow, div_le_div_iff₀ (sq_pos_of_pos hDen) (sq_pos_of_pos hb)]
+  nlinarith [sq_nonneg a, sq_nonneg (a ^ 2),
+    mul_nonneg (sq_nonneg a) (sq_nonneg b)]
+
+private theorem sq_first_div_sq_add_sq_le_quarter_inv_sq
+    (a b : ℝ) (hb : 0 < b) :
+    (a / (a ^ 2 + b ^ 2)) ^ 2 ≤ 1 / (4 * b ^ 2) := by
+  have hDen : 0 < a ^ 2 + b ^ 2 := by positivity
+  have hFour : 0 < 4 * b ^ 2 := by positivity
+  rw [div_pow, div_le_div_iff₀ (sq_pos_of_pos hDen) hFour]
+  nlinarith [sq_nonneg (a ^ 2 - b ^ 2)]
+
+
+
+theorem logarithmicCvSPoleOddWeight_sq_le
+    (c : ℝ) (n : ℤ) (hn : 0 < n) :
+    logarithmicCvSPoleOddWeight c n ^ 2 ≤
+      1 / (16 * Real.pi ^ 2 * (n : ℝ) ^ 2) := by
+  have hnReal : 0 < (n : ℝ) := by exact_mod_cast hn
+  have hb : 0 < 4 * Real.pi * (n : ℝ) := by positivity
+  have h := sq_second_div_sq_add_sq_le_inv_sq
+    (Real.log c) (4 * Real.pi * (n : ℝ)) hb
+  unfold logarithmicCvSPoleOddWeight logarithmicCvSPoleDenominator
+  convert h using 1 <;> ring
+
+theorem logarithmicCvSPoleEvenWeight_sq_le
+    (c : ℝ) (n : ℤ) (hn : 0 < n) :
+    logarithmicCvSPoleEvenWeight c n ^ 2 ≤
+      1 / (64 * Real.pi ^ 2 * (n : ℝ) ^ 2) := by
+  have hnReal : 0 < (n : ℝ) := by exact_mod_cast hn
+  have hb : 0 < 4 * Real.pi * (n : ℝ) := by positivity
+  have h := sq_first_div_sq_add_sq_le_quarter_inv_sq
+    (Real.log c) (4 * Real.pi * (n : ℝ)) hb
+  unfold logarithmicCvSPoleEvenWeight logarithmicCvSPoleDenominator
+  convert h using 1 <;> ring
+
+
+
+private theorem finGlobalShell_inv_sq_sum_eq_Ioc
+    (old shell : ℕ) :
+    (∑ j : Fin shell,
+      (((finGlobalShellPositiveMode old shell j : ℤ) : ℝ) ^ 2)⁻¹) =
+      ∑ n ∈ Finset.Ioc old (old + shell), (((n : ℝ) ^ 2)⁻¹) := by
+  have hIoc : Finset.Ioc old (old + shell) =
+      Finset.Ico (old + 1) (old + shell + 1) := by
+    ext n
+    simp only [Finset.mem_Ioc, Finset.mem_Ico]
+    omega
+  rw [hIoc, Finset.sum_Ico_eq_sum_range]
+  have hLength : old + shell + 1 - (old + 1) = shell := by omega
+  rw [hLength]
+  simpa [finGlobalShellPositiveMode] using
+    (Fin.sum_univ_eq_sum_range
+      (fun j : ℕ => ((((old + 1 + j : ℕ) : ℝ) ^ 2)⁻¹)) shell)
+
+
+
+theorem finGlobalShell_inv_sq_sum_le
+    (old shell : ℕ) (hOld : old ≠ 0) :
+    (∑ j : Fin shell,
+      (((finGlobalShellPositiveMode old shell j : ℤ) : ℝ) ^ 2)⁻¹) ≤
+      1 / (old : ℝ) := by
+  rw [finGlobalShell_inv_sq_sum_eq_Ioc]
+  have hBase := sum_Ioc_inv_sq_le_sub (α := ℝ) hOld
+    (Nat.le_add_right old shell)
+  calc
+    (∑ n ∈ Finset.Ioc old (old + shell), (((n : ℝ) ^ 2)⁻¹)) ≤
+        (old : ℝ)⁻¹ - ((old + shell : ℕ) : ℝ)⁻¹ := hBase
+    _ ≤ 1 / (old : ℝ) := by
+      have hTail : 0 ≤ ((old + shell : ℕ) : ℝ)⁻¹ := by positivity
+      simpa only [one_div] using sub_le_self (old : ℝ)⁻¹ hTail
+
+
+
+theorem logarithmicCvSPoleOddWeight_shell_sum_le
+    (c : ℝ) (old shell : ℕ) (hOld : old ≠ 0) :
+    (∑ j : Fin shell,
+      logarithmicCvSPoleOddWeight c
+        (finGlobalShellPositiveMode old shell j) ^ 2) ≤
+      1 / (16 * Real.pi ^ 2 * (old : ℝ)) := by
+  have hPointwise : ∀ j : Fin shell,
+      logarithmicCvSPoleOddWeight c
+          (finGlobalShellPositiveMode old shell j) ^ 2 ≤
+        (16 * Real.pi ^ 2)⁻¹ *
+          (((finGlobalShellPositiveMode old shell j : ℤ) : ℝ) ^ 2)⁻¹ := by
+    intro j
+    have hMode := finGlobalShellPositiveMode_pos old shell j
+    have hModeReal : 0 <
+        ((finGlobalShellPositiveMode old shell j : ℤ) : ℝ) := by
+      exact_mod_cast hMode
+    have h := logarithmicCvSPoleOddWeight_sq_le c
+      (finGlobalShellPositiveMode old shell j) hMode
+    calc
+      logarithmicCvSPoleOddWeight c
+          (finGlobalShellPositiveMode old shell j) ^ 2 ≤
+          1 / (16 * Real.pi ^ 2 *
+            ((finGlobalShellPositiveMode old shell j : ℤ) : ℝ) ^ 2) := h
+      _ = (16 * Real.pi ^ 2)⁻¹ *
+          (((finGlobalShellPositiveMode old shell j : ℤ) : ℝ) ^ 2)⁻¹ := by
+        field_simp [Real.pi_ne_zero, ne_of_gt hModeReal]
+  calc
+    (∑ j : Fin shell,
+      logarithmicCvSPoleOddWeight c
+        (finGlobalShellPositiveMode old shell j) ^ 2) ≤
+        ∑ j : Fin shell, (16 * Real.pi ^ 2)⁻¹ *
+          (((finGlobalShellPositiveMode old shell j : ℤ) : ℝ) ^ 2)⁻¹ := by
+      exact Finset.sum_le_sum fun j _hj => hPointwise j
+    _ = (16 * Real.pi ^ 2)⁻¹ *
+        ∑ j : Fin shell,
+          (((finGlobalShellPositiveMode old shell j : ℤ) : ℝ) ^ 2)⁻¹ := by
+      rw [Finset.mul_sum]
+    _ ≤ (16 * Real.pi ^ 2)⁻¹ * (1 / (old : ℝ)) := by
+      exact mul_le_mul_of_nonneg_left
+        (finGlobalShell_inv_sq_sum_le old shell hOld) (by positivity)
+    _ = 1 / (16 * Real.pi ^ 2 * (old : ℝ)) := by
+      have hOldReal : (old : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hOld
+      field_simp [Real.pi_ne_zero, hOldReal]
+
+
+
+theorem logarithmicCvSPoleEvenWeight_shell_sum_le_strong
+    (c : ℝ) (old shell : ℕ) (hOld : old ≠ 0) :
+    (∑ j : Fin shell,
+      logarithmicCvSPoleEvenWeight c
+        (finGlobalShellPositiveMode old shell j) ^ 2) ≤
+      1 / (64 * Real.pi ^ 2 * (old : ℝ)) := by
+  have hPointwise : ∀ j : Fin shell,
+      logarithmicCvSPoleEvenWeight c
+          (finGlobalShellPositiveMode old shell j) ^ 2 ≤
+        (64 * Real.pi ^ 2)⁻¹ *
+          (((finGlobalShellPositiveMode old shell j : ℤ) : ℝ) ^ 2)⁻¹ := by
+    intro j
+    have hMode := finGlobalShellPositiveMode_pos old shell j
+    have hModeReal : 0 <
+        ((finGlobalShellPositiveMode old shell j : ℤ) : ℝ) := by
+      exact_mod_cast hMode
+    have h := logarithmicCvSPoleEvenWeight_sq_le c
+      (finGlobalShellPositiveMode old shell j) hMode
+    calc
+      logarithmicCvSPoleEvenWeight c
+          (finGlobalShellPositiveMode old shell j) ^ 2 ≤
+          1 / (64 * Real.pi ^ 2 *
+            ((finGlobalShellPositiveMode old shell j : ℤ) : ℝ) ^ 2) := h
+      _ = (64 * Real.pi ^ 2)⁻¹ *
+          (((finGlobalShellPositiveMode old shell j : ℤ) : ℝ) ^ 2)⁻¹ := by
+        field_simp [Real.pi_ne_zero, ne_of_gt hModeReal]
+  calc
+    (∑ j : Fin shell,
+      logarithmicCvSPoleEvenWeight c
+        (finGlobalShellPositiveMode old shell j) ^ 2) ≤
+        ∑ j : Fin shell, (64 * Real.pi ^ 2)⁻¹ *
+          (((finGlobalShellPositiveMode old shell j : ℤ) : ℝ) ^ 2)⁻¹ := by
+      exact Finset.sum_le_sum fun j _hj => hPointwise j
+    _ = (64 * Real.pi ^ 2)⁻¹ *
+        ∑ j : Fin shell,
+          (((finGlobalShellPositiveMode old shell j : ℤ) : ℝ) ^ 2)⁻¹ := by
+      rw [Finset.mul_sum]
+    _ ≤ (64 * Real.pi ^ 2)⁻¹ * (1 / (old : ℝ)) := by
+      exact mul_le_mul_of_nonneg_left
+        (finGlobalShell_inv_sq_sum_le old shell hOld) (by positivity)
+    _ = 1 / (64 * Real.pi ^ 2 * (old : ℝ)) := by
+      have hOldReal : (old : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hOld
+      field_simp [Real.pi_ne_zero, hOldReal]
+
+theorem logarithmicCvSPoleEvenWeight_shell_sum_le
+    (c : ℝ) (old shell : ℕ) (hOld : old ≠ 0) :
+    (∑ j : Fin shell,
+      logarithmicCvSPoleEvenWeight c
+        (finGlobalShellPositiveMode old shell j) ^ 2) ≤
+      1 / (16 * Real.pi ^ 2 * (old : ℝ)) := by
+  calc
+    (∑ j : Fin shell,
+      logarithmicCvSPoleEvenWeight c
+        (finGlobalShellPositiveMode old shell j) ^ 2) ≤
+        1 / (64 * Real.pi ^ 2 * (old : ℝ)) :=
+      logarithmicCvSPoleEvenWeight_shell_sum_le_strong c old shell hOld
+    _ ≤ 1 / (16 * Real.pi ^ 2 * (old : ℝ)) := by
+      have hOldReal : 0 < (old : ℝ) := by positivity
+      have h16 : 0 < 16 * Real.pi ^ 2 * (old : ℝ) := by positivity
+      have h64 : 0 < 64 * Real.pi ^ 2 * (old : ℝ) := by positivity
+      rw [div_le_div_iff₀ h64 h16]
+      nlinarith [sq_pos_of_pos Real.pi_pos]
+
+
+
+theorem logarithmicCvSPoleScale_nonneg
+    (c : ℝ) (hc : 1 ≤ c) :
+    0 ≤ logarithmicCvSPoleScale c := by
+  have hLog : 0 ≤ Real.log c := Real.log_nonneg hc
+  unfold logarithmicCvSPoleScale
+  positivity
+
+theorem logarithmicCvSBuilderOddShellPoleError_abs_le
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ)
+    (old shell : ℕ) (hOld : old ≠ 0) (x : Fin shell → ℝ) :
+    |finiteMatrixQuadraticEnergy
+        (logarithmicCvSBuilderOddPositiveModeErrorMatrix
+          c location base (finGlobalShellPositiveMode old shell) 0) x| ≤
+      |logarithmicCvSPoleScale c| /
+          (8 * Real.pi ^ 2 * (old : ℝ)) *
+        finiteVectorEuclideanNormSq x := by
+  have hRaw := logarithmicCvSBuilderOddPositiveModePoleError_abs_le
+    c location base (finGlobalShellPositiveMode old shell) x
+  have hWeights := logarithmicCvSPoleOddWeight_shell_sum_le
+    c old shell hOld
+  calc
+    |finiteMatrixQuadraticEnergy
+        (logarithmicCvSBuilderOddPositiveModeErrorMatrix
+          c location base (finGlobalShellPositiveMode old shell) 0) x| ≤
+      |2 * logarithmicCvSPoleScale c| *
+        (∑ i : Fin shell,
+          logarithmicCvSPoleOddWeight c
+            (finGlobalShellPositiveMode old shell i) ^ 2) *
+          finiteVectorEuclideanNormSq x := hRaw
+    _ ≤ |2 * logarithmicCvSPoleScale c| *
+        (1 / (16 * Real.pi ^ 2 * (old : ℝ))) *
+          finiteVectorEuclideanNormSq x := by
+      exact mul_le_mul_of_nonneg_right
+        (mul_le_mul_of_nonneg_left hWeights (abs_nonneg _))
+        (finiteVectorEuclideanNormSq_nonneg x)
+    _ = |logarithmicCvSPoleScale c| /
+          (8 * Real.pi ^ 2 * (old : ℝ)) *
+        finiteVectorEuclideanNormSq x := by
+      have hOldReal : (old : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hOld
+      rw [abs_mul, abs_of_nonneg (show (0 : ℝ) ≤ 2 by norm_num)]
+      field_simp [Real.pi_ne_zero, hOldReal]
+      ring
+
+theorem logarithmicCvSBuilderEvenShellPoleError_abs_le
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ)
+    (old shell : ℕ) (hOld : old ≠ 0) (x : Fin shell → ℝ) :
+    |finiteMatrixQuadraticEnergy
+        (logarithmicCvSBuilderEvenPositiveModeErrorMatrix
+          c location base (finGlobalShellPositiveMode old shell) 0) x| ≤
+      |logarithmicCvSPoleScale c| /
+          (8 * Real.pi ^ 2 * (old : ℝ)) *
+        finiteVectorEuclideanNormSq x := by
+  have hRaw := logarithmicCvSBuilderEvenPositiveModePoleError_abs_le
+    c location base (finGlobalShellPositiveMode old shell) x
+  have hWeights := logarithmicCvSPoleEvenWeight_shell_sum_le
+    c old shell hOld
+  calc
+    |finiteMatrixQuadraticEnergy
+        (logarithmicCvSBuilderEvenPositiveModeErrorMatrix
+          c location base (finGlobalShellPositiveMode old shell) 0) x| ≤
+      |2 * logarithmicCvSPoleScale c| *
+        (∑ i : Fin shell,
+          logarithmicCvSPoleEvenWeight c
+            (finGlobalShellPositiveMode old shell i) ^ 2) *
+          finiteVectorEuclideanNormSq x := hRaw
+    _ ≤ |2 * logarithmicCvSPoleScale c| *
+        (1 / (16 * Real.pi ^ 2 * (old : ℝ))) *
+          finiteVectorEuclideanNormSq x := by
+      exact mul_le_mul_of_nonneg_right
+        (mul_le_mul_of_nonneg_left hWeights (abs_nonneg _))
+        (finiteVectorEuclideanNormSq_nonneg x)
+    _ = |logarithmicCvSPoleScale c| /
+          (8 * Real.pi ^ 2 * (old : ℝ)) *
+        finiteVectorEuclideanNormSq x := by
+      have hOldReal : (old : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hOld
+      rw [abs_mul, abs_of_nonneg (show (0 : ℝ) ≤ 2 by norm_num)]
+      field_simp [Real.pi_ne_zero, hOldReal]
+      ring
+
+
+
+theorem logarithmicCvSBuilderOddShellPoleError_le_poleTail
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (hc : 1 ≤ c) (location base : ι → ℝ)
+    (old shell : ℕ) (hOld : old ≠ 0) (x : Fin shell → ℝ) :
+    |finiteMatrixQuadraticEnergy
+        (logarithmicCvSBuilderOddPositiveModeErrorMatrix
+          c location base (finGlobalShellPositiveMode old shell) 0) x| ≤
+      logarithmicCvSPoleScale c /
+          (8 * Real.pi ^ 2 * (old : ℝ)) *
+        finiteVectorEuclideanNormSq x := by
+  simpa [abs_of_nonneg (logarithmicCvSPoleScale_nonneg c hc)] using
+    logarithmicCvSBuilderOddShellPoleError_abs_le
+      c location base old shell hOld x
+
+theorem logarithmicCvSBuilderEvenShellPoleError_le_poleTail
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (hc : 1 ≤ c) (location base : ι → ℝ)
+    (old shell : ℕ) (hOld : old ≠ 0) (x : Fin shell → ℝ) :
+    |finiteMatrixQuadraticEnergy
+        (logarithmicCvSBuilderEvenPositiveModeErrorMatrix
+          c location base (finGlobalShellPositiveMode old shell) 0) x| ≤
+      logarithmicCvSPoleScale c /
+          (8 * Real.pi ^ 2 * (old : ℝ)) *
+        finiteVectorEuclideanNormSq x := by
+  simpa [abs_of_nonneg (logarithmicCvSPoleScale_nonneg c hc)] using
+    logarithmicCvSBuilderEvenShellPoleError_abs_le
+      c location base old shell hOld x
+
+
+
+theorem c13_logarithmicCvSBuilderOddShellPoleError_le_poleTail
+    {ι : Type*} [Fintype ι]
+    (location base : ι → ℝ)
+    (old shell : ℕ) (hOld : old ≠ 0) (x : Fin shell → ℝ) :
+    |finiteMatrixQuadraticEnergy
+        (logarithmicCvSBuilderOddPositiveModeErrorMatrix
+          13 location base (finGlobalShellPositiveMode old shell) 0) x| ≤
+      logarithmicCvSPoleScale 13 /
+          (8 * Real.pi ^ 2 * (old : ℝ)) *
+        finiteVectorEuclideanNormSq x := by
+  exact logarithmicCvSBuilderOddShellPoleError_le_poleTail
+    13 (by norm_num) location base old shell hOld x
+
+theorem c13_logarithmicCvSBuilderEvenShellPoleError_le_poleTail
+    {ι : Type*} [Fintype ι]
+    (location base : ι → ℝ)
+    (old shell : ℕ) (hOld : old ≠ 0) (x : Fin shell → ℝ) :
+    |finiteMatrixQuadraticEnergy
+        (logarithmicCvSBuilderEvenPositiveModeErrorMatrix
+          13 location base (finGlobalShellPositiveMode old shell) 0) x| ≤
+      logarithmicCvSPoleScale 13 /
+          (8 * Real.pi ^ 2 * (old : ℝ)) *
+        finiteVectorEuclideanNormSq x := by
+  exact logarithmicCvSBuilderEvenShellPoleError_le_poleTail
+    13 (by norm_num) location base old shell hOld x
 end RiemannCvs.V23BoundaryWeylMainline
