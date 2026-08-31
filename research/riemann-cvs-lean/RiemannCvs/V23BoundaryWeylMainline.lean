@@ -272,7 +272,7 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   parity submatrices.  A finite-component coercivity theorem now derives the
   displayed Euclidean floor from one diagonal lower bound and absolute bounds
   for all perturbation forms.  The remaining operator bridge is the concrete
-  CvS component bounds and all-scale shell-tower compatibility.  On the
+  CvS component bounds.  On the
   recursive side, `recursiveBlockEnergy` now gives the canonical `E+2*C+T`
   recursion, its finite-sum formula is proved, and the reserve-product plus
   next-shell adapters no longer ask for a separate recursion hypothesis.
@@ -298,8 +298,12 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   matrices are now split exactly into the negative Archimedean main diagonal
   and three error matrices (pole, Archimedean remainder, and prime).  The
   specialized coercive-floor adapters reduce the remaining operator input to
-  one pointwise diagonal lower bound and three absolute quadratic-form bounds;
-  neither the matrix decomposition nor its parity signs remain implicit.
+  one pointwise diagonal lower bound and three absolute quadratic-form bounds.
+  The pulled-back right-right block of each actual tower is now identified with
+  exactly that positive-mode matrix, including the `4B -> 8B` newest-shell mode
+  map, so the same adapters give the coercive floor directly for
+  `finiteMatrixTowerTailEnergy`; neither shell identification, matrix
+  decomposition, nor its parity signs remain implicit.
   The combined-symbol certificate
   now also rests on a Lean proof of the finite nonresonant geometric-sum bound,
   including arbitrary starting indices and its sine/cosine projections; Arb
@@ -1181,4 +1185,199 @@ theorem logarithmicCvSBuilderOddPositiveModeMatrix_coerciveFloor
       c mode x diagonalFloor hDiagonal
   · exact hError
   · exact hFloor
+
+/-!
+## Concrete tower-shell coercivity
+
+The right-right block of each pulled-back parity tower is the arbitrary
+positive-mode matrix above for the consecutive shell modes.  Consequently the
+component coercivity adapters apply directly to `finiteMatrixTowerTailEnergy`,
+without a separate shell-matrix identification hypothesis.
+-/
+
+/-- Signed positive modes carried by the consecutive shell after an old
+initial segment. -/
+noncomputable def finGlobalShellPositiveMode
+    (old shell : ℕ) (j : Fin shell) : ℤ :=
+  (old + 1 + (j : ℕ) : ℕ)
+
+/-- The right-right block of the pulled-back odd builder is exactly the odd
+positive-mode matrix on the consecutive shell. -/
+theorem logarithmicCvSBuilderOddMatrix_pullback_inr_inr
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ)
+    {old shell next : ℕ} (h : next = old + shell)
+    (i j : Fin shell) :
+    finiteMatrixPullback (finBlockSplitEquiv h)
+        (logarithmicCvSBuilderOddMatrix c location base next)
+        (Sum.inr i) (Sum.inr j) =
+      logarithmicCvSBuilderOddPositiveModeMatrix c location base
+        (finGlobalShellPositiveMode old shell) i j := by
+  simp [finiteMatrixPullback, finBlockSplitEquiv,
+    logarithmicCvSBuilderOddMatrix,
+    logarithmicCvSBuilderOddPositiveModeMatrix,
+    positiveIntegerMode, finGlobalShellPositiveMode]
+  congr 1 <;> ring_nf
+
+/-- The right-right block of the pulled-back even builder is exactly the even
+positive-mode matrix on the consecutive shell; the central mode remains in
+the old block. -/
+theorem logarithmicCvSBuilderEvenMatrix_pullback_inr_inr
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ)
+    {old shell next : ℕ} (h : next = old + shell)
+    (i j : Fin shell) :
+    finiteMatrixPullback (optionFinBlockSplitEquiv h)
+        (logarithmicCvSBuilderEvenMatrix c location base next)
+        (Sum.inr i) (Sum.inr j) =
+      logarithmicCvSBuilderEvenPositiveModeMatrix c location base
+        (finGlobalShellPositiveMode old shell) i j := by
+  simp [finiteMatrixPullback, optionFinBlockSplitEquiv,
+    finBlockSplitEquiv, logarithmicCvSBuilderEvenMatrix,
+    logarithmicCvSBuilderEvenPositiveModeMatrix,
+    positiveIntegerMode, finGlobalShellPositiveMode]
+  congr 1 <;> ring_nf
+
+/-- The actual odd tower-tail coordinate is the positive-mode quadratic
+energy of its consecutive shell. -/
+theorem logarithmicCvSBuilderOddTowerTailEnergy_eq_positiveModeEnergy
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ)
+    (z : ℕ → ℝ) (size shell : ℕ → ℕ)
+    (hSize : ∀ n, size (n + 1) = size n + shell n)
+    (n : ℕ) :
+    finiteMatrixTowerTailEnergy
+        (logarithmicCvSBuilderOddTowerMatrix c location base size)
+        (logarithmicCvSBuilderOddTowerShellVector z size shell)
+        (logarithmicCvSBuilderOddTowerSplit size shell hSize) n =
+      finiteMatrixQuadraticEnergy
+        (logarithmicCvSBuilderOddPositiveModeMatrix c location base
+          (finGlobalShellPositiveMode (size n) (shell n)))
+        (finGlobalShellVector z (size n) (shell n)) := by
+  unfold finiteMatrixTowerTailEnergy finiteMatrixBlockTailEnergy
+    finiteMatrixQuadraticEnergy
+  simp only [logarithmicCvSBuilderOddTowerMatrix,
+    logarithmicCvSBuilderOddTowerShellVector,
+    logarithmicCvSBuilderOddTowerSplit]
+  apply Finset.sum_congr rfl
+  intro i _hi
+  apply Finset.sum_congr rfl
+  intro j _hj
+  rw [logarithmicCvSBuilderOddMatrix_pullback_inr_inr
+    c location base (hSize n) i j]
+
+/-- The actual even tower-tail coordinate is the positive-mode quadratic
+energy of its consecutive shell. -/
+theorem logarithmicCvSBuilderEvenTowerTailEnergy_eq_positiveModeEnergy
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ)
+    (z : ℕ → ℝ) (size shell : ℕ → ℕ)
+    (hSize : ∀ n, size (n + 1) = size n + shell n)
+    (n : ℕ) :
+    finiteMatrixTowerTailEnergy
+        (logarithmicCvSBuilderEvenTowerMatrix c location base size)
+        (logarithmicCvSBuilderEvenTowerShellVector z size shell)
+        (logarithmicCvSBuilderEvenTowerSplit size shell hSize) n =
+      finiteMatrixQuadraticEnergy
+        (logarithmicCvSBuilderEvenPositiveModeMatrix c location base
+          (finGlobalShellPositiveMode (size n) (shell n)))
+        (finGlobalShellVector z (size n) (shell n)) := by
+  unfold finiteMatrixTowerTailEnergy finiteMatrixBlockTailEnergy
+    finiteMatrixQuadraticEnergy
+  simp only [logarithmicCvSBuilderEvenTowerMatrix,
+    logarithmicCvSBuilderEvenTowerShellVector,
+    logarithmicCvSBuilderEvenTowerSplit]
+  apply Finset.sum_congr rfl
+  intro i _hi
+  apply Finset.sum_congr rfl
+  intro j _hj
+  rw [logarithmicCvSBuilderEvenMatrix_pullback_inr_inr
+    c location base (hSize n) i j]
+
+/-- At the dyadic `4B -> 8B` transition, the generic consecutive-shell mode
+map is definitionally the recorded newest-shell mode map. -/
+theorem finGlobalShellPositiveMode_four_mul_eq_newestShellMode
+    (B : ℕ) :
+    finGlobalShellPositiveMode (4 * B) (4 * B) =
+      fun j : Fin (4 * B) => (newestShellMode B j : ℤ) := by
+  funext j
+  rfl
+
+/-- The positive-mode component bounds give the requested coercive floor
+directly for an actual odd tower shell. -/
+theorem logarithmicCvSBuilderOddTowerTailEnergy_coerciveFloor
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ)
+    (z : ℕ → ℝ) (size shell : ℕ → ℕ)
+    (hSize : ∀ n, size (n + 1) = size n + shell n)
+    (n : ℕ) (diagonalFloor shift floor : ℝ)
+    (errorBound : Fin 3 → ℝ)
+    (hDiagonal : ∀ i : Fin (shell n),
+      diagonalFloor ≤
+        -logarithmicCvSArchimedeanEntry c
+          (finGlobalShellPositiveMode (size n) (shell n) i)
+          (finGlobalShellPositiveMode (size n) (shell n) i))
+    (hError : ∀ k,
+      |finiteMatrixQuadraticEnergy
+          (logarithmicCvSBuilderOddPositiveModeErrorMatrix
+            c location base
+            (finGlobalShellPositiveMode (size n) (shell n)) k)
+          (finGlobalShellVector z (size n) (shell n))| ≤
+        errorBound k * finiteVectorEuclideanNormSq
+          (finGlobalShellVector z (size n) (shell n)))
+    (hFloor : floor ≤ diagonalFloor - (∑ k, errorBound k) + shift) :
+    floor * finiteVectorEuclideanNormSq
+        (finGlobalShellVector z (size n) (shell n)) ≤
+      finiteMatrixTowerTailEnergy
+          (logarithmicCvSBuilderOddTowerMatrix c location base size)
+          (logarithmicCvSBuilderOddTowerShellVector z size shell)
+          (logarithmicCvSBuilderOddTowerSplit size shell hSize) n +
+        shift * finiteVectorEuclideanNormSq
+          (finGlobalShellVector z (size n) (shell n)) := by
+  rw [logarithmicCvSBuilderOddTowerTailEnergy_eq_positiveModeEnergy
+    c location base z size shell hSize n]
+  exact logarithmicCvSBuilderOddPositiveModeMatrix_coerciveFloor
+    c location base
+    (finGlobalShellPositiveMode (size n) (shell n))
+    (finGlobalShellVector z (size n) (shell n))
+    diagonalFloor shift floor errorBound hDiagonal hError hFloor
+
+/-- The positive-mode component bounds give the requested coercive floor
+directly for an actual even tower shell. -/
+theorem logarithmicCvSBuilderEvenTowerTailEnergy_coerciveFloor
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ)
+    (z : ℕ → ℝ) (size shell : ℕ → ℕ)
+    (hSize : ∀ n, size (n + 1) = size n + shell n)
+    (n : ℕ) (diagonalFloor shift floor : ℝ)
+    (errorBound : Fin 3 → ℝ)
+    (hDiagonal : ∀ i : Fin (shell n),
+      diagonalFloor ≤
+        -logarithmicCvSArchimedeanEntry c
+          (finGlobalShellPositiveMode (size n) (shell n) i)
+          (finGlobalShellPositiveMode (size n) (shell n) i))
+    (hError : ∀ k,
+      |finiteMatrixQuadraticEnergy
+          (logarithmicCvSBuilderEvenPositiveModeErrorMatrix
+            c location base
+            (finGlobalShellPositiveMode (size n) (shell n)) k)
+          (finGlobalShellVector z (size n) (shell n))| ≤
+        errorBound k * finiteVectorEuclideanNormSq
+          (finGlobalShellVector z (size n) (shell n)))
+    (hFloor : floor ≤ diagonalFloor - (∑ k, errorBound k) + shift) :
+    floor * finiteVectorEuclideanNormSq
+        (finGlobalShellVector z (size n) (shell n)) ≤
+      finiteMatrixTowerTailEnergy
+          (logarithmicCvSBuilderEvenTowerMatrix c location base size)
+          (logarithmicCvSBuilderEvenTowerShellVector z size shell)
+          (logarithmicCvSBuilderEvenTowerSplit size shell hSize) n +
+        shift * finiteVectorEuclideanNormSq
+          (finGlobalShellVector z (size n) (shell n)) := by
+  rw [logarithmicCvSBuilderEvenTowerTailEnergy_eq_positiveModeEnergy
+    c location base z size shell hSize n]
+  exact logarithmicCvSBuilderEvenPositiveModeMatrix_coerciveFloor
+    c location base
+    (finGlobalShellPositiveMode (size n) (shell n))
+    (finGlobalShellVector z (size n) (shell n))
+    diagonalFloor shift floor errorBound hDiagonal hError hFloor
 end RiemannCvs.V23BoundaryWeylMainline

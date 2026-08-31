@@ -44,9 +44,10 @@ newest separated row/column bands are identified exactly below.  Its symmetry
 and simultaneous-reflection invariance are also proved, so the finite recursive
   cross coordinate is the literal historical/newest rectangular form.  The
   remaining operator input is the concrete coercive component bound.  The
-  all-scale shell-tower compatibility and the exact positive-mode component
-  decomposition are instantiated in `V23BoundaryWeylMainline`.  No numerical
-  certificate is promoted to a Lean theorem here.
+  all-scale shell-tower compatibility, the exact positive-mode component
+  decomposition, and its direct application to the concrete tower-tail energy
+  are instantiated in `V23BoundaryWeylMainline`.  No numerical certificate is
+  promoted to a Lean theorem here.
 -/
 
 namespace RiemannCvs.CombinedSymbolDyadicL2

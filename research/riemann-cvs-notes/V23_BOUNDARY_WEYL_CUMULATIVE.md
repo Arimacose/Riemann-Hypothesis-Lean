@@ -1993,15 +1993,16 @@ tail is consequently reduced to eight finite bridge cutoffs:
 30720, 61440, 122880, 245760.
 ```
 
-This is a rigorous scalar composition conditional on four concrete operator
-inputs recorded in the JSON: identification of the crossblock with the odd
-Loewner kernel of `F/pi`, the parity compression, the displayed Euclidean
-coercive floors, and identification of the block-diagonal shell energies with
-the recursively glued core.  It closes neither those source identifications
-nor the eight finite bridges.  It does replace the formerly open all-scale
-newest-band estimate by a finite list plus an explicit all-cutoff theorem, and
-it supplies the exact half-transport algebra needed once a historical band has
-entered its analytic range.
+This scalar composition was introduced with four concrete operator inputs.
+The current JSON has collapsed them to one analytic condition: the concrete
+Archimedean main diagonal must satisfy its pointwise lower bound, and the pole,
+Archimedean-remainder, and prime parity forms must satisfy their displayed
+absolute quadratic-form bounds.  The crossblock, parity compression,
+block-diagonal recursion, and concrete shell-energy identification are now
+kernel-checked below.  The eight finite bridges remain.  The certificate still
+replaces the formerly open all-scale newest-band estimate by a finite list plus
+an explicit all-cutoff theorem and supplies the exact half-transport algebra
+once a historical band has entered its analytic range.
 
 ## 13. Exact source algebra for the combined Loewner symbol
 
@@ -2280,9 +2281,10 @@ six new theorem interfaces are:
 * `logarithmicCvSBuilderOddNewestBand_eq_oddParityRestriction`.
 
 Thus the remaining operator bridge starts after the full centered matrix, its
-parity compression, and the certified finite row/column coordinates: prove
-the concrete diagonal and perturbation component bounds and make the finite
-two-block coordinates coherent across the full dyadic tower.  The
+parity compression, and the certified finite row/column coordinates.  The
+finite two-block coordinates are now coherent across the full dyadic tower as
+recorded below; the remaining source task is the concrete diagonal and
+perturbation component bounds.  The
 universal coercive algebra is now formalized by
 `coerciveFloor_of_componentBounds`: a diagonal form lower bound and finitely
 many absolute perturbation bounds imply exactly the displayed Euclidean floor
@@ -2392,6 +2394,16 @@ coercive-floor theorems consume only:
 Thus matrix splitting, parity/reflection signs, summation of the three errors,
 and passage from pointwise diagonal control to a form lower bound are no longer
 part of the analytic obligation.
+
+The final shell identification is now exact as well.  The right-right block of
+the pulled-back odd `Fin` tower and even `Option Fin` tower equals the arbitrary
+positive-mode matrix on the consecutive shell modes.  The generic shell mode
+specializes definitionally to `newestShellMode B` at the `4B -> 8B`
+transition.  Therefore both actual `finiteMatrixTowerTailEnergy` coordinates
+are equal to the corresponding positive-mode quadratic energies, and the two
+new tower-tail coercive-floor theorems consume the same pointwise diagonal and
+three error-form bounds directly.  No extra shell-energy identification input
+remains.
 The local `base`, `tail`, and literal rectangular `cross` algebra is no longer
 an open step.  The
 finite prime loop, Archimedean symbol and diagonal formulas,
