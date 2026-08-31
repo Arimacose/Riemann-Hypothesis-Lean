@@ -2286,7 +2286,15 @@ block-diagonal shell energies with the recursive-core energy sum.  The
 universal coercive algebra is now formalized by
 `coerciveFloor_of_componentBounds`: a diagonal form lower bound and finitely
 many absolute perturbation bounds imply exactly the displayed Euclidean floor
-after adding the shift.  The finite prime loop, Archimedean symbol and diagonal formulas,
+after adding the shift.  The recursive scalar energy is now canonical as well:
+`recursiveBlockEnergy` adjoins each shell by `E+2*C+T`, its closed finite-sum
+formula is proved by `recursiveBlockEnergy_eq_base_add_sum`, and the reserve
+and next-shell adapters
+`recursiveBlockEnergy_ge_reserveProduct_mul_blockSum` and
+`relativeShell_of_recursiveBlockEnergyReserve` consume that recursion without
+an extra step hypothesis.  The remaining recursive boundary is therefore the
+identification of the actual finite block forms with these `base`, `tail`, and
+`cross` coordinates.  The finite prime loop, Archimedean symbol and diagonal formulas,
 signed-integer restriction, parity compression, band restriction, endpoint
 deletion, rational pole parameters, subtraction signs, convergence,
 reflection, and displacement algebra no longer belong to those open steps.

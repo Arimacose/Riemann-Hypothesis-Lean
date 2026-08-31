@@ -378,8 +378,11 @@ jobs:
           #print axioms RiemannCvs.BoundaryWeylSchurTail.reserveProduct_ge_one_sub_of_partialSumBound
           #print axioms RiemannCvs.BoundaryWeylSchurTail.reserveProduct_pos_of_partialSum_lt_one
           #print axioms RiemannCvs.BoundaryWeylSchurTail.recursiveShellEnergy_ge_reserveProduct_mul_blockSum
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.recursiveBlockEnergy_eq_base_add_sum
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.recursiveBlockEnergy_ge_reserveProduct_mul_blockSum
           #print axioms RiemannCvs.BoundaryWeylSchurTail.recursiveShellEnergy_ge_reserveFloor_mul_blockSum
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeShell_of_recursiveBlockSumReserve
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeShell_of_recursiveBlockEnergyReserve
           #print axioms RiemannCvs.BoundaryWeylSchurTail.recursiveShellEnergy_ge_of_reserveProductLowerBound
           #print axioms RiemannCvs.BoundaryWeylSchurTail.recursiveShellEnergy_limit_ge_of_reserveProductLowerBound
           #print axioms RiemannCvs.BoundaryWeylSchurTail.recursiveShellEnergy_limit_pos_of_reserveProductLowerBound

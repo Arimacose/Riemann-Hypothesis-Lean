@@ -1359,6 +1359,35 @@ theorem relativeCoupling_of_recursiveShell
 
 end RecursiveShell
 
+/-- Canonical scalar energy obtained by adjoining one shell at a time. -/
+noncomputable def recursiveBlockEnergy
+    (base : ℝ) (tail cross : ℕ → ℝ) : ℕ → ℝ
+  | 0 => base
+  | n + 1 => recursiveBlockEnergy base tail cross n + 2 * cross n + tail n
+
+@[simp] theorem recursiveBlockEnergy_zero
+    (base : ℝ) (tail cross : ℕ → ℝ) :
+    recursiveBlockEnergy base tail cross 0 = base := rfl
+
+@[simp] theorem recursiveBlockEnergy_succ
+    (base : ℝ) (tail cross : ℕ → ℝ) (n : ℕ) :
+    recursiveBlockEnergy base tail cross (n + 1) =
+      recursiveBlockEnergy base tail cross n + 2 * cross n + tail n := rfl
+
+/-- The canonical recursive energy is exactly the initial block plus all
+diagonal-shell and doubled cross contributions accumulated so far. -/
+theorem recursiveBlockEnergy_eq_base_add_sum
+    (base : ℝ) (tail cross : ℕ → ℝ) :
+    ∀ n,
+      recursiveBlockEnergy base tail cross n =
+        base + ∑ i ∈ Finset.range n, (2 * cross i + tail i) := by
+  intro n
+  induction n with
+  | zero => simp
+  | succ n ih =>
+      rw [recursiveBlockEnergy_succ, ih, Finset.sum_range_succ]
+      ring
+
 /-- Nonnegativity propagates through any finite chain of scalar shell energies
 whose relative determinant coefficients are at most one.
 
@@ -1611,6 +1640,27 @@ theorem recursiveShellEnergy_ge_reserveProduct_mul_blockSum
         _ = (1 - u n) * (energy n + tail n) := by ring
         _ ≤ energy (n + 1) := hReserve
 
+/-- Canonical-energy specialization of the block-sum reserve theorem.  The
+shell-addition identity is now definitional rather than an external input. -/
+theorem recursiveBlockEnergy_ge_reserveProduct_mul_blockSum
+    (base : ℝ) (tail cross u : ℕ → ℝ)
+    (hBase : 0 ≤ base)
+    (hTail : ∀ n, 0 ≤ tail n)
+    (hUNonnegative : ∀ n, 0 ≤ u n)
+    (hUOne : ∀ n, u n ≤ 1)
+    (hRelative : ∀ n,
+      (cross n) ^ 2 ≤
+        (u n) ^ 2 * recursiveBlockEnergy base tail cross n * tail n) :
+    ∀ n,
+      (∏ i ∈ Finset.range n, (1 - u i)) *
+          (base + ∑ i ∈ Finset.range n, tail i) ≤
+        recursiveBlockEnergy base tail cross n := by
+  apply recursiveShellEnergy_ge_reserveProduct_mul_blockSum
+    (recursiveBlockEnergy base tail cross) tail cross u
+    (by simpa using hBase) hTail hUNonnegative hUOne hRelative
+  intro n
+  exact recursiveBlockEnergy_succ base tail cross n
+
 /-- A uniform lower bound on the finite reserve products therefore controls
 the whole block-diagonal reference with the same floor.  This is the direct
 finite-scale adapter for a sum of previous-core dyadic channel energies. -/
@@ -1678,6 +1728,42 @@ theorem relativeShell_of_recursiveBlockSumReserve
       hRelative hStep hReserveProduct n
   · exact hBudget
   · exact hNewCross
+
+/-- Canonical recursive-energy specialization of the next-shell block-sum
+adapter.  Only identification of the concrete block forms with `base`, `tail`,
+and `cross` remains at the operator boundary. -/
+theorem relativeShell_of_recursiveBlockEnergyReserve
+    (base : ℝ) (tail cross u : ℕ → ℝ)
+    (n : ℕ)
+    (newTail newCross reserveFloor budget rho : ℝ)
+    (hBase : 0 ≤ base)
+    (hTail : ∀ j, 0 ≤ tail j)
+    (hUNonnegative : ∀ j, 0 ≤ u j)
+    (hUOne : ∀ j, u j ≤ 1)
+    (hRelative : ∀ j,
+      (cross j) ^ 2 ≤
+        (u j) ^ 2 * recursiveBlockEnergy base tail cross j * tail j)
+    (hReserveProduct : ∀ j,
+      reserveFloor ≤ ∏ i ∈ Finset.range j, (1 - u i))
+    (hNewTail : 0 ≤ newTail)
+    (hRho : 0 ≤ rho)
+    (hBudget : budget ≤ rho * reserveFloor)
+    (hNewCross :
+      newCross ^ 2 ≤
+        budget * (base + ∑ i ∈ Finset.range n, tail i) * newTail) :
+    newCross ^ 2 ≤
+      rho * recursiveBlockEnergy base tail cross n * newTail := by
+  apply relativeShell_of_recursiveBlockSumReserve
+    (recursiveBlockEnergy base tail cross) tail cross u n
+    newTail newCross reserveFloor budget rho
+    (by simpa using hBase) hTail hUNonnegative hUOne hRelative
+  · intro j
+    exact recursiveBlockEnergy_succ base tail cross j
+  · exact hReserveProduct
+  · exact hNewTail
+  · exact hRho
+  · exact hBudget
+  · simpa using hNewCross
 
 /-- A uniform lower bound on the finite reserve products yields a uniform
 lower bound on every recursively glued shell energy.  The analytic layer may

@@ -272,7 +272,11 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   parity submatrices.  A finite-component coercivity theorem now derives the
   displayed Euclidean floor from one diagonal lower bound and absolute bounds
   for all perturbation forms.  The remaining operator bridge is the concrete
-  CvS component bounds and recursive shell-energy identification.
+  CvS component bounds and recursive shell-energy identification.  On the
+  recursive side, `recursiveBlockEnergy` now gives the canonical `E+2*C+T`
+  recursion, its finite-sum formula is proved, and the reserve-product plus
+  next-shell adapters no longer ask for a separate recursion hypothesis; only
+  the actual finite block-form coordinate identification remains.
   The combined-symbol certificate
   now also rests on a Lean proof of the finite nonresonant geometric-sum bound,
   including arbitrary starting indices and its sine/cosine projections; Arb
@@ -301,8 +305,8 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   `0.0003953180565250889...`.  Hence this analytic route reduces the newest
   channel below that threshold to the eight finite cutoffs
   `1920,3840,7680,15360,30720,61440,122880,245760`.  This conclusion remains
-  conditional on the listed concrete component bounds and recursive
-  shell-energy identification.  The source-specific proof of the
+  conditional on the listed concrete component bounds and actual block-form
+  coordinate identification.  The source-specific proof of the
   joint Loewner/pole amplitude bounds, the identification of separated band
   energies with the scalar shell decomposition, and a uniform coefficient
   partial-sum bound strictly below one remain analytic inputs.  The scalar
