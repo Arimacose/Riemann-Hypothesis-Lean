@@ -313,7 +313,9 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   automatically for both standalone shells and the actual odd/even matrix
   towers.  Thus only the Archimedean remainder and prime error forms remain
   alongside the diagonal bound.  The diagonal self-entry is also rewritten to
-  the literal Archimedean diagonal used by the interval certificate.
+  the literal Archimedean diagonal used by the interval certificate, while
+  `CombinedSymbolDyadicL2` now closes all of its geometric corrections and
+  reduces that bound to real digamma and trigamma estimates.
   The combined-symbol certificate
   now also rests on a Lean proof of the finite nonresonant geometric-sum bound,
   including arbitrary starting indices and its sine/cosine projections; Arb

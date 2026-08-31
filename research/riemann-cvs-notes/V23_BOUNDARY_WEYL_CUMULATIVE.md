@@ -1994,11 +1994,12 @@ tail is consequently reduced to eight finite bridge cutoffs:
 ```
 
 This scalar composition was introduced with four concrete operator inputs.
-The current JSON has collapsed them to one analytic condition: the concrete
-Archimedean main diagonal must satisfy its pointwise lower bound, and the
+The current JSON has collapsed them to one analytic condition: the real
+digamma and trigamma terms must satisfy their pointwise lower bounds, and the
 Archimedean-remainder and prime parity forms must satisfy their displayed
-absolute quadratic-form bounds.  The even/odd `poleTail` component is now a
-Lean theorem, and the cutoff-13 coercivity consumers insert it automatically
+absolute quadratic-form bounds.  All geometric corrections inside the
+Archimedean diagonal and the even/odd `poleTail` component are now Lean
+theorems; the cutoff-13 coercivity consumers insert the latter automatically
 for both a standalone consecutive shell and the actual odd/even matrix towers.
 The crossblock, parity compression, block-diagonal recursion, and concrete
 shell-energy identification are kernel-checked below.  The eight finite bridges
@@ -2245,6 +2246,51 @@ interfaces are:
 * `logarithmicArchimedeanDiagonal_neg`;
 * `logarithmicCutoffFreeKernel_actualArchimedean_law`.
 
+The elementary analytic part of that diagonal is now closed as well.  Put
+
+```text
+r = exp(-2*log(c)),
+C(c) = exp(-log(c)/2)/(1-r),
+B(c) = exp(-log(c)/2)*((1/2)/(1-r) + 2*r/(1-r)^2).
+```
+
+Lean proves that `C` and `B` are exactly the total exponential mass and first
+half-integer moment.  Termwise positive comparison and `norm_tsum` then give,
+for every nonzero frequency `w`,
+
+```text
+|w*G(c,x)| <= C(c)/|w|,
+0 <= G_CC(c,x) <= 2*C(c),
+0 <= G_X1(c,x) <= B(c)/w^2,
+|G_X2(c,x)| <= C(c)/w^2.
+```
+
+These inequalities are combined inside Lean with arbitrary lower bounds for
+`Re psi(1/4+i*pi*x/log(c))` and its real derivative.  The resulting theorem
+produces the lower bound for `-logarithmicArchimedeanDiagonal(c,x)` with every
+geometric correction, sign, and `2/log(c)` factor already discharged.  The
+remaining diagonal work is therefore precisely the digamma/trigamma
+asymptotic inequality and the cutoff-13 scalar constant comparison.  The
+seventeen public interfaces of this layer are:
+
+* `archimedeanGeometricMass`;
+* `archimedeanGeometricFirstMoment`;
+* `tsum_archimedeanExponential_eq_geometricMass`;
+* `tsum_archimedeanExponentialMoment_eq_geometricFirstMoment`;
+* `summable_archimedeanExponentialMoment_terms`;
+* `archimedeanGeometricMass_nonneg`;
+* `archimedeanGeometricSeries_nonneg`;
+* `archimedeanGeometricSeries_le_mass`;
+* `abs_archimedeanFrequency_mul_geometricSeries_le_mass`;
+* `archimedeanCosineGeometricSeries_nonneg`;
+* `archimedeanCosineGeometricSeries_le_mass`;
+* `archimedeanXOneGeometricSeries_nonneg`;
+* `archimedeanXOneGeometricSeries_le_firstMoment`;
+* `abs_archimedeanXTwoGeometricSeries_le_mass`;
+* `neg_two_mul_archimedeanCosineCorrection_ge`;
+* `archimedeanCrossCorrection_ge`;
+* `neg_logarithmicArchimedeanDiagonal_ge_of_digamma`.
+
 The signed-integer finite builder bridge is now exact as well.  Lean defines
 the implementation's signed Archimedean extension, absolute-mode diagonal,
 literal rational pole entry, diagonal/off-diagonal Archimedean branch, complete
@@ -2445,8 +2491,11 @@ error component zero with this result and expose only the diagonal,
 Archimedean-remainder, prime, and final scalar-floor premises.  The pole
 component of the shell coercive floor is no longer an analytic hypothesis.
 The Archimedean self-entry is simultaneously identified with
-`logarithmicArchimedeanDiagonal(c,mode)`, so the remaining diagonal inequality
-is stated on exactly the function enclosed by the Arb certificate.
+`logarithmicArchimedeanDiagonal(c,mode)`.  Its exponential-series mass and
+first moment, together with the `G`, `G_CC`, `G_X1`, and `G_X2` bounds, are now
+kernel-checked.  The remaining diagonal inequality is reduced to the real
+digamma/trigamma estimates on exactly the argument enclosed by the Arb
+certificate.
 
 The local `base`, `tail`, and literal rectangular `cross` algebra is no longer
 an open step.  The

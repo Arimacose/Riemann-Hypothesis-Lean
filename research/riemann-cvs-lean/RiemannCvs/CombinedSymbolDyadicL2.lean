@@ -44,7 +44,10 @@ newest separated row/column bands are identified exactly below.  Its symmetry
 and simultaneous-reflection invariance are also proved, so the finite recursive
   cross coordinate is the literal historical/newest rectangular form.  The
   remaining operator input is the concrete Archimedean diagonal/remainder and
-  prime-form bound.  The scalar pole-weight tail estimate is now closed by
+  prime-form bound.  The exponential-series mass and first moment are evaluated
+  exactly below, closing every geometric correction in the Archimedean symbol
+  and diagonal; the latter is reduced to real digamma and trigamma bounds.  The
+  scalar pole-weight tail estimate is now closed by
   pointwise reciprocal-square bounds and a consecutive-shell reindexing.  The
   all-scale shell-tower compatibility, the exact positive-mode component
   decomposition, its direct application to the concrete tower-tail energy,
@@ -1147,6 +1150,511 @@ noncomputable def logarithmicArchimedeanDiagonal (c x : ℝ) : ℝ :=
     2 * archimedeanCosineCorrection c x +
     logarithmicArchimedeanPoleJ c -
     (2 / Real.log c) * archimedeanCrossCorrection c x
+
+/-!
+### Exact geometric correction bounds
+
+The interval certificate abbreviates the exponentially convergent correction
+terms by their geometric mass `C` and first moment `B`.  The next layer
+evaluates both sums exactly, proves the four source bounds
+`w * g_s <= C / |w|`, `g_cc <= 2C`, `g_x1 <= B / w^2`, and
+`|g_x2| <= C / w^2`, and combines them with supplied real digamma and
+trigamma lower bounds.  Thus no geometric-series estimate remains in the
+Archimedean diagonal premise.
+-/
+noncomputable def archimedeanGeometricMass (c : ℝ) : ℝ :=
+  Real.exp (-Real.log c / 2) /
+    (1 - Real.exp (-2 * Real.log c))
+
+noncomputable def archimedeanGeometricFirstMoment (c : ℝ) : ℝ :=
+  Real.exp (-Real.log c / 2) *
+    ((1 / 2) / (1 - Real.exp (-2 * Real.log c)) +
+      2 * Real.exp (-2 * Real.log c) /
+        (1 - Real.exp (-2 * Real.log c)) ^ 2)
+
+private theorem archimedeanExponential_eq_geometric
+    (c : ℝ) (k : ℕ) :
+    Real.exp (-archimedeanHalfInteger k * Real.log c) =
+      Real.exp (-Real.log c / 2) *
+        Real.exp (-2 * Real.log c) ^ k := by
+  rw [show -archimedeanHalfInteger k * Real.log c =
+      -Real.log c / 2 + (k : ℝ) * (-2 * Real.log c) by
+    unfold archimedeanHalfInteger
+    ring]
+  rw [Real.exp_add, Real.exp_nat_mul]
+
+theorem tsum_archimedeanExponential_eq_geometricMass
+    (c : ℝ) (hc : 1 < c) :
+    ∑' k : ℕ, Real.exp (-archimedeanHalfInteger k * Real.log c) =
+      archimedeanGeometricMass c := by
+  have hr0 : 0 ≤ Real.exp (-2 * Real.log c) := by positivity
+  have hr1 : Real.exp (-2 * Real.log c) < 1 := by
+    rw [Real.exp_lt_one_iff]
+    nlinarith [Real.log_pos hc]
+  simp_rw [archimedeanExponential_eq_geometric]
+  rw [tsum_mul_left, tsum_geometric_of_lt_one hr0 hr1]
+  simp [archimedeanGeometricMass, div_eq_mul_inv]
+
+theorem tsum_archimedeanExponentialMoment_eq_geometricFirstMoment
+    (c : ℝ) (hc : 1 < c) :
+    ∑' k : ℕ,
+        archimedeanHalfInteger k *
+          Real.exp (-archimedeanHalfInteger k * Real.log c) =
+      archimedeanGeometricFirstMoment c := by
+  let r : ℝ := Real.exp (-2 * Real.log c)
+  have hr0 : 0 ≤ r := by
+    dsimp [r]
+    positivity
+  have hr1 : r < 1 := by
+    dsimp [r]
+    rw [Real.exp_lt_one_iff]
+    nlinarith [Real.log_pos hc]
+  have hrAbs : |r| < 1 := by
+    rw [abs_of_nonneg hr0]
+    exact hr1
+  have hGeom := hasSum_geometric_of_lt_one hr0 hr1
+  have hMoment := hasSum_coe_mul_geometric_of_norm_lt_one
+    (show ‖r‖ < 1 by simpa [Real.norm_eq_abs] using hrAbs)
+  have hCombined :=
+    (hGeom.mul_left (1 / 2 : ℝ)).add (hMoment.mul_left (2 : ℝ))
+  have hScaled := hCombined.mul_left (Real.exp (-Real.log c / 2))
+  calc
+    (∑' k : ℕ,
+        archimedeanHalfInteger k *
+          Real.exp (-archimedeanHalfInteger k * Real.log c)) =
+        ∑' k : ℕ, Real.exp (-Real.log c / 2) *
+          ((1 / 2 : ℝ) * r ^ k + 2 * ((k : ℝ) * r ^ k)) := by
+      apply tsum_congr
+      intro k
+      rw [archimedeanExponential_eq_geometric]
+      dsimp [r]
+      unfold archimedeanHalfInteger
+      ring
+    _ = Real.exp (-Real.log c / 2) *
+        ((1 / 2 : ℝ) * (1 - r)⁻¹ +
+          2 * (r / (1 - r) ^ 2)) := hScaled.tsum_eq
+    _ = archimedeanGeometricFirstMoment c := by
+      simp [archimedeanGeometricFirstMoment, r, div_eq_mul_inv]
+      ring
+
+theorem summable_archimedeanExponentialMoment_terms
+    (c : ℝ) (hc : 1 < c) :
+    Summable (fun k : ℕ =>
+      archimedeanHalfInteger k *
+        Real.exp (-archimedeanHalfInteger k * Real.log c)) := by
+  let r : ℝ := Real.exp (-2 * Real.log c)
+  have hr0 : 0 ≤ r := by
+    dsimp [r]
+    positivity
+  have hr1 : r < 1 := by
+    dsimp [r]
+    rw [Real.exp_lt_one_iff]
+    nlinarith [Real.log_pos hc]
+  have hrAbs : |r| < 1 := by
+    rw [abs_of_nonneg hr0]
+    exact hr1
+  have hGeom : Summable (fun k : ℕ => r ^ k) :=
+    summable_geometric_of_lt_one hr0 hr1
+  have hMoment : Summable (fun k : ℕ => (k : ℝ) * r ^ k) :=
+    (hasSum_coe_mul_geometric_of_norm_lt_one
+      (show ‖r‖ < 1 by simpa [Real.norm_eq_abs] using hrAbs)).summable
+  have hScaled : Summable (fun k : ℕ =>
+      Real.exp (-Real.log c / 2) *
+        ((1 / 2 : ℝ) * r ^ k + 2 * ((k : ℝ) * r ^ k))) :=
+    ((hGeom.mul_left (1 / 2 : ℝ)).add
+      (hMoment.mul_left (2 : ℝ))).mul_left _
+  exact hScaled.congr (fun k => by
+    rw [archimedeanExponential_eq_geometric]
+    dsimp [r]
+    unfold archimedeanHalfInteger
+    ring)
+
+theorem archimedeanGeometricMass_nonneg (c : ℝ) (hc : 1 < c) :
+    0 ≤ archimedeanGeometricMass c := by
+  rw [← tsum_archimedeanExponential_eq_geometricMass c hc]
+  exact tsum_nonneg (fun _ => le_of_lt (Real.exp_pos _))
+
+theorem archimedeanGeometricSeries_nonneg (c x : ℝ) :
+    0 ≤ archimedeanGeometricSeries c x := by
+  unfold archimedeanGeometricSeries
+  apply tsum_nonneg
+  intro k
+  have hHalf : 0 < archimedeanHalfInteger k := by
+    unfold archimedeanHalfInteger
+    have hk : 0 ≤ (k : ℝ) := Nat.cast_nonneg k
+    linarith
+  exact div_nonneg (le_of_lt (Real.exp_pos _))
+    (by nlinarith [sq_pos_of_pos hHalf,
+      sq_nonneg (archimedeanFrequency c x)])
+
+theorem archimedeanGeometricSeries_le_mass
+    (c x : ℝ) (hc : 1 < c)
+    (hFrequency : archimedeanFrequency c x ≠ 0) :
+    archimedeanGeometricSeries c x ≤
+      archimedeanGeometricMass c /
+        archimedeanFrequency c x ^ 2 := by
+  have hFrequencySq : 0 < archimedeanFrequency c x ^ 2 :=
+    sq_pos_of_ne_zero hFrequency
+  have hUpper : Summable (fun k : ℕ =>
+      Real.exp (-archimedeanHalfInteger k * Real.log c) /
+        archimedeanFrequency c x ^ 2) := by
+    simpa [div_eq_mul_inv] using
+      (summable_archimedeanExponential_terms c hc).mul_right
+        (archimedeanFrequency c x ^ 2)⁻¹
+  unfold archimedeanGeometricSeries
+  calc
+    (∑' k : ℕ,
+        Real.exp (-archimedeanHalfInteger k * Real.log c) /
+          (archimedeanHalfInteger k ^ 2 +
+            archimedeanFrequency c x ^ 2)) ≤
+        ∑' k : ℕ,
+          Real.exp (-archimedeanHalfInteger k * Real.log c) /
+            archimedeanFrequency c x ^ 2 := by
+      apply (summable_archimedeanGeometricSeries_terms c x hc).tsum_le_tsum
+      · intro k
+        have hDen : 0 < archimedeanHalfInteger k ^ 2 +
+            archimedeanFrequency c x ^ 2 := by
+          have hHalf : 0 < archimedeanHalfInteger k := by
+            unfold archimedeanHalfInteger
+            have hk : 0 ≤ (k : ℝ) := Nat.cast_nonneg k
+            linarith
+          nlinarith [sq_pos_of_pos hHalf,
+            sq_nonneg (archimedeanFrequency c x)]
+        apply (div_le_div_iff₀ hDen hFrequencySq).2
+        exact mul_le_mul_of_nonneg_left
+          (by nlinarith [sq_nonneg (archimedeanHalfInteger k)])
+          (le_of_lt (Real.exp_pos _))
+      · exact hUpper
+    _ = archimedeanGeometricMass c /
+        archimedeanFrequency c x ^ 2 := by
+      rw [tsum_div_const,
+        tsum_archimedeanExponential_eq_geometricMass c hc]
+
+theorem abs_archimedeanFrequency_mul_geometricSeries_le_mass
+    (c x : ℝ) (hc : 1 < c)
+    (hFrequency : archimedeanFrequency c x ≠ 0) :
+    |archimedeanFrequency c x * archimedeanGeometricSeries c x| ≤
+      archimedeanGeometricMass c / |archimedeanFrequency c x| := by
+  have hSeriesNonneg := archimedeanGeometricSeries_nonneg c x
+  have hSeriesUpper := archimedeanGeometricSeries_le_mass
+    c x hc hFrequency
+  calc
+    |archimedeanFrequency c x * archimedeanGeometricSeries c x| =
+        |archimedeanFrequency c x| *
+          archimedeanGeometricSeries c x := by
+      rw [abs_mul, abs_of_nonneg hSeriesNonneg]
+    _ ≤ |archimedeanFrequency c x| *
+        (archimedeanGeometricMass c /
+          archimedeanFrequency c x ^ 2) :=
+      mul_le_mul_of_nonneg_left hSeriesUpper (abs_nonneg _)
+    _ = archimedeanGeometricMass c /
+        |archimedeanFrequency c x| := by
+      have hAbs : |archimedeanFrequency c x| ≠ 0 :=
+        abs_ne_zero.mpr hFrequency
+      rw [← sq_abs]
+      field_simp
+
+theorem archimedeanCosineGeometricSeries_nonneg (c x : ℝ) :
+    0 ≤ archimedeanCosineGeometricSeries c x := by
+  unfold archimedeanCosineGeometricSeries
+  apply tsum_nonneg
+  intro k
+  have hA : 0 ≤ archimedeanHalfInteger k := by
+    unfold archimedeanHalfInteger
+    have hk : 0 ≤ (k : ℝ) := Nat.cast_nonneg k
+    linarith
+  exact div_nonneg
+    (mul_nonneg (le_of_lt (Real.exp_pos _))
+      (sq_nonneg (archimedeanFrequency c x)))
+    (mul_nonneg hA
+      (add_nonneg (sq_nonneg _) (sq_nonneg _)))
+
+theorem archimedeanCosineGeometricSeries_le_mass
+    (c x : ℝ) (hc : 1 < c) :
+    archimedeanCosineGeometricSeries c x ≤
+      2 * archimedeanGeometricMass c := by
+  have hUpper : Summable (fun k : ℕ =>
+      2 * Real.exp (-archimedeanHalfInteger k * Real.log c)) :=
+    (summable_archimedeanExponential_terms c hc).mul_left 2
+  unfold archimedeanCosineGeometricSeries
+  calc
+    (∑' k : ℕ,
+        Real.exp (-archimedeanHalfInteger k * Real.log c) *
+          archimedeanFrequency c x ^ 2 /
+            (archimedeanHalfInteger k *
+              (archimedeanHalfInteger k ^ 2 +
+                archimedeanFrequency c x ^ 2))) ≤
+        ∑' k : ℕ,
+          2 * Real.exp (-archimedeanHalfInteger k * Real.log c) := by
+      apply (summable_archimedeanCosineGeometricSeries_terms c x hc).tsum_le_tsum
+      · intro k
+        have hHalf : 1 / 2 ≤ archimedeanHalfInteger k := by
+          unfold archimedeanHalfInteger
+          have hk : 0 ≤ (k : ℝ) := Nat.cast_nonneg k
+          linarith
+        have hA : 0 < archimedeanHalfInteger k :=
+          lt_of_lt_of_le (by norm_num) hHalf
+        have hDen : 0 <
+            archimedeanHalfInteger k ^ 2 +
+              archimedeanFrequency c x ^ 2 := by
+          nlinarith [sq_nonneg (archimedeanFrequency c x)]
+        have hFull : 0 < archimedeanHalfInteger k *
+            (archimedeanHalfInteger k ^ 2 +
+              archimedeanFrequency c x ^ 2) := mul_pos hA hDen
+        apply (div_le_iff₀ hFull).2
+        have hOne : 1 ≤ 2 * archimedeanHalfInteger k := by linarith
+        have hFreqDen : archimedeanFrequency c x ^ 2 ≤
+            archimedeanHalfInteger k ^ 2 +
+              archimedeanFrequency c x ^ 2 := by
+          nlinarith [sq_nonneg (archimedeanHalfInteger k)]
+        have hRatio : archimedeanFrequency c x ^ 2 ≤
+            (2 * archimedeanHalfInteger k) *
+              (archimedeanHalfInteger k ^ 2 +
+                archimedeanFrequency c x ^ 2) :=
+          hFreqDen.trans (by
+            simpa only [one_mul] using
+              mul_le_mul_of_nonneg_right hOne (le_of_lt hDen))
+        have hExpNonneg :
+            0 ≤ Real.exp (-archimedeanHalfInteger k * Real.log c) := by
+          positivity
+        have hScaled := mul_le_mul_of_nonneg_left hRatio hExpNonneg
+        nlinarith
+      · exact hUpper
+    _ = 2 * archimedeanGeometricMass c := by
+      rw [tsum_mul_left,
+        tsum_archimedeanExponential_eq_geometricMass c hc]
+
+theorem archimedeanXOneGeometricSeries_nonneg (c x : ℝ) :
+    0 ≤ archimedeanXOneGeometricSeries c x := by
+  unfold archimedeanXOneGeometricSeries
+  apply tsum_nonneg
+  intro k
+  have hA : 0 ≤ archimedeanHalfInteger k := by
+    unfold archimedeanHalfInteger
+    have hk : 0 ≤ (k : ℝ) := Nat.cast_nonneg k
+    linarith
+  exact div_nonneg
+    (mul_nonneg (le_of_lt (Real.exp_pos _)) hA)
+    (add_nonneg (sq_nonneg _) (sq_nonneg _))
+
+theorem archimedeanXOneGeometricSeries_le_firstMoment
+    (c x : ℝ) (hc : 1 < c)
+    (hFrequency : archimedeanFrequency c x ≠ 0) :
+    archimedeanXOneGeometricSeries c x ≤
+      archimedeanGeometricFirstMoment c /
+        archimedeanFrequency c x ^ 2 := by
+  have hFrequencySq : 0 < archimedeanFrequency c x ^ 2 :=
+    sq_pos_of_ne_zero hFrequency
+  have hMoment : Summable (fun k : ℕ =>
+      Real.exp (-archimedeanHalfInteger k * Real.log c) *
+        archimedeanHalfInteger k) :=
+    (summable_archimedeanExponentialMoment_terms c hc).congr
+      (fun k => by ring)
+  have hUpper : Summable (fun k : ℕ =>
+      Real.exp (-archimedeanHalfInteger k * Real.log c) *
+        archimedeanHalfInteger k /
+          archimedeanFrequency c x ^ 2) := by
+    simpa [div_eq_mul_inv] using
+      hMoment.mul_right (archimedeanFrequency c x ^ 2)⁻¹
+  unfold archimedeanXOneGeometricSeries
+  calc
+    (∑' k : ℕ,
+        Real.exp (-archimedeanHalfInteger k * Real.log c) *
+          archimedeanHalfInteger k /
+            (archimedeanHalfInteger k ^ 2 +
+              archimedeanFrequency c x ^ 2)) ≤
+        ∑' k : ℕ,
+          Real.exp (-archimedeanHalfInteger k * Real.log c) *
+            archimedeanHalfInteger k /
+              archimedeanFrequency c x ^ 2 := by
+      apply (summable_archimedeanXOneGeometricSeries_terms c x hc).tsum_le_tsum
+      · intro k
+        have hA : 0 ≤ archimedeanHalfInteger k := by
+          unfold archimedeanHalfInteger
+          have hk : 0 ≤ (k : ℝ) := Nat.cast_nonneg k
+          linarith
+        have hNumerator : 0 ≤
+            Real.exp (-archimedeanHalfInteger k * Real.log c) *
+              archimedeanHalfInteger k :=
+          mul_nonneg (le_of_lt (Real.exp_pos _)) hA
+        have hDen : 0 < archimedeanHalfInteger k ^ 2 +
+            archimedeanFrequency c x ^ 2 := by
+          nlinarith [sq_nonneg (archimedeanHalfInteger k)]
+        apply (div_le_div_iff₀ hDen hFrequencySq).2
+        exact mul_le_mul_of_nonneg_left
+          (by nlinarith [sq_nonneg (archimedeanHalfInteger k)]) hNumerator
+      · exact hUpper
+    _ = archimedeanGeometricFirstMoment c /
+        archimedeanFrequency c x ^ 2 := by
+      rw [tsum_div_const]
+      congr 1
+      simpa only [mul_comm] using
+        tsum_archimedeanExponentialMoment_eq_geometricFirstMoment c hc
+
+theorem abs_archimedeanXTwoGeometricSeries_le_mass
+    (c x : ℝ) (hc : 1 < c)
+    (hFrequency : archimedeanFrequency c x ≠ 0) :
+    |archimedeanXTwoGeometricSeries c x| ≤
+      archimedeanGeometricMass c /
+        archimedeanFrequency c x ^ 2 := by
+  let f : ℕ → ℝ := fun k =>
+    Real.exp (-archimedeanHalfInteger k * Real.log c) *
+      (archimedeanHalfInteger k ^ 2 -
+        archimedeanFrequency c x ^ 2) /
+          (archimedeanHalfInteger k ^ 2 +
+            archimedeanFrequency c x ^ 2) ^ 2
+  have hf : Summable f := by
+    simpa [f] using summable_archimedeanXTwoGeometricSeries_terms c x hc
+  have hFrequencySq : 0 < archimedeanFrequency c x ^ 2 :=
+    sq_pos_of_ne_zero hFrequency
+  have hUpper : Summable (fun k : ℕ =>
+      Real.exp (-archimedeanHalfInteger k * Real.log c) /
+        archimedeanFrequency c x ^ 2) := by
+    simpa [div_eq_mul_inv] using
+      (summable_archimedeanExponential_terms c hc).mul_right
+        (archimedeanFrequency c x ^ 2)⁻¹
+  have hPointwise : ∀ k : ℕ,
+      |f k| ≤
+        Real.exp (-archimedeanHalfInteger k * Real.log c) /
+          archimedeanFrequency c x ^ 2 := by
+    intro k
+    have hDen : 0 < archimedeanHalfInteger k ^ 2 +
+        archimedeanFrequency c x ^ 2 := by
+      have hHalf : 0 < archimedeanHalfInteger k := by
+        unfold archimedeanHalfInteger
+        have hk : 0 ≤ (k : ℝ) := Nat.cast_nonneg k
+        linarith
+      nlinarith [sq_pos_of_pos hHalf,
+        sq_nonneg (archimedeanFrequency c x)]
+    have hAbsDiff :
+        |archimedeanHalfInteger k ^ 2 -
+            archimedeanFrequency c x ^ 2| ≤
+          archimedeanHalfInteger k ^ 2 +
+            archimedeanFrequency c x ^ 2 := by
+      calc
+        |archimedeanHalfInteger k ^ 2 -
+            archimedeanFrequency c x ^ 2| ≤
+            |archimedeanHalfInteger k ^ 2| +
+              |archimedeanFrequency c x ^ 2| := abs_sub _ _
+        _ = archimedeanHalfInteger k ^ 2 +
+            archimedeanFrequency c x ^ 2 := by
+          rw [abs_of_nonneg (sq_nonneg _),
+            abs_of_nonneg (sq_nonneg _)]
+    have hFrequencyDen : archimedeanFrequency c x ^ 2 ≤
+        archimedeanHalfInteger k ^ 2 +
+          archimedeanFrequency c x ^ 2 := by
+      nlinarith [sq_nonneg (archimedeanHalfInteger k)]
+    have hProduct :
+        |archimedeanHalfInteger k ^ 2 -
+            archimedeanFrequency c x ^ 2| *
+              archimedeanFrequency c x ^ 2 ≤
+          (archimedeanHalfInteger k ^ 2 +
+              archimedeanFrequency c x ^ 2) ^ 2 := by
+      calc
+        |archimedeanHalfInteger k ^ 2 -
+            archimedeanFrequency c x ^ 2| *
+              archimedeanFrequency c x ^ 2 ≤
+            (archimedeanHalfInteger k ^ 2 +
+                archimedeanFrequency c x ^ 2) *
+              archimedeanFrequency c x ^ 2 :=
+          mul_le_mul_of_nonneg_right hAbsDiff
+            (sq_nonneg (archimedeanFrequency c x))
+        _ ≤ (archimedeanHalfInteger k ^ 2 +
+              archimedeanFrequency c x ^ 2) *
+            (archimedeanHalfInteger k ^ 2 +
+              archimedeanFrequency c x ^ 2) :=
+          mul_le_mul_of_nonneg_left hFrequencyDen (le_of_lt hDen)
+        _ = (archimedeanHalfInteger k ^ 2 +
+              archimedeanFrequency c x ^ 2) ^ 2 := by ring
+    dsimp [f]
+    rw [abs_div, abs_mul, abs_of_pos (Real.exp_pos _),
+      abs_of_pos (sq_pos_of_pos hDen)]
+    apply (div_le_div_iff₀ (sq_pos_of_pos hDen) hFrequencySq).2
+    have hScaled := mul_le_mul_of_nonneg_left hProduct
+      (le_of_lt (Real.exp_pos
+        (-archimedeanHalfInteger k * Real.log c)))
+    nlinarith
+  unfold archimedeanXTwoGeometricSeries
+  change |∑' k : ℕ, f k| ≤
+    archimedeanGeometricMass c / archimedeanFrequency c x ^ 2
+  calc
+    |∑' k : ℕ, f k| = ‖∑' k : ℕ, f k‖ :=
+      (Real.norm_eq_abs _).symm
+    _ ≤ ∑' k : ℕ, ‖f k‖ := norm_tsum_le_tsum_norm hf.norm
+    _ = ∑' k : ℕ, |f k| := by simp only [Real.norm_eq_abs]
+    _ ≤ ∑' k : ℕ,
+        Real.exp (-archimedeanHalfInteger k * Real.log c) /
+          archimedeanFrequency c x ^ 2 :=
+      hf.norm.tsum_le_tsum (by simpa only [Real.norm_eq_abs] using hPointwise)
+        hUpper
+    _ = archimedeanGeometricMass c /
+        archimedeanFrequency c x ^ 2 := by
+      rw [tsum_div_const,
+        tsum_archimedeanExponential_eq_geometricMass c hc]
+
+theorem neg_two_mul_archimedeanCosineCorrection_ge
+    (c x digammaRealFloor : ℝ) (hc : 1 < c)
+    (hDigamma : digammaRealFloor ≤
+      (Complex.digamma (archimedeanArgument c x)).re) :
+    digammaRealFloor - (Complex.digamma (1 / 4 : ℂ)).re -
+        4 * archimedeanGeometricMass c ≤
+      -2 * archimedeanCosineCorrection c x := by
+  have hSeries := archimedeanCosineGeometricSeries_le_mass c x hc
+  unfold archimedeanCosineCorrection
+  linarith
+
+theorem archimedeanCrossCorrection_ge
+    (c x trigammaRealFloor : ℝ) (hc : 1 < c)
+    (hFrequency : archimedeanFrequency c x ≠ 0)
+    (hTrigamma : trigammaRealFloor ≤
+      (deriv Complex.digamma (archimedeanArgument c x)).re) :
+    (1 / 4) * trigammaRealFloor -
+        Real.log c *
+          (archimedeanGeometricFirstMoment c /
+            archimedeanFrequency c x ^ 2) -
+        archimedeanGeometricMass c /
+          archimedeanFrequency c x ^ 2 ≤
+      archimedeanCrossCorrection c x := by
+  have hLog : 0 ≤ Real.log c := (Real.log_pos hc).le
+  have hXOne := archimedeanXOneGeometricSeries_le_firstMoment
+    c x hc hFrequency
+  have hXOneScaled := mul_le_mul_of_nonneg_left hXOne hLog
+  have hXTwo := abs_archimedeanXTwoGeometricSeries_le_mass
+    c x hc hFrequency
+  have hXTwoUpper : archimedeanXTwoGeometricSeries c x ≤
+      archimedeanGeometricMass c /
+        archimedeanFrequency c x ^ 2 :=
+    (le_abs_self _).trans hXTwo
+  unfold archimedeanCrossCorrection
+  linarith
+
+theorem neg_logarithmicArchimedeanDiagonal_ge_of_digamma
+    (c x digammaRealFloor trigammaRealFloor : ℝ) (hc : 1 < c)
+    (hFrequency : archimedeanFrequency c x ≠ 0)
+    (hDigamma : digammaRealFloor ≤
+      (Complex.digamma (archimedeanArgument c x)).re)
+    (hTrigamma : trigammaRealFloor ≤
+      (deriv Complex.digamma (archimedeanArgument c x)).re) :
+    -logarithmicArchimedeanKappa c - logarithmicArchimedeanPoleJ c +
+        (digammaRealFloor - (Complex.digamma (1 / 4 : ℂ)).re -
+          4 * archimedeanGeometricMass c) +
+        (2 / Real.log c) *
+          ((1 / 4) * trigammaRealFloor -
+            Real.log c *
+              (archimedeanGeometricFirstMoment c /
+                archimedeanFrequency c x ^ 2) -
+            archimedeanGeometricMass c /
+              archimedeanFrequency c x ^ 2) ≤
+      -logarithmicArchimedeanDiagonal c x := by
+  have hCosine := neg_two_mul_archimedeanCosineCorrection_ge
+    c x digammaRealFloor hc hDigamma
+  have hCross := archimedeanCrossCorrection_ge
+    c x trigammaRealFloor hc hFrequency hTrigamma
+  have hFactor : 0 ≤ 2 / Real.log c := by
+    positivity [Real.log_pos hc]
+  have hCrossScaled := mul_le_mul_of_nonneg_left hCross hFactor
+  unfold logarithmicArchimedeanDiagonal
+  linarith
 
 theorem logarithmicArchimedeanDiagonal_neg (c x : ℝ) :
     logarithmicArchimedeanDiagonal c (-x) =
