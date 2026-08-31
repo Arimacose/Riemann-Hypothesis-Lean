@@ -20,7 +20,10 @@ All matrices in this script are formed from Arb midpoint evaluations and then
 processed with float64 linear algebra.  The output is therefore a route-selection
 diagnostic, not an interval certificate.  In particular, a failed geometric
 envelope remains visible as a finite exception rather than being rounded into
-a claimed proof.
+a claimed proof.  When ``--previous-probe`` is supplied, consecutive scales are
+also compared band by band against the transport target
+``q_(n+1,d+1) < q_(n,d)/2``.  ``--require-half-transport`` makes that diagnostic
+a regression gate while preserving the explicit non-rigorous status marker.
 """
 
 from __future__ import annotations
@@ -79,6 +82,205 @@ def _segments(cutoffs: list[int]) -> list[tuple[int, int]]:
     return segments
 
 
+def _load_probe(path: Path) -> dict[str, Any]:
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(f"failed to load previous probe {path}: {exc}") from exc
+    if payload.get("status") != "MIDPOINT_DIAGNOSTIC_ONLY":
+        raise ValueError("previous probe is not a midpoint diagnostic")
+    if payload.get("rigorous_certificate") is not False:
+        raise ValueError("previous probe has an inconsistent rigor marker")
+    return payload
+
+
+def _scale_transport_diagnostic(
+    *,
+    current: dict[str, Any],
+    previous_path: Path,
+    exception_budget: Fraction | None,
+    expected_exception_sector: str | None,
+    expected_exception_modes: tuple[int, int] | None,
+) -> dict[str, Any]:
+    """Compare repeated historical bands across two consecutive scales."""
+    previous = _load_probe(previous_path)
+    if previous.get("c") != current.get("c"):
+        raise ValueError("previous/current probes use different c values")
+    for key in ("reference_q", "shift_gain"):
+        if previous.get(key) != current.get(key):
+            raise ValueError(f"previous/current probes use different {key}")
+    if previous.get("candidate", {}).get("leading_squared_coefficient") != (
+        current.get("candidate", {}).get("leading_squared_coefficient")
+    ):
+        raise ValueError("previous/current probes use different leading budgets")
+
+    previous_transition = previous.get("transition", {})
+    current_transition = current.get("transition", {})
+    if previous_transition.get("new_cutoff") != current_transition.get(
+        "middle_cutoff"
+    ):
+        raise ValueError("probes are not consecutive at the new/middle cutoff")
+    expected_cutoffs = list(previous.get("historical_cutoffs", [])) + [
+        int(previous_transition.get("middle_cutoff"))
+    ]
+    if expected_cutoffs != current.get("historical_cutoffs"):
+        raise ValueError("current historical cutoffs do not extend the previous list")
+
+    previous_sectors = {
+        sector["sector"]: sector for sector in previous.get("sectors", [])
+    }
+    sector_records: list[dict[str, Any]] = []
+    all_newest_below_leading = True
+    all_repeated_strictly_below_half = True
+    repeated_channel_count = 0
+    for current_sector in current.get("sectors", []):
+        name = current_sector["sector"]
+        if name not in previous_sectors:
+            raise ValueError(f"previous probe lacks sector {name}")
+        previous_channels = {
+            tuple(channel["modes"]): channel
+            for channel in previous_sectors[name].get("channels", [])
+        }
+        current_channels = current_sector.get("channels", [])
+        newest = [channel for channel in current_channels if channel["distance"] == 0]
+        if len(newest) != 1:
+            raise ValueError(f"{name} sector does not have exactly one newest channel")
+        newest_pass = bool(newest[0]["below_candidate_envelope"])
+        all_newest_below_leading = all_newest_below_leading and newest_pass
+
+        repeated: list[dict[str, Any]] = []
+        for channel in current_channels:
+            modes = tuple(channel["modes"])
+            if modes not in previous_channels:
+                continue
+            old = previous_channels[modes]
+            if channel["distance"] != old["distance"] + 1:
+                raise ValueError(
+                    f"{name} channel {modes} did not move outward by one distance"
+                )
+            current_kappa = float(channel["kappa_midpoint"])
+            previous_kappa = float(old["kappa_midpoint"])
+            if previous_kappa <= 0:
+                raise ValueError("previous channel coefficient is not positive")
+            strict_half = current_kappa < 0.5 * previous_kappa
+            all_repeated_strictly_below_half = (
+                all_repeated_strictly_below_half and strict_half
+            )
+            repeated_channel_count += 1
+            repeated.append(
+                {
+                    "modes": list(modes),
+                    "previous_distance": old["distance"],
+                    "current_distance": channel["distance"],
+                    "previous_kappa_midpoint": previous_kappa,
+                    "current_kappa_midpoint": current_kappa,
+                    "doubling_ratio_midpoint": current_kappa / previous_kappa,
+                    "strictly_below_one_half": strict_half,
+                }
+            )
+        if len(repeated) != len(previous_channels):
+            raise ValueError(f"{name} sector lost a historical channel")
+        sector_records.append(
+            {
+                "sector": name,
+                "newest_channel": {
+                    "modes": newest[0]["modes"],
+                    "kappa_midpoint": newest[0]["kappa_midpoint"],
+                    "leading_budget": newest[0]["candidate_envelope"],
+                    "strictly_below_leading": newest_pass,
+                },
+                "repeated_channels": repeated,
+            }
+        )
+
+    exception_records: list[dict[str, Any]] = []
+    all_exceptions_below_budget = True
+    if exception_budget is not None:
+        budget_float = float(exception_budget)
+        sectors = {
+            sector["sector"]: sector for sector in current.get("sectors", [])
+        }
+        for exception in current.get("route_decision", {}).get(
+            "finite_exceptions", []
+        ):
+            sector = sectors[exception["sector"]]
+            channel = next(
+                channel
+                for channel in sector["channels"]
+                if channel["distance"] == exception["distance"]
+                and channel["modes"] == exception["modes"]
+            )
+            kappa = float(channel["kappa_midpoint"])
+            passed = kappa < budget_float
+            all_exceptions_below_budget = all_exceptions_below_budget and passed
+            exception_records.append(
+                {
+                    "sector": exception["sector"],
+                    "distance": exception["distance"],
+                    "modes": exception["modes"],
+                    "kappa_midpoint": kappa,
+                    "exception_budget": str(exception_budget),
+                    "strictly_below_exception_budget": passed,
+                    "exception_slack_midpoint": budget_float - kappa,
+                }
+            )
+
+    expected_exception_match = True
+    if expected_exception_sector is not None and expected_exception_modes is not None:
+        expected_exception_match = len(exception_records) == 1 and (
+            exception_records[0]["sector"] == expected_exception_sector
+            and tuple(exception_records[0]["modes"]) == expected_exception_modes
+        )
+
+    all_checks = (
+        all_newest_below_leading
+        and all_repeated_strictly_below_half
+        and all_exceptions_below_budget
+        and expected_exception_match
+    )
+    return {
+        "status": "MIDPOINT_DIAGNOSTIC_ONLY",
+        "rigorous_certificate": False,
+        "previous_probe": {
+            "path": str(previous_path.resolve()),
+            "sha256": _sha256(previous_path.resolve()),
+            "git_sha": previous.get("git_sha"),
+            "transition": previous_transition,
+        },
+        "current_transition": current_transition,
+        "transport_target": "q_(scale+1,distance+1) < (1/2)*q_(scale,distance)",
+        "newest_target": "q_(scale,0) < leading",
+        "repeated_channel_count": repeated_channel_count,
+        "all_newest_channels_strictly_below_leading": all_newest_below_leading,
+        "all_repeated_channels_strictly_below_half": (
+            all_repeated_strictly_below_half
+        ),
+        "exception_budget": (
+            str(exception_budget) if exception_budget is not None else None
+        ),
+        "all_geometric_exceptions_strictly_below_exception_budget": (
+            all_exceptions_below_budget
+        ),
+        "expected_exception": (
+            {
+                "sector": expected_exception_sector,
+                "modes": list(expected_exception_modes),
+                "exact_match": expected_exception_match,
+            }
+            if expected_exception_sector is not None
+            and expected_exception_modes is not None
+            else None
+        ),
+        "all_selected_diagnostics_pass": all_checks,
+        "sectors": sector_records,
+        "geometric_exceptions": exception_records,
+        "interpretation": (
+            "route-selection regression only; the CvS source kernel still "
+            "requires an interval or analytic transport proof"
+        ),
+    }
+
+
 def _row_bounds(sector: str, low_mode: int, high_mode: int) -> tuple[int, int]:
     start = (
         0
@@ -98,6 +300,11 @@ def probe(
     shift_gain: Fraction,
     reference_q: Fraction,
     candidate_leading: Fraction,
+    previous_probe: Path | None = None,
+    exception_budget: Fraction | None = None,
+    expected_exception_sector: str | None = None,
+    expected_exception_modes: tuple[int, int] | None = None,
+    require_half_transport: bool = False,
 ) -> dict[str, Any]:
     if c <= 1:
         raise ValueError("c must exceed one")
@@ -120,6 +327,14 @@ def probe(
         raise ValueError("reference_q must lie strictly between zero and one")
     if shift_gain < 0:
         raise ValueError("shift_gain must be nonnegative")
+    if exception_budget is not None and not 0 < exception_budget < 1:
+        raise ValueError("exception_budget must lie strictly between zero and one")
+    if require_half_transport and previous_probe is None:
+        raise ValueError("require_half_transport needs a previous_probe")
+    if (expected_exception_sector is None) != (expected_exception_modes is None):
+        raise ValueError("expected exception sector and modes must be supplied together")
+    if expected_exception_sector is not None and exception_budget is None:
+        raise ValueError("an expected exception needs an exception_budget")
 
     started = time.time()
     leading = float(candidate_leading)
@@ -304,6 +519,19 @@ def probe(
             else "use the geometric envelope for every historical shell"
         ),
     }
+    if previous_probe is not None:
+        comparison = _scale_transport_diagnostic(
+            current=report,
+            previous_path=previous_probe,
+            exception_budget=exception_budget,
+            expected_exception_sector=expected_exception_sector,
+            expected_exception_modes=expected_exception_modes,
+        )
+        report["scale_transport_diagnostic"] = comparison
+        if require_half_transport and not comparison[
+            "all_selected_diagnostics_pass"
+        ]:
+            raise RuntimeError("selected half-transport midpoint diagnostics failed")
     report["seconds"] = round(time.time() - started, 3)
     report["numpy_version"] = np.__version__
     report["python_flint_version"] = flint.__version__
@@ -329,7 +557,12 @@ def main() -> int:
     parser.add_argument("--prec", type=int, default=160)
     parser.add_argument("--shift-gain", default="1/1024")
     parser.add_argument("--reference-q", default="249/250")
-    parser.add_argument("--candidate-leading", default="1/27")
+    parser.add_argument("--candidate-leading", default="1/30")
+    parser.add_argument("--previous-probe", type=Path)
+    parser.add_argument("--exception-budget")
+    parser.add_argument("--expected-exception-sector", choices=("even", "odd"))
+    parser.add_argument("--expected-exception-modes", nargs=2, type=int)
+    parser.add_argument("--require-half-transport", action="store_true")
     parser.add_argument("--json-out", type=Path, required=True)
     args = parser.parse_args()
 
@@ -344,6 +577,21 @@ def main() -> int:
         candidate_leading=_positive_fraction(
             args.candidate_leading, "candidate_leading"
         ),
+        previous_probe=(
+            args.previous_probe.resolve() if args.previous_probe is not None else None
+        ),
+        exception_budget=(
+            _positive_fraction(args.exception_budget, "exception_budget")
+            if args.exception_budget is not None
+            else None
+        ),
+        expected_exception_sector=args.expected_exception_sector,
+        expected_exception_modes=(
+            tuple(args.expected_exception_modes)
+            if args.expected_exception_modes is not None
+            else None
+        ),
+        require_half_transport=args.require_half_transport,
     )
     args.json_out.parent.mkdir(parents=True, exist_ok=True)
     args.json_out.write_text(
@@ -355,6 +603,9 @@ def main() -> int:
             {
                 "status": result["status"],
                 "route_decision": result["route_decision"],
+                "scale_transport_diagnostic": result.get(
+                    "scale_transport_diagnostic"
+                ),
                 "sector_summaries": [
                     {
                         "sector": sector["sector"],

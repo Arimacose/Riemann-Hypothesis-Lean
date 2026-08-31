@@ -1320,13 +1320,14 @@ q_i <= q_0 * 2^(-i)  for i<n
 and `relativeCoupling_of_dyadicChannelBudgets` packages both steps.  To fit the
 existing previous-channel allocation `2/27`, it is therefore sufficient to
 prove a shell-distance envelope with leading squared coefficient at most
-`1/27`.  This replaces one opaque old-core matrix norm by three explicit
-source obligations: identify the cross form as the sum of its dyadic-shell
-pieces, prove that a fixed reserve times the sum of their nonnegative energies
-is controlled by the recursive core, and establish the `2^(-i)` coefficient
-envelope for the structured total crossblock (or an explicit allocation among
-the prime, Archimedean, and pole pieces).  Those source estimates remain open;
-the finite summation and budget conversion are now kernel-checked.
+`1/27`.  The selected odd-exception split below uses the stricter leading value
+`1/30`.  The scalar comparison between the complete block-diagonal shell sum
+and the recursive core is now formalized by the reserve-product block-sum
+theorem.  The source layer must still identify its separated energies with
+those scalar blocks and establish the `2^(-i)` coefficient envelope for the
+structured total crossblock (or an explicit allocation among the prime,
+Archimedean, and pole pieces).  The finite summation, budget conversion, and
+recursive-core scalar normalization are kernel-checked.
 
 The tracked `probe_previous_core_dyadic_channels.py` exercises this interface
 at the already certified `1920 -> 3840` transition, which is the generic
@@ -1348,14 +1349,44 @@ odd:  0.003046025, 0.001732819, 0.000986091, 0.003482023, 0.002456279
 sum:  0.007594261 (even), 0.011703238 (odd).
 ```
 
-Both sums are far below `2/27`, with midpoint slacks about `0.06648` and
-`0.06237`.  The simple `q_i <= (1/27)*2^(-i)` envelope holds for every listed
-channel except the odd fixed base `[1,20]`: at distance four it exceeds the
-candidate by about `0.000141464`.  The route decision is therefore explicit:
+Both sums are far below the selected regular aggregate budget
+`2*(1/30)=1/15`, with midpoint slacks about `0.05907` and `0.05496`.  The
+stricter `q_i <= (1/30)*2^(-i)` envelope holds for every listed channel except
+the odd fixed base `[1,20]`: at distance four it exceeds the regular candidate
+by about `0.000372945`.  The route decision is therefore explicit:
 keep that fixed base as a separately certified finite channel and use the
 geometric envelope on the dyadic tail.  This entire table remains float64
 linear algebra after Arb midpoint assembly; it selects the next interval and
 analytic estimates and does not upgrade them to a proof.
+
+The same tracked probe now runs a second consecutive scale in CI.  It extends
+the historical cutoffs by `1920`, uses middle cutoff `3840` and new cutoff
+`7680`, and compares every repeated band with the first diagnostic.  With the
+selected `1/30` leading budget it records
+
+```text
+newest coefficient: 0.00220868125 (even), 0.00236664910 (odd) < 1/30;
+ten repeated ratios: 0.415949472 .. 0.457977514 < 1/2;
+odd fixed base:       0.00111164734 < 1/384.
+```
+
+The optional `--require-half-transport` flag makes those three midpoint facts
+a workflow regression gate while the JSON retains
+`MIDPOINT_DIAGNOSTIC_ONLY` and `rigorous_certificate=false`.
+
+Four Lean theorems now encode the exact discrete consequence selected by this
+diagnostic.  `channelBudgetEnvelope_of_newest_and_transport` handles a general
+nonnegative decay factor;
+`dyadicChannelBudgetEnvelope_of_newest_and_halfTransport` specializes to
+`1/2`; `dyadicChannelBudgetEnvelope_on_range_of_newest_and_halfTransport`
+produces the finite-range hypothesis consumed by the Cauchy adapter; and
+`fixedExceptionBudget_of_halfTransport` preserves the odd fixed budget.  Thus
+the full triangular envelope follows once the concrete CvS source layer proves
+
+```text
+q_(scale,0) <= 1/30,
+q_(scale+1,distance+1) <= q_(scale,distance)/2.
+```
 
 That selected split now has an exact Lean interface rather than an informal
 recombination step.  The theorem
@@ -1369,11 +1400,12 @@ coefficient `rho` whenever
 q_exception + 2*q_leading <= rho.
 ```
 
-Thus an interval certificate for the odd `[1,20]` block may consume its actual
-finite budget, while the remaining analytic proof targets the unchanged
-`q_i <= q_leading*2^(-i)` envelope.  What remains at source level is to certify
-that exceptional budget and prove the structured dyadic estimates and energy
-normalization; the Lean summation and recombination are complete.
+Thus the odd `[1,20]` block may consume its separately certified finite budget,
+while the remaining analytic proof targets the unchanged
+`q_i <= q_leading*2^(-i)` envelope.  What remains at source level is the
+structured newest-band and half-transport estimate, together with the concrete
+shell-energy identification; the Lean triangular induction, summation,
+normalization, and recombination are complete.
 
 The tracked `certify_odd_fixed_base_channel.py` now closes that finite exception
 at the first certified transition.  It evaluates the direct odd-parity Arb
@@ -1438,8 +1470,11 @@ Lean records these equalities in `v23EvenFiniteRegularBudget_allocation` and
 `v23OddFiniteRegularBudget_allocation`.  Thus the complete first-transition
 source decomposition now has interval proof evidence.  The next source-level
 obligations are to prove `q_i <= (1/30)*2^(-i)` uniformly at every later scale
-and to compare the sum of separated shell energies with the recursive core
-energy; the finite certificate alone does not supply either normalization.
+through the newest-band and half-transport estimates, and to identify the sum
+of concrete separated shell energies with the block sum consumed by the
+recursive-core theorem.  The scalar comparison with the recursive core is now
+formalized; the finite certificate alone does not supply those source
+identifications.
 
 The finite-support-to-closed-value order passage is now explicit in Lean.
 `recursiveShellEnergy_nonnegative_nat` propagates nonnegativity through every
@@ -1585,7 +1620,11 @@ The following are still explicit proof obligations:
    `2/27` to a shell-distance envelope.  The generic route permits leading
    coefficient `1/27`; after assigning the certified odd fixed base `1/384`,
    the selected split uses leading coefficient `1/30`, has exact budget slack
-   `83/17280`, and retains squared decay `2^(-i)`.  The preconditioned-Schur
+   `83/17280`, and retains squared decay `2^(-i)`.  The new triangular Lean
+   induction reduces that decay to a newest-band `1/30` bound and a one-half
+   cross-scale transport inequality.  The two-scale midpoint regression checks
+   those targets at `K=960 -> 1920`, with all ten repeated ratios below `1/2`,
+   while keeping its diagnostic status explicit.  The preconditioned-Schur
    certificates supply the
    `960 -> 1920` and `1920 -> 3840` bridges, while the strict
    `||T_13||<10/3` power certificate and centered Archimedean envelope close the
@@ -1652,6 +1691,7 @@ The V23 workflow additionally rejects proof placeholders and user-declared
 axioms/constants, prints the axiom dependencies of every new terminal theorem,
 replays the corrected V22 finite Arb parity certificate, certifies the direct
 parity shell through `N=3840`, verifies the odd fixed-base exception and all
-nine regular first-transition source channels, and emits their JSON and
+nine regular first-transition source channels, runs the consecutive
+`N=3840/7680` previous-core transport diagnostics, and emits their JSON and
 exact-dyadic preconditioners together with the cumulative-residue interval
 certificate as downloadable regression artifacts.

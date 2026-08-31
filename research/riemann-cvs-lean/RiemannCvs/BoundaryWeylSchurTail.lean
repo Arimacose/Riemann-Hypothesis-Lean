@@ -834,6 +834,103 @@ theorem dyadicChannelBudget_sum_le_two
       mul_le_mul_of_nonneg_left (sum_geometric_two_le n) hLeading
     _ = 2 * leading := by ring
 
+/-- A triangular family of channel coefficients inherits a geometric envelope
+from two local inputs: every newest channel is below `leading`, and moving one
+scale outward while increasing the shell distance multiplies the coefficient
+by at most `decay`.
+
+The condition `distance ≤ scale` describes the triangular array of historical
+shells present after `scale` recursive extensions.  This theorem isolates the
+discrete induction from the source-specific CvS kernel estimate. -/
+theorem channelBudgetEnvelope_of_newest_and_transport
+    (coefficient : ℕ → ℕ → ℝ)
+    (leading decay : ℝ)
+    (hDecay : 0 ≤ decay)
+    (hNewest : ∀ scale, coefficient scale 0 ≤ leading)
+    (hTransport : ∀ scale distance,
+      coefficient (scale + 1) (distance + 1) ≤
+        decay * coefficient scale distance) :
+    ∀ scale distance, distance ≤ scale →
+      coefficient scale distance ≤ leading * decay ^ distance := by
+  intro scale distance hDistance
+  induction distance generalizing scale with
+  | zero => simpa using hNewest scale
+  | succ distance ih =>
+      cases scale with
+      | zero => omega
+      | succ scale =>
+          have hDistance' : distance ≤ scale := by omega
+          calc
+            coefficient (scale + 1) (distance + 1) ≤
+                decay * coefficient scale distance :=
+              hTransport scale distance
+            _ ≤ decay * (leading * decay ^ distance) :=
+              mul_le_mul_of_nonneg_left (ih scale hDistance') hDecay
+            _ = leading * decay ^ (distance + 1) := by
+              rw [pow_succ]
+              ring
+
+/-- Dyadic specialization of
+`channelBudgetEnvelope_of_newest_and_transport`.  A newest-channel bound
+`leading` and a one-half transport estimate imply the exact shell-distance
+target `leading * (1/2)^distance`. -/
+theorem dyadicChannelBudgetEnvelope_of_newest_and_halfTransport
+    (coefficient : ℕ → ℕ → ℝ)
+    (leading : ℝ)
+    (hNewest : ∀ scale, coefficient scale 0 ≤ leading)
+    (hTransport : ∀ scale distance,
+      coefficient (scale + 1) (distance + 1) ≤
+        (1 / 2 : ℝ) * coefficient scale distance) :
+    ∀ scale distance, distance ≤ scale →
+      coefficient scale distance ≤
+        leading * (1 / 2 : ℝ) ^ distance := by
+  exact channelBudgetEnvelope_of_newest_and_transport
+    coefficient leading (1 / 2 : ℝ) (by norm_num) hNewest hTransport
+
+/-- Finite-range form of the dyadic transport theorem.  Its conclusion has
+the same binder shape as the `hBudgetEnvelope` input consumed by
+`relativeCoupling_of_dyadicChannelBudgets` and the V23 odd-exception adapter. -/
+theorem dyadicChannelBudgetEnvelope_on_range_of_newest_and_halfTransport
+    (coefficient : ℕ → ℕ → ℝ)
+    (leading : ℝ)
+    (scale channelCount : ℕ)
+    (hNewest : ∀ stage, coefficient stage 0 ≤ leading)
+    (hTransport : ∀ stage distance,
+      coefficient (stage + 1) (distance + 1) ≤
+        (1 / 2 : ℝ) * coefficient stage distance)
+    (hChannelCount : channelCount ≤ scale + 1) :
+    ∀ distance ∈ Finset.range channelCount,
+      coefficient scale distance ≤
+        leading * (1 / 2 : ℝ) ^ distance := by
+  intro distance hDistance
+  apply dyadicChannelBudgetEnvelope_of_newest_and_halfTransport
+    coefficient leading hNewest hTransport scale distance
+  have hDistanceLt : distance < channelCount := Finset.mem_range.mp hDistance
+  omega
+
+/-- A fixed exceptional channel retains its original budget if each outward
+dyadic transport reduces its coefficient by at least one half.  The selected
+odd `[1,20]` channel uses this interface with the separately certified budget
+`1/384`. -/
+theorem fixedExceptionBudget_of_halfTransport
+    (coefficient : ℕ → ℝ)
+    (budget : ℝ)
+    (hBudget : 0 ≤ budget)
+    (hInitial : coefficient 0 ≤ budget)
+    (hTransport : ∀ scale,
+      coefficient (scale + 1) ≤ (1 / 2 : ℝ) * coefficient scale) :
+    ∀ scale, coefficient scale ≤ budget := by
+  intro scale
+  induction scale with
+  | zero => exact hInitial
+  | succ scale ih =>
+      calc
+        coefficient (scale + 1) ≤ (1 / 2 : ℝ) * coefficient scale :=
+          hTransport scale
+        _ ≤ (1 / 2 : ℝ) * budget :=
+          mul_le_mul_of_nonneg_left ih (by norm_num)
+        _ ≤ budget := by nlinarith
+
 /-- Package the finite-channel Cauchy estimate with a dyadic coefficient
 envelope.  A leading coefficient at most half the desired aggregate budget is
 sufficient uniformly in the number of earlier shells. -/

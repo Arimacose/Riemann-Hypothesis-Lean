@@ -223,6 +223,10 @@ jobs:
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCoupling_of_finsetChannelBudgets
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCoupling_of_exception_and_finsetChannelBudgets
           #print axioms RiemannCvs.BoundaryWeylSchurTail.dyadicChannelBudget_sum_le_two
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.channelBudgetEnvelope_of_newest_and_transport
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.dyadicChannelBudgetEnvelope_of_newest_and_halfTransport
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.dyadicChannelBudgetEnvelope_on_range_of_newest_and_halfTransport
+          #print axioms RiemannCvs.BoundaryWeylSchurTail.fixedExceptionBudget_of_halfTransport
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCoupling_of_dyadicChannelBudgets
           #print axioms RiemannCvs.BoundaryWeylSchurTail.relativeCoupling_of_finiteException_and_dyadicChannelBudgets
           #print axioms RiemannCvs.BoundaryWeylSchurTail.v23OddFixedBaseBudget_allocation
@@ -495,7 +499,7 @@ jobs:
             --validate-cutoff 120 \
             --json-out research/riemann-cvs-numerics/artifacts/v23_c13_q996_N1920_to_N3840_four_ninths_scaling.json
 
-      - name: Probe multiscale previous-core dyadic channels
+      - name: Probe two-scale previous-core dyadic transport
         shell: bash
         run: |
           set -euo pipefail
@@ -507,8 +511,23 @@ jobs:
             --prec 160 \
             --shift-gain 1/1024 \
             --reference-q 249/250 \
-            --candidate-leading 1/27 \
+            --candidate-leading 1/30 \
             --json-out research/riemann-cvs-numerics/artifacts/v23_c13_previous_core_to_N3840_dyadic_channels.json
+          python research/riemann-cvs-numerics/probe_previous_core_dyadic_channels.py \
+            --c 13 \
+            --historical-cutoffs 20 120 240 480 960 1920 \
+            --middle-cutoff 3840 \
+            --new-cutoff 7680 \
+            --prec 160 \
+            --shift-gain 1/1024 \
+            --reference-q 249/250 \
+            --candidate-leading 1/30 \
+            --previous-probe research/riemann-cvs-numerics/artifacts/v23_c13_previous_core_to_N3840_dyadic_channels.json \
+            --exception-budget 1/384 \
+            --expected-exception-sector odd \
+            --expected-exception-modes 1 20 \
+            --require-half-transport \
+            --json-out research/riemann-cvs-numerics/artifacts/v23_c13_previous_core_to_N7680_transport_diagnostic.json
 
       - name: Certify the exceptional odd fixed-base channel
         shell: bash
@@ -619,6 +638,7 @@ jobs:
             research/riemann-cvs-numerics/artifacts/v23_c13_N120_to_N240_shell_midpoint_smoke.json
             research/riemann-cvs-numerics/artifacts/v23_c13_q996_N1920_to_N3840_four_ninths_scaling.json
             research/riemann-cvs-numerics/artifacts/v23_c13_previous_core_to_N3840_dyadic_channels.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_previous_core_to_N7680_transport_diagnostic.json
             research/riemann-cvs-numerics/artifacts/v23_c13_odd_base20_to_N3840_interval.json
             research/riemann-cvs-numerics/artifacts/v23_c13_odd_base20_to_N3840_interval_base_preconditioner.npy
             research/riemann-cvs-numerics/artifacts/v23_c13_odd_base20_to_N3840_interval_schur_preconditioner.npy

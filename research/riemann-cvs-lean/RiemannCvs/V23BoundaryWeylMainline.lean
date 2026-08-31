@@ -206,16 +206,23 @@ four odd bands with sum `1/16`.  Their exact finite slacks inside `2/27` are
 the initial-block estimate: the same finite reserve product controls the
 initial energy plus the sum of every historical shell energy, and a direct
 adapter converts a source estimate against that full block-diagonal sum into
-one relative to the recursively glued core.  The regular envelope at every
-later scale, the source-specific identification of those separated band
-energies with the scalar shell decomposition, and a uniform coefficient
-partial-sum bound strictly below one remain analytic inputs.  The scalar
-product lemmas turn that last bound into the explicit positive floor
-`1-total`.  This is followed by convergence of the
-finite-support energies to the closed tail form.  The scalar induction,
-full block-sum normalization, finite-product floor adapter, and strict
-order-limit passage are kernel-checked; the source-specific separated-band
-envelope and shell-energy identification, the fourteen finite middle
-bridges, the summable coefficient bound, and source-specific form convergence
-remain open.
+one relative to the recursively glued core.  The all-scale regular envelope is
+now also reduced to two local source estimates: every newest coefficient is at
+most `1/30`, and transporting an existing band one dyadic scale outward reduces
+its coefficient by at least one half.  Four new Lean theorems propagate those
+inputs through the full triangular channel array, provide the finite-range
+shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
+A two-scale midpoint regression from `K=960` to `K=1920` observes all ten
+repeated-band ratios strictly below `1/2`, but remains route-selection evidence.
+The source-specific proof of that prime/Archimedean/pole transport estimate,
+the identification of separated band energies with the scalar shell
+decomposition, and a uniform coefficient partial-sum bound strictly below one
+remain analytic inputs.  The scalar product lemmas turn the last bound into the
+explicit positive floor `1-total`.  This is followed by convergence of the
+finite-support energies to the closed tail form.  The triangular transport
+induction, full block-sum normalization, finite-product floor adapter, and
+strict order-limit passage are kernel-checked; the source-specific transport
+bound and shell-energy identification, the fourteen finite middle bridges,
+the summable coefficient bound, and source-specific form convergence remain
+open.
 -/
