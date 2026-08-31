@@ -2001,3 +2001,59 @@ nor the eight finite bridges.  It does replace the formerly open all-scale
 newest-band estimate by a finite list plus an explicit all-cutoff theorem, and
 it supplies the exact half-transport algebra needed once a historical band has
 entered its analytic range.
+
+## 13. Exact source algebra for the combined Loewner symbol
+
+The first of the four newest-band operator inputs has now been split into an
+algebraic part and an analytic source-formula part.  The algebraic part no
+longer remains implicit.  `CombinedSymbolDyadicL2.lean` defines
+
+```text
+finiteSineSymbol(weight,phase)(x)
+  = sum_i weight_i * sin(phase_i*x),
+combinedSineSymbol(x)
+  = arch(x) + finiteSineSymbol(x),
+fourierNormalizedSymbol(x)
+  = (1/pi) * combinedSineSymbol(x).
+```
+
+Lean proves that every finite sine polynomial is odd, that adding it to an odd
+Archimedean symbol preserves oddness, and that the exact `1/pi` normalization
+preserves oddness.  The complete `oddDifferenceKernel`, including its supplied
+diagonal data, now satisfies exact addition and scalar-multiplication laws.
+Consequently
+
+```text
+Loewner((arch + primeSine)/pi)
+  = (1/pi) * (Loewner(arch) + Loewner(primeSine))
+```
+
+as a kernel identity rather than only away from the diagonal.  The theorem
+`oddDifferenceKernel_fourierNormalized_combined` packages this equality in the
+form consumed by the parity and energy layers.  The endpoint event omitted by
+the Arb square-sum certificate is also checked symbolically:
+
+```text
+sin(2*pi*n) = 0  for every natural Fourier mode n.
+```
+
+The new public theorem surface is:
+
+* `finiteSineSymbol_odd`;
+* `combinedSineSymbol_odd`;
+* `fourierNormalizedSymbol_odd`;
+* `oddDifferenceKernel_add`;
+* `oddDifferenceKernel_smul`;
+* `oddDifferenceKernel_fourierNormalized`;
+* `oddDifferenceKernel_fourierNormalized_combined`;
+* `sin_two_pi_nat`.
+
+All eight theorems compile with only `propext`, `Classical.choice`, and
+`Quot.sound`, with no `sorryAx`.  This closes the exact finite-sum,
+prime/Archimedean combination, Fourier-normalization, and endpoint-deletion
+algebra.  What still remains in this operator input is source-specific and
+analytic: identify the concrete CvS Archimedean and prime matrix entries and
+their diagonal values with these packaged functions, then identify their
+cosine/sine restrictions with the finite historical-band/new-shell matrices
+used by the relative-energy theorem.  The coercive-floor, recursive block-sum,
+and eight finite newest-band bridges remain separate obligations.

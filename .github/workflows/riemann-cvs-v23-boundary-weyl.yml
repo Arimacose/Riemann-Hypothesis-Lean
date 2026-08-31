@@ -165,6 +165,14 @@ jobs:
           #print axioms RiemannCvs.CvSParityDisplacement.oddDifferenceKernel_displacement
           #print axioms RiemannCvs.CvSParityDisplacement.oddDifferenceKernel_evenParity_offDiagonal
           #print axioms RiemannCvs.CvSParityDisplacement.oddDifferenceKernel_oddParity_offDiagonal
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.finiteSineSymbol_odd
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.combinedSineSymbol_odd
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.fourierNormalizedSymbol_odd
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.oddDifferenceKernel_add
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.oddDifferenceKernel_smul
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.oddDifferenceKernel_fourierNormalized
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.oddDifferenceKernel_fourierNormalized_combined
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.sin_two_pi_nat
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.evenWeightedNumerator_abs_le
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.oddWeightedNumerator_abs_le
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.oddDifferenceKernel_evenParity_abs_le

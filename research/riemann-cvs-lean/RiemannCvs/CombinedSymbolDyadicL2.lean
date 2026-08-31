@@ -10,32 +10,168 @@ odd Loewner symbol.  This module supplies the kernel-checked algebra that turns
 source estimates for that symbol into dyadic square-sum and rectangular-form
 bounds.
 
-There are six layers.
+There are seven layers.
 
-1. The exact parity formulas from `CvSParityDisplacement` give entry bounds
+1. A source-algebra layer builds the finite prime sine polynomial, proves its
+   oddness, combines it with an odd Archimedean symbol, preserves the exact
+   `1 / π` normalization through the Loewner kernel, and removes the endpoint
+   phase `2 * π * n` on natural Fourier modes.
+2. The exact parity formulas from `CvSParityDisplacement` give entry bounds
    for positive separated modes.
-2. Finite Cauchy--Schwarz converts entry-square budgets into rectangular
+3. Finite Cauchy--Schwarz converts entry-square budgets into rectangular
    bilinear bounds.
-3. The Mathlib reciprocal-square tail estimate gives the exact dyadic factor
+4. The Mathlib reciprocal-square tail estimate gives the exact dyadic factor
    `1 / (2 * N)`.
-4. Finite Abel summation turns an affine prefix bound into a weighted dyadic
+5. Finite Abel summation turns an affine prefix bound into a weighted dyadic
    bound and exposes the strict endpoint expression consumed by the Arb
    certificate.
-5. Rowwise square estimates and rectangular Cauchy--Schwarz send that scalar
+6. Rowwise square estimates and rectangular Cauchy--Schwarz send that scalar
    bound into a matrix Frobenius budget and then into coercive relative energy.
-6. The newest-band specialization closes the constant `24*C`, while the exact
+7. The newest-band specialization closes the constant `24*C`, while the exact
    doubled-shell identity supplies the one-half transport used by the recursive
    channel envelope.
 
-The source-specific identification of the concrete CvS symbol and its affine
-prefix constants remains an explicit input.  No numerical certificate is
-promoted to a Lean theorem here.
+The source-specific analytic identification of the concrete Archimedean and
+prime matrix entries, and their affine prefix constants, remains an explicit
+input.  No numerical certificate is promoted to a Lean theorem here.
 -/
 
 namespace RiemannCvs.CombinedSymbolDyadicL2
 
 open Finset
 open scoped BigOperators
+
+/-!
+## Combined-symbol source algebra
+
+The prime-power contribution is a finite sine polynomial.  The following
+definitions and identities close the purely algebraic part of combining it
+with an odd Archimedean symbol and applying the concrete `1 / π` Fourier
+normalization.  The remaining source task is to connect the analytic CvS
+entries and their diagonal data to these functions.
+-/
+
+/-- A finite real sine polynomial, the exact shape of the prime-power part of
+the combined CvS Loewner symbol. -/
+noncomputable def finiteSineSymbol
+    {ι : Type*} [Fintype ι]
+    (weight phase : ι → ℝ) (x : ℝ) : ℝ :=
+  ∑ i, weight i * Real.sin (phase i * x)
+
+/-- Every finite sine polynomial is odd. -/
+theorem finiteSineSymbol_odd
+    {ι : Type*} [Fintype ι]
+    (weight phase : ι → ℝ) :
+    Function.Odd (finiteSineSymbol weight phase) := by
+  intro x
+  simp [finiteSineSymbol]
+
+/-- The source-level combined symbol keeps the Archimedean and prime pieces
+inside one Loewner symbol. -/
+noncomputable def combinedSineSymbol
+    {ι : Type*} [Fintype ι]
+    (arch : ℝ → ℝ) (weight phase : ι → ℝ) (x : ℝ) : ℝ :=
+  arch x + finiteSineSymbol weight phase x
+
+/-- An odd Archimedean symbol plus the prime sine polynomial is odd. -/
+theorem combinedSineSymbol_odd
+    {ι : Type*} [Fintype ι]
+    (arch : ℝ → ℝ) (weight phase : ι → ℝ)
+    (hArch : Function.Odd arch) :
+    Function.Odd (combinedSineSymbol arch weight phase) := by
+  intro x
+  rw [combinedSineSymbol, combinedSineSymbol, hArch x,
+    finiteSineSymbol_odd weight phase x]
+  ring
+
+/-- Fourier normalization used by the concrete CvS off-diagonal kernel. -/
+noncomputable def fourierNormalizedSymbol
+    (symbol : ℝ → ℝ) (x : ℝ) : ℝ :=
+  (1 / Real.pi) * symbol x
+
+/-- Fourier normalization preserves oddness. -/
+theorem fourierNormalizedSymbol_odd
+    (symbol : ℝ → ℝ) (hSymbol : Function.Odd symbol) :
+    Function.Odd (fourierNormalizedSymbol symbol) := by
+  intro x
+  rw [fourierNormalizedSymbol, fourierNormalizedSymbol, hSymbol x]
+  ring
+
+/-- Adding source symbols and diagonal data adds their complete Loewner
+kernels. -/
+theorem oddDifferenceKernel_add
+    (leftSymbol leftDiagonal rightSymbol rightDiagonal : ℝ → ℝ)
+    (p q : ℝ) :
+    CvSParityDisplacement.oddDifferenceKernel
+        (fun x => leftSymbol x + rightSymbol x)
+        (fun x => leftDiagonal x + rightDiagonal x) p q =
+      CvSParityDisplacement.oddDifferenceKernel leftSymbol leftDiagonal p q +
+        CvSParityDisplacement.oddDifferenceKernel rightSymbol rightDiagonal p q := by
+  by_cases hpq : p = q
+  · subst q
+    simp [CvSParityDisplacement.oddDifferenceKernel]
+  · simp only [CvSParityDisplacement.oddDifferenceKernel, hpq, if_false]
+    ring
+
+/-- Scaling both the off-diagonal symbol and diagonal source data scales the
+complete Loewner kernel exactly. -/
+theorem oddDifferenceKernel_smul
+    (symbol diagonal : ℝ → ℝ) (scale p q : ℝ) :
+    CvSParityDisplacement.oddDifferenceKernel
+        (fun x => scale * symbol x)
+        (fun x => scale * diagonal x) p q =
+      scale * CvSParityDisplacement.oddDifferenceKernel symbol diagonal p q := by
+  by_cases hpq : p = q
+  · subst q
+    simp [CvSParityDisplacement.oddDifferenceKernel]
+  · simp only [CvSParityDisplacement.oddDifferenceKernel, hpq, if_false]
+    ring
+
+/-- The exact `1 / π` CvS normalization commutes with the complete Loewner
+kernel when its diagonal data use the same normalization. -/
+theorem oddDifferenceKernel_fourierNormalized
+    (symbol diagonal : ℝ → ℝ) (p q : ℝ) :
+    CvSParityDisplacement.oddDifferenceKernel
+        (fourierNormalizedSymbol symbol)
+        (fourierNormalizedSymbol diagonal) p q =
+      (1 / Real.pi) *
+        CvSParityDisplacement.oddDifferenceKernel symbol diagonal p q := by
+  change CvSParityDisplacement.oddDifferenceKernel
+      (fun x => (1 / Real.pi) * symbol x)
+      (fun x => (1 / Real.pi) * diagonal x) p q = _
+  exact oddDifferenceKernel_smul symbol diagonal (1 / Real.pi) p q
+
+/-- End-to-end algebraic source identity: the normalized combined kernel is
+the normalized sum of the Archimedean and prime sine Loewner kernels. -/
+theorem oddDifferenceKernel_fourierNormalized_combined
+    {ι : Type*} [Fintype ι]
+    (arch archDiagonal : ℝ → ℝ) (weight phase : ι → ℝ)
+    (primeDiagonal : ℝ → ℝ) (p q : ℝ) :
+    CvSParityDisplacement.oddDifferenceKernel
+        (fourierNormalizedSymbol (combinedSineSymbol arch weight phase))
+        (fourierNormalizedSymbol
+          (fun x => archDiagonal x + primeDiagonal x)) p q =
+      (1 / Real.pi) *
+        (CvSParityDisplacement.oddDifferenceKernel arch archDiagonal p q +
+          CvSParityDisplacement.oddDifferenceKernel
+            (finiteSineSymbol weight phase) primeDiagonal p q) := by
+  rw [oddDifferenceKernel_fourierNormalized]
+  change (1 / Real.pi) *
+      CvSParityDisplacement.oddDifferenceKernel
+        (fun x => arch x + finiteSineSymbol weight phase x)
+        (fun x => archDiagonal x + primeDiagonal x) p q = _
+  exact congrArg (fun z => (1 / Real.pi) * z)
+    (oddDifferenceKernel_add arch archDiagonal
+      (finiteSineSymbol weight phase) primeDiagonal p q)
+
+/-- The endpoint phase `2 * π * n` vanishes exactly on every natural Fourier
+mode, justifying deletion of the `q = c` sine event from off-diagonal symbols. -/
+theorem sin_two_pi_nat (n : ℕ) :
+    Real.sin (2 * Real.pi * (n : ℝ)) = 0 := by
+  rw [show 2 * Real.pi * (n : ℝ) = ((2 * n : ℕ) : ℝ) * Real.pi by
+    push_cast
+    ring]
+  exact Real.sin_nat_mul_pi (2 * n)
 
 /-- The even-parity weighted numerator is controlled by pointwise symbol
 amplitudes. -/

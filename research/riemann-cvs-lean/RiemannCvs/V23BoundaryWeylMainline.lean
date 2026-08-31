@@ -237,7 +237,15 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   the exact weighted numerators `q*F(q)-p*F(p)` in the even sector and
   `p*F(q)-q*F(p)` in the odd sector, both over `p^2-q^2`.  Thus the remaining
   source estimate targets the combined odd symbol directly and retains the
-  observed prime/Archimedean cancellation.  The combined-symbol certificate
+  observed prime/Archimedean cancellation.  Eight source-algebra theorems now
+  define the finite prime sine polynomial, prove its oddness, combine it with
+  any odd Archimedean symbol, commute addition and scalar multiplication with
+  the complete diagonal-aware Loewner kernel, preserve the concrete `1/pi`
+  normalization, and prove the omitted endpoint phase `sin(2*pi*n)=0` on every
+  natural Fourier mode.  Hence the algebraic combination and normalization are
+  checked; the remaining source identification is the analytic equality of the
+  concrete CvS entries and diagonal data with those packaged functions, followed
+  by their restriction to the stated parity shell bands.  The combined-symbol certificate
   now proves the scalar weighted square budget `<1/N` for every `N>=1920`.
   Fourteen further Lean adapters preserve the concrete `1/pi` Fourier scale,
   turn the old-band weighted budget into an ordinary square sum, close the
