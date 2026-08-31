@@ -2201,14 +2201,53 @@ odd-symbol hypothesis.  The eight public theorem interfaces are:
 * `logarithmicArchimedeanSymbol_odd`;
 * `logarithmicCutoffFreeKernel_archimedean_law`.
 
-Thus the remaining pointwise source identity is confined to the actual
-diagonal: instantiate `archDiagonal` with
-`kappa+2*CC_n+J-(2/L)*XC_n` and identify it with the CvS
-trigamma/geometric diagonal branch.  The subsequent operator step restricts
-the already assembled kernel to the finite parity shell bands.  The finite
-prime loop, Archimedean off-diagonal symbol, endpoint deletion, rational pole
-parameters, subtraction signs, convergence, oddness, and displacement algebra
-no longer belong to those open steps.
+The actual diagonal is now concrete too.  Lean defines the three series used
+by the Arb builder,
+
+```text
+G_CC(c,x) = sum exp(-a_k*L)*omega^2/(a_k*(a_k^2+omega^2)),
+G_X1(c,x) = sum exp(-a_k*L)*a_k/(a_k^2+omega^2),
+G_X2(c,x) = sum exp(-a_k*L)*(a_k^2-omega^2)/(a_k^2+omega^2)^2,
+```
+
+then records the real digamma correction `CC`, the real derivative-of-digamma
+correction `XC`, the exact cutoff constants `kappa` and `J`, and
+
+```text
+logarithmicArchimedeanDiagonal(c,x)
+  = kappa(c) + 2*CC(c,x) + J(c) - (2/log(c))*XC(c,x).
+```
+
+All three series are proved summable for `c>1` by comparison with the same
+exponential geometric majorant.  The Gamma/digamma conjugation argument is
+differentiated once more, proving the real derivative term even; termwise
+reflection proves every geometric diagonal correction even, hence the complete
+diagonal is even.  The full kernel is finally instantiated with both the
+concrete symbol and this concrete diagonal.  The fourteen new theorem
+interfaces are:
+
+* `archimedeanArgument_neg`;
+* `archimedeanDigammaImaginary_eq_argument`;
+* `deriv_digamma_conj`;
+* `summable_archimedeanExponential_terms`;
+* `summable_archimedeanCosineGeometricSeries_terms`;
+* `summable_archimedeanXOneGeometricSeries_terms`;
+* `summable_archimedeanXTwoGeometricSeries_terms`;
+* `archimedeanCosineGeometricSeries_neg`;
+* `archimedeanXOneGeometricSeries_neg`;
+* `archimedeanXTwoGeometricSeries_neg`;
+* `archimedeanCosineCorrection_neg`;
+* `archimedeanCrossCorrection_neg`;
+* `logarithmicArchimedeanDiagonal_neg`;
+* `logarithmicCutoffFreeKernel_actualArchimedean_law`.
+
+Thus the remaining source bridge is no longer a special-function formula:
+identify the signed-integer restriction of this exact Lean kernel entrywise
+with the finite CvS builder matrix, then restrict it to the stated parity shell
+bands and connect the certified coercive floors.  The finite prime loop,
+Archimedean symbol and diagonal formulas, endpoint deletion, rational pole
+parameters, subtraction signs, convergence, reflection, and displacement
+algebra no longer belong to those open steps.
 
 The composite phase conditions are also symbolic now.  For two strict
 interior locations, Lean proves the pair-difference half phase lies in

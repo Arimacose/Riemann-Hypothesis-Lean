@@ -405,6 +405,59 @@ def certify(
                 "RiemannCvs.CombinedSymbolDyadicL2."
                 "logarithmicCutoffFreeKernel_archimedean_law"
             ),
+            "archimedean_argument": (
+                "RiemannCvs.CombinedSymbolDyadicL2.archimedeanArgument"
+            ),
+            "archimedean_argument_reflection": (
+                "RiemannCvs.CombinedSymbolDyadicL2.archimedeanArgument_neg"
+            ),
+            "archimedean_digamma_argument_identification": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "archimedeanDigammaImaginary_eq_argument"
+            ),
+            "archimedean_cosine_geometric_series": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "archimedeanCosineGeometricSeries"
+            ),
+            "archimedean_x_one_geometric_series": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "archimedeanXOneGeometricSeries"
+            ),
+            "archimedean_x_two_geometric_series": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "archimedeanXTwoGeometricSeries"
+            ),
+            "archimedean_diagonal_series_summable": [
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "summable_archimedeanCosineGeometricSeries_terms",
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "summable_archimedeanXOneGeometricSeries_terms",
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "summable_archimedeanXTwoGeometricSeries_terms",
+            ],
+            "archimedean_cosine_correction": (
+                "RiemannCvs.CombinedSymbolDyadicL2.archimedeanCosineCorrection"
+            ),
+            "archimedean_cross_correction": (
+                "RiemannCvs.CombinedSymbolDyadicL2.archimedeanCrossCorrection"
+            ),
+            "archimedean_kappa": (
+                "RiemannCvs.CombinedSymbolDyadicL2.logarithmicArchimedeanKappa"
+            ),
+            "archimedean_pole_j": (
+                "RiemannCvs.CombinedSymbolDyadicL2.logarithmicArchimedeanPoleJ"
+            ),
+            "archimedean_diagonal": (
+                "RiemannCvs.CombinedSymbolDyadicL2.logarithmicArchimedeanDiagonal"
+            ),
+            "archimedean_diagonal_even": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "logarithmicArchimedeanDiagonal_neg"
+            ),
+            "actual_archimedean_cutoff_free_displacement": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "logarithmicCutoffFreeKernel_actualArchimedean_law"
+            ),
             "cutoff_endpoint_zero": (
                 "RiemannCvs.CombinedSymbolDyadicL2.logarithmicPrimeEndpoint_term_zero"
             ),

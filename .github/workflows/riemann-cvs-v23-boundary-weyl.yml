@@ -202,6 +202,20 @@ jobs:
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.archimedeanDigammaImaginary_neg
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicArchimedeanSymbol_odd
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicCutoffFreeKernel_archimedean_law
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.archimedeanArgument_neg
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.archimedeanDigammaImaginary_eq_argument
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.deriv_digamma_conj
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.summable_archimedeanExponential_terms
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.summable_archimedeanCosineGeometricSeries_terms
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.summable_archimedeanXOneGeometricSeries_terms
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.summable_archimedeanXTwoGeometricSeries_terms
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.archimedeanCosineGeometricSeries_neg
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.archimedeanXOneGeometricSeries_neg
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.archimedeanXTwoGeometricSeries_neg
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.archimedeanCosineCorrection_neg
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.archimedeanCrossCorrection_neg
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicArchimedeanDiagonal_neg
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicCutoffFreeKernel_actualArchimedean_law
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicPrimePhase_half_sin_pos
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.abs_shifted_logarithmicPrime_sine_sum_le
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.abs_shifted_logarithmicPrime_cosine_sum_le

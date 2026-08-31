@@ -256,9 +256,14 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   part and exponentially convergent geometric correction.  Lean proves the
   correction series summable for every `c>1`, proves the symbol odd by complex
   conjugation, and instantiates the full cutoff-free displacement law with it.
-  The remaining source identification is the analytic equality of the concrete
-  CvS trigamma/geometric diagonal data with the supplied diagonal branch,
-  followed by restriction to the stated parity shell bands.  The combined-symbol certificate
+  The concrete diagonal is now defined from the real digamma and
+  derivative-of-digamma terms, all three Arb geometric corrections, and the
+  exact `kappa` and `J` cutoff constants.  Lean proves every diagonal series
+  summable for `c>1`, proves all correction terms and the assembled diagonal
+  reflection-even, and instantiates the full kernel with no free Archimedean
+  source argument.  The remaining source bridge identifies the signed-integer
+  restriction of this Lean kernel entrywise with the finite CvS builder and
+  then restricts it to the stated parity shell bands.  The combined-symbol certificate
   now also rests on a Lean proof of the finite nonresonant geometric-sum bound,
   including arbitrary starting indices and its sine/cosine projections; Arb
   retains the composite doubled/difference/sum phase checks.  Nine further
