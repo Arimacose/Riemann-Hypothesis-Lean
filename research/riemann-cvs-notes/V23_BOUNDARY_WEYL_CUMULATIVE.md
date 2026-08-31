@@ -1995,9 +1995,10 @@ tail is consequently reduced to eight finite bridge cutoffs:
 
 This scalar composition was introduced with four concrete operator inputs.
 The current JSON has collapsed them to one analytic condition: the concrete
-Archimedean main diagonal must satisfy its pointwise lower bound, and the pole,
-Archimedean-remainder, and prime parity forms must satisfy their displayed
-absolute quadratic-form bounds.  The crossblock, parity compression,
+Archimedean main diagonal must satisfy its pointwise lower bound, the explicit
+even/odd pole weight-square sums must satisfy the recorded `poleTail` scalar
+bound, and the Archimedean-remainder and prime parity forms must satisfy their
+displayed absolute quadratic-form bounds.  The crossblock, parity compression,
 block-diagonal recursion, and concrete shell-energy identification are now
 kernel-checked below.  The eight finite bridges remain.  The certificate still
 replaces the formerly open all-scale newest-band estimate by a finite list plus
@@ -2388,8 +2389,10 @@ diagonal energy is reduced to a coordinate sum, and the two specialized
 coercive-floor theorems consume only:
 
 1. the pointwise lower bound for `-logarithmicCvSArchimedeanEntry(c,n,n)`;
-2. absolute quadratic-form bounds for the three displayed error matrices; and
-3. the final scalar floor comparison.
+2. the scalar even/odd pole weight-square tail bounds;
+3. absolute quadratic-form bounds for the Archimedean-remainder and prime
+   matrices; and
+4. the final scalar floor comparison.
 
 Thus matrix splitting, parity/reflection signs, summation of the three errors,
 and passage from pointwise diagonal control to a form lower bound are no longer
@@ -2404,6 +2407,25 @@ are equal to the corresponding positive-mode quadratic energies, and the two
 new tower-tail coercive-floor theorems consume the same pointwise diagonal and
 three error-form bounds directly.  No extra shell-energy identification input
 remains.
+
+The rational pole component is no longer an opaque form estimate.  Lean now
+defines its common scale, denominator, and even/odd scalar weights and proves
+that the even pole matrix is `2*scale*u*u^T`, while the odd pole matrix is
+`-2*scale*v*v^T`.  Their quadratic energies are therefore exactly
+`2*scale*(sum u_i*x_i)^2` and `-2*scale*(sum v_i*x_i)^2`.  Finite
+Cauchy--Schwarz yields the absolute bounds consumed by error component zero:
+
+```text
+|Q_pole,even(x)| <= |2*scale| * (sum u_i^2) * ||x||_2^2,
+|Q_pole,odd (x)| <= |2*scale| * (sum v_i^2) * ||x||_2^2.
+```
+
+Thus the pole obligation has been reduced from a matrix inequality to the
+scalar tail estimates for those two explicit weight sums.  The Archimedean
+self-entry is simultaneously identified with
+`logarithmicArchimedeanDiagonal(c,mode)`, so the remaining diagonal inequality
+is stated on exactly the function enclosed by the Arb certificate.
+
 The local `base`, `tail`, and literal rectangular `cross` algebra is no longer
 an open step.  The
 finite prime loop, Archimedean symbol and diagonal formulas,

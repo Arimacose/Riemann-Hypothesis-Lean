@@ -43,11 +43,13 @@ The concrete source builder, its orthonormal parity compression, and the
 newest separated row/column bands are identified exactly below.  Its symmetry
 and simultaneous-reflection invariance are also proved, so the finite recursive
   cross coordinate is the literal historical/newest rectangular form.  The
-  remaining operator input is the concrete coercive component bound.  The
+  remaining operator input is the concrete Archimedean diagonal/remainder and
+  prime-form bound together with a scalar pole-weight tail estimate.  The
   all-scale shell-tower compatibility, the exact positive-mode component
-  decomposition, and its direct application to the concrete tower-tail energy
-  are instantiated in `V23BoundaryWeylMainline`.  No numerical certificate is
-  promoted to a Lean theorem here.
+  decomposition, its direct application to the concrete tower-tail energy, and
+  the rank-one reduction of both pole parity blocks are instantiated in
+  `V23BoundaryWeylMainline`.  No numerical certificate is promoted to a Lean
+  theorem here.
 -/
 
 namespace RiemannCvs.CombinedSymbolDyadicL2

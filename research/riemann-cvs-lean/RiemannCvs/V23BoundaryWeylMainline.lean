@@ -303,7 +303,12 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   exactly that positive-mode matrix, including the `4B -> 8B` newest-shell mode
   map, so the same adapters give the coercive floor directly for
   `finiteMatrixTowerTailEnergy`; neither shell identification, matrix
-  decomposition, nor its parity signs remain implicit.
+  decomposition, nor its parity signs remain implicit.  The pole error is now
+  factored further: the even and odd parity pole blocks are explicit rank-one
+  forms, so their absolute quadratic-form bounds follow from finite scalar
+  sums of squared rational weights by Cauchy--Schwarz.  The diagonal self-entry
+  is also rewritten to the literal Archimedean diagonal used by the interval
+  certificate.
   The combined-symbol certificate
   now also rests on a Lean proof of the finite nonresonant geometric-sum bound,
   including arbitrary starting indices and its sine/cosine projections; Arb
@@ -1380,4 +1385,220 @@ theorem logarithmicCvSBuilderEvenTowerTailEnergy_coerciveFloor
     (finGlobalShellPositiveMode (size n) (shell n))
     (finGlobalShellVector z (size n) (shell n))
     diagonalFloor shift floor errorBound hDiagonal hError hFloor
+
+/-!
+## Explicit pole-component bound
+
+The rational pole parity blocks factor into one rank-one form each.  Their
+quadratic energies and absolute Cauchy bounds therefore reduce exactly to
+finite sums of explicit scalar weights.  The Archimedean diagonal self-entry
+is also rewritten to the literal diagonal function used by the interval
+certificate.
+-/
+noncomputable def logarithmicCvSPoleScale (c : ℝ) : ℝ :=
+  32 * Real.log c * Real.sinh (Real.log c / 4) ^ 2
+
+noncomputable def logarithmicCvSPoleDenominator (c : ℝ) (n : ℤ) : ℝ :=
+  Real.log c ^ 2 + 16 * Real.pi ^ 2 * (n : ℝ) ^ 2
+
+noncomputable def logarithmicCvSPoleEvenWeight (c : ℝ) (n : ℤ) : ℝ :=
+  Real.log c / logarithmicCvSPoleDenominator c n
+
+noncomputable def logarithmicCvSPoleOddWeight (c : ℝ) (n : ℤ) : ℝ :=
+  4 * Real.pi * (n : ℝ) / logarithmicCvSPoleDenominator c n
+
+@[simp] theorem logarithmicCvSArchimedeanEntry_self (c : ℝ) (n : ℤ) :
+    logarithmicCvSArchimedeanEntry c n n =
+      logarithmicArchimedeanDiagonal c |(n : ℝ)| := by
+  simp [logarithmicCvSArchimedeanEntry]
+
+theorem finGlobalShellPositiveMode_pos (old shell : ℕ) (j : Fin shell) :
+    0 < finGlobalShellPositiveMode old shell j := by
+  unfold finGlobalShellPositiveMode
+  omega
+
+theorem logarithmicCvSArchimedeanEntry_shell_self
+    (c : ℝ) (old shell : ℕ) (j : Fin shell) :
+    logarithmicCvSArchimedeanEntry c
+        (finGlobalShellPositiveMode old shell j)
+        (finGlobalShellPositiveMode old shell j) =
+      logarithmicArchimedeanDiagonal c
+        (finGlobalShellPositiveMode old shell j : ℝ) := by
+  rw [logarithmicCvSArchimedeanEntry_self, abs_of_pos]
+  exact_mod_cast finGlobalShellPositiveMode_pos old shell j
+
+theorem logarithmicCvSArchimedeanShellDiagonal_ge
+    (c : ℝ) (old shell : ℕ) (diagonalFloor : ℝ)
+    (hDiagonal : ∀ j : Fin shell,
+      diagonalFloor ≤
+        -logarithmicArchimedeanDiagonal c
+          (finGlobalShellPositiveMode old shell j : ℝ)) :
+    ∀ j : Fin shell,
+      diagonalFloor ≤
+        -logarithmicCvSArchimedeanEntry c
+          (finGlobalShellPositiveMode old shell j)
+          (finGlobalShellPositiveMode old shell j) := by
+  intro j
+  rw [logarithmicCvSArchimedeanEntry_shell_self]
+  exact hDiagonal j
+
+theorem logarithmicCvSPoleEntry_even_factorization (c : ℝ) (n m : ℤ) :
+    logarithmicCvSPoleEntry c n m + logarithmicCvSPoleEntry c n (-m) =
+      2 * logarithmicCvSPoleScale c *
+        logarithmicCvSPoleEvenWeight c n *
+          logarithmicCvSPoleEvenWeight c m := by
+  simp [logarithmicCvSPoleEntry, logarithmicCvSPoleScale,
+    logarithmicCvSPoleDenominator, logarithmicCvSPoleEvenWeight,
+    div_eq_mul_inv]
+  ring
+
+theorem logarithmicCvSPoleEntry_odd_factorization (c : ℝ) (n m : ℤ) :
+    logarithmicCvSPoleEntry c n m - logarithmicCvSPoleEntry c n (-m) =
+      -(2 * logarithmicCvSPoleScale c) *
+        logarithmicCvSPoleOddWeight c n *
+          logarithmicCvSPoleOddWeight c m := by
+  simp [logarithmicCvSPoleEntry, logarithmicCvSPoleScale,
+    logarithmicCvSPoleDenominator, logarithmicCvSPoleOddWeight,
+    div_eq_mul_inv]
+  ring
+
+theorem logarithmicCvSPoleEvenPositiveModeMatrix_eq_rankOne
+    {κ : Type*}
+    (c : ℝ) (mode : κ → ℤ) :
+    logarithmicCvSPoleEvenPositiveModeMatrix c mode =
+      fun i j =>
+        (2 * logarithmicCvSPoleScale c) *
+          logarithmicCvSPoleEvenWeight c (mode i) *
+            logarithmicCvSPoleEvenWeight c (mode j) := by
+  ext i j
+  exact logarithmicCvSPoleEntry_even_factorization c (mode i) (mode j)
+
+theorem logarithmicCvSPoleOddPositiveModeMatrix_eq_rankOne
+    {κ : Type*}
+    (c : ℝ) (mode : κ → ℤ) :
+    logarithmicCvSPoleOddPositiveModeMatrix c mode =
+      fun i j =>
+        (-(2 * logarithmicCvSPoleScale c)) *
+          logarithmicCvSPoleOddWeight c (mode i) *
+            logarithmicCvSPoleOddWeight c (mode j) := by
+  ext i j
+  exact logarithmicCvSPoleEntry_odd_factorization c (mode i) (mode j)
+
+theorem finiteMatrixQuadraticEnergy_rankOne
+    {κ : Type*} [Fintype κ]
+    (a : ℝ) (u x : κ → ℝ) :
+    finiteMatrixQuadraticEnergy (fun i j => a * u i * u j) x =
+      a * (∑ i, u i * x i) ^ 2 := by
+  unfold finiteMatrixQuadraticEnergy
+  have hInner (i : κ) :
+      (∑ j, x i * (a * u i * u j) * x j) =
+        (x i * a * u i) * ∑ j, u j * x j := by
+    rw [Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro j _hj
+    ring
+  rw [show (∑ i, ∑ j, x i * (a * u i * u j) * x j) =
+      ∑ i, (x i * a * u i) * ∑ j, u j * x j by
+    apply Finset.sum_congr rfl
+    intro i _hi
+    exact hInner i]
+  rw [← Finset.sum_mul]
+  have hLeft : (∑ i, x i * a * u i) = a * ∑ i, u i * x i := by
+    rw [Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro i _hi
+    ring
+  rw [hLeft, pow_two]
+  ring
+
+theorem finiteMatrixQuadraticEnergy_rankOne_abs_le
+    {κ : Type*} [Fintype κ]
+    (a : ℝ) (u x : κ → ℝ) :
+    |finiteMatrixQuadraticEnergy (fun i j => a * u i * u j) x| ≤
+      |a| * (∑ i, u i ^ 2) * finiteVectorEuclideanNormSq x := by
+  rw [finiteMatrixQuadraticEnergy_rankOne]
+  let S := ∑ i, u i * x i
+  change |a * S ^ 2| ≤ _
+  rw [abs_mul, abs_of_nonneg (sq_nonneg S)]
+  have hCauchy := Finset.sum_mul_sq_le_sq_mul_sq
+    (Finset.univ : Finset κ) u x
+  have hScaled := mul_le_mul_of_nonneg_left hCauchy (abs_nonneg a)
+  simpa [finiteVectorEuclideanNormSq, mul_assoc] using hScaled
+
+theorem logarithmicCvSPoleEvenPositiveModeMatrix_energy
+    {κ : Type*} [Fintype κ]
+    (c : ℝ) (mode : κ → ℤ) (x : κ → ℝ) :
+    finiteMatrixQuadraticEnergy
+        (logarithmicCvSPoleEvenPositiveModeMatrix c mode) x =
+      2 * logarithmicCvSPoleScale c *
+        (∑ i, logarithmicCvSPoleEvenWeight c (mode i) * x i) ^ 2 := by
+  rw [logarithmicCvSPoleEvenPositiveModeMatrix_eq_rankOne]
+  exact finiteMatrixQuadraticEnergy_rankOne
+    (2 * logarithmicCvSPoleScale c)
+    (fun i => logarithmicCvSPoleEvenWeight c (mode i)) x
+
+theorem logarithmicCvSPoleOddPositiveModeMatrix_energy
+    {κ : Type*} [Fintype κ]
+    (c : ℝ) (mode : κ → ℤ) (x : κ → ℝ) :
+    finiteMatrixQuadraticEnergy
+        (logarithmicCvSPoleOddPositiveModeMatrix c mode) x =
+      -(2 * logarithmicCvSPoleScale c) *
+        (∑ i, logarithmicCvSPoleOddWeight c (mode i) * x i) ^ 2 := by
+  rw [logarithmicCvSPoleOddPositiveModeMatrix_eq_rankOne]
+  exact finiteMatrixQuadraticEnergy_rankOne
+    (-(2 * logarithmicCvSPoleScale c))
+    (fun i => logarithmicCvSPoleOddWeight c (mode i)) x
+
+theorem logarithmicCvSPoleEvenPositiveModeMatrix_abs_energy_le
+    {κ : Type*} [Fintype κ]
+    (c : ℝ) (mode : κ → ℤ) (x : κ → ℝ) :
+    |finiteMatrixQuadraticEnergy
+        (logarithmicCvSPoleEvenPositiveModeMatrix c mode) x| ≤
+      |2 * logarithmicCvSPoleScale c| *
+        (∑ i, logarithmicCvSPoleEvenWeight c (mode i) ^ 2) *
+          finiteVectorEuclideanNormSq x := by
+  rw [logarithmicCvSPoleEvenPositiveModeMatrix_eq_rankOne]
+  exact finiteMatrixQuadraticEnergy_rankOne_abs_le
+    (2 * logarithmicCvSPoleScale c)
+    (fun i => logarithmicCvSPoleEvenWeight c (mode i)) x
+
+theorem logarithmicCvSPoleOddPositiveModeMatrix_abs_energy_le
+    {κ : Type*} [Fintype κ]
+    (c : ℝ) (mode : κ → ℤ) (x : κ → ℝ) :
+    |finiteMatrixQuadraticEnergy
+        (logarithmicCvSPoleOddPositiveModeMatrix c mode) x| ≤
+      |2 * logarithmicCvSPoleScale c| *
+        (∑ i, logarithmicCvSPoleOddWeight c (mode i) ^ 2) *
+          finiteVectorEuclideanNormSq x := by
+  rw [logarithmicCvSPoleOddPositiveModeMatrix_eq_rankOne]
+  simpa only [abs_neg] using
+    finiteMatrixQuadraticEnergy_rankOne_abs_le
+      (-(2 * logarithmicCvSPoleScale c))
+      (fun i => logarithmicCvSPoleOddWeight c (mode i)) x
+
+theorem logarithmicCvSBuilderEvenPositiveModePoleError_abs_le
+    {ι κ : Type*} [Fintype ι] [Fintype κ] [DecidableEq κ]
+    (c : ℝ) (location base : ι → ℝ)
+    (mode : κ → ℤ) (x : κ → ℝ) :
+    |finiteMatrixQuadraticEnergy
+        (logarithmicCvSBuilderEvenPositiveModeErrorMatrix
+          c location base mode 0) x| ≤
+      |2 * logarithmicCvSPoleScale c| *
+        (∑ i, logarithmicCvSPoleEvenWeight c (mode i) ^ 2) *
+          finiteVectorEuclideanNormSq x := by
+  simpa [logarithmicCvSBuilderEvenPositiveModeErrorMatrix] using
+    logarithmicCvSPoleEvenPositiveModeMatrix_abs_energy_le c mode x
+
+theorem logarithmicCvSBuilderOddPositiveModePoleError_abs_le
+    {ι κ : Type*} [Fintype ι] [Fintype κ] [DecidableEq κ]
+    (c : ℝ) (location base : ι → ℝ)
+    (mode : κ → ℤ) (x : κ → ℝ) :
+    |finiteMatrixQuadraticEnergy
+        (logarithmicCvSBuilderOddPositiveModeErrorMatrix
+          c location base mode 0) x| ≤
+      |2 * logarithmicCvSPoleScale c| *
+        (∑ i, logarithmicCvSPoleOddWeight c (mode i) ^ 2) *
+          finiteVectorEuclideanNormSq x := by
+  simpa [logarithmicCvSBuilderOddPositiveModeErrorMatrix] using
+    logarithmicCvSPoleOddPositiveModeMatrix_abs_energy_le c mode x
 end RiemannCvs.V23BoundaryWeylMainline
