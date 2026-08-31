@@ -2266,15 +2266,27 @@ are:
 * `logarithmicCvSBuilderEvenMatrix_eq_evenParityMatrix`;
 * `logarithmicCvSBuilderOddMatrix_eq_oddParityMatrix`.
 
-Thus the remaining operator bridge starts after the full centered matrix and
-its parity compression: identify the shell coordinate maps with the certified
-finite row/column bands, prove that the resulting parity forms dominate the
-displayed Euclidean coercive floors, and identify their block-diagonal shell
-energies with the recursive-core energy sum.  The finite prime loop,
-Archimedean symbol and diagonal formulas, signed-integer restriction, parity
-compression, endpoint deletion, rational pole parameters, subtraction signs,
-convergence, reflection, and displacement algebra no longer belong to those
-open steps.
+The separated newest channel is now exact.  Writing `B=K/2`, Lean proves that
+`Fin B` enumerates exactly `(B,2B]` and `Fin (4B)` enumerates exactly
+`(4B,8B]`, embeds both into the positive modes of the `8B` parity matrix, and
+identifies the resulting even and odd rectangular builder restrictions.  The
+six new theorem interfaces are:
+
+* `exists_historicalBandMode_iff`;
+* `exists_newestShellMode_iff`;
+* `positiveIntegerMode_historicalBandIndex`;
+* `positiveIntegerMode_newestShellIndex`;
+* `logarithmicCvSBuilderEvenNewestBand_eq_evenParityRestriction`;
+* `logarithmicCvSBuilderOddNewestBand_eq_oddParityRestriction`.
+
+Thus the remaining operator bridge starts after the full centered matrix, its
+parity compression, and the certified finite row/column coordinates: prove
+that the resulting parity forms dominate the displayed Euclidean coercive
+floors and identify their block-diagonal shell energies with the recursive-core
+energy sum.  The finite prime loop, Archimedean symbol and diagonal formulas,
+signed-integer restriction, parity compression, band restriction, endpoint
+deletion, rational pole parameters, subtraction signs, convergence,
+reflection, and displacement algebra no longer belong to those open steps.
 
 The composite phase conditions are also symbolic now.  For two strict
 interior locations, Lean proves the pair-difference half phase lies in

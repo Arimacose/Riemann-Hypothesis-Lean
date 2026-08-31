@@ -521,6 +521,48 @@ def certify(
                 "RiemannCvs.CombinedSymbolDyadicL2."
                 "logarithmicCvSBuilderOddMatrix_eq_oddParityMatrix"
             ),
+            "historical_band_mode": (
+                "RiemannCvs.CombinedSymbolDyadicL2.historicalBandMode"
+            ),
+            "newest_shell_mode": (
+                "RiemannCvs.CombinedSymbolDyadicL2.newestShellMode"
+            ),
+            "historical_band_exhaustion": (
+                "RiemannCvs.CombinedSymbolDyadicL2.exists_historicalBandMode_iff"
+            ),
+            "newest_shell_exhaustion": (
+                "RiemannCvs.CombinedSymbolDyadicL2.exists_newestShellMode_iff"
+            ),
+            "historical_band_index": (
+                "RiemannCvs.CombinedSymbolDyadicL2.historicalBandIndex"
+            ),
+            "newest_shell_index": (
+                "RiemannCvs.CombinedSymbolDyadicL2.newestShellIndex"
+            ),
+            "historical_band_index_mode": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "positiveIntegerMode_historicalBandIndex"
+            ),
+            "newest_shell_index_mode": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "positiveIntegerMode_newestShellIndex"
+            ),
+            "finite_builder_even_newest_band": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "logarithmicCvSBuilderEvenNewestBand"
+            ),
+            "finite_builder_odd_newest_band": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "logarithmicCvSBuilderOddNewestBand"
+            ),
+            "finite_builder_even_newest_band_identification": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "logarithmicCvSBuilderEvenNewestBand_eq_evenParityRestriction"
+            ),
+            "finite_builder_odd_newest_band_identification": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "logarithmicCvSBuilderOddNewestBand_eq_oddParityRestriction"
+            ),
             "cutoff_endpoint_zero": (
                 "RiemannCvs.CombinedSymbolDyadicL2.logarithmicPrimeEndpoint_term_zero"
             ),

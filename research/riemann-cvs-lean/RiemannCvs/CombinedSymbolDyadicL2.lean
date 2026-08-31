@@ -39,10 +39,10 @@ There are eight layers.
    doubled-shell identity supplies the one-half transport used by the recursive
    channel envelope.
 
-The source-specific analytic identification of the concrete Archimedean
-matrix entries and the affine prefix constants remains an explicit input.  The
-finite prime entrywise builder is identified exactly below.  No numerical
-certificate is promoted to a Lean theorem here.
+The concrete source builder, its orthonormal parity compression, and the
+newest separated row/column bands are identified exactly below.  The remaining
+operator inputs are the coercive form floors and the recursive shell-energy
+identification.  No numerical certificate is promoted to a Lean theorem here.
 -/
 
 namespace RiemannCvs.CombinedSymbolDyadicL2
@@ -1299,6 +1299,119 @@ theorem logarithmicCvSBuilderOddMatrix_eq_oddParityMatrix
   simp [logarithmicCvSBuilderOddMatrix,
     CvSParityDisplacement.oddParityMatrix,
     logarithmicCvSBuilderEntry_eq_cutoffFreeKernel]
+
+/-!
+### Exact newest-band coordinates
+
+Write `B = K / 2` in the notation of the scalar certificate.  The historical
+rows are precisely the `B` positive modes in `(B, 2B]`, while the newest
+columns are the `4B` positive modes in `(4B, 8B]`.  The following finite
+coordinates exhaust those intervals and restrict the literal builder parity
+matrices to exactly that rectangular channel.
+-/
+noncomputable def historicalBandMode (B : ℕ) (i : Fin B) : ℕ :=
+  B + 1 + (i : ℕ)
+
+noncomputable def newestShellMode (B : ℕ) (j : Fin (4 * B)) : ℕ :=
+  4 * B + 1 + (j : ℕ)
+
+theorem exists_historicalBandMode_iff
+    (B n : ℕ) :
+    (∃ i : Fin B, historicalBandMode B i = n) ↔
+      B < n ∧ n ≤ 2 * B := by
+  constructor
+  · rintro ⟨i, rfl⟩
+    simp only [historicalBandMode]
+    omega
+  · rintro ⟨hLower, hUpper⟩
+    let i : Fin B := ⟨n - (B + 1), by omega⟩
+    refine ⟨i, ?_⟩
+    simp only [historicalBandMode, i]
+    omega
+
+theorem exists_newestShellMode_iff
+    (B n : ℕ) :
+    (∃ j : Fin (4 * B), newestShellMode B j = n) ↔
+      4 * B < n ∧ n ≤ 8 * B := by
+  constructor
+  · rintro ⟨j, rfl⟩
+    simp only [newestShellMode]
+    omega
+  · rintro ⟨hLower, hUpper⟩
+    let j : Fin (4 * B) := ⟨n - (4 * B + 1), by omega⟩
+    refine ⟨j, ?_⟩
+    simp only [newestShellMode, j]
+    omega
+
+noncomputable def historicalBandIndex
+    (B : ℕ) (i : Fin B) : Fin (8 * B) :=
+  ⟨B + (i : ℕ), by omega⟩
+
+noncomputable def newestShellIndex
+    (B : ℕ) (j : Fin (4 * B)) : Fin (8 * B) :=
+  ⟨4 * B + (j : ℕ), by omega⟩
+
+theorem positiveIntegerMode_historicalBandIndex
+    (B : ℕ) (i : Fin B) :
+    positiveIntegerMode (historicalBandIndex B i) =
+      (historicalBandMode B i : ℤ) := by
+  simp [positiveIntegerMode, historicalBandIndex, historicalBandMode]
+  ring
+
+theorem positiveIntegerMode_newestShellIndex
+    (B : ℕ) (j : Fin (4 * B)) :
+    positiveIntegerMode (newestShellIndex B j) =
+      (newestShellMode B j : ℤ) := by
+  simp [positiveIntegerMode, newestShellIndex, newestShellMode]
+  ring
+
+noncomputable def logarithmicCvSBuilderEvenNewestBand
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (B : ℕ) :
+    Matrix (Fin B) (Fin (4 * B)) ℝ :=
+  fun i j =>
+    logarithmicCvSBuilderEvenMatrix c location base (8 * B)
+      (some (historicalBandIndex B i)) (some (newestShellIndex B j))
+
+noncomputable def logarithmicCvSBuilderOddNewestBand
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (B : ℕ) :
+    Matrix (Fin B) (Fin (4 * B)) ℝ :=
+  fun i j =>
+    logarithmicCvSBuilderOddMatrix c location base (8 * B)
+      (historicalBandIndex B i) (newestShellIndex B j)
+
+theorem logarithmicCvSBuilderEvenNewestBand_eq_evenParityRestriction
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (B : ℕ) :
+    logarithmicCvSBuilderEvenNewestBand c location base B =
+      fun i j =>
+        CvSParityDisplacement.evenParityMatrix
+          (logarithmicCutoffFreeKernel
+            (logarithmicArchimedeanSymbol c)
+            (logarithmicArchimedeanDiagonal c) c location base)
+          (fun k : Fin (8 * B) => (positiveIntegerMode k : ℝ))
+          (some (historicalBandIndex B i)) (some (newestShellIndex B j)) := by
+  ext i j
+  change logarithmicCvSBuilderEvenMatrix c location base (8 * B)
+      (some (historicalBandIndex B i)) (some (newestShellIndex B j)) = _
+  rw [logarithmicCvSBuilderEvenMatrix_eq_evenParityMatrix]
+
+theorem logarithmicCvSBuilderOddNewestBand_eq_oddParityRestriction
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (B : ℕ) :
+    logarithmicCvSBuilderOddNewestBand c location base B =
+      fun i j =>
+        CvSParityDisplacement.oddParityMatrix
+          (logarithmicCutoffFreeKernel
+            (logarithmicArchimedeanSymbol c)
+            (logarithmicArchimedeanDiagonal c) c location base)
+          (fun k : Fin (8 * B) => (positiveIntegerMode k : ℝ))
+          (historicalBandIndex B i) (newestShellIndex B j) := by
+  ext i j
+  change logarithmicCvSBuilderOddMatrix c location base (8 * B)
+      (historicalBandIndex B i) (newestShellIndex B j) = _
+  rw [logarithmicCvSBuilderOddMatrix_eq_oddParityMatrix]
 
 /-- Every strict interior event `1 < q < c` has a positive half-angle sine,
 so its finite geometric sums are nonresonant without numerical phase testing. -/

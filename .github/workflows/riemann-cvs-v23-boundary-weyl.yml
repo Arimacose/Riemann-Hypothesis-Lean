@@ -224,6 +224,12 @@ jobs:
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicCvSBuilderMatrix_eq_kernelRestriction
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicCvSBuilderEvenMatrix_eq_evenParityMatrix
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicCvSBuilderOddMatrix_eq_oddParityMatrix
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.exists_historicalBandMode_iff
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.exists_newestShellMode_iff
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.positiveIntegerMode_historicalBandIndex
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.positiveIntegerMode_newestShellIndex
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicCvSBuilderEvenNewestBand_eq_evenParityRestriction
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicCvSBuilderOddNewestBand_eq_oddParityRestriction
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicPrimePhase_half_sin_pos
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.abs_shifted_logarithmicPrime_sine_sum_le
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.abs_shifted_logarithmicPrime_cosine_sum_le

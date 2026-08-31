@@ -266,8 +266,11 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   the proved reflection laws, and identifies every finite matrix entry with
   the exact cutoff-free kernel restriction.  Its literal finite cosine and sine
   matrices are now proved equal to the existing orthonormal even and odd parity
-  compressions.  The remaining operator bridge is the shell coordinate map,
-  coercive-floor domination, and recursive shell-energy identification.
+  compressions.  With `B=K/2`, `Fin B` and `Fin (4B)` are now proved to exhaust
+  exactly the historical `(B,2B]` rows and newest `(4B,8B]` columns, and both
+  rectangular builder restrictions are identified with the corresponding
+  parity submatrices.  The remaining operator bridge is coercive-floor
+  domination and recursive shell-energy identification.
   The combined-symbol certificate
   now also rests on a Lean proof of the finite nonresonant geometric-sum bound,
   including arbitrary starting indices and its sine/cosine projections; Arb
@@ -281,8 +284,9 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   doubled, pair-difference, and pair-sum denominators symbolically nonzero.
   Arb now supplies their rigorous magnitudes rather than the nonresonance
   fact.  The analytic CvS digamma/geometric value and diagonal, the finite
-  prime and rational-pole branches, the full sign assembly, and the finite
-  parity compression are now source-identified.  The certificate
+  prime and rational-pole branches, the full sign assembly, the finite parity
+  compression, and the newest separated mode bands are now source-identified.
+  The certificate
   now proves the scalar weighted square budget `<1/N` for every `N>=1920`.
   Fourteen further Lean adapters preserve the concrete `1/pi` Fourier scale,
   turn the old-band weighted budget into an ordinary square sum, close the
@@ -295,8 +299,8 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   `0.0003953180565250889...`.  Hence this analytic route reduces the newest
   channel below that threshold to the eight finite cutoffs
   `1920,3840,7680,15360,30720,61440,122880,245760`.  This conclusion remains
-  conditional on the listed concrete Loewner-symbol, parity-compression, and
-  coercive-floor identifications.  The source-specific proof of the
+  conditional on the listed coercive-floor and recursive shell-energy
+  identifications.  The source-specific proof of the
   joint Loewner/pole amplitude bounds, the identification of separated band
   energies with the scalar shell decomposition, and a uniform coefficient
   partial-sum bound strictly below one remain analytic inputs.  The scalar
