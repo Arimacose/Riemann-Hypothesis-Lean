@@ -2076,3 +2076,56 @@ interfaces are `norm_geometric_sum_le_inv_abs_sin_half`,
 actual single, doubled, pair-difference, and pair-sum phase denominator is
 strictly positive; the universal inequality itself is no longer an external
 mathematical input.
+
+The prime source is now concrete at the Lean level rather than represented by
+arbitrary `weight` and `phase` functions.  The definitions are
+
+```text
+logarithmicPrimeWeight(q,p) = log(p)/sqrt(q),
+logarithmicPrimePhase(c,q) = 2*pi*log(q)/log(c),
+finiteLogarithmicPrimeSymbol(c)(x)
+  = sum_i logarithmicPrimeWeight(q_i,p_i)
+      * sin(logarithmicPrimePhase(c,q_i)*x).
+```
+
+Lean proves this finite symbol is odd, combines it with the Archimedean odd
+symbol, and establishes the complete diagonal-aware identity for its exact
+`1/pi` normalized Loewner kernel.  For every `c>1`, the endpoint phase is
+exactly `2*pi`, so the entire weighted cutoff event vanishes at natural modes.
+For every strict interior event `1<q<c`, monotonicity of the real logarithm
+puts the half phase strictly between `0` and `pi`; hence its sine is positive
+and the single-phase sine/cosine geometric bounds apply without a numerical
+nonresonance premise.  The nine theorem interfaces are:
+
+* `finiteLogarithmicPrimeSymbol_odd`;
+* `logarithmicCombinedSymbol_odd`;
+* `oddDifferenceKernel_fourierNormalized_logarithmicCombined`;
+* `logarithmicPrimePhase_self`;
+* `logarithmicPrimeEndpoint_sine_zero`;
+* `logarithmicPrimeEndpoint_term_zero`;
+* `logarithmicPrimePhase_half_sin_pos`;
+* `abs_shifted_logarithmicPrime_sine_sum_le`;
+* `abs_shifted_logarithmicPrime_cosine_sum_le`.
+
+The genuinely open source step is now narrower: prove that the concrete CvS
+Archimedean and prime matrix entries and their diagonal values equal this
+packaged normalized kernel, then restrict it to the finite parity shell bands.
+
+The composite phase conditions are also symbolic now.  For two strict
+interior locations, Lean proves the pair-difference half phase lies in
+`(-pi,0)`.  For a pair sum, the sine is positive when `q*r<c`, negative when
+`c<q*r<c^2`, so its sole possible resonance is `q*r=c`; the doubled phase is
+the specialization `q^2=c`.  The tracked cutoff-13 data are represented by
+
+```text
+locations = [2,3,4,5,7,8,9,11],
+bases     = [2,3,2,5,7,2,3,11].
+```
+
+Finite `Fin 8` case proofs establish `1<q<13`, injectivity of the location
+list, and `q_i*q_j != 13` for all 64 pairs.  The aggregate theorem
+`c13PrimePhase_all_nonresonant` therefore proves every denominator class used
+by the square expansion nonzero: single, doubled, pair-difference, and
+pair-sum.  Arb continues to enclose their absolute magnitudes to obtain the
+explicit constant `geometricError`; it no longer carries the logical burden
+of proving phase nonresonance.

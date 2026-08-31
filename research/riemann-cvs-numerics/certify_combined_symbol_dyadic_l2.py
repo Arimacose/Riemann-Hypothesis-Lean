@@ -20,9 +20,12 @@ Arb is used for every transcendental value and strict comparison.
 The output is a rigorous constant-composition certificate.  Its proof-level
 use remains conditional on the Lean/source identification connecting the
 concrete CvS symbol to the finite trigonometric polynomial.  The companion
-Lean module now formalizes the finite geometric-sum inequality itself, as well
-as the Abel, dyadic, endpoint-monotonicity, and rectangular-Cauchy adapters;
-this script interval-certifies nonresonance of every concrete phase.
+Lean module now formalizes the finite geometric-sum inequality itself, the
+exact logarithmic prime weights and phases, and symbolic nonresonance of every
+single, doubled, pair-difference, and pair-sum phase in the tracked cutoff-13
+event list, as well as the Abel, dyadic, endpoint-monotonicity, and
+rectangular-Cauchy adapters.  This script independently interval-certifies the
+positive denominator magnitudes needed for the numerical constants below.
 """
 
 from __future__ import annotations
@@ -317,6 +320,30 @@ def certify(
         "combined_symbol": (
             "F_n=S_n+sum_(q<c) log(p)/sqrt(q)*sin(2*pi*n*log(q)/log(c))"
         ),
+        "lean_concrete_source_formula": {
+            "prime_symbol": (
+                "RiemannCvs.CombinedSymbolDyadicL2.finiteLogarithmicPrimeSymbol"
+            ),
+            "combined_symbol": (
+                "RiemannCvs.CombinedSymbolDyadicL2.logarithmicCombinedSymbol"
+            ),
+            "normalized_complete_kernel": (
+                "RiemannCvs.CombinedSymbolDyadicL2."
+                "oddDifferenceKernel_fourierNormalized_logarithmicCombined"
+            ),
+            "cutoff_endpoint_zero": (
+                "RiemannCvs.CombinedSymbolDyadicL2.logarithmicPrimeEndpoint_term_zero"
+            ),
+            "strict_interior_single_phase_nonresonance": (
+                "RiemannCvs.CombinedSymbolDyadicL2.logarithmicPrimePhase_half_sin_pos"
+            ),
+            "cutoff_13_symbol": (
+                "RiemannCvs.CombinedSymbolDyadicL2.c13FiniteLogarithmicPrimeSymbol"
+            ),
+            "cutoff_13_all_phase_nonresonance": (
+                "RiemannCvs.CombinedSymbolDyadicL2.c13PrimePhase_all_nonresonant"
+            ),
+        },
         "geometric_sum_bound": {
             "statement": ("abs(sum_{n=a+1}^{b} exp(i*n*phi)) <= 1/abs(sin(phi/2))"),
             "lean_complex_interface": (
@@ -332,6 +359,10 @@ def certify(
                 "abs_shifted_cosine_sum_le_inv_abs_sin_half"
             ),
             "concrete_nonresonance_interval_certified": True,
+            "concrete_denominator_magnitudes_interval_certified": True,
+            "lean_cutoff_13_all_phase_nonresonance": (
+                "RiemannCvs.CombinedSymbolDyadicL2.c13PrimePhase_all_nonresonant"
+            ),
         },
         "archimedean_input": (f"abs(S_n-pi/4) <= ({centered_decay})/n"),
         "affine_prefix_bound": (

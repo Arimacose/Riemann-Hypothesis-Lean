@@ -179,6 +179,28 @@ jobs:
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.norm_shifted_exp_sum_le_inv_abs_sin_half
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.abs_shifted_sine_sum_le_inv_abs_sin_half
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.abs_shifted_cosine_sum_le_inv_abs_sin_half
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.finiteLogarithmicPrimeSymbol_odd
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicCombinedSymbol_odd
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.oddDifferenceKernel_fourierNormalized_logarithmicCombined
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicPrimePhase_self
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicPrimeEndpoint_sine_zero
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicPrimeEndpoint_term_zero
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicPrimePhase_half_sin_pos
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.abs_shifted_logarithmicPrime_sine_sum_le
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.abs_shifted_logarithmicPrime_cosine_sum_le
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicPrimePhase_sub_half_sin_neg
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicPrimePhase_add_half_sin_pos_of_mul_lt
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicPrimePhase_add_half_sin_neg_of_cutoff_lt_mul
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicPrimePhase_add_half_sin_ne_zero
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicPrimePhase_sin_ne_zero
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.c13PrimePowerLocation_bounds
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.c13PrimePowerLocation_injective
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.c13PrimePowerLocation_mul_ne_thirteen
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.c13PrimePhase_half_sin_pos
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.c13PrimePhase_sin_ne_zero
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.c13PrimePhase_add_half_sin_ne_zero
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.c13PrimePhase_sub_half_sin_ne_zero
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.c13PrimePhase_all_nonresonant
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.evenWeightedNumerator_abs_le
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.oddWeightedNumerator_abs_le
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.oddDifferenceKernel_evenParity_abs_le

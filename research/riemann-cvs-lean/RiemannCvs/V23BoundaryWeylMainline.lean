@@ -248,7 +248,18 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   by their restriction to the stated parity shell bands.  The combined-symbol certificate
   now also rests on a Lean proof of the finite nonresonant geometric-sum bound,
   including arbitrary starting indices and its sine/cosine projections; Arb
-  retains only the concrete phase-nonresonance checks.  The certificate
+  retains the composite doubled/difference/sum phase checks.  Nine further
+  Lean theorems now instantiate the prime polynomial with the exact
+  `log(p)/sqrt(q)` weights and `2*pi*log(q)/log(c)` phases, package its complete
+  normalized combined Loewner kernel, prove exact cutoff-event deletion, and
+  prove strict-interior single-phase nonresonance from `1<q<c`.  Thirteen more
+  Lean theorems isolate the sole pair-sum resonance `q*r=c`, enumerate the
+  tracked cutoff-13 locations `2,3,4,5,7,8,9,11`, and prove all single,
+  doubled, pair-difference, and pair-sum denominators symbolically nonzero.
+  Arb now supplies their rigorous magnitudes rather than the nonresonance
+  fact.  The remaining
+  source boundary is the analytic CvS matrix-entry/diagonal identification,
+  not the prime formula itself.  The certificate
   now proves the scalar weighted square budget `<1/N` for every `N>=1920`.
   Fourteen further Lean adapters preserve the concrete `1/pi` Fourier scale,
   turn the old-band weighted budget into an ordinary square sum, close the

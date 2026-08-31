@@ -312,6 +312,408 @@ theorem abs_shifted_cosine_sum_le_inv_abs_sin_half
     (norm_shifted_exp_sum_le_inv_abs_sin_half
       phase start count hPhase)
 
+/-!
+## Concrete logarithmic prime-power source formula
+
+The abstract finite sine polynomial can now be instantiated with the exact
+weights and phases used by the CvS prime source.  These definitions and
+identities expose the concrete formula to the kernel and certificate layers;
+the analytic equality with the original CvS matrix remains a separate source
+identification.
+-/
+
+/-- The exact von-Mangoldt weight attached to a prime-power location `q=p^k`. -/
+noncomputable def logarithmicPrimeWeight (q p : ℝ) : ℝ :=
+  Real.log p / Real.sqrt q
+
+/-- The Fourier phase of the prime-power event at location `q` for cutoff `c`. -/
+noncomputable def logarithmicPrimePhase (c q : ℝ) : ℝ :=
+  2 * Real.pi * Real.log q / Real.log c
+
+/-- The concrete finite prime-power sine symbol used by the CvS certificate. -/
+noncomputable def finiteLogarithmicPrimeSymbol
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (x : ℝ) : ℝ :=
+  finiteSineSymbol
+    (fun i => logarithmicPrimeWeight (location i) (base i))
+    (fun i => logarithmicPrimePhase c (location i)) x
+
+/-- The concrete logarithmic prime-power symbol is odd. -/
+theorem finiteLogarithmicPrimeSymbol_odd
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) :
+    Function.Odd (finiteLogarithmicPrimeSymbol c location base) := by
+  exact finiteSineSymbol_odd
+    (fun i => logarithmicPrimeWeight (location i) (base i))
+    (fun i => logarithmicPrimePhase c (location i))
+
+/-- The source-level combined symbol with the concrete logarithmic prime
+weights and phases exposed. -/
+noncomputable def logarithmicCombinedSymbol
+    {ι : Type*} [Fintype ι]
+    (arch : ℝ → ℝ) (c : ℝ) (location base : ι → ℝ) (x : ℝ) : ℝ :=
+  combinedSineSymbol arch
+    (fun i => logarithmicPrimeWeight (location i) (base i))
+    (fun i => logarithmicPrimePhase c (location i)) x
+
+/-- An odd Archimedean symbol plus the concrete logarithmic prime symbol is
+odd. -/
+theorem logarithmicCombinedSymbol_odd
+    {ι : Type*} [Fintype ι]
+    (arch : ℝ → ℝ) (c : ℝ) (location base : ι → ℝ)
+    (hArch : Function.Odd arch) :
+    Function.Odd (logarithmicCombinedSymbol arch c location base) := by
+  exact combinedSineSymbol_odd arch
+    (fun i => logarithmicPrimeWeight (location i) (base i))
+    (fun i => logarithmicPrimePhase c (location i)) hArch
+
+/-- Exact complete-kernel identity for the concrete logarithmic combined
+symbol, including supplied diagonal values and the Fourier `1/pi` scale. -/
+theorem oddDifferenceKernel_fourierNormalized_logarithmicCombined
+    {ι : Type*} [Fintype ι]
+    (arch archDiagonal : ℝ → ℝ) (c : ℝ)
+    (location base : ι → ℝ) (primeDiagonal : ℝ → ℝ) (p q : ℝ) :
+    CvSParityDisplacement.oddDifferenceKernel
+        (fourierNormalizedSymbol
+          (logarithmicCombinedSymbol arch c location base))
+        (fourierNormalizedSymbol
+          (fun x => archDiagonal x + primeDiagonal x)) p q =
+      (1 / Real.pi) *
+        (CvSParityDisplacement.oddDifferenceKernel arch archDiagonal p q +
+          CvSParityDisplacement.oddDifferenceKernel
+            (finiteLogarithmicPrimeSymbol c location base)
+            primeDiagonal p q) := by
+  change CvSParityDisplacement.oddDifferenceKernel
+      (fourierNormalizedSymbol
+        (combinedSineSymbol arch
+          (fun i => logarithmicPrimeWeight (location i) (base i))
+          (fun i => logarithmicPrimePhase c (location i))))
+      (fourierNormalizedSymbol
+        (fun x => archDiagonal x + primeDiagonal x)) p q =
+    (1 / Real.pi) *
+      (CvSParityDisplacement.oddDifferenceKernel arch archDiagonal p q +
+        CvSParityDisplacement.oddDifferenceKernel
+          (finiteSineSymbol
+            (fun i => logarithmicPrimeWeight (location i) (base i))
+            (fun i => logarithmicPrimePhase c (location i)))
+          primeDiagonal p q)
+  exact oddDifferenceKernel_fourierNormalized_combined arch archDiagonal
+    (fun i => logarithmicPrimeWeight (location i) (base i))
+    (fun i => logarithmicPrimePhase c (location i))
+    primeDiagonal p q
+
+/-- The event at the cutoff itself has phase exactly `2*pi`. -/
+theorem logarithmicPrimePhase_self
+    (c : ℝ) (hc : 1 < c) :
+    logarithmicPrimePhase c c = 2 * Real.pi := by
+  have hcPos : 0 < c := lt_trans zero_lt_one hc
+  have hcNe : c ≠ 1 := ne_of_gt hc
+  have hLog : Real.log c ≠ 0 :=
+    Real.log_ne_zero_of_pos_of_ne_one hcPos hcNe
+  unfold logarithmicPrimePhase
+  field_simp
+
+/-- Consequently the cutoff event vanishes on every natural Fourier mode. -/
+theorem logarithmicPrimeEndpoint_sine_zero
+    (c : ℝ) (n : ℕ) (hc : 1 < c) :
+    Real.sin (logarithmicPrimePhase c c * (n : ℝ)) = 0 := by
+  rw [logarithmicPrimePhase_self c hc]
+  exact sin_two_pi_nat n
+
+/-- The complete weighted endpoint event is therefore exactly zero. -/
+theorem logarithmicPrimeEndpoint_term_zero
+    (c p : ℝ) (n : ℕ) (hc : 1 < c) :
+    logarithmicPrimeWeight c p *
+        Real.sin (logarithmicPrimePhase c c * (n : ℝ)) = 0 := by
+  rw [logarithmicPrimeEndpoint_sine_zero c n hc]
+  ring
+
+/-- Every strict interior event `1 < q < c` has a positive half-angle sine,
+so its finite geometric sums are nonresonant without numerical phase testing. -/
+theorem logarithmicPrimePhase_half_sin_pos
+    (c q : ℝ) (hc : 1 < c) (hq : 1 < q) (hqc : q < c) :
+    0 < Real.sin (logarithmicPrimePhase c q / 2) := by
+  have hcPos : 0 < c := lt_trans zero_lt_one hc
+  have hqPos : 0 < q := lt_trans zero_lt_one hq
+  have hLogC : 0 < Real.log c := Real.log_pos hc
+  have hLogQ : 0 < Real.log q := Real.log_pos hq
+  have hLogLt : Real.log q < Real.log c :=
+    Real.strictMonoOn_log hqPos hcPos hqc
+  have hRatioPos : 0 < Real.log q / Real.log c :=
+    div_pos hLogQ hLogC
+  have hRatioLt : Real.log q / Real.log c < 1 :=
+    (div_lt_one hLogC).2 hLogLt
+  rw [show logarithmicPrimePhase c q / 2 =
+      Real.pi * (Real.log q / Real.log c) by
+    unfold logarithmicPrimePhase
+    ring]
+  exact Real.sin_pos_of_pos_of_lt_pi
+    (mul_pos Real.pi_pos hRatioPos)
+    (by nlinarith [Real.pi_pos])
+
+/-- Concrete shifted sine sums for one strict interior prime-power event obey
+the exact reciprocal half-angle bound consumed by the Arb certificate. -/
+theorem abs_shifted_logarithmicPrime_sine_sum_le
+    (c q : ℝ) (start count : ℕ)
+    (hc : 1 < c) (hq : 1 < q) (hqc : q < c) :
+    |∑ j ∈ Finset.range count,
+        Real.sin (((start + j : ℕ) : ℝ) * logarithmicPrimePhase c q)| ≤
+      1 / |Real.sin (logarithmicPrimePhase c q / 2)| := by
+  exact abs_shifted_sine_sum_le_inv_abs_sin_half
+    (logarithmicPrimePhase c q) start count
+    (ne_of_gt (logarithmicPrimePhase_half_sin_pos c q hc hq hqc))
+
+/-- The parallel concrete cosine-sum bound for one strict interior event. -/
+theorem abs_shifted_logarithmicPrime_cosine_sum_le
+    (c q : ℝ) (start count : ℕ)
+    (hc : 1 < c) (hq : 1 < q) (hqc : q < c) :
+    |∑ j ∈ Finset.range count,
+        Real.cos (((start + j : ℕ) : ℝ) * logarithmicPrimePhase c q)| ≤
+      1 / |Real.sin (logarithmicPrimePhase c q / 2)| := by
+  exact abs_shifted_cosine_sum_le_inv_abs_sin_half
+    (logarithmicPrimePhase c q) start count
+    (ne_of_gt (logarithmicPrimePhase_half_sin_pos c q hc hq hqc))
+
+/-!
+### Composite phases and the tracked cutoff-13 event list
+
+The square expansion also contains doubled, pair-difference, and pair-sum
+phases.  Their only possible pair-sum resonance is `q*r=c`.  The following
+generic lemmas isolate that condition, then a finite `Fin 8` enumeration proves
+all actual cutoff-13 phase denominators nonzero in Lean.
+-/
+
+/-- Distinct strict-interior logarithmic phases have a negative, nonzero
+half-difference sine. -/
+theorem logarithmicPrimePhase_sub_half_sin_neg
+    (c q r : ℝ) (hc : 1 < c) (hq : 1 < q) (hqr : q < r) (hrc : r < c) :
+    Real.sin
+        ((logarithmicPrimePhase c q - logarithmicPrimePhase c r) / 2) < 0 := by
+  have hcPos : 0 < c := lt_trans zero_lt_one hc
+  have hqPos : 0 < q := lt_trans zero_lt_one hq
+  have hrPos : 0 < r := lt_trans hqPos hqr
+  have hLogC : 0 < Real.log c := Real.log_pos hc
+  have hLogQ : 0 < Real.log q := Real.log_pos hq
+  have hLogQLtR : Real.log q < Real.log r :=
+    Real.strictMonoOn_log hqPos hrPos hqr
+  have hLogRLtC : Real.log r < Real.log c :=
+    Real.strictMonoOn_log hrPos hcPos hrc
+  have hRatioNeg :
+      (Real.log q - Real.log r) / Real.log c < 0 :=
+    div_neg_of_neg_of_pos (sub_neg.mpr hLogQLtR) hLogC
+  have hRatioLower :
+      -1 < (Real.log q - Real.log r) / Real.log c := by
+    apply (lt_div_iff₀ hLogC).2
+    nlinarith
+  rw [show (logarithmicPrimePhase c q - logarithmicPrimePhase c r) / 2 =
+      Real.pi * ((Real.log q - Real.log r) / Real.log c) by
+    unfold logarithmicPrimePhase
+    ring]
+  apply Real.sin_neg_of_neg_of_neg_pi_lt
+  · exact mul_neg_of_pos_of_neg Real.pi_pos hRatioNeg
+  · have h := mul_lt_mul_of_pos_left hRatioLower Real.pi_pos
+    nlinarith
+
+/-- If the product of two strict-interior event locations remains below the
+cutoff, their half-sum phase has positive sine. -/
+theorem logarithmicPrimePhase_add_half_sin_pos_of_mul_lt
+    (c q r : ℝ) (hc : 1 < c) (hq : 1 < q) (hr : 1 < r)
+    (hMul : q * r < c) :
+    0 < Real.sin
+      ((logarithmicPrimePhase c q + logarithmicPrimePhase c r) / 2) := by
+  have hcPos : 0 < c := lt_trans zero_lt_one hc
+  have hqPos : 0 < q := lt_trans zero_lt_one hq
+  have hrPos : 0 < r := lt_trans zero_lt_one hr
+  have hLogC : 0 < Real.log c := Real.log_pos hc
+  have hLogQ : 0 < Real.log q := Real.log_pos hq
+  have hLogR : 0 < Real.log r := Real.log_pos hr
+  have hMulPos : 0 < q * r := mul_pos hqPos hrPos
+  have hLogSumLt : Real.log q + Real.log r < Real.log c := by
+    rw [← Real.log_mul (ne_of_gt hqPos) (ne_of_gt hrPos)]
+    exact Real.strictMonoOn_log hMulPos hcPos hMul
+  have hRatioPos :
+      0 < (Real.log q + Real.log r) / Real.log c :=
+    div_pos (add_pos hLogQ hLogR) hLogC
+  have hRatioLt :
+      (Real.log q + Real.log r) / Real.log c < 1 :=
+    (div_lt_one hLogC).2 hLogSumLt
+  rw [show (logarithmicPrimePhase c q + logarithmicPrimePhase c r) / 2 =
+      Real.pi * ((Real.log q + Real.log r) / Real.log c) by
+    unfold logarithmicPrimePhase
+    ring]
+  exact Real.sin_pos_of_pos_of_lt_pi
+    (mul_pos Real.pi_pos hRatioPos)
+    (by nlinarith [mul_lt_mul_of_pos_left hRatioLt Real.pi_pos])
+
+/-- If the product lies strictly between `c` and `c^2`, the half-sum phase
+lies in `(pi,2*pi)` and has negative sine. -/
+theorem logarithmicPrimePhase_add_half_sin_neg_of_cutoff_lt_mul
+    (c q r : ℝ) (hc : 1 < c) (hq : 1 < q) (hr : 1 < r)
+    (hLower : c < q * r) (hUpper : q * r < c ^ 2) :
+    Real.sin
+        ((logarithmicPrimePhase c q + logarithmicPrimePhase c r) / 2) < 0 := by
+  have hcPos : 0 < c := lt_trans zero_lt_one hc
+  have hqPos : 0 < q := lt_trans zero_lt_one hq
+  have hrPos : 0 < r := lt_trans zero_lt_one hr
+  have hMulPos : 0 < q * r := mul_pos hqPos hrPos
+  have hSqPos : 0 < c ^ 2 := sq_pos_of_pos hcPos
+  have hLogC : 0 < Real.log c := Real.log_pos hc
+  have hLogLower : Real.log c < Real.log q + Real.log r := by
+    rw [← Real.log_mul (ne_of_gt hqPos) (ne_of_gt hrPos)]
+    exact Real.strictMonoOn_log hcPos hMulPos hLower
+  have hLogUpper : Real.log q + Real.log r < 2 * Real.log c := by
+    calc
+      Real.log q + Real.log r = Real.log (q * r) := by
+        rw [Real.log_mul (ne_of_gt hqPos) (ne_of_gt hrPos)]
+      _ < Real.log (c ^ 2) :=
+        Real.strictMonoOn_log hMulPos hSqPos hUpper
+      _ = 2 * Real.log c := by norm_num [Real.log_pow]
+  have hRatioLower :
+      1 < (Real.log q + Real.log r) / Real.log c :=
+    (lt_div_iff₀ hLogC).2 (by simpa using hLogLower)
+  have hRatioUpper :
+      (Real.log q + Real.log r) / Real.log c < 2 :=
+    (div_lt_iff₀ hLogC).2 (by simpa [mul_comm] using hLogUpper)
+  let x := Real.pi * ((Real.log q + Real.log r) / Real.log c)
+  have hxPi : Real.pi < x := by
+    dsimp [x]
+    nlinarith [mul_lt_mul_of_pos_left hRatioLower Real.pi_pos]
+  have hxTwoPi : x < 2 * Real.pi := by
+    dsimp [x]
+    nlinarith [mul_lt_mul_of_pos_left hRatioUpper Real.pi_pos]
+  have hShift : Real.sin (x - 2 * Real.pi) < 0 :=
+    Real.sin_neg_of_neg_of_neg_pi_lt (by linarith) (by linarith)
+  rw [Real.sin_sub_two_pi] at hShift
+  rw [show (logarithmicPrimePhase c q + logarithmicPrimePhase c r) / 2 = x by
+    dsimp [x]
+    unfold logarithmicPrimePhase
+    ring]
+  exact hShift
+
+/-- For strict-interior locations, exclusion of the sole resonance
+`q*r=c` proves nonresonance of every pair-sum phase. -/
+theorem logarithmicPrimePhase_add_half_sin_ne_zero
+    (c q r : ℝ) (hc : 1 < c) (hq : 1 < q) (hr : 1 < r)
+    (hqc : q < c) (hrc : r < c) (hMulNe : q * r ≠ c) :
+    Real.sin
+        ((logarithmicPrimePhase c q + logarithmicPrimePhase c r) / 2) ≠ 0 := by
+  have hcPos : 0 < c := lt_trans zero_lt_one hc
+  have hMulUpper : q * r < c ^ 2 := by
+    rw [sq]
+    exact mul_lt_mul hqc (le_of_lt hrc) (lt_trans zero_lt_one hr)
+      (le_of_lt hcPos)
+  rcases lt_or_gt_of_ne hMulNe with hMulLt | hMulGt
+  · exact ne_of_gt
+      (logarithmicPrimePhase_add_half_sin_pos_of_mul_lt
+        c q r hc hq hr hMulLt)
+  · exact ne_of_lt
+      (logarithmicPrimePhase_add_half_sin_neg_of_cutoff_lt_mul
+        c q r hc hq hr hMulGt hMulUpper)
+
+/-- The doubled phase for one event is nonresonant whenever `q^2 != c`. -/
+theorem logarithmicPrimePhase_sin_ne_zero
+    (c q : ℝ) (hc : 1 < c) (hq : 1 < q) (hqc : q < c)
+    (hSqNe : q ^ 2 ≠ c) :
+    Real.sin (logarithmicPrimePhase c q) ≠ 0 := by
+  have h := logarithmicPrimePhase_add_half_sin_ne_zero
+    c q q hc hq hq hqc hqc (by simpa [pow_two] using hSqNe)
+  rw [show (logarithmicPrimePhase c q + logarithmicPrimePhase c q) / 2 =
+      logarithmicPrimePhase c q by ring] at h
+  exact h
+
+/-- Prime-power locations strictly below the cutoff `13`. -/
+def c13PrimePowerLocation : Fin 8 → ℝ :=
+  ![2, 3, 4, 5, 7, 8, 9, 11]
+
+/-- Underlying prime at each tracked prime-power location. -/
+def c13PrimePowerBase : Fin 8 → ℝ :=
+  ![2, 3, 2, 5, 7, 2, 3, 11]
+
+/-- The exact tracked finite prime symbol at cutoff `13`. -/
+noncomputable def c13FiniteLogarithmicPrimeSymbol : ℝ → ℝ :=
+  finiteLogarithmicPrimeSymbol 13 c13PrimePowerLocation c13PrimePowerBase
+
+theorem c13PrimePowerLocation_bounds (i : Fin 8) :
+    1 < c13PrimePowerLocation i ∧ c13PrimePowerLocation i < 13 := by
+  fin_cases i <;> norm_num [c13PrimePowerLocation]
+
+theorem c13PrimePowerLocation_injective :
+    Function.Injective c13PrimePowerLocation := by
+  intro i j hij
+  fin_cases i <;> fin_cases j <;> simp_all [c13PrimePowerLocation]
+
+theorem c13PrimePowerLocation_mul_ne_thirteen (i j : Fin 8) :
+    c13PrimePowerLocation i * c13PrimePowerLocation j ≠ 13 := by
+  fin_cases i <;> fin_cases j <;> norm_num [c13PrimePowerLocation]
+
+theorem c13PrimePhase_half_sin_pos (i : Fin 8) :
+    0 < Real.sin
+      (logarithmicPrimePhase 13 (c13PrimePowerLocation i) / 2) := by
+  rcases c13PrimePowerLocation_bounds i with ⟨hiOne, hiThirteen⟩
+  exact logarithmicPrimePhase_half_sin_pos
+    13 (c13PrimePowerLocation i) (by norm_num) hiOne hiThirteen
+
+theorem c13PrimePhase_sin_ne_zero (i : Fin 8) :
+    Real.sin (logarithmicPrimePhase 13 (c13PrimePowerLocation i)) ≠ 0 := by
+  rcases c13PrimePowerLocation_bounds i with ⟨hiOne, hiThirteen⟩
+  exact logarithmicPrimePhase_sin_ne_zero
+    13 (c13PrimePowerLocation i) (by norm_num) hiOne hiThirteen
+    (by simpa [pow_two] using c13PrimePowerLocation_mul_ne_thirteen i i)
+
+theorem c13PrimePhase_add_half_sin_ne_zero (i j : Fin 8) :
+    Real.sin
+        ((logarithmicPrimePhase 13 (c13PrimePowerLocation i) +
+          logarithmicPrimePhase 13 (c13PrimePowerLocation j)) / 2) ≠ 0 := by
+  rcases c13PrimePowerLocation_bounds i with ⟨hiOne, hiThirteen⟩
+  rcases c13PrimePowerLocation_bounds j with ⟨hjOne, hjThirteen⟩
+  exact logarithmicPrimePhase_add_half_sin_ne_zero
+    13 (c13PrimePowerLocation i) (c13PrimePowerLocation j)
+    (by norm_num) hiOne hjOne hiThirteen hjThirteen
+    (c13PrimePowerLocation_mul_ne_thirteen i j)
+
+theorem c13PrimePhase_sub_half_sin_ne_zero
+    (i j : Fin 8) (hij : i ≠ j) :
+    Real.sin
+        ((logarithmicPrimePhase 13 (c13PrimePowerLocation i) -
+          logarithmicPrimePhase 13 (c13PrimePowerLocation j)) / 2) ≠ 0 := by
+  have hLocationNe : c13PrimePowerLocation i ≠ c13PrimePowerLocation j :=
+    fun h => hij (c13PrimePowerLocation_injective h)
+  rcases c13PrimePowerLocation_bounds i with ⟨hiOne, hiThirteen⟩
+  rcases c13PrimePowerLocation_bounds j with ⟨hjOne, hjThirteen⟩
+  rcases lt_or_gt_of_ne hLocationNe with hlt | hgt
+  · exact ne_of_lt (logarithmicPrimePhase_sub_half_sin_neg
+      13 (c13PrimePowerLocation i) (c13PrimePowerLocation j)
+      (by norm_num) hiOne hlt hjThirteen)
+  · have hneg := logarithmicPrimePhase_sub_half_sin_neg
+      13 (c13PrimePowerLocation j) (c13PrimePowerLocation i)
+      (by norm_num) hjOne hgt hiThirteen
+    rw [show (logarithmicPrimePhase 13 (c13PrimePowerLocation i) -
+        logarithmicPrimePhase 13 (c13PrimePowerLocation j)) / 2 =
+        -((logarithmicPrimePhase 13 (c13PrimePowerLocation j) -
+          logarithmicPrimePhase 13 (c13PrimePowerLocation i)) / 2) by ring,
+      Real.sin_neg]
+    exact neg_ne_zero.mpr (ne_of_lt hneg)
+
+/-- All single, doubled, pair-difference, and pair-sum phase denominators used
+by the cutoff-13 certificate are symbolically nonresonant. -/
+theorem c13PrimePhase_all_nonresonant :
+    (∀ i : Fin 8,
+      Real.sin (logarithmicPrimePhase 13 (c13PrimePowerLocation i) / 2) ≠ 0) ∧
+    (∀ i : Fin 8,
+      Real.sin (logarithmicPrimePhase 13 (c13PrimePowerLocation i)) ≠ 0) ∧
+    (∀ i j : Fin 8, i ≠ j →
+      Real.sin
+        ((logarithmicPrimePhase 13 (c13PrimePowerLocation i) -
+          logarithmicPrimePhase 13 (c13PrimePowerLocation j)) / 2) ≠ 0) ∧
+    (∀ i j : Fin 8,
+      Real.sin
+        ((logarithmicPrimePhase 13 (c13PrimePowerLocation i) +
+          logarithmicPrimePhase 13 (c13PrimePowerLocation j)) / 2) ≠ 0) := by
+  exact ⟨fun i => ne_of_gt (c13PrimePhase_half_sin_pos i),
+    c13PrimePhase_sin_ne_zero,
+    c13PrimePhase_sub_half_sin_ne_zero,
+    c13PrimePhase_add_half_sin_ne_zero⟩
+
 /-- The even-parity weighted numerator is controlled by pointwise symbol
 amplitudes. -/
 theorem evenWeightedNumerator_abs_le
