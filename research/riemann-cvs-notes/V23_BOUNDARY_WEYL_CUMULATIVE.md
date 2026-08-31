@@ -1909,3 +1909,95 @@ weighted symbol square sum through the full Cholesky/energy normalization.
 That step must preserve the combined prime/Archimedean cancellation and the
 strict `0.030789...` endpoint reserve rather than reverting to a
 component-wise triangle estimate.
+
+## 12. Combined-symbol matrix and newest-band energy bridge
+
+The weighted square estimate now passes through the first matrix and energy
+normalization layer without splitting the prime and Archimedean pieces.  For a
+previous cutoff `K`, write the newest historical band as `(K/2,K]` and the new
+shell as `(2K,4K]`.  The concrete off-diagonal CvS Loewner symbol is `F/pi`, so
+its square budget retains the exact Fourier factor `1/pi^2`.
+
+Two applications of the dyadic estimate give
+
+```text
+sum_(K/2<p<=K) F(p)^2/p^2 <= 2/K,
+sum_(2K<q<=4K) F(q)^2/q^2 <= 1/(2K).
+```
+
+Since `p<=K`, the first inequality implies
+
+```text
+sum_(K/2<p<=K) F(p)^2 <= 2K.
+```
+
+The parity entry-square estimate, the `K/2` historical rows, and
+
+```text
+sum_(2K<q<=4K) 1/q^2 <= 1/(4K)
+```
+
+therefore produce the cutoff-independent Frobenius-square bound
+
+```text
+32/pi^2 * (1/4 + 1/2) = 24/pi^2.
+```
+
+`CombinedSymbolDyadicL2.lean` now kernel-checks this chain and its energy
+normalization.  The principal new interfaces are:
+
+* `scaled_shifted_symbolSquareBudget`, preserving `1/pi^2` exactly;
+* `shifted_symbolSquare_sum_le_four_mul`, converting weighted to ordinary
+  square sums on `(N,2N]`;
+* `rectangularSymbolSquareBudget_four_mul_le_twentyFour_mul`, proving the
+  matrix constant `24*C`;
+* `rectangular_relativeCoupling_newestBand_of_shifted_symbolSquareRowBudgets`,
+  reducing the newest relative coefficient to
+  `24*C <= q*lowGap*highGap`;
+* `rectangularSymbolSquareBudget_two_mul` and
+  `rectangularSymbolSquareBudget_halfTransport`, proving that a fixed
+  historical band spends exactly half its preceding matrix budget when the
+  target shell doubles and no more than half its relative coefficient when the
+  coercive floors grow;
+* `rectangular_relativeCoupling_halfTransport_of_shifted_symbolSquareRowBudgets`,
+  packaging that half transport directly at the bilinear-energy level.
+
+The new certifier `certify_combined_symbol_newest_energy.py` consumes the
+tracked combined-symbol, prime-translation, and Archimedean certificates and
+uses the same coercive shell floor as the eventual middle-channel proof.  Its
+rigorous scalar formula is
+
+```text
+rho_newest(K)
+  <= (24/pi^2) / (gap(K/2)*gap(2K)).
+```
+
+Independent 256-bit and 384-bit replays agree.  The first dyadic cutoff at
+which this bound is strictly below `1/30` is
+
+```text
+K = 491520,
+rho_newest(K) upper midpoint
+  = 0.0329380152768082444332150801486928732...,
+1/30-rho_newest(K) lower midpoint
+  = 0.0003953180565250889001182531846404601....
+```
+
+At `K=245760` the interval is still strictly above `1/30`, so the threshold is
+genuinely the first passing dyadic row in this route.  The newest-band analytic
+tail is consequently reduced to eight finite bridge cutoffs:
+
+```text
+1920, 3840, 7680, 15360,
+30720, 61440, 122880, 245760.
+```
+
+This is a rigorous scalar composition conditional on four concrete operator
+inputs recorded in the JSON: identification of the crossblock with the odd
+Loewner kernel of `F/pi`, the parity compression, the displayed Euclidean
+coercive floors, and identification of the block-diagonal shell energies with
+the recursively glued core.  It closes neither those source identifications
+nor the eight finite bridges.  It does replace the formerly open all-scale
+newest-band estimate by a finite list plus an explicit all-cutoff theorem, and
+it supplies the exact half-transport algebra needed once a historical band has
+entered its analytic range.

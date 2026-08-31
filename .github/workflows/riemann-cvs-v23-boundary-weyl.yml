@@ -34,6 +34,7 @@ on:
       - 'research/riemann-cvs-numerics/certify_prime_translation_power_bound.py'
       - 'research/riemann-cvs-numerics/certify_archimedean_tail_envelope.py'
       - 'research/riemann-cvs-numerics/certify_combined_symbol_dyadic_l2.py'
+      - 'research/riemann-cvs-numerics/certify_combined_symbol_newest_energy.py'
       - 'research/riemann-cvs-numerics/certify_eventual_dyadic_middle_channel.py'
       - 'research/riemann-cvs-numerics/certify_boundary_weyl_cumulative.py'
       - 'research/riemann-cvs-numerics/certify_parity_gap.py'
@@ -71,6 +72,7 @@ on:
       - 'research/riemann-cvs-numerics/certify_prime_translation_power_bound.py'
       - 'research/riemann-cvs-numerics/certify_archimedean_tail_envelope.py'
       - 'research/riemann-cvs-numerics/certify_combined_symbol_dyadic_l2.py'
+      - 'research/riemann-cvs-numerics/certify_combined_symbol_newest_energy.py'
       - 'research/riemann-cvs-numerics/certify_eventual_dyadic_middle_channel.py'
       - 'research/riemann-cvs-numerics/certify_boundary_weyl_cumulative.py'
       - 'research/riemann-cvs-numerics/certify_parity_gap.py'
@@ -189,6 +191,20 @@ jobs:
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.dyadicEndpointScaledUpper_lt_one_of_start
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.dyadic_weighted_sum_lt_one_div_of_endpoint
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.dyadic_weighted_sum_lt_one_div_of_start_endpoint
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.scaled_shifted_symbolSquareBudget
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.shifted_symbolSquare_sum_le_four_mul
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.shifted_entry_sum_sq_le_of_symbolSquareBudget
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.evenParity_fixedRow_sum_sq_le_of_symbolSquareBudget
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.oddParity_fixedRow_sum_sq_le_of_symbolSquareBudget
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.rectangular_sum_sq_le_of_shifted_symbolSquareRowBudgets
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.rectangular_bilinear_sq_le_of_shifted_symbolSquareRowBudgets
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.relativeCoupling_of_squaredNormBudget
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.rectangular_relativeCoupling_of_shifted_symbolSquareRowBudgets
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.rectangularSymbolSquareBudget_four_mul_le_twentyFour_mul
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.rectangular_relativeCoupling_newestBand_of_shifted_symbolSquareRowBudgets
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.rectangularSymbolSquareBudget_two_mul
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.rectangularSymbolSquareBudget_halfTransport
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.rectangular_relativeCoupling_halfTransport_of_shifted_symbolSquareRowBudgets
           #print axioms RiemannCvs.CvSParityDisplacement.poleKernel_displacement
           #print axioms RiemannCvs.CvSParityDisplacement.parityMatrix_displacement
           #print axioms RiemannCvs.CvSParityDisplacement.parityMatrix_displacement_centralCorrected
@@ -415,6 +431,33 @@ jobs:
             --prec 384 \
             --archimedean-certificate research/riemann-cvs-numerics/artifacts/v23_c13_N960_archimedean_tail_384bit.json \
             --json-out research/riemann-cvs-numerics/artifacts/v23_c13_N1920_combined_symbol_dyadic_l2_384bit.json
+
+      - name: Certify the combined-symbol newest-band energy bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          python research/riemann-cvs-numerics/certify_combined_symbol_newest_energy.py \
+            --c 13 \
+            --prec 256 \
+            --start-previous-cutoff 3840 \
+            --first-open-previous-cutoff 1920 \
+            --target 1/30 \
+            --shift-gain 1/1024 \
+            --combined-certificate research/riemann-cvs-numerics/artifacts/v23_c13_N1920_combined_symbol_dyadic_l2.json \
+            --prime-certificate research/riemann-cvs-numerics/artifacts/v23_c13_prime_translation_power6.json \
+            --archimedean-certificate research/riemann-cvs-numerics/artifacts/v23_c13_N960_archimedean_tail.json \
+            --json-out research/riemann-cvs-numerics/artifacts/v23_c13_combined_symbol_newest_energy.json
+          python research/riemann-cvs-numerics/certify_combined_symbol_newest_energy.py \
+            --c 13 \
+            --prec 384 \
+            --start-previous-cutoff 3840 \
+            --first-open-previous-cutoff 1920 \
+            --target 1/30 \
+            --shift-gain 1/1024 \
+            --combined-certificate research/riemann-cvs-numerics/artifacts/v23_c13_N1920_combined_symbol_dyadic_l2_384bit.json \
+            --prime-certificate research/riemann-cvs-numerics/artifacts/v23_c13_prime_translation_power6.json \
+            --archimedean-certificate research/riemann-cvs-numerics/artifacts/v23_c13_N960_archimedean_tail_384bit.json \
+            --json-out research/riemann-cvs-numerics/artifacts/v23_c13_combined_symbol_newest_energy_384bit.json
 
       - name: Certify the eventual V23 dyadic middle channel
         shell: bash

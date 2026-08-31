@@ -10,7 +10,7 @@ odd Loewner symbol.  This module supplies the kernel-checked algebra that turns
 source estimates for that symbol into dyadic square-sum and rectangular-form
 bounds.
 
-There are four layers.
+There are six layers.
 
 1. The exact parity formulas from `CvSParityDisplacement` give entry bounds
    for positive separated modes.
@@ -21,6 +21,11 @@ There are four layers.
 4. Finite Abel summation turns an affine prefix bound into a weighted dyadic
    bound and exposes the strict endpoint expression consumed by the Arb
    certificate.
+5. Rowwise square estimates and rectangular Cauchy--Schwarz send that scalar
+   bound into a matrix Frobenius budget and then into coercive relative energy.
+6. The newest-band specialization closes the constant `24*C`, while the exact
+   doubled-shell identity supplies the one-half transport used by the recursive
+   channel envelope.
 
 The source-specific identification of the concrete CvS symbol and its affine
 prefix constants remains an explicit input.  No numerical certificate is
@@ -676,5 +681,516 @@ theorem dyadic_weighted_sum_lt_one_div_of_start_endpoint
     hLinear hQuadratic hGeometric hStartEndpoint
   exact dyadic_weighted_sum_lt_one_div_of_endpoint
     r N hN main linear quadratic geometric hSlope hPrefix hEndpoint
+
+/-!
+## Rowwise matrix and relative-energy bridge
+
+The following adapters turn the dyadic symbol-square estimate into finite
+matrix, coercive-energy, newest-band, and exact half-transport budgets.
+-/
+
+/-- Scaling the concrete symbol scales its dyadic square budget by the exact
+square of the normalization factor.  In the CvS source identification this
+retains the Fourier normalization `1 / π` as `1 / π²`. -/
+theorem scaled_shifted_symbolSquareBudget
+    (symbol : ℝ → ℝ) (scale C : ℝ) (N : ℕ)
+    (hSymbol :
+      (∑ j ∈ range N,
+          symbol ((N + 1 + j : ℕ) : ℝ) ^ 2 /
+            ((N + 1 + j : ℕ) : ℝ) ^ 2) ≤
+        C / (N : ℝ)) :
+    (∑ j ∈ range N,
+        (scale * symbol ((N + 1 + j : ℕ) : ℝ)) ^ 2 /
+          ((N + 1 + j : ℕ) : ℝ) ^ 2) ≤
+      (scale ^ 2 * C) / (N : ℝ) := by
+  have hRewrite :
+      (∑ j ∈ range N,
+          (scale * symbol ((N + 1 + j : ℕ) : ℝ)) ^ 2 /
+            ((N + 1 + j : ℕ) : ℝ) ^ 2) =
+        scale ^ 2 *
+          ∑ j ∈ range N,
+            symbol ((N + 1 + j : ℕ) : ℝ) ^ 2 /
+              ((N + 1 + j : ℕ) : ℝ) ^ 2 := by
+    rw [Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro j _hj
+    ring
+  rw [hRewrite]
+  calc
+    scale ^ 2 *
+        (∑ j ∈ range N,
+          symbol ((N + 1 + j : ℕ) : ℝ) ^ 2 /
+            ((N + 1 + j : ℕ) : ℝ) ^ 2) ≤
+      scale ^ 2 * (C / (N : ℝ)) :=
+        mul_le_mul_of_nonneg_left hSymbol (sq_nonneg scale)
+    _ = (scale ^ 2 * C) / (N : ℝ) := by ring
+
+/-- On a dyadic band `(N,2N]`, a weighted symbol-square budget controls the
+ordinary square sum with the sharp elementary loss `(2N)²`. -/
+theorem shifted_symbolSquare_sum_le_four_mul
+    (symbol : ℝ → ℝ) (C : ℝ) (N : ℕ) (hN : N ≠ 0)
+    (hSymbol :
+      (∑ j ∈ range N,
+          symbol ((N + 1 + j : ℕ) : ℝ) ^ 2 /
+            ((N + 1 + j : ℕ) : ℝ) ^ 2) ≤
+        C / (N : ℝ)) :
+    (∑ j ∈ range N,
+        symbol ((N + 1 + j : ℕ) : ℝ) ^ 2) ≤
+      4 * C * (N : ℝ) := by
+  have hNR : (N : ℝ) ≠ 0 := by exact_mod_cast hN
+  have hBand : ∀ j ∈ range N,
+      (((N + 1 + j : ℕ) : ℝ) ^ 2) ≤ (2 * (N : ℝ)) ^ 2 := by
+    intro j hj
+    have hjN : j < N := Finset.mem_range.mp hj
+    have hNat : N + 1 + j ≤ 2 * N := by omega
+    have hReal : ((N + 1 + j : ℕ) : ℝ) ≤ 2 * (N : ℝ) := by
+      exact_mod_cast hNat
+    exact sq_le_sq₀ (by positivity) (by positivity) |>.2 hReal
+  have hTermwise :
+      (∑ j ∈ range N,
+          symbol ((N + 1 + j : ℕ) : ℝ) ^ 2) ≤
+        (2 * (N : ℝ)) ^ 2 *
+          ∑ j ∈ range N,
+            symbol ((N + 1 + j : ℕ) : ℝ) ^ 2 /
+              ((N + 1 + j : ℕ) : ℝ) ^ 2 := by
+    rw [Finset.mul_sum]
+    apply Finset.sum_le_sum
+    intro j hj
+    let mode : ℝ := ((N + 1 + j : ℕ) : ℝ)
+    have hModePos : 0 < mode := by
+      dsimp only [mode]
+      positivity
+    have hModeNe : mode ≠ 0 := ne_of_gt hModePos
+    have hWeightNonnegative :
+        0 ≤ symbol mode ^ 2 / mode ^ 2 := by positivity
+    calc
+      symbol mode ^ 2 = mode ^ 2 * (symbol mode ^ 2 / mode ^ 2) := by
+        field_simp [hModeNe]
+      _ ≤ (2 * (N : ℝ)) ^ 2 * (symbol mode ^ 2 / mode ^ 2) :=
+        mul_le_mul_of_nonneg_right (hBand j hj) hWeightNonnegative
+  calc
+    (∑ j ∈ range N,
+        symbol ((N + 1 + j : ℕ) : ℝ) ^ 2) ≤
+      (2 * (N : ℝ)) ^ 2 *
+        ∑ j ∈ range N,
+          symbol ((N + 1 + j : ℕ) : ℝ) ^ 2 /
+            ((N + 1 + j : ℕ) : ℝ) ^ 2 := hTermwise
+    _ ≤ (2 * (N : ℝ)) ^ 2 * (C / (N : ℝ)) :=
+      mul_le_mul_of_nonneg_left hSymbol (sq_nonneg (2 * (N : ℝ)))
+    _ = 4 * C * (N : ℝ) := by
+      field_simp [hNR]
+      ring
+
+theorem shifted_entry_sum_sq_le_of_symbolSquareBudget
+    (entry : ℕ → ℝ) (symbol : ℝ → ℝ) (p : ℝ)
+    (N : ℕ) (hN : N ≠ 0) (C : ℝ)
+    (hEntry : ∀ j ∈ range N,
+      entry j ^ 2 ≤
+        32 * (symbol ((N + 1 + j : ℕ) : ℝ) ^ 2 /
+              ((N + 1 + j : ℕ) : ℝ) ^ 2 +
+            symbol p ^ 2 / ((N + 1 + j : ℕ) : ℝ) ^ 2))
+    (hSymbol :
+      (∑ j ∈ range N,
+          symbol ((N + 1 + j : ℕ) : ℝ) ^ 2 /
+            ((N + 1 + j : ℕ) : ℝ) ^ 2) ≤
+        C / (N : ℝ)) :
+    (∑ j ∈ range N, entry j ^ 2) ≤
+      32 * (C / (N : ℝ) + symbol p ^ 2 / (2 * (N : ℝ))) := by
+  have hEntries :
+      (∑ j ∈ range N, entry j ^ 2) ≤
+        ∑ j ∈ range N,
+          32 * (symbol ((N + 1 + j : ℕ) : ℝ) ^ 2 /
+                ((N + 1 + j : ℕ) : ℝ) ^ 2 +
+              symbol p ^ 2 / ((N + 1 + j : ℕ) : ℝ) ^ 2) := by
+    apply Finset.sum_le_sum
+    intro j hj
+    exact hEntry j hj
+  have hReciprocal := dyadic_shifted_weight_sum_le N hN
+  have hFixed :
+      symbol p ^ 2 *
+          (∑ j ∈ range N, ((((N + 1 + j : ℕ) : ℝ) ^ 2)⁻¹)) ≤
+        symbol p ^ 2 * (1 / (2 * (N : ℝ))) :=
+    mul_le_mul_of_nonneg_left hReciprocal (sq_nonneg (symbol p))
+  have hFixedRewrite :
+      (∑ j ∈ range N,
+          symbol p ^ 2 / ((N + 1 + j : ℕ) : ℝ) ^ 2) =
+        symbol p ^ 2 *
+          ∑ j ∈ range N, ((((N + 1 + j : ℕ) : ℝ) ^ 2)⁻¹) := by
+    rw [Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro j _hj
+    rw [div_eq_mul_inv]
+  calc
+    (∑ j ∈ range N, entry j ^ 2) ≤
+        ∑ j ∈ range N,
+          32 * (symbol ((N + 1 + j : ℕ) : ℝ) ^ 2 /
+                ((N + 1 + j : ℕ) : ℝ) ^ 2 +
+              symbol p ^ 2 / ((N + 1 + j : ℕ) : ℝ) ^ 2) := hEntries
+    _ = 32 *
+          (∑ j ∈ range N,
+            symbol ((N + 1 + j : ℕ) : ℝ) ^ 2 /
+              ((N + 1 + j : ℕ) : ℝ) ^ 2) +
+        32 *
+          (∑ j ∈ range N,
+            symbol p ^ 2 / ((N + 1 + j : ℕ) : ℝ) ^ 2) := by
+      simp_rw [mul_add]
+      rw [Finset.sum_add_distrib, Finset.mul_sum, Finset.mul_sum]
+    _ = 32 * (
+          (∑ j ∈ range N,
+            symbol ((N + 1 + j : ℕ) : ℝ) ^ 2 /
+              ((N + 1 + j : ℕ) : ℝ) ^ 2) +
+          symbol p ^ 2 *
+            ∑ j ∈ range N, ((((N + 1 + j : ℕ) : ℝ) ^ 2)⁻¹)) := by
+      rw [hFixedRewrite]
+      ring
+    _ ≤ 32 * (C / (N : ℝ) + symbol p ^ 2 * (1 / (2 * (N : ℝ)))) := by
+      gcongr
+    _ = 32 * (C / (N : ℝ) + symbol p ^ 2 / (2 * (N : ℝ))) := by
+      simp [div_eq_mul_inv]
+
+theorem evenParity_fixedRow_sum_sq_le_of_symbolSquareBudget
+    (symbol diagonal : ℝ → ℝ) (p : ℝ)
+    (N : ℕ) (hN : N ≠ 0) (C : ℝ)
+    (hp : 0 ≤ p)
+    (hsep : ∀ j, j < N → 2 * p ≤ ((N + 1 + j : ℕ) : ℝ))
+    (hOdd : Function.Odd symbol)
+    (hSymbol :
+      (∑ j ∈ range N,
+          symbol ((N + 1 + j : ℕ) : ℝ) ^ 2 /
+            ((N + 1 + j : ℕ) : ℝ) ^ 2) ≤
+        C / (N : ℝ)) :
+    (∑ j ∈ range N,
+        (CvSParityDisplacement.oddDifferenceKernel symbol diagonal p
+            ((N + 1 + j : ℕ) : ℝ) +
+          CvSParityDisplacement.oddDifferenceKernel symbol diagonal p
+            (-((N + 1 + j : ℕ) : ℝ))) ^ 2) ≤
+      32 * (C / (N : ℝ) + symbol p ^ 2 / (2 * (N : ℝ))) := by
+  apply shifted_entry_sum_sq_le_of_symbolSquareBudget
+    (fun j =>
+      CvSParityDisplacement.oddDifferenceKernel symbol diagonal p
+          ((N + 1 + j : ℕ) : ℝ) +
+        CvSParityDisplacement.oddDifferenceKernel symbol diagonal p
+          (-((N + 1 + j : ℕ) : ℝ)))
+    symbol p N hN C
+  · intro j hj
+    have hjN : j < N := Finset.mem_range.mp hj
+    exact oddDifferenceKernel_evenParity_sq_le_symbolSquares_of_two_mul_le
+      symbol diagonal p ((N + 1 + j : ℕ) : ℝ) hp (by positivity)
+      (hsep j hjN) hOdd
+  · exact hSymbol
+
+theorem oddParity_fixedRow_sum_sq_le_of_symbolSquareBudget
+    (symbol diagonal : ℝ → ℝ) (p : ℝ)
+    (N : ℕ) (hN : N ≠ 0) (C : ℝ)
+    (hp : 0 ≤ p)
+    (hsep : ∀ j, j < N → 2 * p ≤ ((N + 1 + j : ℕ) : ℝ))
+    (hOdd : Function.Odd symbol)
+    (hSymbol :
+      (∑ j ∈ range N,
+          symbol ((N + 1 + j : ℕ) : ℝ) ^ 2 /
+            ((N + 1 + j : ℕ) : ℝ) ^ 2) ≤
+        C / (N : ℝ)) :
+    (∑ j ∈ range N,
+        (CvSParityDisplacement.oddDifferenceKernel symbol diagonal p
+            ((N + 1 + j : ℕ) : ℝ) -
+          CvSParityDisplacement.oddDifferenceKernel symbol diagonal p
+            (-((N + 1 + j : ℕ) : ℝ))) ^ 2) ≤
+      32 * (C / (N : ℝ) + symbol p ^ 2 / (2 * (N : ℝ))) := by
+  apply shifted_entry_sum_sq_le_of_symbolSquareBudget
+    (fun j =>
+      CvSParityDisplacement.oddDifferenceKernel symbol diagonal p
+          ((N + 1 + j : ℕ) : ℝ) -
+        CvSParityDisplacement.oddDifferenceKernel symbol diagonal p
+          (-((N + 1 + j : ℕ) : ℝ)))
+    symbol p N hN C
+  · intro j hj
+    have hjN : j < N := Finset.mem_range.mp hj
+    exact oddDifferenceKernel_oddParity_sq_le_symbolSquares_of_two_mul_le
+      symbol diagonal p ((N + 1 + j : ℕ) : ℝ) hp (by positivity)
+      (hsep j hjN) hOdd
+  · exact hSymbol
+
+theorem rectangular_sum_sq_le_of_shifted_symbolSquareRowBudgets
+    {ι : Type*} [DecidableEq ι]
+    (rows : Finset ι) (entry : ι → ℕ → ℝ) (oldSymbol : ι → ℝ)
+    (N : ℕ) (C : ℝ)
+    (hRow : ∀ i ∈ rows,
+      (∑ j ∈ range N, entry i j ^ 2) ≤
+        32 * (C / (N : ℝ) + oldSymbol i ^ 2 / (2 * (N : ℝ)))) :
+    (∑ i ∈ rows, ∑ j ∈ range N, entry i j ^ 2) ≤
+      32 * (rows.card * (C / (N : ℝ)) +
+        (∑ i ∈ rows, oldSymbol i ^ 2) / (2 * (N : ℝ))) := by
+  have hDivSum :
+      (∑ i ∈ rows, oldSymbol i ^ 2 / (2 * (N : ℝ))) =
+        (∑ i ∈ rows, oldSymbol i ^ 2) / (2 * (N : ℝ)) := by
+    simp_rw [div_eq_mul_inv]
+    rw [← Finset.sum_mul]
+  calc
+    (∑ i ∈ rows, ∑ j ∈ range N, entry i j ^ 2) ≤
+        ∑ i ∈ rows,
+          32 * (C / (N : ℝ) + oldSymbol i ^ 2 / (2 * (N : ℝ))) := by
+      apply Finset.sum_le_sum
+      intro i hi
+      exact hRow i hi
+    _ = 32 * (rows.card * (C / (N : ℝ)) +
+          (∑ i ∈ rows, oldSymbol i ^ 2) / (2 * (N : ℝ))) := by
+      simp_rw [mul_add]
+      rw [Finset.sum_add_distrib]
+      rw [← Finset.mul_sum, ← Finset.mul_sum]
+      rw [hDivSum]
+      simp only [Finset.sum_const, nsmul_eq_mul]
+
+theorem rectangular_bilinear_sq_le_of_shifted_symbolSquareRowBudgets
+    {ι : Type*} [DecidableEq ι]
+    (rows : Finset ι) (entry : ι → ℕ → ℝ) (oldSymbol : ι → ℝ)
+    (x : ι → ℝ) (y : ℕ → ℝ) (N : ℕ) (C : ℝ)
+    (hRow : ∀ i ∈ rows,
+      (∑ j ∈ range N, entry i j ^ 2) ≤
+        32 * (C / (N : ℝ) + oldSymbol i ^ 2 / (2 * (N : ℝ)))) :
+    (∑ ij ∈ rows ×ˢ range N,
+        entry ij.1 ij.2 * (x ij.1 * y ij.2)) ^ 2 ≤
+      (32 * (rows.card * (C / (N : ℝ)) +
+        (∑ i ∈ rows, oldSymbol i ^ 2) / (2 * (N : ℝ)))) *
+      ((∑ i ∈ rows, x i ^ 2) * ∑ j ∈ range N, y j ^ 2) := by
+  have hCauchy := rectangular_bilinear_sq_le_entry_sq_mul_norms
+    rows (range N) entry x y
+  have hEntries := rectangular_sum_sq_le_of_shifted_symbolSquareRowBudgets
+    rows entry oldSymbol N C hRow
+  have hEntryProduct :
+      (∑ ij ∈ rows ×ˢ range N, entry ij.1 ij.2 ^ 2) ≤
+        32 * (rows.card * (C / (N : ℝ)) +
+          (∑ i ∈ rows, oldSymbol i ^ 2) / (2 * (N : ℝ))) := by
+    rw [Finset.sum_product]
+    exact hEntries
+  have hNorms :
+      0 ≤ (∑ i ∈ rows, x i ^ 2) * ∑ j ∈ range N, y j ^ 2 := by
+    positivity
+  exact hCauchy.trans (mul_le_mul_of_nonneg_right hEntryProduct hNorms)
+
+theorem relativeCoupling_of_squaredNormBudget
+    (lowEnergy highEnergy cross lowGap highGap entrySqBudget q
+      lowNormSq highNormSq : ℝ)
+    (hLowGap : 0 ≤ lowGap) (hHighGap : 0 ≤ highGap)
+    (hq : 0 ≤ q)
+    (hLowNormSq : 0 ≤ lowNormSq) (hHighNormSq : 0 ≤ highNormSq)
+    (hLowEnergy : lowGap * lowNormSq ≤ lowEnergy)
+    (hHighEnergy : highGap * highNormSq ≤ highEnergy)
+    (hCross : cross ^ 2 ≤ entrySqBudget * (lowNormSq * highNormSq))
+    (hBudget : entrySqBudget ≤ q * lowGap * highGap) :
+    cross ^ 2 ≤ q * lowEnergy * highEnergy := by
+  have hLowReference : 0 ≤ lowGap * lowNormSq :=
+    mul_nonneg hLowGap hLowNormSq
+  have hHighReference : 0 ≤ highGap * highNormSq :=
+    mul_nonneg hHighGap hHighNormSq
+  have hLowEnergyNonnegative : 0 ≤ lowEnergy :=
+    hLowReference.trans hLowEnergy
+  have hReferenceProduct :
+      (lowGap * lowNormSq) * (highGap * highNormSq) ≤
+        lowEnergy * highEnergy := by
+    calc
+      (lowGap * lowNormSq) * (highGap * highNormSq) ≤
+          lowEnergy * (highGap * highNormSq) :=
+        mul_le_mul_of_nonneg_right hLowEnergy hHighReference
+      _ ≤ lowEnergy * highEnergy :=
+        mul_le_mul_of_nonneg_left hHighEnergy hLowEnergyNonnegative
+  have hNormProduct : 0 ≤ lowNormSq * highNormSq :=
+    mul_nonneg hLowNormSq hHighNormSq
+  have hBudgetScaled := mul_le_mul_of_nonneg_right hBudget hNormProduct
+  have hReferenceScaled := mul_le_mul_of_nonneg_left hReferenceProduct hq
+  calc
+    cross ^ 2 ≤ entrySqBudget * (lowNormSq * highNormSq) := hCross
+    _ ≤ (q * lowGap * highGap) * (lowNormSq * highNormSq) := hBudgetScaled
+    _ = q * ((lowGap * lowNormSq) * (highGap * highNormSq)) := by ring
+    _ ≤ q * (lowEnergy * highEnergy) := hReferenceScaled
+    _ = q * lowEnergy * highEnergy := by ring
+
+theorem rectangular_relativeCoupling_of_shifted_symbolSquareRowBudgets
+    {ι : Type*} [DecidableEq ι]
+    (rows : Finset ι) (entry : ι → ℕ → ℝ) (oldSymbol : ι → ℝ)
+    (x : ι → ℝ) (y : ℕ → ℝ) (N : ℕ) (C : ℝ)
+    (lowEnergy highEnergy lowGap highGap q : ℝ)
+    (hRow : ∀ i ∈ rows,
+      (∑ j ∈ range N, entry i j ^ 2) ≤
+        32 * (C / (N : ℝ) + oldSymbol i ^ 2 / (2 * (N : ℝ))))
+    (hLowGap : 0 ≤ lowGap) (hHighGap : 0 ≤ highGap) (hq : 0 ≤ q)
+    (hLowEnergy :
+      lowGap * (∑ i ∈ rows, x i ^ 2) ≤ lowEnergy)
+    (hHighEnergy :
+      highGap * (∑ j ∈ range N, y j ^ 2) ≤ highEnergy)
+    (hBudget :
+      32 * (rows.card * (C / (N : ℝ)) +
+        (∑ i ∈ rows, oldSymbol i ^ 2) / (2 * (N : ℝ))) ≤
+          q * lowGap * highGap) :
+    (∑ ij ∈ rows ×ˢ range N,
+        entry ij.1 ij.2 * (x ij.1 * y ij.2)) ^ 2 ≤
+      q * lowEnergy * highEnergy := by
+  let entrySqBudget :=
+    32 * (rows.card * (C / (N : ℝ)) +
+      (∑ i ∈ rows, oldSymbol i ^ 2) / (2 * (N : ℝ)))
+  have hCross := rectangular_bilinear_sq_le_of_shifted_symbolSquareRowBudgets
+    rows entry oldSymbol x y N C hRow
+  exact relativeCoupling_of_squaredNormBudget
+    lowEnergy highEnergy
+    (∑ ij ∈ rows ×ˢ range N,
+      entry ij.1 ij.2 * (x ij.1 * y ij.2))
+    lowGap highGap entrySqBudget q
+    (∑ i ∈ rows, x i ^ 2) (∑ j ∈ range N, y j ^ 2)
+    hLowGap hHighGap hq (by positivity) (by positivity)
+    hLowEnergy hHighEnergy (by simpa only [entrySqBudget] using hCross)
+    (by simpa only [entrySqBudget] using hBudget)
+
+/-- Frobenius-square budget produced by the separated-row symbol estimate. -/
+noncomputable def rectangularSymbolSquareBudget
+    {ι : Type*} [DecidableEq ι]
+    (rows : Finset ι) (oldSymbol : ι → ℝ) (N : ℕ) (C : ℝ) : ℝ :=
+  32 * (rows.card * (C / (N : ℝ)) +
+    (∑ i ∈ rows, oldSymbol i ^ 2) / (2 * (N : ℝ)))
+
+/-- Newest-band specialization of the matrix budget.  If the historical band
+has at most `B` rows, its ordinary symbol-square sum is at most `4*C*B`, and
+the target shell has length `4B`, then the complete Frobenius-square budget is
+at most `24*C`. -/
+theorem rectangularSymbolSquareBudget_four_mul_le_twentyFour_mul
+    {ι : Type*} [DecidableEq ι]
+    (rows : Finset ι) (oldSymbol : ι → ℝ) (B : ℕ) (C : ℝ)
+    (hB : B ≠ 0) (hC : 0 ≤ C)
+    (hCard : rows.card ≤ B)
+    (hOldSymbol :
+      (∑ i ∈ rows, oldSymbol i ^ 2) ≤ 4 * C * (B : ℝ)) :
+    rectangularSymbolSquareBudget rows oldSymbol (4 * B) C ≤ 24 * C := by
+  have hBR : (B : ℝ) ≠ 0 := by exact_mod_cast hB
+  have hCardReal : (rows.card : ℝ) ≤ (B : ℝ) := by exact_mod_cast hCard
+  have hCardScaled : (rows.card : ℝ) * C ≤ (B : ℝ) * C :=
+    mul_le_mul_of_nonneg_right hCardReal hC
+  have hNumerator :
+      8 * ((rows.card : ℝ) * C) +
+          4 * (∑ i ∈ rows, oldSymbol i ^ 2) ≤
+        24 * C * (B : ℝ) := by
+    nlinarith
+  have hIdentity :
+      rectangularSymbolSquareBudget rows oldSymbol (4 * B) C =
+        (8 * ((rows.card : ℝ) * C) +
+          4 * (∑ i ∈ rows, oldSymbol i ^ 2)) / (B : ℝ) := by
+    simp only [rectangularSymbolSquareBudget, Nat.cast_mul, Nat.cast_ofNat]
+    field_simp [hBR]
+    ring
+  rw [hIdentity]
+  exact (div_le_iff₀ (by positivity : (0 : ℝ) < (B : ℝ))).2 (by
+    simpa [mul_comm, mul_left_comm, mul_assoc] using hNumerator)
+
+/-- End-to-end newest-band adapter.  The dyadic symbol estimates reduce the
+matrix side to `24*C`; one scalar comparison with the two coercive floors then
+produces the relative-energy coefficient `q`. -/
+theorem rectangular_relativeCoupling_newestBand_of_shifted_symbolSquareRowBudgets
+    {ι : Type*} [DecidableEq ι]
+    (rows : Finset ι) (entry : ι → ℕ → ℝ) (oldSymbol : ι → ℝ)
+    (x : ι → ℝ) (y : ℕ → ℝ) (B : ℕ) (C : ℝ)
+    (lowEnergy highEnergy lowGap highGap q : ℝ)
+    (hB : B ≠ 0) (hC : 0 ≤ C) (hCard : rows.card ≤ B)
+    (hOldSymbol :
+      (∑ i ∈ rows, oldSymbol i ^ 2) ≤ 4 * C * (B : ℝ))
+    (hRow : ∀ i ∈ rows,
+      (∑ j ∈ range (4 * B), entry i j ^ 2) ≤
+        32 * (C / ((4 * B : ℕ) : ℝ) +
+          oldSymbol i ^ 2 / (2 * ((4 * B : ℕ) : ℝ))))
+    (hLowGap : 0 ≤ lowGap) (hHighGap : 0 ≤ highGap) (hq : 0 ≤ q)
+    (hLowEnergy :
+      lowGap * (∑ i ∈ rows, x i ^ 2) ≤ lowEnergy)
+    (hHighEnergy :
+      highGap * (∑ j ∈ range (4 * B), y j ^ 2) ≤ highEnergy)
+    (hScalarBudget : 24 * C ≤ q * lowGap * highGap) :
+    (∑ ij ∈ rows ×ˢ range (4 * B),
+        entry ij.1 ij.2 * (x ij.1 * y ij.2)) ^ 2 ≤
+      q * lowEnergy * highEnergy := by
+  have hMatrixBudget :
+      rectangularSymbolSquareBudget rows oldSymbol (4 * B) C ≤
+        q * lowGap * highGap :=
+    (rectangularSymbolSquareBudget_four_mul_le_twentyFour_mul
+      rows oldSymbol B C hB hC hCard hOldSymbol).trans hScalarBudget
+  apply rectangular_relativeCoupling_of_shifted_symbolSquareRowBudgets
+    rows entry oldSymbol x y (4 * B) C lowEnergy highEnergy
+      lowGap highGap q hRow hLowGap hHighGap hq hLowEnergy hHighEnergy
+  simpa only [rectangularSymbolSquareBudget] using hMatrixBudget
+
+/-- With the historical rows fixed, doubling the target-shell length halves
+the separated-symbol Frobenius-square budget exactly. -/
+theorem rectangularSymbolSquareBudget_two_mul
+    {ι : Type*} [DecidableEq ι]
+    (rows : Finset ι) (oldSymbol : ι → ℝ) (N : ℕ) (C : ℝ)
+    (hN : N ≠ 0) :
+    rectangularSymbolSquareBudget rows oldSymbol (2 * N) C =
+      rectangularSymbolSquareBudget rows oldSymbol N C / 2 := by
+  have hNR : (N : ℝ) ≠ 0 := by exact_mod_cast hN
+  simp only [rectangularSymbolSquareBudget, Nat.cast_mul, Nat.cast_ofNat]
+  field_simp [hNR]
+
+/-- A fixed-row separated-symbol budget transports with coefficient one half
+when the target shell doubles and both coercive floors grow. -/
+theorem rectangularSymbolSquareBudget_halfTransport
+    {ι : Type*} [DecidableEq ι]
+    (rows : Finset ι) (oldSymbol : ι → ℝ) (N : ℕ) (C : ℝ)
+    (q lowGap highGap nextLowGap nextHighGap : ℝ)
+    (hN : N ≠ 0) (hq : 0 ≤ q)
+    (hLowGap : 0 ≤ lowGap) (hHighGap : 0 ≤ highGap)
+    (hLowGrowth : lowGap ≤ nextLowGap)
+    (hHighGrowth : highGap ≤ nextHighGap)
+    (hBudget : rectangularSymbolSquareBudget rows oldSymbol N C ≤
+      q * lowGap * highGap) :
+    rectangularSymbolSquareBudget rows oldSymbol (2 * N) C ≤
+      (q / 2) * nextLowGap * nextHighGap := by
+  have hNextLowGap : 0 ≤ nextLowGap := hLowGap.trans hLowGrowth
+  have hGapProduct : lowGap * highGap ≤ nextLowGap * nextHighGap := by
+    calc
+      lowGap * highGap ≤ nextLowGap * highGap :=
+        mul_le_mul_of_nonneg_right hLowGrowth hHighGap
+      _ ≤ nextLowGap * nextHighGap :=
+        mul_le_mul_of_nonneg_left hHighGrowth hNextLowGap
+  rw [rectangularSymbolSquareBudget_two_mul rows oldSymbol N C hN]
+  calc
+    rectangularSymbolSquareBudget rows oldSymbol N C / 2 ≤
+        (q * lowGap * highGap) / 2 := by gcongr
+    _ = (q / 2) * (lowGap * highGap) := by ring
+    _ ≤ (q / 2) * (nextLowGap * nextHighGap) :=
+      mul_le_mul_of_nonneg_left hGapProduct (div_nonneg hq (by norm_num))
+    _ = (q / 2) * nextLowGap * nextHighGap := by ring
+
+/-- End-to-end half-transport adapter: the doubled-shell row estimates and the
+previous scalar budget imply the next relative-energy coupling with coefficient
+`q/2`. -/
+theorem rectangular_relativeCoupling_halfTransport_of_shifted_symbolSquareRowBudgets
+    {ι : Type*} [DecidableEq ι]
+    (rows : Finset ι) (entry : ι → ℕ → ℝ) (oldSymbol : ι → ℝ)
+    (x : ι → ℝ) (y : ℕ → ℝ) (N : ℕ) (C : ℝ)
+    (lowEnergy nextHighEnergy lowGap highGap nextLowGap nextHighGap q : ℝ)
+    (hN : N ≠ 0)
+    (hRow : ∀ i ∈ rows,
+      (∑ j ∈ range (2 * N), entry i j ^ 2) ≤
+        32 * (C / ((2 * N : ℕ) : ℝ) +
+          oldSymbol i ^ 2 / (2 * ((2 * N : ℕ) : ℝ))))
+    (hq : 0 ≤ q) (hLowGap : 0 ≤ lowGap) (hHighGap : 0 ≤ highGap)
+    (hLowGrowth : lowGap ≤ nextLowGap)
+    (hHighGrowth : highGap ≤ nextHighGap)
+    (hLowEnergy :
+      nextLowGap * (∑ i ∈ rows, x i ^ 2) ≤ lowEnergy)
+    (hNextHighEnergy :
+      nextHighGap * (∑ j ∈ range (2 * N), y j ^ 2) ≤ nextHighEnergy)
+    (hPreviousBudget : rectangularSymbolSquareBudget rows oldSymbol N C ≤
+      q * lowGap * highGap) :
+    (∑ ij ∈ rows ×ˢ range (2 * N),
+        entry ij.1 ij.2 * (x ij.1 * y ij.2)) ^ 2 ≤
+      (q / 2) * lowEnergy * nextHighEnergy := by
+  have hNextLowGap : 0 ≤ nextLowGap := hLowGap.trans hLowGrowth
+  have hNextHighGap : 0 ≤ nextHighGap := hHighGap.trans hHighGrowth
+  have hNextBudget :
+      rectangularSymbolSquareBudget rows oldSymbol (2 * N) C ≤
+        (q / 2) * nextLowGap * nextHighGap :=
+    rectangularSymbolSquareBudget_halfTransport
+      rows oldSymbol N C q lowGap highGap nextLowGap nextHighGap
+      hN hq hLowGap hHighGap hLowGrowth hHighGrowth hPreviousBudget
+  apply rectangular_relativeCoupling_of_shifted_symbolSquareRowBudgets
+    rows entry oldSymbol x y (2 * N) C lowEnergy nextHighEnergy
+      nextLowGap nextHighGap (q / 2) hRow hNextLowGap hNextHighGap
+      (div_nonneg hq (by norm_num)) hLowEnergy hNextHighEnergy
+  simpa only [rectangularSymbolSquareBudget] using hNextBudget
 
 end RiemannCvs.CombinedSymbolDyadicL2

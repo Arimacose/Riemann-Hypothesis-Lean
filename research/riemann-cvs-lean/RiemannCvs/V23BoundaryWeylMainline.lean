@@ -237,7 +237,21 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   the exact weighted numerators `q*F(q)-p*F(p)` in the even sector and
   `p*F(q)-q*F(p)` in the odd sector, both over `p^2-q^2`.  Thus the remaining
   source estimate targets the combined odd symbol directly and retains the
-  observed prime/Archimedean cancellation.  The source-specific proof of the
+  observed prime/Archimedean cancellation.  The combined-symbol certificate
+  now proves the scalar weighted square budget `<1/N` for every `N>=1920`.
+  Fourteen further Lean adapters preserve the concrete `1/pi` Fourier scale,
+  turn the old-band weighted budget into an ordinary square sum, close the
+  newest-band matrix constant at `24/pi^2`, pass it through two coercive energy
+  floors, and prove exact one-half transport when the target shell doubles.
+  The corresponding 256-bit and 384-bit Arb compositions agree: the newest
+  regular coefficient is strictly below `1/30` for every dyadic previous
+  cutoff `K>=491520`; the first passing upper midpoint is
+  `0.0329380152768082444...`, with strict slack
+  `0.0003953180565250889...`.  Hence this analytic route reduces the newest
+  channel below that threshold to the eight finite cutoffs
+  `1920,3840,7680,15360,30720,61440,122880,245760`.  This conclusion remains
+  conditional on the listed concrete Loewner-symbol, parity-compression, and
+  coercive-floor identifications.  The source-specific proof of the
   joint Loewner/pole amplitude bounds, the identification of separated band
   energies with the scalar shell decomposition, and a uniform coefficient
   partial-sum bound strictly below one remain analytic inputs.  The scalar
