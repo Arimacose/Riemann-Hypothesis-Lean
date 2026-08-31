@@ -197,9 +197,14 @@ rows, `38400/38400` verified-solve residual intervals containing zero, and
 `1920/1920` positive Schur rows.  Choosing regular leading coefficient `1/30`
 then gives exact allocation `133/1920` and positive slack `83/17280` below
 `2/27`; `relativeCoupling_of_v23OddFixedBaseAndDyadicBudgets` is the matching
-Lean adapter.  The regular all-scale envelope and its energy normalization
-remain source inputs.  This is followed by
-convergence of the
+Lean adapter.  At the first `1920 -> 3840` transition, direct Arb formulas,
+two common reverse-Schur solves, and exact-dyadic congruences now also certify
+all nine regular source bands: five even bands with budget sum `31/480`, and
+four odd bands with sum `1/16`.  Their exact finite slacks inside `2/27` are
+`41/4320` in the even sector and, after adding the odd `1/384` exception,
+`31/3456` in the odd sector.  The regular envelope at every later scale and
+the comparison of the separated band energies with the recursive core energy
+remain source inputs.  This is followed by convergence of the
 finite-support energies to the closed tail form.  The scalar induction,
 finite-product lower bound, and strict order-limit passage are kernel-checked;
 the source-specific separated-band envelope and shell-energy decomposition,

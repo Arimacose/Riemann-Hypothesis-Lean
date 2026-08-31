@@ -1358,10 +1358,43 @@ saturated generic value `1/27`.  The exact allocation is
 ```
 
 Lean records the equality in `v23OddFixedBaseBudget_allocation` and packages the
-result as `relativeCoupling_of_v23OddFixedBaseAndDyadicBudgets`.  This closes
-the finite odd base channel for `1920 -> 3840`; the regular all-scale estimate
-`q_i <= (1/30)*2^(-i)` and the comparison between the sum of shell energies and
-the recursive core remain the next source-level obligations.
+result as `relativeCoupling_of_v23OddFixedBaseAndDyadicBudgets`.
+
+The tracked `certify_regular_previous_core_channels.py` now closes every
+remaining source crossblock at the same `1920 -> 3840` transition.  From newest
+to oldest, it certifies the regular bands `[481,960]`, `[241,480]`,
+`[121,240]`, and `[21,120]` in both parity sectors, plus the even fixed base
+`[0,20]`.  The assigned coefficients are respectively
+
+```text
+1/30, 1/60, 1/120, 1/240, 1/480,
+```
+
+with the last coefficient used only by the even fixed base.  That base energy
+also retains the reference factor `249/250`; the odd fixed base remains the
+separate `1/384` exception above.
+
+The certifier proves each common shifted `1920 x 1920` new-shell block positive,
+solves against all source crossblocks at once per parity, checks all
+`1,845,120/1,845,120` even and `1,804,800/1,804,800` odd residual intervals
+contain zero, then proves nine smaller reverse Schur complements positive by
+exact-dyadic congruences.  The resulting finite budget arithmetic is
+
+```text
+even regular sum = 31/480,
+2/27 - 31/480 = 41/4320 > 0;
+
+odd regular sum = 1/16,
+odd regular sum + 1/384 = 25/384,
+2/27 - 25/384 = 31/3456 > 0.
+```
+
+Lean records these equalities in `v23EvenFiniteRegularBudget_allocation` and
+`v23OddFiniteRegularBudget_allocation`.  Thus the complete first-transition
+source decomposition now has interval proof evidence.  The next source-level
+obligations are to prove `q_i <= (1/30)*2^(-i)` uniformly at every later scale
+and to compare the sum of separated shell energies with the recursive core
+energy; the finite certificate alone does not supply either normalization.
 
 The finite-support-to-closed-value order passage is now explicit in Lean.
 `recursiveShellEnergy_nonnegative_nat` propagates nonnegativity through every
@@ -1488,8 +1521,10 @@ The following are still explicit proof obligations:
 1. instantiate the characteristic-polynomial identification for the concrete
    self-adjoint CvS blocks from a Lean-side ordered eigenvalue enumeration;
 2. after the rigorously checked chain
-   `N=20 -> 120 -> 240 -> 480 -> 960 -> 1920 -> 3840`, prove the previous-core
-   channel uniformly and certify the fourteen remaining finite middle-channel
+   `N=20 -> 120 -> 240 -> 480 -> 960 -> 1920 -> 3840`, propagate the now
+   certified first-transition previous-core source estimates uniformly to all
+   later scales, prove their recursive-core energy normalization, and certify
+   the fourteen remaining finite middle-channel
    bridges through `K=15,728,640`; the new scalar-composition certificate gives
    the middle-channel coefficient `2/27` for every integer
    `K>=31,457,280`.  Then pass the resulting `q=999/1000` finite-support
@@ -1568,6 +1603,7 @@ lake env lean RiemannCvs/V23BoundaryWeylMainline.lean
 The V23 workflow additionally rejects proof placeholders and user-declared
 axioms/constants, prints the axiom dependencies of every new terminal theorem,
 replays the corrected V22 finite Arb parity certificate, certifies the direct
-parity shell through `N=3840`, and emits its JSON and exact-dyadic
-preconditioners together with the cumulative-residue interval certificate as
-downloadable regression artifacts.
+parity shell through `N=3840`, verifies the odd fixed-base exception and all
+nine regular first-transition source channels, and emits their JSON and
+exact-dyadic preconditioners together with the cumulative-residue interval
+certificate as downloadable regression artifacts.

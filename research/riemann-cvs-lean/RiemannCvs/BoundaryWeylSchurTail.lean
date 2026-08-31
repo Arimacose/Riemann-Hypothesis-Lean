@@ -907,6 +907,24 @@ theorem v23OddFixedBaseBudget_allocation :
       ((1 / 384 : ℝ) + 2 * (1 / 30 : ℝ)) = 83 / 17280 := by
   norm_num
 
+/-- Exact finite budget remaining after the five certified even regular
+source bands at the first `1920 -> 3840` transition.  Their coefficients are
+`1/30, 1/60, 1/120, 1/240, 1/480`. -/
+theorem v23EvenFiniteRegularBudget_allocation :
+    (2 / 27 : ℝ) -
+      ((1 / 30 : ℝ) + 1 / 60 + 1 / 120 + 1 / 240 + 1 / 480) =
+        41 / 4320 := by
+  norm_num
+
+/-- Exact finite budget remaining after the four certified odd regular source
+bands and the separately certified `1/384` odd fixed base at the first
+`1920 -> 3840` transition. -/
+theorem v23OddFiniteRegularBudget_allocation :
+    (2 / 27 : ℝ) -
+      ((1 / 384 : ℝ) + 1 / 30 + 1 / 60 + 1 / 120 + 1 / 240) =
+        31 / 3456 := by
+  norm_num
+
 /-- V23 specialization of the finite-exception/dyadic adapter.  A rigorous
 `1/384` estimate for the odd fixed base and a regular envelope with leading
 coefficient `1/30` combine strictly inside the previous-core budget `2/27`.
