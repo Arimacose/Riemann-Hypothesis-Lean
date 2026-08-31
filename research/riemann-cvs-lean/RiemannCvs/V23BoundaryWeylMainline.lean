@@ -289,9 +289,13 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   finite-matrix tower theorem now proves that exact reindexings
   `I(n+1) ≃ I(n) ⊕ S(n)`, vector concatenation, and preservation of the old
   matrix block force the entire concrete energy sequence to equal
-  `recursiveBlockEnergy`.  What remains on this side is therefore the concrete
-  dyadic construction of those index equivalences and the two displayed
-  compatibility identities, rather than another scalar recursion proof.
+  `recursiveBlockEnergy`.  The odd `Fin` tower and the even `Option Fin` tower
+  now have explicit dyadic split equivalences; Lean proves their vector
+  concatenation and old-core matrix preservation identities and instantiates
+  the generic theorem for both concrete parity energies.  Thus the all-scale
+  shell-tower compatibility is closed without another scalar recursion
+  hypothesis; the remaining operator input here is the concrete component
+  coercivity/error bound.
   The combined-symbol certificate
   now also rests on a Lean proof of the finite nonresonant geometric-sum bound,
   including arbitrary starting indices and its sine/cosine projections; Arb
@@ -320,10 +324,8 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   `0.0003953180565250889...`.  Hence this analytic route reduces the newest
   channel below that threshold to the eight finite cutoffs
   `1920,3840,7680,15360,30720,61440,122880,245760`.  This conclusion remains
-  conditional on the listed concrete component bounds and the two exact tower
-  compatibility identities.  The source-specific proof of the
-  joint Loewner/pole amplitude bounds, concrete vector/core preservation under
-  the dyadic reindexings, and a uniform coefficient
+  conditional on the listed concrete component bounds.  The source-specific
+  proof of the joint Loewner/pole amplitude bounds and a uniform coefficient
   partial-sum bound strictly below one remain analytic inputs.  The scalar
   product lemmas turn the last bound into the explicit positive floor `1-total`.
   This is followed by convergence of the finite-support energies to the closed
@@ -570,5 +572,276 @@ theorem recursiveBlockEnergy_succ_eq_oddHistoricalNewestForm
     base tail cross n
     (logarithmicCvSBuilderOddHistoricalNewestBlock
       c location eventBase B) x y hBase hTail hCross
+
+/-!
+## Exact all-scale parity towers
+
+The positive modes of the finite CvS matrices are initial segments of one
+fixed sequence.  Splitting `Fin next` at `old` therefore gives the concrete
+index equivalence required by the generic matrix-tower theorem.  Fixed global
+coordinate sequences automatically concatenate across the split, and the
+literal builder formulas automatically preserve the old matrix block.
+-/
+
+/-- Split a finite initial segment into its old prefix and new shell. -/
+noncomputable def finBlockSplitEquiv
+    {old shell next : ℕ} (h : next = old + shell) :
+    Fin next ≃ Fin old ⊕ Fin shell :=
+  (Fin.castOrderIso h).toEquiv.trans finSumFinEquiv.symm
+
+/-- Restriction of one global positive-mode coordinate sequence. -/
+noncomputable def finGlobalVector
+    (z : ℕ → ℝ) (N : ℕ) : Fin N → ℝ :=
+  fun i => z i
+
+/-- Consecutive shell extracted from the same global coordinate sequence. -/
+noncomputable def finGlobalShellVector
+    (z : ℕ → ℝ) (old shell : ℕ) : Fin shell → ℝ :=
+  fun j => z (old + j)
+
+/-- A global positive-mode vector pulls back to the old prefix concatenated
+with its consecutive shell. -/
+theorem finGlobalVector_pullback_split
+    (z : ℕ → ℝ) {old shell next : ℕ}
+    (h : next = old + shell) :
+    finiteVectorPullback (finBlockSplitEquiv h) (finGlobalVector z next) =
+      finiteMatrixBlockVector
+        (finGlobalVector z old) (finGlobalShellVector z old shell) := by
+  funext i
+  rcases i with i | j
+  · simp [finiteVectorPullback, finiteMatrixBlockVector,
+      finGlobalVector, finBlockSplitEquiv]
+  · simp [finiteVectorPullback, finiteMatrixBlockVector,
+      finGlobalVector, finGlobalShellVector, finBlockSplitEquiv]
+
+/-- Under the initial-segment split, the old-old block of the literal odd
+builder is exactly the previous odd builder matrix. -/
+theorem logarithmicCvSBuilderOddMatrix_pullback_inl_inl
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ)
+    {old shell next : ℕ} (h : next = old + shell)
+    (i j : Fin old) :
+    finiteMatrixPullback (finBlockSplitEquiv h)
+        (logarithmicCvSBuilderOddMatrix c location base next)
+        (Sum.inl i) (Sum.inl j) =
+      logarithmicCvSBuilderOddMatrix c location base old i j := by
+  simp [finiteMatrixPullback, finBlockSplitEquiv,
+    logarithmicCvSBuilderOddMatrix, positiveIntegerMode]
+
+noncomputable def logarithmicCvSBuilderOddTowerMatrix
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (size : ℕ → ℕ)
+    (n : ℕ) : Matrix (Fin (size n)) (Fin (size n)) ℝ :=
+  logarithmicCvSBuilderOddMatrix c location base (size n)
+
+noncomputable def logarithmicCvSBuilderOddTowerVector
+    (z : ℕ → ℝ) (size : ℕ → ℕ)
+    (n : ℕ) : Fin (size n) → ℝ :=
+  finGlobalVector z (size n)
+
+noncomputable def logarithmicCvSBuilderOddTowerShellVector
+    (z : ℕ → ℝ) (size shell : ℕ → ℕ)
+    (n : ℕ) : Fin (shell n) → ℝ :=
+  finGlobalShellVector z (size n) (shell n)
+
+noncomputable def logarithmicCvSBuilderOddTowerSplit
+    (size shell : ℕ → ℕ)
+    (hSize : ∀ n, size (n + 1) = size n + shell n)
+    (n : ℕ) : Fin (size (n + 1)) ≃ Fin (size n) ⊕ Fin (shell n) :=
+  finBlockSplitEquiv (hSize n)
+
+/-- Every nested odd-parity finite CvS energy is exactly the canonical
+recursive block energy, for any additive shell schedule and fixed global
+positive-mode coordinate sequence. -/
+theorem logarithmicCvSBuilderOddTowerEnergy_eq_recursiveBlockEnergy
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ)
+    (z : ℕ → ℝ) (size shell : ℕ → ℕ)
+    (hSize : ∀ n, size (n + 1) = size n + shell n) :
+    ∀ n,
+      finiteMatrixTowerEnergy
+          (logarithmicCvSBuilderOddTowerMatrix c location base size)
+          (logarithmicCvSBuilderOddTowerVector z size) n =
+        recursiveBlockEnergy
+          (finiteMatrixTowerEnergy
+            (logarithmicCvSBuilderOddTowerMatrix c location base size)
+            (logarithmicCvSBuilderOddTowerVector z size) 0)
+          (finiteMatrixTowerTailEnergy
+            (logarithmicCvSBuilderOddTowerMatrix c location base size)
+            (logarithmicCvSBuilderOddTowerShellVector z size shell)
+            (logarithmicCvSBuilderOddTowerSplit size shell hSize))
+          (finiteMatrixTowerCrossEnergy
+            (logarithmicCvSBuilderOddTowerMatrix c location base size)
+            (logarithmicCvSBuilderOddTowerVector z size)
+            (logarithmicCvSBuilderOddTowerShellVector z size shell)
+            (logarithmicCvSBuilderOddTowerSplit size shell hSize)) n := by
+  apply finiteMatrixTowerEnergy_eq_recursiveBlockEnergy
+    (logarithmicCvSBuilderOddTowerMatrix c location base size)
+    (logarithmicCvSBuilderOddTowerVector z size)
+    (logarithmicCvSBuilderOddTowerShellVector z size shell)
+    (logarithmicCvSBuilderOddTowerSplit size shell hSize)
+  · intro n
+    exact finGlobalVector_pullback_split z (hSize n)
+  · intro n i j
+    exact logarithmicCvSBuilderOddMatrix_pullback_inl_inl
+      c location base (hSize n) i j
+
+/-- Reassociate an optional coordinate over a binary sum so that the central
+coordinate stays with the old even block. -/
+noncomputable def optionSumEquiv (α β : Type*) :
+    Option (α ⊕ β) ≃ Option α ⊕ β where
+  toFun
+    | none => Sum.inl none
+    | some (Sum.inl a) => Sum.inl (some a)
+    | some (Sum.inr b) => Sum.inr b
+  invFun
+    | Sum.inl none => none
+    | Sum.inl (some a) => some (Sum.inl a)
+    | Sum.inr b => some (Sum.inr b)
+  left_inv x := by rcases x with _ | (_ | _) <;> rfl
+  right_inv x := by rcases x with (_ | _) | _ <;> rfl
+
+/-- Even-sector split: the central coordinate and old positive modes form the
+left block, while only the newly added positive modes form the shell. -/
+noncomputable def optionFinBlockSplitEquiv
+    {old shell next : ℕ} (h : next = old + shell) :
+    Option (Fin next) ≃ Option (Fin old) ⊕ Fin shell where
+  toFun
+    | none => Sum.inl none
+    | some i =>
+      match finBlockSplitEquiv h i with
+      | Sum.inl j => Sum.inl (some j)
+      | Sum.inr j => Sum.inr j
+  invFun
+    | Sum.inl none => none
+    | Sum.inl (some i) => some ((finBlockSplitEquiv h).symm (Sum.inl i))
+    | Sum.inr j => some ((finBlockSplitEquiv h).symm (Sum.inr j))
+  left_inv
+    | none => rfl
+    | some i => by
+      cases hi : finBlockSplitEquiv h i with
+      | inl j =>
+          simp only [hi]
+          congr 1
+          simpa [hi] using (finBlockSplitEquiv h).symm_apply_apply i
+      | inr j =>
+          simp only [hi]
+          congr 1
+          simpa [hi] using (finBlockSplitEquiv h).symm_apply_apply i
+  right_inv
+    | Sum.inl none => rfl
+    | Sum.inl (some i) => by
+        simp only
+        rw [(finBlockSplitEquiv h).apply_symm_apply (Sum.inl i)]
+    | Sum.inr j => by
+        simp only
+        rw [(finBlockSplitEquiv h).apply_symm_apply (Sum.inr j)]
+
+/-- Restriction of one global even-sector vector, with a fixed central
+coordinate and a global positive-mode sequence. -/
+noncomputable def optionFinGlobalVector
+    (z0 : ℝ) (z : ℕ → ℝ) (N : ℕ) : Option (Fin N) → ℝ
+  | none => z0
+  | some i => z i
+
+theorem optionFinGlobalVector_pullback_split
+    (z0 : ℝ) (z : ℕ → ℝ)
+    {old shell next : ℕ} (h : next = old + shell) :
+    finiteVectorPullback (optionFinBlockSplitEquiv h)
+        (optionFinGlobalVector z0 z next) =
+      finiteMatrixBlockVector
+        (optionFinGlobalVector z0 z old)
+        (finGlobalShellVector z old shell) := by
+  funext i
+  rcases i with (_ | i) | j
+  · rfl
+  · simp [finiteVectorPullback, finiteMatrixBlockVector,
+      optionFinGlobalVector, optionFinBlockSplitEquiv,
+      finBlockSplitEquiv]
+  · simp [finiteVectorPullback, finiteMatrixBlockVector,
+      optionFinGlobalVector, finGlobalShellVector,
+      optionFinBlockSplitEquiv, finBlockSplitEquiv]
+
+/-- Under the even-sector split, the old-old block is exactly the previous
+even builder matrix, including the unchanged central coordinate. -/
+theorem logarithmicCvSBuilderEvenMatrix_pullback_inl_inl
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ)
+    {old shell next : ℕ} (h : next = old + shell)
+    (i j : Option (Fin old)) :
+    finiteMatrixPullback (optionFinBlockSplitEquiv h)
+        (logarithmicCvSBuilderEvenMatrix c location base next)
+        (Sum.inl i) (Sum.inl j) =
+      logarithmicCvSBuilderEvenMatrix c location base old i j := by
+  rcases i with _ | i <;> rcases j with _ | j
+  · rfl
+  · simp [finiteMatrixPullback, optionFinBlockSplitEquiv,
+      finBlockSplitEquiv, logarithmicCvSBuilderEvenMatrix,
+      positiveIntegerMode]
+  · simp [finiteMatrixPullback, optionFinBlockSplitEquiv,
+      finBlockSplitEquiv, logarithmicCvSBuilderEvenMatrix,
+      positiveIntegerMode]
+  · simp [finiteMatrixPullback, optionFinBlockSplitEquiv,
+      finBlockSplitEquiv, logarithmicCvSBuilderEvenMatrix,
+      positiveIntegerMode]
+
+noncomputable def logarithmicCvSBuilderEvenTowerMatrix
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (size : ℕ → ℕ)
+    (n : ℕ) : Matrix (Option (Fin (size n))) (Option (Fin (size n))) ℝ :=
+  logarithmicCvSBuilderEvenMatrix c location base (size n)
+
+noncomputable def logarithmicCvSBuilderEvenTowerVector
+    (z0 : ℝ) (z : ℕ → ℝ) (size : ℕ → ℕ)
+    (n : ℕ) : Option (Fin (size n)) → ℝ :=
+  optionFinGlobalVector z0 z (size n)
+
+noncomputable def logarithmicCvSBuilderEvenTowerShellVector
+    (z : ℕ → ℝ) (size shell : ℕ → ℕ)
+    (n : ℕ) : Fin (shell n) → ℝ :=
+  finGlobalShellVector z (size n) (shell n)
+
+noncomputable def logarithmicCvSBuilderEvenTowerSplit
+    (size shell : ℕ → ℕ)
+    (hSize : ∀ n, size (n + 1) = size n + shell n)
+    (n : ℕ) :
+    Option (Fin (size (n + 1))) ≃
+      Option (Fin (size n)) ⊕ Fin (shell n) :=
+  optionFinBlockSplitEquiv (hSize n)
+
+/-- Every nested even-parity finite CvS energy, including the central mode,
+is exactly the canonical recursive block energy. -/
+theorem logarithmicCvSBuilderEvenTowerEnergy_eq_recursiveBlockEnergy
+    {ι : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ)
+    (z0 : ℝ) (z : ℕ → ℝ) (size shell : ℕ → ℕ)
+    (hSize : ∀ n, size (n + 1) = size n + shell n) :
+    ∀ n,
+      finiteMatrixTowerEnergy
+          (logarithmicCvSBuilderEvenTowerMatrix c location base size)
+          (logarithmicCvSBuilderEvenTowerVector z0 z size) n =
+        recursiveBlockEnergy
+          (finiteMatrixTowerEnergy
+            (logarithmicCvSBuilderEvenTowerMatrix c location base size)
+            (logarithmicCvSBuilderEvenTowerVector z0 z size) 0)
+          (finiteMatrixTowerTailEnergy
+            (logarithmicCvSBuilderEvenTowerMatrix c location base size)
+            (logarithmicCvSBuilderEvenTowerShellVector z size shell)
+            (logarithmicCvSBuilderEvenTowerSplit size shell hSize))
+          (finiteMatrixTowerCrossEnergy
+            (logarithmicCvSBuilderEvenTowerMatrix c location base size)
+            (logarithmicCvSBuilderEvenTowerVector z0 z size)
+            (logarithmicCvSBuilderEvenTowerShellVector z size shell)
+            (logarithmicCvSBuilderEvenTowerSplit size shell hSize)) n := by
+  apply finiteMatrixTowerEnergy_eq_recursiveBlockEnergy
+    (logarithmicCvSBuilderEvenTowerMatrix c location base size)
+    (logarithmicCvSBuilderEvenTowerVector z0 z size)
+    (logarithmicCvSBuilderEvenTowerShellVector z size shell)
+    (logarithmicCvSBuilderEvenTowerSplit size shell hSize)
+  · intro n
+    exact optionFinGlobalVector_pullback_split z0 z (hSize n)
+  · intro n i j
+    exact logarithmicCvSBuilderEvenMatrix_pullback_inl_inl
+      c location base (hSize n) i j
 
 end RiemannCvs.V23BoundaryWeylMainline
