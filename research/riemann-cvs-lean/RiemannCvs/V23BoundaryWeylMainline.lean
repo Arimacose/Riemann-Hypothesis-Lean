@@ -285,9 +285,13 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   simultaneous-reflection invariance of the pole and Loewner branches are now
   proved through the concrete builder and both parity compressions; hence the
   averaged cross coordinate simplifies exactly to the single rectangular
-  historical/newest bilinear form consumed by the certificate.  What remains
-  on this side is the coherent reuse of those blocks and vectors across the
-  complete dyadic tower.
+  historical/newest bilinear form consumed by the certificate.  A generic
+  finite-matrix tower theorem now proves that exact reindexings
+  `I(n+1) ≃ I(n) ⊕ S(n)`, vector concatenation, and preservation of the old
+  matrix block force the entire concrete energy sequence to equal
+  `recursiveBlockEnergy`.  What remains on this side is therefore the concrete
+  dyadic construction of those index equivalences and the two displayed
+  compatibility identities, rather than another scalar recursion proof.
   The combined-symbol certificate
   now also rests on a Lean proof of the finite nonresonant geometric-sum bound,
   including arbitrary starting indices and its sine/cosine projections; Arb
@@ -316,10 +320,10 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   `0.0003953180565250889...`.  Hence this analytic route reduces the newest
   channel below that threshold to the eight finite cutoffs
   `1920,3840,7680,15360,30720,61440,122880,245760`.  This conclusion remains
-  conditional on the listed concrete component bounds and all-scale block
-  compatibility.  The source-specific proof of the
-  joint Loewner/pole amplitude bounds, coherent reuse of the separated band
-  energies through every scalar shell step, and a uniform coefficient
+  conditional on the listed concrete component bounds and the two exact tower
+  compatibility identities.  The source-specific proof of the
+  joint Loewner/pole amplitude bounds, concrete vector/core preservation under
+  the dyadic reindexings, and a uniform coefficient
   partial-sum bound strictly below one remain analytic inputs.  The scalar
   product lemmas turn the last bound into the explicit positive floor `1-total`.
   This is followed by convergence of the finite-support energies to the closed

@@ -1473,6 +1473,146 @@ theorem recursiveBlockEnergy_succ_eq_finiteMatrixQuadraticEnergy
   rw [recursiveBlockEnergy_succ, hBase, hTail, hCross]
   exact (finiteMatrixQuadraticEnergy_blockVector A x y).symm
 
+/-!
+### Coherent finite matrix towers
+
+An all-scale shell argument has a family of finite index types `I n`, a new
+shell `S n`, and an exact reindexing `I (n+1) ≃ I n ⊕ S n`.  The next theorem
+shows that vector concatenation and preservation of the old matrix block are
+the only compatibility data needed to identify the entire concrete matrix
+energy sequence with `recursiveBlockEnergy`.
+-/
+
+/-- Pull a finite matrix back through an index equivalence. -/
+noncomputable def finiteMatrixPullback
+    {α β : Type*} (e : α ≃ β)
+    (A : Matrix α α ℝ) : Matrix β β ℝ :=
+  fun i j => A (e.symm i) (e.symm j)
+
+/-- Pull a finite coordinate vector back through an index equivalence. -/
+noncomputable def finiteVectorPullback
+    {α β : Type*} (e : α ≃ β) (x : α → ℝ) : β → ℝ :=
+  fun i => x (e.symm i)
+
+/-- Finite quadratic energy is unchanged by an exact reindexing. -/
+theorem finiteMatrixQuadraticEnergy_pullback
+    {α β : Type*} [Fintype α] [Fintype β]
+    (e : α ≃ β) (A : Matrix α α ℝ) (x : α → ℝ) :
+    finiteMatrixQuadraticEnergy A x =
+      finiteMatrixQuadraticEnergy (finiteMatrixPullback e A)
+        (finiteVectorPullback e x) := by
+  unfold finiteMatrixQuadraticEnergy
+  apply Fintype.sum_equiv e
+  intro i
+  apply Fintype.sum_equiv e
+  intro j
+  simp [finiteVectorPullback, finiteMatrixPullback]
+
+section FiniteMatrixTower
+
+variable {I S : ℕ → Type*}
+variable [∀ n, Fintype (I n)] [∀ n, Fintype (S n)]
+
+/-- Concrete quadratic energy at level `n` of a finite matrix tower. -/
+noncomputable def finiteMatrixTowerEnergy
+    (A : ∀ n, Matrix (I n) (I n) ℝ)
+    (x : ∀ n, I n → ℝ) (n : ℕ) : ℝ :=
+  finiteMatrixQuadraticEnergy (A n) (x n)
+
+/-- New-shell diagonal energy after pulling level `n+1` back to
+`I n ⊕ S n`. -/
+noncomputable def finiteMatrixTowerTailEnergy
+    (A : ∀ n, Matrix (I n) (I n) ℝ)
+    (y : ∀ n, S n → ℝ)
+    (split : ∀ n, I (n + 1) ≃ I n ⊕ S n) (n : ℕ) : ℝ :=
+  finiteMatrixBlockTailEnergy
+    (finiteMatrixPullback (split n) (A (n + 1))) (y n)
+
+/-- Old-core/new-shell cross energy at level `n`. -/
+noncomputable def finiteMatrixTowerCrossEnergy
+    (A : ∀ n, Matrix (I n) (I n) ℝ)
+    (x : ∀ n, I n → ℝ) (y : ∀ n, S n → ℝ)
+    (split : ∀ n, I (n + 1) ≃ I n ⊕ S n) (n : ℕ) : ℝ :=
+  finiteMatrixBlockCrossEnergy
+    (finiteMatrixPullback (split n) (A (n + 1))) (x n) (y n)
+
+/-- Vector concatenation plus preservation of the old matrix block gives the
+exact concrete `E+2*C+T` step at every level. -/
+theorem finiteMatrixTowerEnergy_succ
+    (A : ∀ n, Matrix (I n) (I n) ℝ)
+    (x : ∀ n, I n → ℝ) (y : ∀ n, S n → ℝ)
+    (split : ∀ n, I (n + 1) ≃ I n ⊕ S n)
+    (hVector : ∀ n,
+      finiteVectorPullback (split n) (x (n + 1)) =
+        finiteMatrixBlockVector (x n) (y n))
+    (hCore : ∀ n i j,
+      finiteMatrixPullback (split n) (A (n + 1))
+          (Sum.inl i) (Sum.inl j) = A n i j)
+    (n : ℕ) :
+    finiteMatrixTowerEnergy A x (n + 1) =
+      finiteMatrixTowerEnergy A x n +
+        2 * finiteMatrixTowerCrossEnergy A x y split n +
+          finiteMatrixTowerTailEnergy A y split n := by
+  let pulled := finiteMatrixPullback (split n) (A (n + 1))
+  have hBase :
+      finiteMatrixBlockBaseEnergy pulled (x n) =
+        finiteMatrixQuadraticEnergy (A n) (x n) := by
+    unfold finiteMatrixBlockBaseEnergy finiteMatrixQuadraticEnergy
+    apply Finset.sum_congr rfl
+    intro i _hi
+    apply Finset.sum_congr rfl
+    intro j _hj
+    rw [show pulled (Sum.inl i) (Sum.inl j) = A n i j by
+      exact hCore n i j]
+  calc
+    finiteMatrixTowerEnergy A x (n + 1) =
+        finiteMatrixQuadraticEnergy pulled
+          (finiteVectorPullback (split n) (x (n + 1))) := by
+      unfold finiteMatrixTowerEnergy
+      exact finiteMatrixQuadraticEnergy_pullback
+        (split n) (A (n + 1)) (x (n + 1))
+    _ = finiteMatrixQuadraticEnergy pulled
+          (finiteMatrixBlockVector (x n) (y n)) := by
+      rw [hVector n]
+    _ = finiteMatrixBlockBaseEnergy pulled (x n) +
+          2 * finiteMatrixBlockCrossEnergy pulled (x n) (y n) +
+            finiteMatrixBlockTailEnergy pulled (y n) :=
+      finiteMatrixQuadraticEnergy_blockVector pulled (x n) (y n)
+    _ = finiteMatrixTowerEnergy A x n +
+          2 * finiteMatrixTowerCrossEnergy A x y split n +
+            finiteMatrixTowerTailEnergy A y split n := by
+      rw [hBase]
+      rfl
+
+/-- The whole compatible finite matrix tower is the canonical recursive block
+energy.  This replaces a separate scalar recursion assumption at every scale
+by the two explicit coordinate compatibilities `hVector` and `hCore`. -/
+theorem finiteMatrixTowerEnergy_eq_recursiveBlockEnergy
+    (A : ∀ n, Matrix (I n) (I n) ℝ)
+    (x : ∀ n, I n → ℝ) (y : ∀ n, S n → ℝ)
+    (split : ∀ n, I (n + 1) ≃ I n ⊕ S n)
+    (hVector : ∀ n,
+      finiteVectorPullback (split n) (x (n + 1)) =
+        finiteMatrixBlockVector (x n) (y n))
+    (hCore : ∀ n i j,
+      finiteMatrixPullback (split n) (A (n + 1))
+          (Sum.inl i) (Sum.inl j) = A n i j) :
+    ∀ n,
+      finiteMatrixTowerEnergy A x n =
+        recursiveBlockEnergy
+          (finiteMatrixTowerEnergy A x 0)
+          (finiteMatrixTowerTailEnergy A y split)
+          (finiteMatrixTowerCrossEnergy A x y split) n := by
+  intro n
+  induction n with
+  | zero => simp
+  | succ n ih =>
+      rw [recursiveBlockEnergy_succ, ← ih]
+      exact finiteMatrixTowerEnergy_succ
+        A x y split hVector hCore n
+
+end FiniteMatrixTower
+
 /-- The canonical recursive energy is exactly the initial block plus all
 diagonal-shell and doubled cross contributions accumulated so far. -/
 theorem recursiveBlockEnergy_eq_base_add_sum

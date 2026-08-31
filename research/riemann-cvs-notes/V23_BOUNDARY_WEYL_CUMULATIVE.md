@@ -2348,9 +2348,31 @@ The end-to-end interfaces are
 `logarithmicCvSBuilderEvenHistoricalNewestBlock_crossEnergy` /
 `logarithmicCvSBuilderOddHistoricalNewestBlock_crossEnergy` theorems.
 
-The remaining recursive boundary is therefore the all-scale compatibility
-statement: successive pulled-back forms must reuse the same historical core
-and the concrete shell vectors must assemble into one coherent dyadic tower.
+The all-scale scalar recursion is now derived from a finite matrix tower rather
+than postulated.  For arbitrary finite index families `I n` and shell families
+`S n`, Lean pulls matrices and vectors back through exact equivalences
+`I(n+1) ≃ I(n) ⊕ S(n)`, proves quadratic energy invariant under that reindexing,
+and defines the concrete tower tail and cross energies.  If the pulled-back
+next vector is `blockVector (x n) (y n)` and its left-left block is exactly the
+previous matrix, `finiteMatrixTowerEnergy_succ` proves the concrete
+`E+2*C+T` step.  Induction then gives
+
+```text
+finiteMatrixTowerEnergy A x n
+  = recursiveBlockEnergy
+      (finiteMatrixTowerEnergy A x 0)
+      finiteMatrixTowerTailEnergy
+      finiteMatrixTowerCrossEnergy n.
+```
+
+The interfaces are `finiteMatrixQuadraticEnergy_pullback`,
+`finiteMatrixTowerEnergy_succ`, and
+`finiteMatrixTowerEnergy_eq_recursiveBlockEnergy`.
+
+The remaining recursive boundary is therefore the concrete dyadic
+instantiation of two explicit hypotheses: the index equivalences must preserve
+the old core matrix, and the vectors must concatenate through those
+equivalences.  No separate scalar shell recursion remains.
 The local `base`, `tail`, and literal rectangular `cross` algebra is no longer
 an open step.  The
 finite prime loop, Archimedean symbol and diagonal formulas,
