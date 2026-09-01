@@ -1336,3 +1336,36 @@ iteration, and finite-family composition are now closed.  Remaining work is
 to certify the scalar full-symbol square sums/base budgets, attach the finitely
 many bands below the analytic `960` threshold to their finite energy
 certificates, and complete the recursive/infinite boundary-Weyl passage.
+
+## 2026-09-02: the scalar full-symbol constant falls below one tenth
+
+`FullBuilderSymbolDyadicL2.lean` resolves the regular scalar square-sum part of
+the preceding boundary.  It proves the rational-pole symbol bound
+`|P(x)| <= 1/(4*x)` and the dyadic weighted tail `1/(32*N^3)` directly in
+Lean.  It then observes that the literal combined Loewner symbol is not the raw
+Arb symbol but its Fourier normalization `F/pi`.  The formal inequality
+`pi > 3.14` converts the Arb target `97/100` into the historical-symbol target
+`2425/24649`.
+
+A deliberately asymmetric Young inequality, with weights `3001/3000` and
+`3001`, assigns almost all slack to the cubic pole term.  Exact arithmetic at
+the monotone endpoint `N=1920` then yields the uniform result
+
+```text
+full builder dyadic symbol budget < 197/2000 < 1/10.
+```
+
+This is more than a cosmetic replacement of the provisional constant `1`:
+the rectangular source budget and every transported regular historical
+coefficient now enter with a greater-than-tenfold improvement.  Both actual
+parity-compressed builder matrices have direct corollaries consuming the raw
+`97/100` certificate and transporting the sharper budget by `q*(1/2)^k`.
+
+The external 256-bit replay passed with raw scaled upper
+`0.9692102614364212589966291674788481...`; its artifact SHA-256 is
+`AADBBCD025B864902FD2634F54DB546C8364723967D8C7EAEBF4ABDACC368AFD`.
+The interval certificate remains an explicit scalar input to the Lean adapter,
+while all normalization, pole absorption, endpoint monotonicity, and transport
+algebra are theorem-checked.  The next obstruction is therefore the base
+rectangular budget/finitely many early bands, followed by recursive reserve
+closure and the infinite boundary-Weyl passage.

@@ -38,6 +38,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/FirstAnalyticMultiblockBudget.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/HistoricalCombinedLoewnerTransport.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/FullBuilderLoewnerTransport.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/FullBuilderSymbolDyadicL2.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/FiniteMatrixBoundaryWeylAdapter.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V23BoundaryWeylMainline.lean'
@@ -105,6 +106,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/FirstAnalyticMultiblockBudget.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/HistoricalCombinedLoewnerTransport.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/FullBuilderLoewnerTransport.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/FullBuilderSymbolDyadicL2.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/FiniteMatrixBoundaryWeylAdapter.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V23BoundaryWeylMainline.lean'
@@ -231,6 +233,8 @@ jobs:
           lake env lean RiemannCvs/HistoricalCombinedLoewnerTransport.lean
           lake build RiemannCvs.FullBuilderLoewnerTransport
           lake env lean RiemannCvs/FullBuilderLoewnerTransport.lean
+          lake build RiemannCvs.FullBuilderSymbolDyadicL2
+          lake env lean RiemannCvs/FullBuilderSymbolDyadicL2.lean
           lake build RiemannCvs.FiniteMatrixBoundaryWeylAdapter
           lake env lean RiemannCvs/FiniteMatrixBoundaryWeylAdapter.lean
           lake build RiemannCvs.PrimeTranslationSeparatedBands
@@ -280,6 +284,7 @@ jobs:
             RiemannCvs/FirstAnalyticMultiblockBudget.lean
             RiemannCvs/HistoricalCombinedLoewnerTransport.lean
             RiemannCvs/FullBuilderLoewnerTransport.lean
+            RiemannCvs/FullBuilderSymbolDyadicL2.lean
             RiemannCvs/FiniteMatrixBoundaryWeylAdapter.lean
           )
           if grep -nE '(^|[^[:alnum:]_])(sorry|admit)([^[:alnum:]_]|$)' "${files[@]}"; then
@@ -305,6 +310,7 @@ jobs:
           import RiemannCvs.FirstAnalyticMultiblockBudget
           import RiemannCvs.HistoricalCombinedLoewnerTransport
           import RiemannCvs.FullBuilderLoewnerTransport
+          import RiemannCvs.FullBuilderSymbolDyadicL2
           import RiemannCvs.FiniteMatrixBoundaryWeylAdapter
           import RiemannCvs.PrimeTranslationSeparatedBands
           import RiemannCvs.PoleSeparatedBands
@@ -763,6 +769,18 @@ jobs:
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13HistoricalRemoteOddBuilder_dyadicTransport_fullLoewner
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13HistoricalRemoteEvenBuilder_dyadicFamily_fullLoewner
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13HistoricalRemoteOddBuilder_dyadicFamily_fullLoewner
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_abs_logarithmicPoleLoewnerSymbol_le_one_div_four_mul_inv
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_logarithmicPoleLoewnerSymbol_dyadic_weighted_sum_le
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.one_div_pi_sq_le_twoThousandFiveHundred_div_twentyFourThousandSixHundredFortyNine
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13HistoricalCombinedLoewnerSymbol_dyadic_weighted_sum_le_normalized
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.sub_sq_le_threeThousandOne_split
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13HistoricalBuilderLoewnerSymbol_dyadic_weighted_sum_le_sharp
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13HistoricalBuilderLoewnerSymbol_dyadic_weighted_sum_lt_sharp
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13HistoricalBuilderLoewnerSymbol_dyadic_weighted_sum_le_sharpTarget
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13HistoricalRemoteEvenBuilder_dyadicTransport_of_rawCombined
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13HistoricalRemoteOddBuilder_dyadicTransport_of_rawCombined
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13HistoricalRemoteEvenBuilder_dyadicFamily_of_rawCombined
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13HistoricalRemoteOddBuilder_dyadicFamily_of_rawCombined
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddBuilderDyadicAdjacentCoreNewest_relative_twoFifths
           #print axioms RiemannCvs.V23BoundaryWeylMainline.finiteMatrixCouplingEuclideanForm_eq_crossEnergy
           #print axioms RiemannCvs.V23BoundaryWeylMainline.finiteMatrixBoundaryWeyl_mono_of_relativeEnergyCertificate
@@ -960,6 +978,22 @@ jobs:
             --prec 384 \
             --archimedean-certificate research/riemann-cvs-numerics/artifacts/v23_c13_N960_archimedean_tail_384bit.json \
             --json-out research/riemann-cvs-numerics/artifacts/v23_c13_N1920_combined_symbol_dyadic_l2_384bit.json
+          python research/riemann-cvs-numerics/certify_combined_symbol_dyadic_l2.py \
+            --c 13 \
+            --start-mode 1920 \
+            --centered-decay 1/4 \
+            --target-scaled-upper 97/100 \
+            --prec 256 \
+            --archimedean-certificate research/riemann-cvs-numerics/artifacts/v23_c13_N960_archimedean_tail.json \
+            --json-out research/riemann-cvs-numerics/artifacts/v23_c13_N1920_combined_symbol_dyadic_l2_97over100.json
+          python research/riemann-cvs-numerics/certify_combined_symbol_dyadic_l2.py \
+            --c 13 \
+            --start-mode 1920 \
+            --centered-decay 1/4 \
+            --target-scaled-upper 97/100 \
+            --prec 384 \
+            --archimedean-certificate research/riemann-cvs-numerics/artifacts/v23_c13_N960_archimedean_tail_384bit.json \
+            --json-out research/riemann-cvs-numerics/artifacts/v23_c13_N1920_combined_symbol_dyadic_l2_97over100_384bit.json
 
       - name: Certify the combined-symbol newest-band energy bridge
         shell: bash

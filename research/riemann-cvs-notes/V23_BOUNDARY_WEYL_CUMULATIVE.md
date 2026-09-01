@@ -3310,3 +3310,89 @@ newly introduced shell, connect the finitely many source bands below `960` to
 their certified energies, and then feed the resulting uniform coefficient into
 the recursive reserve and infinite boundary-Weyl limit.  Neither those scalar
 certificates nor the infinite limit is asserted here.
+
+## 2026-09-02: Fourier normalization sharpens the full-symbol budget to 197/2000
+
+`FullBuilderSymbolDyadicL2.lean` closes the regular dyadic square-sum adapter
+for the complete builder symbol.  The first ingredient is a pure Lean estimate
+for the rational-pole Loewner symbol:
+
+```text
+|logarithmicPoleLoewnerSymbol 13 x| <= 1/(4*x),  x > 0,
+sum_{N<n<=2N} P(n)^2/n^2 <= 1/(32*N^3).
+```
+
+The proof reduces the pole scale to elementary bounds for
+`sinh(log(13)/4)^2`, `log(13)`, and `pi`; no floating interval is assumed.
+
+The decisive improvement is to use the normalization already present in the
+literal historical kernel.  The companion Arb certificate controls the raw
+combined symbol
+
+```text
+F(n) = ArchimedeanSymbol13(n) + finitePrimeSymbol13(n)
+```
+
+by `97/(100*N)` on every dyadic shell beginning at `N >= 1920`.  But the
+actual Loewner symbol is `F/pi`.  From `pi > 3.14`, Lean obtains
+
+```text
+1/pi^2 <= 2500/24649,
+sum historicalCombined(n)^2/n^2 <= (2425/24649)/N.
+```
+
+This factor was absent from the provisional unit-budget route.  A Young split
+with parameter `1/3000`, proved from `(a + 3000*b)^2 >= 0`, then gives
+
+```text
+(a-b)^2 <= (3001/3000)*a^2 + 3001*b^2.
+```
+
+Combining the normalized raw-symbol term with the cubic pole tail proves, in
+Lean and by exact rational arithmetic, that for every `N >= 1920`,
+
+```text
+sum_{N<n<=2N} builderSymbol(n)^2/n^2
+  < (197/2000)/N.
+```
+
+At the first scale the rational upper expression is approximately
+`0.0984395066`, leaving about `6.049e-5` below `197/2000`; these decimals only
+describe the exact inequality and are not proof premises.  The even and odd
+endpoints
+
+```text
+c13HistoricalRemoteEvenBuilder_dyadicTransport_of_rawCombined
+c13HistoricalRemoteOddBuilder_dyadicTransport_of_rawCombined
+```
+
+feed the new constant directly into the previously proved
+`q*(1/2)^k` transport theorem.  Thus the regular transport no longer carries a
+unit full-symbol constant: it uses `197/2000`, an improvement by a factor
+greater than ten.
+
+The matching finite-family endpoints
+
+```text
+c13HistoricalRemoteEvenBuilder_dyadicFamily_of_rawCombined
+c13HistoricalRemoteOddBuilder_dyadicFamily_of_rawCombined
+```
+
+perform the same substitution at a common target and retain the uniform
+`2*leading` total envelope.  They expose only the raw target certificate and
+the source rectangular budgets, so no separate full-symbol premise remains at
+the multiblock call site.
+
+The 256-bit Arb replay for the required raw premise passed with scaled upper
+`0.9692102614364212589966291674788481...`, strict slack
+`0.0007897385635787410033708325211519...`, and JSON SHA-256
+`AADBBCD025B864902FD2634F54DB546C8364723967D8C7EAEBF4ABDACC368AFD`.
+The independent 384-bit replay has SHA-256
+`900DAA2D9C93F4B0D558EDE1BE41DFCB2AC1A095B5341436207AE5FF2BAA2830`.
+CI now replays both `97/100` certificates in addition to the older unit
+certificates used by downstream regression scripts.
+
+The remaining regular-shell input is now only the source rectangular base
+budget.  Separately, the finitely many source bands below `960`, including the
+structured old odd band, must be attached to finite energy certificates before
+the recursive reserve and infinite boundary-Weyl limit can be completed.
