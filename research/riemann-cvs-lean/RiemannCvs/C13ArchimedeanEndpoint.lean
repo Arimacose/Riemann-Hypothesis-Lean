@@ -2,7 +2,7 @@ import Mathlib.Analysis.Real.Pi.Bounds
 import Mathlib.Analysis.SpecialFunctions.Log.Deriv
 import Mathlib.Analysis.SpecialFunctions.Complex.Arctan
 import RiemannCvs.CombinedSymbolDyadicL2
-import RiemannCvs.DigammaQuadraticRemainder
+import RiemannCvs.DigammaEulerMaclaurin
 
 namespace RiemannCvs.C13ArchimedeanEndpoint
 
@@ -270,5 +270,27 @@ theorem c13_neg_logarithmicArchimedeanDiagonal_ge_log_sub_nineteenTwentieth_of_f
     x hx
       (RiemannCvs.DigammaQuadraticRemainder.quadratic_remainder_bound_of_first_neglected_term
         hFirst)
+
+/-- The cutoff-13 diagonal reduced all the way to the literal
+Euler--Maclaurin tent-kernel representation and its positive-real mass
+estimate. -/
+theorem c13_neg_logarithmicArchimedeanDiagonal_ge_log_sub_nineteenTwentieth_of_eulerMaclaurin_tent
+    (x : ℝ) (hx : (960 : ℝ) ≤ x)
+    (hRepresentation : ∀ w : ℂ, 0 < w.re →
+      Complex.digamma w - (Complex.log w - 1 / (2 * w)) =
+        -(∫ t : ℝ in Set.Ioi 0,
+          (RiemannCvs.DigammaEulerMaclaurin.periodicTentWeight t : ℂ) *
+            (w + (t : ℂ))⁻¹ ^ 3))
+    (hRealMass : ∀ r : ℝ, 0 < r →
+      ∫ t : ℝ in Set.Ioi 0,
+          RiemannCvs.DigammaEulerMaclaurin.periodicTentWeight t *
+            (1 / (r + t) ^ 3) ≤
+        1 / (12 * r ^ 2)) :
+    Real.log x - 19 / 20 ≤
+      -logarithmicArchimedeanDiagonal 13 x := by
+  exact c13_neg_logarithmicArchimedeanDiagonal_ge_log_sub_nineteenTwentieth
+    x hx
+      (RiemannCvs.DigammaEulerMaclaurin.quadratic_remainder_bound_of_eulerMaclaurin_tent
+        hRepresentation hRealMass)
 
 end RiemannCvs.C13ArchimedeanEndpoint

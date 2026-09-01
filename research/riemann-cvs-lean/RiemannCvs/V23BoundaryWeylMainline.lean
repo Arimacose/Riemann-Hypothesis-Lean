@@ -1678,6 +1678,31 @@ theorem c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth_
         (RiemannCvs.DigammaQuadraticRemainder.quadratic_remainder_bound_of_first_neglected_term
           hFirst)
 
+/-- The V23 shell-diagonal route reduced to the literal Euler--Maclaurin
+tent-kernel representation and its positive-real scalar mass estimate. -/
+theorem c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth_of_eulerMaclaurin_tent
+    (old shell : ℕ) (hOld : 960 ≤ old)
+    (hRepresentation : ∀ w : ℂ, 0 < w.re →
+      Complex.digamma w - (Complex.log w - 1 / (2 * w)) =
+        -(∫ t : ℝ in Set.Ioi 0,
+          (RiemannCvs.DigammaEulerMaclaurin.periodicTentWeight t : ℂ) *
+            (w + (t : ℂ))⁻¹ ^ 3))
+    (hRealMass : ∀ r : ℝ, 0 < r →
+      ∫ t : ℝ in Set.Ioi 0,
+          RiemannCvs.DigammaEulerMaclaurin.periodicTentWeight t *
+            (1 / (r + t) ^ 3) ≤
+        1 / (12 * r ^ 2)) :
+    ∀ j : Fin shell,
+      Real.log (old : ℝ) - 19 / 20 ≤
+        -logarithmicCvSArchimedeanEntry 13
+          (finGlobalShellPositiveMode old shell j)
+          (finGlobalShellPositiveMode old shell j) := by
+  exact
+    c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth_of_quadratic_remainder_bound_closed_endpoint
+      old shell hOld
+        (RiemannCvs.DigammaEulerMaclaurin.quadratic_remainder_bound_of_eulerMaclaurin_tent
+          hRepresentation hRealMass)
+
 theorem logarithmicCvSPoleEntry_even_factorization (c : ℝ) (n m : ℤ) :
     logarithmicCvSPoleEntry c n m + logarithmicCvSPoleEntry c n (-m) =
       2 * logarithmicCvSPoleScale c *
