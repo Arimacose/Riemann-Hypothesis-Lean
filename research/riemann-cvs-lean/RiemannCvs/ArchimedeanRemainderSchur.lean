@@ -881,7 +881,7 @@ lemma five_lt_log_nat_of_c13_shell
   nlinarith [five_halves_lt_log_thirteen]
 
 /-- A slightly longer rational arctanh sum sharpens the elementary cutoff
-constant enough to retain a uniform coercive reserve. -/
+estimate enough to retain a uniform coercive reserve. -/
 lemma sixtyFourTwentyFive_lt_log_thirteen :
     (64 / 25 : ℝ) < Real.log 13 := by
   have h := Real.sum_range_le_log_div
@@ -925,6 +925,66 @@ theorem c13_shell_complete_scalar_reserve_ge_threeTwentyFive
         1 / 2 + 10 / 3) := by
   have hLog :=
     oneHundredTwentyEightTwentyFive_lt_log_nat_of_c13_shell old hOld
+  have hPole := c13_logarithmicCvSPoleTail_le_thirteenSixtieth old hOld
+  nlinarith
+
+/-!
+### Sharp elementary reserve at the actual cutoff
+
+The earlier `3/25` floor used only `960 ≥ 13²`, discarding most of the
+available logarithmic diagonal.  Factoring `960 = 2⁶ * 3 * 5` and applying
+short rational arctanh sums at `1/3`, `1/2`, and `2/3` recovers a much larger
+fully exact reserve without changing any operator estimate.
+-/
+
+lemma log_two_gt_sixtyNineHundredths :
+    (69 / 100 : ℝ) < Real.log 2 := by
+  have h := Real.sum_range_le_log_div
+    (x := (1 / 3 : ℝ)) (by norm_num) (by norm_num) 2
+  norm_num at h
+  linarith
+
+lemma log_three_gt_oneHundredNineHundredths :
+    (109 / 100 : ℝ) < Real.log 3 := by
+  have h := Real.sum_range_le_log_div
+    (x := (1 / 2 : ℝ)) (by norm_num) (by norm_num) 3
+  norm_num at h
+  linarith
+
+lemma log_five_gt_eightFifths :
+    (8 / 5 : ℝ) < Real.log 5 := by
+  have h := Real.sum_range_le_log_div
+    (x := (2 / 3 : ℝ)) (by norm_num) (by norm_num) 4
+  norm_num at h
+  linarith
+
+lemma sixHundredEightyThreeHundredths_lt_log_nat_of_c13_shell
+    (old : ℕ) (hOld : 960 ≤ old) :
+    (683 / 100 : ℝ) < Real.log (old : ℝ) := by
+  have h960 : (960 : ℝ) ≤ (old : ℝ) := by exact_mod_cast hOld
+  have hLogMono : Real.log (960 : ℝ) ≤ Real.log (old : ℝ) :=
+    Real.log_le_log (by norm_num) h960
+  have hLog960 :
+      Real.log (960 : ℝ) = 6 * Real.log 2 + Real.log 3 + Real.log 5 := by
+    rw [show (960 : ℝ) = 2 * 2 * 2 * 2 * 2 * 2 * 3 * 5 by norm_num]
+    repeat' rw [Real.log_mul (by norm_num) (by norm_num)]
+    ring
+  rw [hLog960] at hLogMono
+  nlinarith [log_two_gt_sixtyNineHundredths,
+    log_three_gt_oneHundredNineHundredths,
+    log_five_gt_eightFifths]
+
+/-- The actual cutoff leaves a `9/5` coercive reserve.  This is fifteen times
+the earlier `3/25` interface and is the preferred gap for future relative
+coupling estimates. -/
+theorem c13_shell_complete_scalar_reserve_ge_nineFifths
+    (old : ℕ) (hOld : 960 ≤ old) :
+    (9 / 5 : ℝ) ≤ Real.log (old : ℝ) - 19 / 20 -
+      (logarithmicCvSPoleScale 13 /
+          (8 * Real.pi ^ 2 * (old : ℝ)) +
+        1 / 2 + 10 / 3) := by
+  have hLog :=
+    sixHundredEightyThreeHundredths_lt_log_nat_of_c13_shell old hOld
   have hPole := c13_logarithmicCvSPoleTail_le_thirteenSixtieth old hOld
   nlinarith
 
@@ -1007,6 +1067,42 @@ theorem c13_logarithmicCvSBuilderOddShell_energy_ge_threeTwentyFive_normSq
       c13_shell_complete_scalar_reserve_ge_threeTwentyFive old hOld)
   simpa using h
 
+/-- Preferred quantitative even-shell coercivity at the literal cutoff. -/
+theorem c13_logarithmicCvSBuilderEvenShell_energy_ge_nineFifths_normSq
+    (old shell : ℕ) (hOld : 960 ≤ old) (hShell : shell ≤ old)
+    (x : Fin shell → ℝ) :
+    (9 / 5 : ℝ) * finiteVectorEuclideanNormSq x ≤
+      finiteMatrixQuadraticEnergy
+        (logarithmicCvSBuilderEvenPositiveModeMatrix
+          13 c13PrimePowerLocation c13PrimePowerBase
+          (finGlobalShellPositiveMode old shell)) x := by
+  have h := c13_logarithmicCvSBuilderEvenShell_coerciveFloor_primeClosed
+    old shell (by omega) x
+    (Real.log (old : ℝ) - 19 / 20) 0 (9 / 5) (1 / 2)
+    (c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth_closed
+      old shell hOld)
+    (c13_evenRemainder_energy_abs_le_half old shell hOld hShell x)
+    (by simpa using c13_shell_complete_scalar_reserve_ge_nineFifths old hOld)
+  simpa using h
+
+/-- Preferred quantitative odd-shell coercivity at the literal cutoff. -/
+theorem c13_logarithmicCvSBuilderOddShell_energy_ge_nineFifths_normSq
+    (old shell : ℕ) (hOld : 960 ≤ old) (hShell : shell ≤ old)
+    (x : Fin shell → ℝ) :
+    (9 / 5 : ℝ) * finiteVectorEuclideanNormSq x ≤
+      finiteMatrixQuadraticEnergy
+        (logarithmicCvSBuilderOddPositiveModeMatrix
+          13 c13PrimePowerLocation c13PrimePowerBase
+          (finGlobalShellPositiveMode old shell)) x := by
+  have h := c13_logarithmicCvSBuilderOddShell_coerciveFloor_primeClosed
+    old shell (by omega) x
+    (Real.log (old : ℝ) - 19 / 20) 0 (9 / 5) (1 / 2)
+    (c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth_closed
+      old shell hOld)
+    (c13_oddRemainder_energy_abs_le_half old shell hOld hShell x)
+    (by simpa using c13_shell_complete_scalar_reserve_ge_nineFifths old hOld)
+  simpa using h
+
 /-- The actual even matrix-tower tail is nonnegative whenever its newest
 shell is no larger than its previous core and that core has reached `960`. -/
 theorem c13_logarithmicCvSBuilderEvenTowerTailEnergy_nonneg
@@ -1075,6 +1171,44 @@ theorem c13_logarithmicCvSBuilderOddTowerTailEnergy_ge_threeTwentyFive_normSq
     13 c13PrimePowerLocation c13PrimePowerBase z size shell hSize n]
   exact
     c13_logarithmicCvSBuilderOddShell_energy_ge_threeTwentyFive_normSq
+      (size n) (shell n) hOld hShell
+        (finGlobalShellVector z (size n) (shell n))
+
+/-- Quantitative even tower-tail coercivity with the sharpened `9/5` gap. -/
+theorem c13_logarithmicCvSBuilderEvenTowerTailEnergy_ge_nineFifths_normSq
+    (z : ℕ → ℝ) (size shell : ℕ → ℕ)
+    (hSize : ∀ n, size (n + 1) = size n + shell n)
+    (n : ℕ) (hOld : 960 ≤ size n) (hShell : shell n ≤ size n) :
+    (9 / 5 : ℝ) * finiteVectorEuclideanNormSq
+        (finGlobalShellVector z (size n) (shell n)) ≤
+      finiteMatrixTowerTailEnergy
+        (logarithmicCvSBuilderEvenTowerMatrix
+          13 c13PrimePowerLocation c13PrimePowerBase size)
+        (logarithmicCvSBuilderEvenTowerShellVector z size shell)
+        (logarithmicCvSBuilderEvenTowerSplit size shell hSize) n := by
+  rw [logarithmicCvSBuilderEvenTowerTailEnergy_eq_positiveModeEnergy
+    13 c13PrimePowerLocation c13PrimePowerBase z size shell hSize n]
+  exact
+    c13_logarithmicCvSBuilderEvenShell_energy_ge_nineFifths_normSq
+      (size n) (shell n) hOld hShell
+        (finGlobalShellVector z (size n) (shell n))
+
+/-- Quantitative odd tower-tail coercivity with the sharpened `9/5` gap. -/
+theorem c13_logarithmicCvSBuilderOddTowerTailEnergy_ge_nineFifths_normSq
+    (z : ℕ → ℝ) (size shell : ℕ → ℕ)
+    (hSize : ∀ n, size (n + 1) = size n + shell n)
+    (n : ℕ) (hOld : 960 ≤ size n) (hShell : shell n ≤ size n) :
+    (9 / 5 : ℝ) * finiteVectorEuclideanNormSq
+        (finGlobalShellVector z (size n) (shell n)) ≤
+      finiteMatrixTowerTailEnergy
+        (logarithmicCvSBuilderOddTowerMatrix
+          13 c13PrimePowerLocation c13PrimePowerBase size)
+        (logarithmicCvSBuilderOddTowerShellVector z size shell)
+        (logarithmicCvSBuilderOddTowerSplit size shell hSize) n := by
+  rw [logarithmicCvSBuilderOddTowerTailEnergy_eq_positiveModeEnergy
+    13 c13PrimePowerLocation c13PrimePowerBase z size shell hSize n]
+  exact
+    c13_logarithmicCvSBuilderOddShell_energy_ge_nineFifths_normSq
       (size n) (shell n) hOld hShell
         (finGlobalShellVector z (size n) (shell n))
 
