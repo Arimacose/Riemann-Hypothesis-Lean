@@ -2385,6 +2385,153 @@ noncomputable def archimedeanDiagonalAsymptoticError (c x : ℝ) : ℝ :=
     2 * archimedeanGeometricFirstMoment c / w ^ 2 +
     (2 / Real.log c) * archimedeanGeometricMass c / w ^ 2
 
+/-!
+### Exact elementary normal form of the cutoff-13 endpoint
+
+At the chosen cutoff, every exponential geometric correction is algebraic.
+The following identities replace the mass and first moment by exact multiples
+of `sqrt 13`, eliminate the remaining pole constant, and expose the unique
+mode-960 comparison as an elementary real inequality.  No floating-point or
+interval result is promoted in this reduction.
+-/
+
+lemma exp_log_thirteen_div_two :
+    Real.exp (Real.log 13 / 2) = Real.sqrt 13 := by
+  rw [← Real.log_sqrt (by norm_num : (0 : ℝ) ≤ 13)]
+  exact Real.exp_log (Real.sqrt_pos.2 (by norm_num))
+
+lemma exp_neg_log_thirteen_div_two :
+    Real.exp (-Real.log 13 / 2) = (Real.sqrt 13)⁻¹ := by
+  rw [show -Real.log 13 / 2 = -(Real.log 13 / 2) by ring,
+    ← Real.log_sqrt (by norm_num : (0 : ℝ) ≤ 13), Real.exp_neg,
+    Real.exp_log (Real.sqrt_pos.2 (by norm_num))]
+
+lemma exp_neg_two_mul_log_thirteen :
+    Real.exp (-2 * Real.log 13) = (1 / 169 : ℝ) := by
+  rw [show -2 * Real.log 13 = -(2 * Real.log 13) by ring,
+    Real.exp_neg,
+    show 2 * Real.log 13 = Real.log 13 + Real.log 13 by ring,
+    Real.exp_add,
+    Real.exp_log (by norm_num : (0 : ℝ) < 13)]
+  norm_num
+
+lemma c13_archimedeanGeometricMass_eq :
+    archimedeanGeometricMass 13 = 13 * Real.sqrt 13 / 168 := by
+  unfold archimedeanGeometricMass
+  rw [exp_neg_log_thirteen_div_two, exp_neg_two_mul_log_thirteen]
+  have hs : Real.sqrt (13 : ℝ) ≠ 0 :=
+    ne_of_gt (Real.sqrt_pos.2 (by norm_num))
+  field_simp [hs]
+  nlinarith [Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 13)]
+
+lemma c13_archimedeanGeometricFirstMoment_eq :
+    archimedeanGeometricFirstMoment 13 =
+      559 * Real.sqrt 13 / 14112 := by
+  unfold archimedeanGeometricFirstMoment
+  rw [exp_neg_log_thirteen_div_two, exp_neg_two_mul_log_thirteen]
+  have hs : Real.sqrt (13 : ℝ) ≠ 0 :=
+    ne_of_gt (Real.sqrt_pos.2 (by norm_num))
+  field_simp [hs]
+  nlinarith [Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 13)]
+
+theorem c13_archimedeanDiagonalAsymptoticConstant_eq :
+    archimedeanDiagonalAsymptoticConstant 13 =
+      Real.pi - 2 * Real.arctan (Real.sqrt 13) +
+        2 * Real.log (Real.sqrt 13 + 1) -
+        Real.log (12 * Real.log 13) -
+        13 * Real.sqrt 13 / 42 := by
+  rw [archimedeanDiagonalAsymptoticConstant_eq_without_euler_of_pos
+    13 (by norm_num), c13_archimedeanGeometricMass_eq]
+  unfold logarithmicArchimedeanPoleJ
+  dsimp only
+  rw [exp_log_thirteen_div_two,
+    Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 13)]
+  norm_num
+  have hLog13 : 0 < Real.log 13 := Real.log_pos (by norm_num)
+  have hLogPiInv :
+      Real.log (Real.pi * (Real.log 13)⁻¹) =
+        Real.log Real.pi - Real.log (Real.log 13) := by
+    rw [Real.log_mul Real.pi_ne_zero (inv_ne_zero (ne_of_gt hLog13)),
+      Real.log_inv]
+    ring
+  have hLogPiRatio :
+      Real.log (Real.pi * (24 / 7 : ℝ)) =
+        Real.log Real.pi + Real.log (24 / 7 : ℝ) := by
+    rw [Real.log_mul Real.pi_ne_zero (by norm_num)]
+  have hLogTarget :
+      Real.log (Real.log 13 * 12) =
+        Real.log (Real.log 13) + Real.log 12 := by
+    rw [Real.log_mul (ne_of_gt hLog13) (by norm_num)]
+  have hLogTwo : Real.log 2 * 2 = Real.log 4 := by
+    rw [show (4 : ℝ) = 2 ^ (2 : ℕ) by norm_num, Real.log_pow]
+    ring
+  have hLogFortyEight :
+      Real.log (24 / 7 : ℝ) + Real.log 14 = Real.log 48 := by
+    rw [← Real.log_mul (by norm_num : (24 / 7 : ℝ) ≠ 0)
+      (by norm_num : (14 : ℝ) ≠ 0)]
+    norm_num
+  have hLogQuotient : Real.log 4 - Real.log 48 = -Real.log 12 := by
+    rw [← Real.log_div (by norm_num : (4 : ℝ) ≠ 0)
+      (by norm_num : (48 : ℝ) ≠ 0)]
+    rw [show (4 / 48 : ℝ) = (12 : ℝ)⁻¹ by norm_num, Real.log_inv]
+  have hNumeric :
+      Real.log 2 * 2 - Real.log (24 / 7 : ℝ) - Real.log 14 =
+        -Real.log 12 := by
+    linarith [hLogTwo, hLogFortyEight, hLogQuotient]
+  ring_nf
+  rw [hLogPiInv, hLogPiRatio, hLogTarget]
+  linarith
+
+theorem c13_archimedeanDiagonalAsymptoticError_eq :
+    archimedeanDiagonalAsymptoticError 13 960 =
+      (1 / 8 + Real.sqrt 2 / 6) /
+          (960 * Real.pi / Real.log 13) ^ 2 +
+        (1 / (960 * Real.pi / Real.log 13) +
+            1 / (960 * Real.pi / Real.log 13) ^ 2) /
+          (2 * Real.log 13) +
+        (2 * (559 * Real.sqrt 13 / 14112)) /
+          (1920 * Real.pi / Real.log 13) ^ 2 +
+        (2 / Real.log 13) * (13 * Real.sqrt 13 / 168) /
+          (1920 * Real.pi / Real.log 13) ^ 2 := by
+  unfold archimedeanDiagonalAsymptoticError
+    archimedeanAsymptoticHeight archimedeanFrequency
+  dsimp only
+  rw [c13_archimedeanGeometricMass_eq,
+    c13_archimedeanGeometricFirstMoment_eq]
+  ring
+
+/-- Elementary normal form of the unique cutoff-13 endpoint still required by
+the Archimedean diagonal route. -/
+noncomputable def c13ArchimedeanEndpointElementary : ℝ :=
+  Real.pi - 2 * Real.arctan (Real.sqrt 13) +
+      2 * Real.log (Real.sqrt 13 + 1) -
+      Real.log (12 * Real.log 13) -
+      13 * Real.sqrt 13 / 42 -
+    ((1 / 8 + Real.sqrt 2 / 6) /
+        (960 * Real.pi / Real.log 13) ^ 2 +
+      (1 / (960 * Real.pi / Real.log 13) +
+          1 / (960 * Real.pi / Real.log 13) ^ 2) /
+        (2 * Real.log 13) +
+      (2 * (559 * Real.sqrt 13 / 14112)) /
+        (1920 * Real.pi / Real.log 13) ^ 2 +
+      (2 / Real.log 13) * (13 * Real.sqrt 13 / 168) /
+        (1920 * Real.pi / Real.log 13) ^ 2)
+
+theorem c13_archimedeanEndpoint_eq_elementary :
+    archimedeanDiagonalAsymptoticConstant 13 -
+        archimedeanDiagonalAsymptoticError 13 960 =
+      c13ArchimedeanEndpointElementary := by
+  rw [c13_archimedeanDiagonalAsymptoticConstant_eq,
+    c13_archimedeanDiagonalAsymptoticError_eq]
+  rfl
+
+theorem c13_archimedeanEndpoint_bound_iff_elementary :
+    (-(19 / 20 : ℝ) ≤
+        archimedeanDiagonalAsymptoticConstant 13 -
+          archimedeanDiagonalAsymptoticError 13 960) ↔
+      (-(19 / 20 : ℝ) ≤ c13ArchimedeanEndpointElementary) := by
+  rw [c13_archimedeanEndpoint_eq_elementary]
+
 theorem archimedeanDiagonalAsymptoticError_antitone
     (c x₀ x : ℝ) (hc : 1 < c) (hx₀ : 0 < x₀) (hxx : x₀ ≤ x) :
     archimedeanDiagonalAsymptoticError c x ≤
