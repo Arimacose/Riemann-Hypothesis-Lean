@@ -2955,3 +2955,63 @@ polynomials, prove the complex real/imaginary energy identity and Parseval
 normalization, and feed the result through the existing signed-mode parity
 compression.  The continuous positive-Schur estimate itself is no longer an
 open premise.
+
+## Fourier/Parseval closes the cutoff-13 prime operator premise
+
+The remaining operator passage has now been carried out in
+`PrimeTranslationContinuousFourier`.  For an arbitrary finite integer mode
+family, Lean defines the real cosine and sine polynomials
+
+```text
+C(x) = sum_i v_i cos(2*pi*m_i*x/L),
+S(x) = sum_i v_i sin(2*pi*m_i*x/L),
+```
+
+and proves the pointwise product identity that expands
+`C(x) C(x+y) + S(x) S(x+y)` into the double Fourier sum used by
+`truncatedTranslationFourierEntry`.  Finite sum/integral interchange then
+gives the exact, normalization-sensitive identity
+
+```text
+energy(truncatedTranslationFourierEntry L y)
+  = (2/L) * integral_0^(L-y)
+      (C(x) C(x+y) + S(x) S(x+y)) dx.
+```
+
+Summing this equality over the eight prime-power shifts identifies the full
+finite translation-matrix energy with the two physical Schur forms divided by
+`log 13`.  Separately, `finiteCosineSine_parseval` proves, for injective
+integer modes,
+
+```text
+integral_0^L (C(x)^2 + S(x)^2) dx
+  = L * sum_i v_i^2.
+```
+
+All continuity, measurability, and interval-integrability obligations are now
+internal theorems.  In particular, the step supersolution height is proved
+measurable and uniformly bounded, the weighted height ratios are bounded by
+`2`, and every left/right truncated row integrand is interval integrable for
+each continuous input.  Hence `c13PrimeTranslationSchur_continuous` has no
+external integration side conditions beyond continuity of the test function.
+
+Combining these identities yields the premise-free finite matrix estimate
+
+```text
+|energy(finitePrimeTranslationModeMatrix 13 ... mode, v)|
+  <= (10/3) * sum_i v_i^2
+```
+
+for every injective integer mode family.  A further signed-mode injectivity
+lemma handles `mode (+/- i)` whenever the original modes are injective and
+strictly positive.  The existing even/odd compression identities therefore
+close both cutoff-13 parity prime forms with the same `10/3` constant.
+
+The V23 mainline now instantiates this result on the literal consecutive shell
+map `old + 1 + j`.  It proves that map injective, supplies premise-free even
+and odd shell prime bounds, and adds prime-closed coercivity consumers for both
+standalone shells and actual matrix-tower tails.  In those consumers the pole
+tail is already explicit and the prime term is fixed at `10/3`; the only
+substantive operator estimate still exposed is the Archimedean off-diagonal
+remainder.  This is the next proof target.  These results close a component of
+the V23 reduction; they are not by themselves a proof of RH.

@@ -2,6 +2,7 @@ import RiemannCvs.V22ZeroModeMainline
 import RiemannCvs.CvSParityDisplacement
 import RiemannCvs.CombinedSymbolDyadicL2
 import RiemannCvs.PrimeTranslationFourierBridge
+import RiemannCvs.PrimeTranslationContinuousFourier
 import RiemannCvs.PrimeTranslationPowerBound
 import RiemannCvs.C13ArchimedeanEndpoint
 import RiemannCvs.ObliqueWeylDeterminant
@@ -373,6 +374,7 @@ namespace RiemannCvs.V23BoundaryWeylMainline
 open RiemannCvs.CombinedSymbolDyadicL2
 open RiemannCvs.BoundaryWeylSchurTail
 open RiemannCvs.PrimeTranslationFourierBridge
+open RiemannCvs.PrimeTranslationContinuousFourier
 open Filter
 open scoped Topology
 
@@ -1136,6 +1138,36 @@ theorem c13_finiteLogarithmicPrimeOddPositiveModeErrorEnergy_abs_le_tenThird_of_
   exact finiteLogarithmicPrimeOddPositiveModeErrorEnergy_abs_le_of_signedTranslation
     13 (10 / 3) location base mode x (by norm_num) hSigned
 
+/-- The continuous positive-supersolution/Fourier argument closes the even
+cutoff-13 prime-form premise for every injective positive mode family. -/
+theorem c13_finiteLogarithmicPrimeEvenPositiveModeErrorEnergy_abs_le_tenThird_closed
+    {κ : Type*} [Fintype κ]
+    (mode : κ → ℤ) (x : κ → ℝ)
+    (hmode : Function.Injective mode) (hpos : ∀ i, 0 < mode i) :
+    |finiteMatrixQuadraticEnergy
+        (finiteLogarithmicPrimeEvenPositiveModeErrorMatrix
+          13 c13PrimePowerLocation c13PrimePowerBase mode) x| ≤
+      (10 / 3 : ℝ) * finiteVectorEuclideanNormSq x := by
+  apply c13_finiteLogarithmicPrimeEvenPositiveModeErrorEnergy_abs_le_tenThird_of_signedTranslation
+  intro y
+  simpa [finiteTranslationVectorNormSq, finiteVectorEuclideanNormSq] using
+    c13_signedModeEnergy_abs_le_tenThird mode hmode hpos y
+
+/-- The same closed signed-space estimate supplies the odd cutoff-13 prime
+form with no operator hypothesis. -/
+theorem c13_finiteLogarithmicPrimeOddPositiveModeErrorEnergy_abs_le_tenThird_closed
+    {κ : Type*} [Fintype κ]
+    (mode : κ → ℤ) (x : κ → ℝ)
+    (hmode : Function.Injective mode) (hpos : ∀ i, 0 < mode i) :
+    |finiteMatrixQuadraticEnergy
+        (finiteLogarithmicPrimeOddPositiveModeErrorMatrix
+          13 c13PrimePowerLocation c13PrimePowerBase mode) x| ≤
+      (10 / 3 : ℝ) * finiteVectorEuclideanNormSq x := by
+  apply c13_finiteLogarithmicPrimeOddPositiveModeErrorEnergy_abs_le_tenThird_of_signedTranslation
+  intro y
+  simpa [finiteTranslationVectorNormSq, finiteVectorEuclideanNormSq] using
+    c13_signedModeEnergy_abs_le_tenThird mode hmode hpos y
+
 noncomputable def logarithmicCvSBuilderEvenPositiveModeErrorMatrix
     {ι κ : Type*} [Fintype ι] [DecidableEq κ]
     (c : ℝ) (location base : ι → ℝ) (mode : κ → ℤ) :
@@ -1538,6 +1570,46 @@ theorem finGlobalShellPositiveMode_pos (old shell : ℕ) (j : Fin shell) :
     0 < finGlobalShellPositiveMode old shell j := by
   unfold finGlobalShellPositiveMode
   omega
+
+/-- Consecutive positive shell modes are pairwise distinct.  This is the
+remaining structural hypothesis needed to feed an actual tower shell into the
+closed finite Fourier/Schur estimate. -/
+theorem finGlobalShellPositiveMode_injective (old shell : ℕ) :
+    Function.Injective (finGlobalShellPositiveMode old shell) := by
+  intro i j hij
+  apply Fin.ext
+  unfold finGlobalShellPositiveMode at hij
+  omega
+
+/-- The cutoff-13 even prime error on every concrete consecutive shell is
+bounded by `10 / 3`, with no operator premise. -/
+theorem c13_finiteLogarithmicPrimeEvenShellErrorEnergy_abs_le_tenThird
+    (old shell : ℕ) (x : Fin shell → ℝ) :
+    |finiteMatrixQuadraticEnergy
+        (finiteLogarithmicPrimeEvenPositiveModeErrorMatrix
+          13 c13PrimePowerLocation c13PrimePowerBase
+          (finGlobalShellPositiveMode old shell)) x| ≤
+      (10 / 3 : ℝ) * finiteVectorEuclideanNormSq x := by
+  exact
+    c13_finiteLogarithmicPrimeEvenPositiveModeErrorEnergy_abs_le_tenThird_closed
+      (finGlobalShellPositiveMode old shell) x
+      (finGlobalShellPositiveMode_injective old shell)
+      (finGlobalShellPositiveMode_pos old shell)
+
+/-- The same premise-free cutoff-13 bound holds for the odd prime error on
+every concrete consecutive shell. -/
+theorem c13_finiteLogarithmicPrimeOddShellErrorEnergy_abs_le_tenThird
+    (old shell : ℕ) (x : Fin shell → ℝ) :
+    |finiteMatrixQuadraticEnergy
+        (finiteLogarithmicPrimeOddPositiveModeErrorMatrix
+          13 c13PrimePowerLocation c13PrimePowerBase
+          (finGlobalShellPositiveMode old shell)) x| ≤
+      (10 / 3 : ℝ) * finiteVectorEuclideanNormSq x := by
+  exact
+    c13_finiteLogarithmicPrimeOddPositiveModeErrorEnergy_abs_le_tenThird_closed
+      (finGlobalShellPositiveMode old shell) x
+      (finGlobalShellPositiveMode_injective old shell)
+      (finGlobalShellPositiveMode_pos old shell)
 
 theorem logarithmicCvSArchimedeanEntry_shell_self
     (c : ℝ) (old shell : ℕ) (j : Fin shell) :
@@ -2409,6 +2481,75 @@ theorem c13_logarithmicCvSBuilderOddShell_coerciveFloor
     · simpa [logarithmicCvSBuilderOddPositiveModeErrorMatrix] using hPrime
   · simpa [Fin.sum_univ_three] using hFloor
 
+/-!
+### Prime-closed cutoff-13 shell coercivity
+
+The continuous Fourier/Schur theorem fixes the prime component at `10 / 3`
+for the literal cutoff-13 prime-power data.  Thus these adapters expose the
+actual remaining shell boundary: the Archimedean off-diagonal remainder (plus
+the already explicit scalar floor comparison).
+-/
+
+theorem c13_logarithmicCvSBuilderEvenShell_coerciveFloor_primeClosed
+    (old shell : ℕ) (hOld : old ≠ 0) (x : Fin shell → ℝ)
+    (diagonalFloor shift floor archRemainderBound : ℝ)
+    (hDiagonal : ∀ i : Fin shell,
+      diagonalFloor ≤ -logarithmicCvSArchimedeanEntry 13
+        (finGlobalShellPositiveMode old shell i)
+        (finGlobalShellPositiveMode old shell i))
+    (hArchRemainder :
+      |finiteMatrixQuadraticEnergy
+          (logarithmicCvSArchimedeanEvenPositiveModeRemainderMatrix
+            13 (finGlobalShellPositiveMode old shell)) x| ≤
+        archRemainderBound * finiteVectorEuclideanNormSq x)
+    (hFloor : floor ≤ diagonalFloor -
+      (logarithmicCvSPoleScale 13 /
+          (8 * Real.pi ^ 2 * (old : ℝ)) +
+        archRemainderBound + 10 / 3) + shift) :
+    floor * finiteVectorEuclideanNormSq x ≤
+      finiteMatrixQuadraticEnergy
+          (logarithmicCvSBuilderEvenPositiveModeMatrix
+            13 c13PrimePowerLocation c13PrimePowerBase
+            (finGlobalShellPositiveMode old shell)) x +
+        shift * finiteVectorEuclideanNormSq x := by
+  exact c13_logarithmicCvSBuilderEvenShell_coerciveFloor
+    c13PrimePowerLocation c13PrimePowerBase old shell hOld x
+    diagonalFloor shift floor archRemainderBound (10 / 3)
+    hDiagonal hArchRemainder
+    (c13_finiteLogarithmicPrimeEvenShellErrorEnergy_abs_le_tenThird
+      old shell x)
+    hFloor
+
+theorem c13_logarithmicCvSBuilderOddShell_coerciveFloor_primeClosed
+    (old shell : ℕ) (hOld : old ≠ 0) (x : Fin shell → ℝ)
+    (diagonalFloor shift floor archRemainderBound : ℝ)
+    (hDiagonal : ∀ i : Fin shell,
+      diagonalFloor ≤ -logarithmicCvSArchimedeanEntry 13
+        (finGlobalShellPositiveMode old shell i)
+        (finGlobalShellPositiveMode old shell i))
+    (hArchRemainder :
+      |finiteMatrixQuadraticEnergy
+          (logarithmicCvSArchimedeanOddPositiveModeRemainderMatrix
+            13 (finGlobalShellPositiveMode old shell)) x| ≤
+        archRemainderBound * finiteVectorEuclideanNormSq x)
+    (hFloor : floor ≤ diagonalFloor -
+      (logarithmicCvSPoleScale 13 /
+          (8 * Real.pi ^ 2 * (old : ℝ)) +
+        archRemainderBound + 10 / 3) + shift) :
+    floor * finiteVectorEuclideanNormSq x ≤
+      finiteMatrixQuadraticEnergy
+          (logarithmicCvSBuilderOddPositiveModeMatrix
+            13 c13PrimePowerLocation c13PrimePowerBase
+            (finGlobalShellPositiveMode old shell)) x +
+        shift * finiteVectorEuclideanNormSq x := by
+  exact c13_logarithmicCvSBuilderOddShell_coerciveFloor
+    c13PrimePowerLocation c13PrimePowerBase old shell hOld x
+    diagonalFloor shift floor archRemainderBound (10 / 3)
+    hDiagonal hArchRemainder
+    (c13_finiteLogarithmicPrimeOddShellErrorEnergy_abs_le_tenThird
+      old shell x)
+    hFloor
+
 theorem c13_logarithmicCvSBuilderEvenTowerTailEnergy_coerciveFloor
     {ι : Type*} [Fintype ι]
     (location base : ι → ℝ)
@@ -2500,4 +2641,82 @@ theorem c13_logarithmicCvSBuilderOddTowerTailEnergy_coerciveFloor
     (finGlobalShellVector z (size n) (shell n))
     diagonalFloor shift floor archRemainderBound primeBound
     hDiagonal hArchRemainder hPrime hFloor
+
+/-- Prime-closed cutoff-13 coercivity for the actual even matrix-tower tail.
+Only the Archimedean remainder estimate and scalar floor comparison remain as
+analytic inputs. -/
+theorem c13_logarithmicCvSBuilderEvenTowerTailEnergy_coerciveFloor_primeClosed
+    (z : ℕ → ℝ) (size shell : ℕ → ℕ)
+    (hSize : ∀ n, size (n + 1) = size n + shell n)
+    (n : ℕ) (hOld : size n ≠ 0)
+    (diagonalFloor shift floor archRemainderBound : ℝ)
+    (hDiagonal : ∀ i : Fin (shell n),
+      diagonalFloor ≤ -logarithmicCvSArchimedeanEntry 13
+        (finGlobalShellPositiveMode (size n) (shell n) i)
+        (finGlobalShellPositiveMode (size n) (shell n) i))
+    (hArchRemainder :
+      |finiteMatrixQuadraticEnergy
+          (logarithmicCvSArchimedeanEvenPositiveModeRemainderMatrix
+            13 (finGlobalShellPositiveMode (size n) (shell n)))
+          (finGlobalShellVector z (size n) (shell n))| ≤
+        archRemainderBound * finiteVectorEuclideanNormSq
+          (finGlobalShellVector z (size n) (shell n)))
+    (hFloor : floor ≤ diagonalFloor -
+      (logarithmicCvSPoleScale 13 /
+          (8 * Real.pi ^ 2 * (size n : ℝ)) +
+        archRemainderBound + 10 / 3) + shift) :
+    floor * finiteVectorEuclideanNormSq
+        (finGlobalShellVector z (size n) (shell n)) ≤
+      finiteMatrixTowerTailEnergy
+          (logarithmicCvSBuilderEvenTowerMatrix
+            13 c13PrimePowerLocation c13PrimePowerBase size)
+          (logarithmicCvSBuilderEvenTowerShellVector z size shell)
+          (logarithmicCvSBuilderEvenTowerSplit size shell hSize) n +
+        shift * finiteVectorEuclideanNormSq
+          (finGlobalShellVector z (size n) (shell n)) := by
+  exact c13_logarithmicCvSBuilderEvenTowerTailEnergy_coerciveFloor
+    c13PrimePowerLocation c13PrimePowerBase z size shell hSize n hOld
+    diagonalFloor shift floor archRemainderBound (10 / 3)
+    hDiagonal hArchRemainder
+    (c13_finiteLogarithmicPrimeEvenShellErrorEnergy_abs_le_tenThird
+      (size n) (shell n) (finGlobalShellVector z (size n) (shell n)))
+    hFloor
+
+/-- Prime-closed cutoff-13 coercivity for the actual odd matrix-tower tail. -/
+theorem c13_logarithmicCvSBuilderOddTowerTailEnergy_coerciveFloor_primeClosed
+    (z : ℕ → ℝ) (size shell : ℕ → ℕ)
+    (hSize : ∀ n, size (n + 1) = size n + shell n)
+    (n : ℕ) (hOld : size n ≠ 0)
+    (diagonalFloor shift floor archRemainderBound : ℝ)
+    (hDiagonal : ∀ i : Fin (shell n),
+      diagonalFloor ≤ -logarithmicCvSArchimedeanEntry 13
+        (finGlobalShellPositiveMode (size n) (shell n) i)
+        (finGlobalShellPositiveMode (size n) (shell n) i))
+    (hArchRemainder :
+      |finiteMatrixQuadraticEnergy
+          (logarithmicCvSArchimedeanOddPositiveModeRemainderMatrix
+            13 (finGlobalShellPositiveMode (size n) (shell n)))
+          (finGlobalShellVector z (size n) (shell n))| ≤
+        archRemainderBound * finiteVectorEuclideanNormSq
+          (finGlobalShellVector z (size n) (shell n)))
+    (hFloor : floor ≤ diagonalFloor -
+      (logarithmicCvSPoleScale 13 /
+          (8 * Real.pi ^ 2 * (size n : ℝ)) +
+        archRemainderBound + 10 / 3) + shift) :
+    floor * finiteVectorEuclideanNormSq
+        (finGlobalShellVector z (size n) (shell n)) ≤
+      finiteMatrixTowerTailEnergy
+          (logarithmicCvSBuilderOddTowerMatrix
+            13 c13PrimePowerLocation c13PrimePowerBase size)
+          (logarithmicCvSBuilderOddTowerShellVector z size shell)
+          (logarithmicCvSBuilderOddTowerSplit size shell hSize) n +
+        shift * finiteVectorEuclideanNormSq
+          (finGlobalShellVector z (size n) (shell n)) := by
+  exact c13_logarithmicCvSBuilderOddTowerTailEnergy_coerciveFloor
+    c13PrimePowerLocation c13PrimePowerBase z size shell hSize n hOld
+    diagonalFloor shift floor archRemainderBound (10 / 3)
+    hDiagonal hArchRemainder
+    (c13_finiteLogarithmicPrimeOddShellErrorEnergy_abs_le_tenThird
+      (size n) (shell n) (finGlobalShellVector z (size n) (shell n)))
+    hFloor
 end RiemannCvs.V23BoundaryWeylMainline
