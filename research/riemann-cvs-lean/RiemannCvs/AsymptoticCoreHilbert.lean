@@ -1725,6 +1725,14 @@ theorem c13CoreNewestRelativeEnvelope_1109Over3840_lt_fourNinth
   norm_num at hscaled ⊢
   nlinarith
 
+/-- The cutoff `190` is the first integer certified by this exact rational
+envelope: at `189` the same bound still lies at or above `4 / 9`. -/
+theorem c13CoreNewestRelativeEnvelope_1109Over3840_ge_fourNinth_at_189 :
+    (4 / 9 : ℝ) ≤
+      c13CoreNewestRelativeEnvelope (1109 / 3840) 189 := by
+  unfold c13CoreNewestRelativeEnvelope c13DyadicGapLower
+  norm_num
+
 theorem c13EvenBuilderDyadicCoreNewest_relative_fourNinth_of_ge_190
     (n : ℕ) (hn : 190 ≤ n)
     (x : Fin (c13DyadicShellBase n - 960) → ℝ)

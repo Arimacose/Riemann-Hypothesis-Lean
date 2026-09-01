@@ -1,10 +1,12 @@
 # V23 Archimedean remainder Schur closure
 
-Date: 2026-09-01
+Date: 2026-09-02
 Branch: `research/cvs-boundary-weyl-v23`
 Lean module: `research/riemann-cvs-lean/RiemannCvs/ArchimedeanRemainderSchur.lean`
 Coupling module: `research/riemann-cvs-lean/RiemannCvs/AsymptoticTailRelativeCoupling.lean`
 Operator module: `research/riemann-cvs-lean/RiemannCvs/AsymptoticTailOperatorBound.lean`
+Historical-core module: `research/riemann-cvs-lean/RiemannCvs/AsymptoticCoreHilbert.lean`
+Sharp Hilbert module: `research/riemann-cvs-lean/RiemannCvs/AsymptoticCoreHilbertPi.lean`
 
 ## Result
 
@@ -550,13 +552,100 @@ For reference, the existing finite-channel aggregation theorem
 themselves, not their square roots.  The direct rectangular argument bypasses
 that aggregation altogether for the full old-core channel.
 
+## Pi-weighted Hilbert upgrade
+
+The elementary constant `4` above is now retained only as a dependency-light
+fallback.  `AsymptoticCoreHilbertPi.lean` formalizes the sharp weighted row
+estimate.  For `p > 0`, set
+
+\[
+f_p(t)=\frac1{(p+t)\sqrt t}.
+\]
+
+The module proves that `f_p` is antitone on every positive ray and evaluates
+its improper integral exactly:
+
+\[
+\int_0^\infty f_p(t)\,dt=\frac{\pi}{\sqrt p}.
+\]
+
+The proof uses Mathlib's change-of-variables theorem twice.  First `t=u^2`
+turns the integrand into `2/(p+u^2)`; then `u=sqrt(p)*v` reduces it to the
+standard identity
+
+\[
+\int_0^\infty\frac{dv}{1+v^2}=\frac\pi2.
+\]
+
+The integral comparison theorem for antitone functions then gives, for every
+finite consecutive interval above `M >= 1`,
+
+\[
+\sum_q\frac{q^{-1/2}}{p+q}\le\frac\pi{\sqrt p}.
+\]
+
+Feeding this row certificate into the existing weighted-Schur theorem replaces
+the quadratic-form constant `4` by `pi`, so the reflected half-Hilbert term
+costs only `pi/2`.  To keep the rest of the budget in exact rational arithmetic,
+the formal chain uses Mathlib's certified decimal upper bound on `pi` to prove
+
+\[
+\frac\pi2<\frac{11}{7}.
+\]
+
+The centered residual is unchanged.  Hence the complete Archimedean loss is
+
+\[
+\frac{11}{7}+\frac{43}{3840}
+=\frac{42541}{26880},
+\]
+
+and the uniform historical-core coercive floor improves to
+
+\[
+\frac95+\frac12-\frac{42541}{26880}
+=\frac{19283}{26880}\approx0.7173735.
+\]
+
+This is more than twice the previous `1109/3840` floor and applies to every
+core length in both parity sectors.  Substitution into the exact full
+core/newest envelope gives
+
+\[
+q_n^{\rm core/new}
+=\frac{(4217/1000)^2}{(19283/26880)L_n}.
+\]
+
+Lean proves that this coefficient is strictly below `4/9` for every `n >= 70`.
+It also proves that the same exact rational envelope is still at least `4/9`
+at `n = 69`, so `70` is the first integer reached by this particular envelope.
+The final even and odd theorems act on the literal builder blocks.  Since
+`c13DyadicShellBase n = 371293 * 2^n`, this is an eventual analytic threshold,
+not a claim about the unresolved finite prefix.
+
+Principal new theorems:
+
+- `integral_hilbertPiIntegrand`
+- `integrableOn_hilbertPiIntegrand`
+- `c13CoreHilbertKernel_row_le_pi`
+- `c13CoreHilbertKernel_energy_abs_le_pi`
+- `c13CoreReflectedHilbertLeading_energy_abs_le_elevenSevenths`
+- `c13EvenCoreArchimedeanRemainder_energy_abs_le_42541Over26880`
+- `c13OddCoreArchimedeanRemainder_energy_abs_le_42541Over26880`
+- `c13_logarithmicCvSBuilderEvenCore_energy_ge_19283Over26880`
+- `c13_logarithmicCvSBuilderOddCore_energy_ge_19283Over26880`
+- `c13CoreNewestRelativeEnvelope_19283Over26880_lt_fourNinth`
+- `c13CoreNewestRelativeEnvelope_19283Over26880_ge_fourNinth_at_69`
+- `c13EvenBuilderDyadicCoreNewest_relative_fourNinth_of_ge_70`
+- `c13OddBuilderDyadicCoreNewest_relative_fourNinth_of_ge_70`
+
 ## Next formal boundary
 
 The fixed historical-core floor and the full old-core/new-shell estimate are
 now closed.  The next boundary is structural rather than an unproved local
 operator estimate:
 
-1. connect the uniform `1109/3840` core floor and the unconditional `n >= 190`
+1. connect the uniform `19283/26880` core floor and the unconditional `n >= 70`
    `< 4/9` theorem to the existing
    `BoundaryWeylCumulative`, `BoundaryGapNoCrossing`, and
    `ParityOrderContinuation` no-crossing chain;
