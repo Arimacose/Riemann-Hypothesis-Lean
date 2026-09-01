@@ -639,23 +639,130 @@ Principal new theorems:
 - `c13EvenBuilderDyadicCoreNewest_relative_fourNinth_of_ge_70`
 - `c13OddBuilderDyadicCoreNewest_relative_fourNinth_of_ge_70`
 
+## Exact finite-matrix to boundary-Weyl adapter
+
+`FiniteMatrixBoundaryWeylAdapter.lean` removes a previously implicit type
+conversion.  For a concrete matrix on a sum index `iota ⊕ kappa`, it defines:
+
+- the left-left and right-right matrices;
+- the averaged rectangular cross matrix used by
+  `finiteMatrixBlockCrossEnergy`;
+- their bilinear maps on the actual Hilbert spaces
+  `EuclideanSpace R iota` and `EuclideanSpace R kappa`.
+
+The coordinate identities are exact:
+
+```text
+lowForm(x,x)  = finiteMatrixBlockBaseEnergy A x,
+highForm(y,y) = finiteMatrixBlockTailEnergy A y,
+coupling(x,y) = finiteMatrixBlockCrossEnergy A x y.
+```
+
+A `FiniteMatrixRelativeEnergyCertificate A q` now packages symmetry,
+nonnegativity of both diagonal energies, and the relative cross inequality.
+The theorem
+`finiteMatrixBoundaryWeyl_mono_of_relativeEnergyCertificate` feeds that
+package directly into `boundaryWeyl_mono_of_relativeEnergyCoupling`; its
+positive-response companion is also formalized.  Hence no continuity norm,
+matrix convention, or factor of two is hidden between the literal CvS block
+and the abstract response theorem.
+
+For the complete `(960,N] ⊕ (N,2N]` builder, both parity certificates are
+constructed for `n >= 70`, and the even/odd boundary-Weyl monotonicity and
+positivity wrappers leave only the three weak resolvent equations and the
+finite positive response as explicit hypotheses.
+
+## Adjacent-half multiband breakthrough
+
+The threshold `n >= 70` comes from charging the entire historical interval
+`(960,N]` the smallest mode-`960` gap.  It is not intrinsic to the newest
+coupling.  `AsymptoticAdjacentCoreHilbertPi.lean` begins a different route:
+split the historical interval into dyadic bands and first isolate the half
+adjacent to the newest shell,
+
+```text
+(floor(N/2), N]  against  (N,2N].
+```
+
+At the first analytic scale `N = 13^5 = 371293`, one has
+
+```text
+floor(N/2) >= 6 * 13^4 = 171366.
+```
+
+The exact factorization
+
+```text
+log(6 * 13^4) = log 2 + log 3 + 4 log 13
+```
+
+together with the already proved rational bounds
+`log 2 > 69/100`, `log 3 > 109/100`, and `log 13 > 64/25`
+gives `log(floor(N/2)) > 12`.  After the pole, prime, and new pi-weighted
+Archimedean losses, Lean obtains the much larger adjacent-core gap
+
+```text
+59/10 = 5.9.
+```
+
+The newest shell already has gap `39/5 = 7.8`.  Exact rational arithmetic
+then verifies
+
+```text
+(4217/1000)^2
+  <= (2/5) * (59/10) * (39/5).
+```
+
+Consequently the literal complete even and odd couplings between the adjacent
+historical half and the newest shell satisfy relative coefficient `2/5` for
+**every** `n >= 0`.  This simultaneously removes the `n >= 70` threshold for
+the dominant adjacent band and improves its coefficient from `4/9` to `2/5`.
+The corresponding Euclidean relative-energy certificates are already built,
+so this block can be inserted directly into the boundary-Weyl form adapter.
+
+This does not yet aggregate the older bands.  It changes the remaining
+analytic target substantially: the adjacent half consumes `2/5`, leaving
+`3/5` of a unit relative budget for all earlier bands.  Those bands are
+separated from the newest shell by a distance comparable to their scale, so
+the next source theorem should exploit the explicit off-diagonal prime
+translation denominator and the existing centered Archimedean decay rather
+than reusing the global `10/3` prime norm.
+
+Principal additional theorems:
+
+- `twelve_lt_log_nat_of_ge_six_mul_thirteenPowFour`
+- `c13_adjacentPiCore_scalar_reserve_ge_fiftyNineTenths`
+- `c13_logarithmicCvSBuilderEvenAdjacentCore_energy_ge_fiftyNineTenths`
+- `c13_logarithmicCvSBuilderOddAdjacentCore_energy_ge_fiftyNineTenths`
+- `c13_completeCrossBudget_le_twoFifths_adjacentGapProduct`
+- `c13EvenBuilderDyadicAdjacentCoreNewest_relative_twoFifths`
+- `c13OddBuilderDyadicAdjacentCoreNewest_relative_twoFifths`
+- `finiteMatrixCouplingEuclideanForm_eq_crossEnergy`
+- `finiteMatrixBoundaryWeyl_mono_of_relativeEnergyCertificate`
+- `c13EvenBuilderDyadicAdjacentCoreNewest_relativeEnergyCertificate`
+- `c13OddBuilderDyadicAdjacentCoreNewest_relativeEnergyCertificate`
+
 ## Next formal boundary
 
 The fixed historical-core floor and the full old-core/new-shell estimate are
 now closed.  The next boundary is structural rather than an unproved local
 operator estimate:
 
-1. connect the uniform `19283/26880` core floor and the unconditional `n >= 70`
-   `< 4/9` theorem to the existing
+1. prove distance-sensitive cross estimates for the older dyadic historical
+   bands, especially the prime-translation component whose global `10/3`
+   operator norm discards frequency separation, and aggregate those budgets
+   with the new scale-free adjacent `2/5` certificate;
+2. absorb the fixed prefix through mode `960` (or a smaller separately
+   certified base) into the resulting multiband form without spending the
+   adjacent block's logarithmic reserve;
+3. instantiate the now-exact Euclidean form adapter with the actual finite and
+   split weak resolvent equations, then connect its monotonic response to
    `BoundaryWeylCumulative`, `BoundaryGapNoCrossing`, and
-   `ParityOrderContinuation` no-crossing chain;
-2. bridge the finite interval between the certified cutoff ladder and the
-   analytic bases (`M >= 960` and the dyadic tail base `13^5`), or sharpen the
-   constants enough to lower those thresholds;
-3. formulate the infinite dyadic block limit so that uniform finite-core
+   `ParityOrderContinuation`;
+4. formulate the infinite dyadic block limit so that finite-core
    coercivity and the relative `< 4/9` estimate pass to the limiting
    self-adjoint form without reintroducing a divergent square-root budget;
-4. retain the adjacent-shell summable theorem as a separate tool for any
+5. retain the adjacent-shell summable theorem as a separate tool for any
    later cumulative-residue estimate that genuinely requires summability.
 
 This is a substantive new no-crossing ingredient, but the global continuation

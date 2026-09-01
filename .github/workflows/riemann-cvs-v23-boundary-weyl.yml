@@ -29,6 +29,8 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticCoreNewestTotalError.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticCoreHilbert.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticCoreHilbertPi.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticAdjacentCoreHilbertPi.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/FiniteMatrixBoundaryWeylAdapter.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V23BoundaryWeylMainline.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V22ZeroModeMainline.lean'
@@ -86,6 +88,8 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticCoreNewestTotalError.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticCoreHilbert.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticCoreHilbertPi.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticAdjacentCoreHilbertPi.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/FiniteMatrixBoundaryWeylAdapter.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V23BoundaryWeylMainline.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V22ZeroModeMainline.lean'
@@ -199,6 +203,10 @@ jobs:
           lake env lean RiemannCvs/AsymptoticCoreHilbert.lean
           lake build RiemannCvs.AsymptoticCoreHilbertPi
           lake env lean RiemannCvs/AsymptoticCoreHilbertPi.lean
+          lake build RiemannCvs.AsymptoticAdjacentCoreHilbertPi
+          lake env lean RiemannCvs/AsymptoticAdjacentCoreHilbertPi.lean
+          lake build RiemannCvs.FiniteMatrixBoundaryWeylAdapter
+          lake env lean RiemannCvs/FiniteMatrixBoundaryWeylAdapter.lean
 
       - name: Reject placeholders and audit theorem axioms
         working-directory: research/riemann-cvs-lean
@@ -231,6 +239,8 @@ jobs:
             RiemannCvs/AsymptoticCoreNewestTotalError.lean
             RiemannCvs/AsymptoticCoreHilbert.lean
             RiemannCvs/AsymptoticCoreHilbertPi.lean
+            RiemannCvs/AsymptoticAdjacentCoreHilbertPi.lean
+            RiemannCvs/FiniteMatrixBoundaryWeylAdapter.lean
           )
           if grep -nE '(^|[^[:alnum:]_])(sorry|admit)([^[:alnum:]_]|$)' "${files[@]}"; then
             echo 'proof placeholder detected' >&2
@@ -249,6 +259,8 @@ jobs:
           import RiemannCvs.AsymptoticCoreNewestTotalError
           import RiemannCvs.AsymptoticCoreHilbert
           import RiemannCvs.AsymptoticCoreHilbertPi
+          import RiemannCvs.AsymptoticAdjacentCoreHilbertPi
+          import RiemannCvs.FiniteMatrixBoundaryWeylAdapter
           import RiemannCvs.PrimeTranslationSupersolution
           import RiemannCvs.PrimeTranslationContinuousSupersolution
           import RiemannCvs.PrimeTranslationContinuousSchur
@@ -657,6 +669,20 @@ jobs:
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13CoreNewestRelativeEnvelope_19283Over26880_ge_fourNinth_at_69
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13EvenBuilderDyadicCoreNewest_relative_fourNinth_of_ge_70
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddBuilderDyadicCoreNewest_relative_fourNinth_of_ge_70
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.twelve_lt_log_nat_of_ge_six_mul_thirteenPowFour
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_adjacentPiCore_scalar_reserve_ge_fiftyNineTenths
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_logarithmicCvSBuilderEvenAdjacentCore_energy_ge_fiftyNineTenths
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_logarithmicCvSBuilderOddAdjacentCore_energy_ge_fiftyNineTenths
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_completeCrossBudget_le_twoFifths_adjacentGapProduct
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13EvenBuilderDyadicAdjacentCoreNewest_relative_twoFifths
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddBuilderDyadicAdjacentCoreNewest_relative_twoFifths
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.finiteMatrixCouplingEuclideanForm_eq_crossEnergy
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.finiteMatrixBoundaryWeyl_mono_of_relativeEnergyCertificate
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.finiteMatrixBoundaryWeyl_pos_of_relativeEnergyCertificate
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13EvenBuilderDyadicAdjacentCoreNewest_relativeEnergyCertificate
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddBuilderDyadicAdjacentCoreNewest_relativeEnergyCertificate
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13EvenBuilderDyadic_boundaryWeyl_mono_of_ge_70
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddBuilderDyadic_boundaryWeyl_mono_of_ge_70
           LEAN
           lake env lean V23BoundaryWeylAxioms.lean | tee v23-boundary-weyl-axioms.txt
           if grep -E 'sorryAx' v23-boundary-weyl-axioms.txt; then
