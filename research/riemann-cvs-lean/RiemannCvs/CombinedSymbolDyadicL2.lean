@@ -4,9 +4,9 @@ import Mathlib.Analysis.Complex.Liouville
 import Mathlib.Analysis.Complex.Trigonometric
 import Mathlib.Analysis.PSeries
 import Mathlib.Analysis.SpecificLimits.Basic
-import Mathlib.Analysis.SpecialFunctions.Gamma.Digamma
 import RiemannCvs.BoundaryWeylCumulative
 import RiemannCvs.CvSParityDisplacement
+import RiemannCvs.DigammaQuarter
 
 /-!
 # Combined-symbol dyadic L2 adapters
@@ -2349,6 +2349,33 @@ noncomputable def archimedeanDiagonalAsymptoticConstant (c : ℝ) : ℝ :=
     (Complex.digamma (1 / 4 : ℂ)).re -
     logarithmicArchimedeanKappa c - logarithmicArchimedeanPoleJ c -
     4 * archimedeanGeometricMass c
+
+/-- Eliminating `ψ(1/4)` from the asymptotic constant also cancels the
+Euler--Mascheroni terms exactly.  The remaining cutoff endpoint is elementary:
+it contains only logarithms, exponentials, arctangent, `π`, and square roots. -/
+theorem archimedeanDiagonalAsymptoticConstant_eq_without_euler (c : ℝ) :
+    archimedeanDiagonalAsymptoticConstant c =
+      Real.log (Real.pi / Real.log c) + 3 * Real.log 2 + Real.pi / 2 -
+        Real.log
+          (4 * Real.pi *
+            (Real.exp (Real.log c) - 1) / (Real.exp (Real.log c) + 1)) -
+        logarithmicArchimedeanPoleJ c -
+        4 * archimedeanGeometricMass c := by
+  unfold archimedeanDiagonalAsymptoticConstant logarithmicArchimedeanKappa
+  rw [RiemannCvs.digamma_one_fourth_re]
+  ring
+
+/-- Positive cutoffs replace `exp (log c)` by `c` in the elementary
+asymptotic constant. -/
+theorem archimedeanDiagonalAsymptoticConstant_eq_without_euler_of_pos
+    (c : ℝ) (hc : 0 < c) :
+    archimedeanDiagonalAsymptoticConstant c =
+      Real.log (Real.pi / Real.log c) + 3 * Real.log 2 + Real.pi / 2 -
+        Real.log (4 * Real.pi * (c - 1) / (c + 1)) -
+        logarithmicArchimedeanPoleJ c -
+        4 * archimedeanGeometricMass c := by
+  rw [archimedeanDiagonalAsymptoticConstant_eq_without_euler,
+    Real.exp_log hc]
 
 noncomputable def archimedeanDiagonalAsymptoticError (c x : ℝ) : ℝ :=
   let y := archimedeanAsymptoticHeight c x
