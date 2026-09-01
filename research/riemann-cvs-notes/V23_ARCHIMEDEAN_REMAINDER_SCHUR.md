@@ -742,19 +742,92 @@ Principal additional theorems:
 - `c13EvenBuilderDyadicAdjacentCoreNewest_relativeEnergyCertificate`
 - `c13OddBuilderDyadicAdjacentCoreNewest_relativeEnergyCertificate`
 
+## Full analytic core anchored at `3840`
+
+The adjacent-half split reveals a second improvement that aligns directly with
+the rigorous finite frontier.  The old uniform pole charge `13/60` was proved
+at `M=960` and then reused for every larger historical start.  Its source
+formula actually decays as `1/M`.  At `M >= 3840`, the existing rational pole
+scale bound and `pi > 3` give the sharper formal estimate
+
+```text
+poleTail(M) <= 51/1000.
+```
+
+Also,
+
+```text
+3840 = 2^8 * 3 * 5,
+```
+
+so the elementary logarithm bounds already in the repository imply
+
+```text
+log M > 8*(69/100) + 109/100 + 8/5 = 821/100.
+```
+
+Combining this with the pi-weighted Archimedean loss and the prime bound gives
+a complete historical-core coercive floor
+
+```text
+229/100 = 2.29
+```
+
+for every builder block beginning at `M >= 3840`.  The same retained pole
+decay reduces the complete cross amplitude from `4217/1000` to the exact sum
+
+```text
+51/1000 + 667/1000 + 10/3 = 6077/1500.
+```
+
+At the first analytic shell, exact arithmetic verifies
+
+```text
+(6077/1500)^2
+  <= (23/25) * (229/100) * (39/5).
+```
+
+Therefore the literal complete core `(3840,N]`, not merely its adjacent half,
+has relative coefficient `23/25 < 1` against `(N,2N]` for every
+`N = 371293*2^n`, including `n=0`.  Both parity sectors and their Euclidean
+relative-energy certificates are formalized.  This replaces the previous
+`n>=70` eventual full-core threshold by a scale-free coefficient once the
+historical start is moved from `960` to the already certified cutoff `3840`.
+
+It does not by itself identify the low block `[1,3840]` with the analytic core
+or prove their cross estimate.  Its importance is architectural: the finite
+certificate and analytic theorem now share the same anchor, and the remaining
+bridge is a fixed-prefix-to-remote-core channel rather than seventy unproved
+dyadic analytic steps.
+
+Principal anchor theorems:
+
+- `eightHundredTwentyOneHundredths_lt_log_nat_of_ge_3840`
+- `c13_logarithmicCvSPoleTail_le_fiftyOneThousandths`
+- `c13_anchor3840PiCore_scalar_reserve_ge_twoHundredTwentyNineHundredths`
+- `c13_logarithmicCvSBuilderEvenAnchor3840Core_energy_ge_229Over100`
+- `c13_logarithmicCvSBuilderOddAnchor3840Core_energy_ge_229Over100`
+- `c13EvenCoreNewestTotalErrorCrossEnergy_sq_le_6077Over1500`
+- `c13OddCoreNewestTotalErrorCrossEnergy_sq_le_6077Over1500`
+- `c13_anchor3840_completeCrossBudget_le_twentyThreeTwentyFifths_gapProduct`
+- `c13EvenBuilderDyadicAnchor3840CoreNewest_relative_23Over25`
+- `c13OddBuilderDyadicAnchor3840CoreNewest_relative_23Over25`
+- `c13EvenBuilderDyadicAnchor3840CoreNewest_relativeEnergyCertificate`
+- `c13OddBuilderDyadicAnchor3840CoreNewest_relativeEnergyCertificate`
+
 ## Next formal boundary
 
 The fixed historical-core floor and the full old-core/new-shell estimate are
 now closed.  The next boundary is structural rather than an unproved local
 operator estimate:
 
-1. prove distance-sensitive cross estimates for the older dyadic historical
-   bands, especially the prime-translation component whose global `10/3`
-   operator norm discards frequency separation, and aggregate those budgets
-   with the new scale-free adjacent `2/5` certificate;
-2. absorb the fixed prefix through mode `960` (or a smaller separately
-   certified base) into the resulting multiband form without spending the
-   adjacent block's logarithmic reserve;
+1. prove the fixed `[1,3840]` to remote analytic-core cross estimate needed to
+   glue the rigorous finite frontier to the new scale-free `23/25` core; a
+   distance-sensitive prime-translation estimate is now the dominant source
+   target;
+2. retain the adjacent `2/5` and older-band decomposition as a reserve-rich
+   fallback if the direct fixed-prefix channel cannot fit the `2/25` slack of
+   the anchored full-core certificate;
 3. instantiate the now-exact Euclidean form adapter with the actual finite and
    split weak resolvent equations, then connect its monotonic response to
    `BoundaryWeylCumulative`, `BoundaryGapNoCrossing`, and

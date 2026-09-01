@@ -18,8 +18,10 @@ The final theorems instantiate this adapter for the literal even and odd
 `c = 13` historical-core/newest-shell matrices.  The complete `(960,N]`
 historical core supplies `q = 4/9` from the sharp uniform-envelope cutoff
 `n = 70`; the adjacent half `(floor(N/2),N]` supplies the stronger `q = 2/5`
-certificate already at `n = 0`.  Only the actual weak resolvent equations and
-the finite response remain as explicit boundary-Weyl inputs.
+certificate already at `n = 0`; and the complete core anchored at the current
+finite frontier `3840` supplies `q = 23/25 < 1` for every `n`.  Only the actual
+weak resolvent equations and the finite response remain as explicit
+boundary-Weyl inputs.
 -/
 
 namespace RiemannCvs.V23BoundaryWeylMainline
@@ -397,6 +399,58 @@ theorem c13OddBuilderDyadicAdjacentCoreNewest_relativeEnergyCertificate
       (finiteVectorEuclideanNormSq_nonneg y)).trans hTail
   · simpa [M, N] using
       c13OddBuilderDyadicAdjacentCoreNewest_relative_twoFifths n
+
+/-- The complete analytic core anchored at the current rigorous finite
+frontier `3840` has a fixed coefficient `23/25 < 1` at every dyadic scale. -/
+theorem c13EvenBuilderDyadicAnchor3840CoreNewest_relativeEnergyCertificate
+    (n : ℕ) :
+    FiniteMatrixRelativeEnergyCertificate
+      (c13EvenBuilderCoreNewestBlock 3840 (c13DyadicShellBase n))
+      (23 / 25 : ℝ) := by
+  have hN : 960 ≤ c13DyadicShellBase n := by
+    have h := c13DyadicShellBase_ge_371293 n
+    omega
+  constructor
+  · intro i j
+    exact logarithmicCvSBuilderEvenPositiveModeMatrix_symm
+      13 c13PrimePowerLocation c13PrimePowerBase
+      (c13CoreNewestPositiveMode 3840 (c13DyadicShellBase n)) i j
+  · intro x
+    have hCore := c13EvenBuilderAnchor3840CoreNewestBaseEnergy_ge_229Over100
+      3840 (c13DyadicShellBase n) (by norm_num) x
+    exact (mul_nonneg (by norm_num)
+      (finiteVectorEuclideanNormSq_nonneg x)).trans hCore
+  · intro y
+    have hTail := c13EvenBuilderCoreNewestTailEnergy_ge_dynamicGap_normSq
+      3840 (c13DyadicShellBase n) hN y
+    exact (mul_nonneg (c13ShellDynamicGap_nonneg _ hN)
+      (finiteVectorEuclideanNormSq_nonneg y)).trans hTail
+  · exact c13EvenBuilderDyadicAnchor3840CoreNewest_relative_23Over25 n
+
+theorem c13OddBuilderDyadicAnchor3840CoreNewest_relativeEnergyCertificate
+    (n : ℕ) :
+    FiniteMatrixRelativeEnergyCertificate
+      (c13OddBuilderCoreNewestBlock 3840 (c13DyadicShellBase n))
+      (23 / 25 : ℝ) := by
+  have hN : 960 ≤ c13DyadicShellBase n := by
+    have h := c13DyadicShellBase_ge_371293 n
+    omega
+  constructor
+  · intro i j
+    exact logarithmicCvSBuilderOddPositiveModeMatrix_symm
+      13 c13PrimePowerLocation c13PrimePowerBase
+      (c13CoreNewestPositiveMode 3840 (c13DyadicShellBase n)) i j
+  · intro x
+    have hCore := c13OddBuilderAnchor3840CoreNewestBaseEnergy_ge_229Over100
+      3840 (c13DyadicShellBase n) (by norm_num) x
+    exact (mul_nonneg (by norm_num)
+      (finiteVectorEuclideanNormSq_nonneg x)).trans hCore
+  · intro y
+    have hTail := c13OddBuilderCoreNewestTailEnergy_ge_dynamicGap_normSq
+      3840 (c13DyadicShellBase n) hN y
+    exact (mul_nonneg (c13ShellDynamicGap_nonneg _ hN)
+      (finiteVectorEuclideanNormSq_nonneg y)).trans hTail
+  · exact c13OddBuilderDyadicAnchor3840CoreNewest_relative_23Over25 n
 
 /-- The even finite matrix certificate now reaches the abstract
 boundary-Weyl response without any untyped matrix/form conversion left over.

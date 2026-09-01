@@ -683,6 +683,20 @@ jobs:
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddBuilderDyadicAdjacentCoreNewest_relativeEnergyCertificate
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13EvenBuilderDyadic_boundaryWeyl_mono_of_ge_70
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddBuilderDyadic_boundaryWeyl_mono_of_ge_70
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.eightHundredTwentyOneHundredths_lt_log_nat_of_ge_3840
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_logarithmicCvSPoleTail_le_fiftyOneThousandths
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_anchor3840PiCore_scalar_reserve_ge_twoHundredTwentyNineHundredths
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_logarithmicCvSBuilderEvenAnchor3840Core_energy_ge_229Over100
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_logarithmicCvSBuilderOddAnchor3840Core_energy_ge_229Over100
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13EvenPoleCoreNewestCrossEnergy_sq_le_fiftyOneThousandths
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddPoleCoreNewestCrossEnergy_sq_le_fiftyOneThousandths
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13EvenCoreNewestTotalErrorCrossEnergy_sq_le_6077Over1500
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddCoreNewestTotalErrorCrossEnergy_sq_le_6077Over1500
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_anchor3840_completeCrossBudget_le_twentyThreeTwentyFifths_gapProduct
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13EvenBuilderDyadicAnchor3840CoreNewest_relative_23Over25
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddBuilderDyadicAnchor3840CoreNewest_relative_23Over25
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13EvenBuilderDyadicAnchor3840CoreNewest_relativeEnergyCertificate
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddBuilderDyadicAnchor3840CoreNewest_relativeEnergyCertificate
           LEAN
           lake env lean V23BoundaryWeylAxioms.lean | tee v23-boundary-weyl-axioms.txt
           if grep -E 'sorryAx' v23-boundary-weyl-axioms.txt; then
