@@ -2860,3 +2860,40 @@ Schur skeleton must be lifted to the bounded partial-translation operator on
 `L2[0,log 13]` and composed with the proved Fourier-compression identity.
 This is now a one-step positive-supersolution interface rather than a
 six-fold path-kernel expansion.
+
+## The 61-cell certificate now covers every real physical point
+
+The first of those two connections is now closed, and in a stronger form than
+the representative-point statement.  The deterministic generator
+`generate_prime_translation_continuous_supersolution.py` emits
+`PrimeTranslationContinuousSupersolution.lean` and verifies the checked-in
+module byte-for-byte in `--check` mode.  The generated proof defines the same
+step height directly on `Real`, partitions `[1,13]` at the exact 62 rational
+breakpoints, proves the upper-weight row inequality on every open cell and
+every endpoint, and then exhausts the ordered interval.
+
+The resulting theorem is genuinely continuous-domain rather than a density
+claim about rational samples:
+
+```text
+c13ContinuousSupersolution_all_upper_rows_le
+  (t : Real) (1 <= t) (t <= 13) :
+  T_upper h(t) <= (33223/10000) * h(t).
+```
+
+The eight already-proved strict logarithmic weight inequalities and
+nonnegativity of every row factor then give the final pointwise statement
+
+```text
+c13ContinuousActualPrimeTranslationRow_lt_tenThird
+  (t : Real) (1 <= t) (t <= 13) :
+  T_actual h(t) < (10/3) * h(t).
+```
+
+Thus neither interpolation nor an unformalized assertion that the row
+signature is constant remains in the prime supersolution certificate.  The
+remaining prime-side analytic boundary is now only the operator passage:
+formalize the partial translations on `L2[0,log 13]`, integrate the weighted
+AM-GM inequality under translation, and compose the resulting norm bound with
+the existing Fourier-compression/parity bridge.  No sixth-power path
+enumeration is needed on this preferred route.
