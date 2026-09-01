@@ -815,16 +815,99 @@ Principal anchor theorems:
 - `c13EvenBuilderDyadicAnchor3840CoreNewest_relativeEnergyCertificate`
 - `c13OddBuilderDyadicAnchor3840CoreNewest_relativeEnergyCertificate`
 
+## Distance-sensitive fixed-prefix prime bridge
+
+The first source component of the remaining `[1,3840]` bridge is now closed
+in `PrimeTranslationSeparatedBands.lean`.  The global prime operator bound
+`10/3` is intentionally insensitive to Fourier distance.  For a fixed prefix
+and a remote shell that loss is artificial: the exact truncated-translation
+formula gives, whenever `n != m`,
+
+```text
+|T_y(n,m)| <= 2 / (pi * |n-m|).
+```
+
+The eight cutoff-13 von-Mangoldt weights are each below their previously
+certified rational envelopes, whose exact sum is
+
+```text
+491/1000 + 635/1000 + 347/1000 + 720/1000
+  + 736/1000 + 246/1000 + 367/1000 + 724/1000
+= 2133/500.
+```
+
+Using `pi > 3`, Lean therefore proves the simple scalar kernel bound
+
+```text
+|Prime13(n,m)| <= 3 / |n-m|.
+```
+
+The positive-mode even and odd parity entries contain both the difference and
+sum denominators.  For a row in `[1,F]` and a column in `(N,2N]`, both are at
+least `N+1-F`, hence
+
+```text
+|PrimeParity(i,j)| <= 6 / (N+1-F).
+```
+
+A rectangular Cauchy--Schwarz estimate retains the actual `F*N` entry count,
+instead of replacing the rectangle by an `N*N` square.  The resulting squared
+Euclidean coefficient is
+
+```text
+C(F,N) = F*N*(6/(N+1-F))^2.
+```
+
+For the certified finite frontier and first analytic shell,
+
+```text
+C(3840,371293) = 0.3801408381... < 2/5.
+```
+
+The decimal is explanatory only; Lean proves the rational inequality after
+clearing the positive denominator.  More importantly, the coefficient has an
+exact all-scale transport law
+
+```text
+C(F,2N) <= (1/2)*C(F,N)       (1 <= F <= N),
+```
+
+so that
+
+```text
+C(3840,371293*2^k) <= (2/5)*(1/2)^k.
+```
+
+This geometric envelope is proved for the actual CvS prime-error sign
+convention and for the averaged finite-matrix cross coordinate in both parity
+sectors.  It is the first fully formal fixed-prefix-to-remote-shell source
+estimate.  In particular, the prime part of the finite/analytic bridge is no
+longer represented by the nondecaying `10/3` norm.
+
+Principal separated-band theorems:
+
+- `abs_truncatedTranslationFourierEntry_le_two_div`
+- `c13_logarithmicPrimeWeight_sum_lt_2133Over500`
+- `c13_finitePrimeTranslationFourierEntry_abs_le_three_div`
+- `c13_fixedRemoteEvenPrimeEntry_abs_le_six_div_gap`
+- `c13_fixedRemoteOddPrimeEntry_abs_le_six_div_gap`
+- `rectangular_bilinear_sq_le_card_product_of_entry_abs_le`
+- `c13FixedRemotePrimeCoefficient_two_mul_le_half`
+- `c13FixedRemotePrimeCoefficient_dyadic_le`
+- `c13_fixed3840_remote_primeCoefficient_le_twoFifths`
+- `c13_fixed3840_remote_primeCoefficient_dyadic_le`
+- `c13_fixed3840_remoteEvenPrimeErrorCrossEnergy_sq_le_dyadic`
+- `c13_fixed3840_remoteOddPrimeErrorCrossEnergy_sq_le_dyadic`
+
 ## Next formal boundary
 
 The fixed historical-core floor and the full old-core/new-shell estimate are
 now closed.  The next boundary is structural rather than an unproved local
 operator estimate:
 
-1. prove the fixed `[1,3840]` to remote analytic-core cross estimate needed to
-   glue the rigorous finite frontier to the new scale-free `23/25` core; a
-   distance-sensitive prime-translation estimate is now the dominant source
-   target;
+1. complete the pole and Archimedean components of the fixed `[1,3840]` to
+   remote-shell channel, then combine them with the now-proved geometrically
+   decaying prime component and the exact finite-prefix coercive certificate;
 2. retain the adjacent `2/5` and older-band decomposition as a reserve-rich
    fallback if the direct fixed-prefix channel cannot fit the `2/25` slack of
    the anchored full-core certificate;

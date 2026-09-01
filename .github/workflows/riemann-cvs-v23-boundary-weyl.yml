@@ -14,6 +14,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/CvSParityDisplacement.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/CombinedSymbolDyadicL2.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationFourierBridge.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationSeparatedBands.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationPowerBound.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationSupersolution.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationContinuousSupersolution.lean'
@@ -73,6 +74,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/CvSParityDisplacement.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/CombinedSymbolDyadicL2.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationFourierBridge.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationSeparatedBands.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationPowerBound.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationSupersolution.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationContinuousSupersolution.lean'
@@ -207,6 +209,8 @@ jobs:
           lake env lean RiemannCvs/AsymptoticAdjacentCoreHilbertPi.lean
           lake build RiemannCvs.FiniteMatrixBoundaryWeylAdapter
           lake env lean RiemannCvs/FiniteMatrixBoundaryWeylAdapter.lean
+          lake build RiemannCvs.PrimeTranslationSeparatedBands
+          lake env lean RiemannCvs/PrimeTranslationSeparatedBands.lean
 
       - name: Reject placeholders and audit theorem axioms
         working-directory: research/riemann-cvs-lean
@@ -222,6 +226,7 @@ jobs:
             RiemannCvs/CvSParityDisplacement.lean
             RiemannCvs/CombinedSymbolDyadicL2.lean
             RiemannCvs/PrimeTranslationFourierBridge.lean
+            RiemannCvs/PrimeTranslationSeparatedBands.lean
             RiemannCvs/PrimeTranslationPowerBound.lean
             RiemannCvs/PrimeTranslationSupersolution.lean
             RiemannCvs/PrimeTranslationContinuousSupersolution.lean
@@ -261,6 +266,7 @@ jobs:
           import RiemannCvs.AsymptoticCoreHilbertPi
           import RiemannCvs.AsymptoticAdjacentCoreHilbertPi
           import RiemannCvs.FiniteMatrixBoundaryWeylAdapter
+          import RiemannCvs.PrimeTranslationSeparatedBands
           import RiemannCvs.PrimeTranslationSupersolution
           import RiemannCvs.PrimeTranslationContinuousSupersolution
           import RiemannCvs.PrimeTranslationContinuousSchur
@@ -697,6 +703,19 @@ jobs:
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddBuilderDyadicAnchor3840CoreNewest_relative_23Over25
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13EvenBuilderDyadicAnchor3840CoreNewest_relativeEnergyCertificate
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddBuilderDyadicAnchor3840CoreNewest_relativeEnergyCertificate
+          #print axioms RiemannCvs.PrimeTranslationSeparatedBands.abs_truncatedTranslationFourierEntry_le_two_div
+          #print axioms RiemannCvs.PrimeTranslationSeparatedBands.c13_logarithmicPrimeWeight_sum_lt_2133Over500
+          #print axioms RiemannCvs.PrimeTranslationSeparatedBands.c13_finitePrimeTranslationFourierEntry_abs_le_three_div
+          #print axioms RiemannCvs.PrimeTranslationSeparatedBands.c13_fixedRemoteEvenPrimeEntry_abs_le_six_div_gap
+          #print axioms RiemannCvs.PrimeTranslationSeparatedBands.c13_fixedRemoteOddPrimeEntry_abs_le_six_div_gap
+          #print axioms RiemannCvs.PrimeTranslationSeparatedBands.c13FixedRemotePrimeCoefficient_two_mul_le_half
+          #print axioms RiemannCvs.PrimeTranslationSeparatedBands.c13FixedRemotePrimeCoefficient_dyadic_le
+          #print axioms RiemannCvs.PrimeTranslationSeparatedBands.c13_fixed3840_remote_primeCoefficient_le_twoFifths
+          #print axioms RiemannCvs.PrimeTranslationSeparatedBands.c13_fixed3840_remote_primeCoefficient_dyadic_le
+          #print axioms RiemannCvs.PrimeTranslationSeparatedBands.c13_fixed3840_remoteEvenPrimeErrorCrossEnergy_sq_le_twoFifths
+          #print axioms RiemannCvs.PrimeTranslationSeparatedBands.c13_fixed3840_remoteOddPrimeErrorCrossEnergy_sq_le_twoFifths
+          #print axioms RiemannCvs.PrimeTranslationSeparatedBands.c13_fixed3840_remoteEvenPrimeErrorCrossEnergy_sq_le_dyadic
+          #print axioms RiemannCvs.PrimeTranslationSeparatedBands.c13_fixed3840_remoteOddPrimeErrorCrossEnergy_sq_le_dyadic
           LEAN
           lake env lean V23BoundaryWeylAxioms.lean | tee v23-boundary-weyl-axioms.txt
           if grep -E 'sorryAx' v23-boundary-weyl-axioms.txt; then
