@@ -391,26 +391,108 @@ asymptotic heuristic.
 - `summable_c13DyadicRelativeEnvelope`
 - `c13EvenDyadicShellCrossEnergy_relative_summableEnvelope`
 - `c13OddDyadicShellCrossEnergy_relative_summableEnvelope`
+- `c13EvenArchimedeanCoreNewestCrossEnergy_sq_le_sixHundredSixtySevenThousandths`
+- `c13OddArchimedeanCoreNewestCrossEnergy_sq_le_sixHundredSixtySevenThousandths`
+- `c13EvenPrimeCoreNewestCrossEnergy_sq_le_tenThird`
+- `c13OddPrimeCoreNewestCrossEnergy_sq_le_tenThird`
+- `c13EvenPoleCoreNewestCrossEnergy_sq_le_thirteenSixtieth`
+- `c13OddPoleCoreNewestCrossEnergy_sq_le_thirteenSixtieth`
+- `c13EvenBuilderCoreNewestCrossEnergy_sq_le_fourThousandTwoHundredSeventeenThousandths`
+- `c13OddBuilderCoreNewestCrossEnergy_sq_le_fourThousandTwoHundredSeventeenThousandths`
+- `c13EvenBuilderCoreNewestTailEnergy_ge_dynamicGap_normSq`
+- `c13OddBuilderCoreNewestTailEnergy_ge_dynamicGap_normSq`
+- `c13EvenBuilderCoreNewest_relative_of_coreFloor`
+- `c13OddBuilderCoreNewest_relative_of_coreFloor`
+- `c13CoreNewestRelativeEnvelope_budget`
+- `tendsto_c13CoreNewestRelativeEnvelope_zero`
+- `c13EvenBuilderDyadicCoreNewest_relative_vanishingEnvelope`
+- `c13OddBuilderDyadicCoreNewest_relative_vanishingEnvelope`
+- `exists_c13CoreNewestRelativeEnvelope_lt_fourNinth`
 
 The corresponding nonnegativity adapters are also retained.
 
+## Full historical-core/newest-shell advance
+
+The multiscale triangle route is no longer the only available interface.  A
+direct rectangular estimate now treats the complete historical band `(M,N]`
+against the newest dyadic shell `(N,2N]`.  Its decisive arithmetic observation
+is that, whenever `M <= p <= N < q <= 2N`,
+
+\[
+p(q-p)\ge N.
+\]
+
+After centering the cutoff-13 Archimedean symbol at `pi/4`, the same-sign
+divided difference is therefore at most `1/(6N)`.  In the reflected entry, the
+constant part gives the Hilbert term `1/(2(p+q)) <= 1/(2N)`, while the two
+centered remainders combine exactly into a term bounded by `1/(12pq)`.  Since
+`p >= M`, each rectangular Archimedean entry is bounded by
+
+\[
+\frac1N\left(\frac23+\frac1{12M}\right).
+\]
+
+There are at most `N^2` entries in the rectangle, so a direct
+Frobenius--Cauchy estimate loses no power of the scale.  For `M >= 960`, Lean
+closes the rational bound
+
+\[
+\frac23+\frac1{12M}\le\frac{667}{1000}.
+\]
+
+The pole term is transferred through the exact equivalence
+`Fin (2*N-M) ~= Fin (N-M) ⊕ Fin N`; consequently it retains the one-block
+constant `13/60` instead of being counted twice.  The prime translation block
+retains `10/3`.  Thus the complete off-diagonal error amplitude is
+
+\[
+\frac{13}{60}+\frac{667}{1000}+\frac{10}{3}
+ =\frac{4217}{1000}.
+\]
+
+The diagonal main term vanishes on this off-diagonal rectangle, and the new
+Lean theorems identify the resulting block with the literal cutoff-13 even and
+odd builder matrices.  Hence the estimate applies to the actual historical
+core/newest-shell coupling rather than to a surrogate matrix.
+
+If the historical core has a scale-independent Euclidean coercivity floor
+`g_core > 0`, while the newest shell uses the proved dynamic lower gap
+`g(N)`, the complete relative coefficient is bounded by
+
+\[
+q_n^{\rm core/new}
+ =\frac{(4217/1000)^2}{g_{\rm core}L_n},
+\qquad
+L_n=\frac{39}{5}+\frac{69}{100}n.
+\]
+
+Lean proves that this envelope is nonnegative, pays the exact operator budget,
+and tends to zero.  In particular, for every fixed positive `g_core`, it is
+eventually strictly below `4/9`.  This coefficient behaves like `1/n`; it is
+not the summable `1/n^2` adjacent-shell envelope, and the two statements are
+kept separate.
+
+For reference, the existing finite-channel aggregation theorem
+`relativeCoupling_of_finsetChannelBudgets` sums the relative budgets `q_i`
+themselves, not their square roots.  The direct rectangular argument bypasses
+that aggregation altogether for the full old-core channel.
+
 ## Next formal boundary
 
-The strongest next target is now a multiscale aggregation theorem:
+The main analytic premise has now moved:
 
-1. combine the newly summable adjacent-shell cross bounds into the
-   historical-core/new-shell
-   estimate without reintroducing a divergent triangle or Frobenius loss;
-2. determine the correct weighted Hilbert direct-sum/Cauchy interface so that
-   the sum of square-root cross coefficients is controlled by the proved
-   `Summable q_n` information;
-3. bridge the finite interval between the existing certified cutoff ladder and
-   the analytic base `13^5`, or sharpen the component constants enough to lower
-   that base substantially;
-4. express the boundary-Weyl increment/cumulative residue in terms of this
-   stitched tower estimate and feed it into the existing
+1. prove a fixed positive Euclidean coercivity floor for every growing
+   historical core, or replace it with a source-normalized lower bound that is
+   strong enough for the same relative adapter;
+2. connect that core floor and the new eventual `< 4/9` theorem to the existing
    `BoundaryWeylCumulative`, `BoundaryGapNoCrossing`, and
-   `ParityOrderContinuation` chain.
+   `ParityOrderContinuation` no-crossing chain;
+3. bridge the finite interval between the certified cutoff ladder and the
+   analytic bases (`M >= 960` and the dyadic tail base `13^5`), or sharpen the
+   constants enough to lower those thresholds;
+4. retain the adjacent-shell summable theorem as a separate tool for any
+   later cumulative-residue estimate that genuinely requires summability.
 
-Those steps would turn the new adjacent-shell operator theorem into a global
-no-crossing advance. No claim of an RH proof is made at this stage.
+This closes a previously open full-core cross-channel estimate, conditional
+only at the relative-energy stage on the historical-core floor.  It does not
+yet supply that floor and therefore is not, by itself, a proof of RH.
