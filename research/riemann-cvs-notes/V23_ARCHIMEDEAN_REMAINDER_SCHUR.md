@@ -899,15 +899,76 @@ Principal separated-band theorems:
 - `c13_fixed3840_remoteEvenPrimeErrorCrossEnergy_sq_le_dyadic`
 - `c13_fixed3840_remoteOddPrimeErrorCrossEnergy_sq_le_dyadic`
 
+## Rank-one fixed-prefix pole bridge
+
+The second source component is now closed in `PoleSeparatedBands.lean`.
+The decisive observation is that the pole matrix is not merely bounded by a
+small global norm: in each parity sector it is exactly rank one.  If `u` is
+the appropriate pole weight, its fixed-prefix/remote cross coordinate factors
+as
+
+```text
+(2*poleScale) * (sum_[1,F] u_n*x_n) * (sum_(N,2N] u_m*y_m),
+```
+
+up to the harmless odd-parity sign.  Applying Cauchy separately on the two
+bands retains the remote reciprocal-square decay.  The formal elementary
+bounds are
+
+```text
+sum_[1,F] u_n^2       <= 1/72,
+sum_(N,2N] u_m^2      <= 1/(144*N),
+logarithmicCvSPoleScale 13 <= 13872.
+```
+
+They imply the squared Euclidean coefficient
+
+```text
+P(N) = (2*poleScale)^2 * (1/72) * (1/(144*N)).
+```
+
+At the first analytic scale, exact rational arithmetic in Lean gives
+
+```text
+P(371293) <= 1/5.
+```
+
+Moreover `P(2*N) = P(N)/2` exactly, hence
+
+```text
+P(371293*2^k) <= (1/5)*(1/2)^k.
+```
+
+The theorem is stated for the actual even and odd pole matrices and those
+matrices are proved by reflexivity to be component zero of the existing CvS
+builder error vector.  Thus both the prime and pole parts of the finite to
+analytic bridge now decay geometrically; neither uses the old global operator
+loss.
+
+Principal pole-band theorems:
+
+- `fixedPrefix_inv_sq_sum_le_two`
+- `fixedPrefixPoleOddWeight_sq_sum_le_oneSeventySecond`
+- `fixedPrefixPoleEvenWeight_sq_sum_le_oneSeventySecond`
+- `remotePoleOddWeight_sq_sum_le_oneOver144N`
+- `remotePoleEvenWeight_sq_sum_le_oneOver144N`
+- `finiteMatrixBlockCrossEnergy_rankOne_sq_le`
+- `c13_fixedRemoteEvenBuilderError_zero`
+- `c13_fixedRemoteOddBuilderError_zero`
+- `c13_fixedRemotePoleCoefficient_le_oneFifth`
+- `c13FixedRemotePoleCoefficient_dyadic_eq`
+- `c13_fixed3840_remoteEvenPoleCrossEnergy_sq_le_dyadic`
+- `c13_fixed3840_remoteOddPoleCrossEnergy_sq_le_dyadic`
+
 ## Next formal boundary
 
 The fixed historical-core floor and the full old-core/new-shell estimate are
 now closed.  The next boundary is structural rather than an unproved local
 operator estimate:
 
-1. complete the pole and Archimedean components of the fixed `[1,3840]` to
-   remote-shell channel, then combine them with the now-proved geometrically
-   decaying prime component and the exact finite-prefix coercive certificate;
+1. complete the Archimedean component of the fixed `[1,3840]` to remote-shell
+   channel, then combine it with the now-proved geometrically decaying prime
+   and pole components and the exact finite-prefix coercive certificate;
 2. retain the adjacent `2/5` and older-band decomposition as a reserve-rich
    fallback if the direct fixed-prefix channel cannot fit the `2/25` slack of
    the anchored full-core certificate;

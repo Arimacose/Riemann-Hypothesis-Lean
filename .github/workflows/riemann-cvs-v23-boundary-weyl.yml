@@ -15,6 +15,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/CombinedSymbolDyadicL2.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationFourierBridge.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationSeparatedBands.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/PoleSeparatedBands.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationPowerBound.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationSupersolution.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationContinuousSupersolution.lean'
@@ -75,6 +76,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/CombinedSymbolDyadicL2.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationFourierBridge.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationSeparatedBands.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/PoleSeparatedBands.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationPowerBound.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationSupersolution.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationContinuousSupersolution.lean'
@@ -211,6 +213,8 @@ jobs:
           lake env lean RiemannCvs/FiniteMatrixBoundaryWeylAdapter.lean
           lake build RiemannCvs.PrimeTranslationSeparatedBands
           lake env lean RiemannCvs/PrimeTranslationSeparatedBands.lean
+          lake build RiemannCvs.PoleSeparatedBands
+          lake env lean RiemannCvs/PoleSeparatedBands.lean
 
       - name: Reject placeholders and audit theorem axioms
         working-directory: research/riemann-cvs-lean
@@ -227,6 +231,7 @@ jobs:
             RiemannCvs/CombinedSymbolDyadicL2.lean
             RiemannCvs/PrimeTranslationFourierBridge.lean
             RiemannCvs/PrimeTranslationSeparatedBands.lean
+            RiemannCvs/PoleSeparatedBands.lean
             RiemannCvs/PrimeTranslationPowerBound.lean
             RiemannCvs/PrimeTranslationSupersolution.lean
             RiemannCvs/PrimeTranslationContinuousSupersolution.lean
@@ -267,6 +272,7 @@ jobs:
           import RiemannCvs.AsymptoticAdjacentCoreHilbertPi
           import RiemannCvs.FiniteMatrixBoundaryWeylAdapter
           import RiemannCvs.PrimeTranslationSeparatedBands
+          import RiemannCvs.PoleSeparatedBands
           import RiemannCvs.PrimeTranslationSupersolution
           import RiemannCvs.PrimeTranslationContinuousSupersolution
           import RiemannCvs.PrimeTranslationContinuousSchur
@@ -716,6 +722,20 @@ jobs:
           #print axioms RiemannCvs.PrimeTranslationSeparatedBands.c13_fixed3840_remoteOddPrimeErrorCrossEnergy_sq_le_twoFifths
           #print axioms RiemannCvs.PrimeTranslationSeparatedBands.c13_fixed3840_remoteEvenPrimeErrorCrossEnergy_sq_le_dyadic
           #print axioms RiemannCvs.PrimeTranslationSeparatedBands.c13_fixed3840_remoteOddPrimeErrorCrossEnergy_sq_le_dyadic
+          #print axioms RiemannCvs.PoleSeparatedBands.fixedPrefix_inv_sq_sum_le_two
+          #print axioms RiemannCvs.PoleSeparatedBands.fixedPrefixPoleOddWeight_sq_sum_le_oneSeventySecond
+          #print axioms RiemannCvs.PoleSeparatedBands.fixedPrefixPoleEvenWeight_sq_sum_le_oneSeventySecond
+          #print axioms RiemannCvs.PoleSeparatedBands.remotePoleOddWeight_sq_sum_le_oneOver144N
+          #print axioms RiemannCvs.PoleSeparatedBands.remotePoleEvenWeight_sq_sum_le_oneOver144N
+          #print axioms RiemannCvs.PoleSeparatedBands.finiteMatrixBlockCrossEnergy_rankOne_sq_le
+          #print axioms RiemannCvs.PoleSeparatedBands.c13_fixedRemoteEvenBuilderError_zero
+          #print axioms RiemannCvs.PoleSeparatedBands.c13_fixedRemoteOddBuilderError_zero
+          #print axioms RiemannCvs.PoleSeparatedBands.c13_fixedRemotePoleCoefficient_le_oneFifth
+          #print axioms RiemannCvs.PoleSeparatedBands.c13FixedRemotePoleCoefficient_dyadic_eq
+          #print axioms RiemannCvs.PoleSeparatedBands.c13_fixed3840_remoteEvenPoleCrossEnergy_sq_le_oneFifth
+          #print axioms RiemannCvs.PoleSeparatedBands.c13_fixed3840_remoteOddPoleCrossEnergy_sq_le_oneFifth
+          #print axioms RiemannCvs.PoleSeparatedBands.c13_fixed3840_remoteEvenPoleCrossEnergy_sq_le_dyadic
+          #print axioms RiemannCvs.PoleSeparatedBands.c13_fixed3840_remoteOddPoleCrossEnergy_sq_le_dyadic
           LEAN
           lake env lean V23BoundaryWeylAxioms.lean | tee v23-boundary-weyl-axioms.txt
           if grep -E 'sorryAx' v23-boundary-weyl-axioms.txt; then
