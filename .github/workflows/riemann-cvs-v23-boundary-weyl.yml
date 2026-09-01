@@ -35,6 +35,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticAdjacentCoreHilbertPi.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/AdjacentArchimedeanHilbertSchmidt.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/AdjacentArchimedeanSharpGap.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/FirstAnalyticMultiblockBudget.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/FiniteMatrixBoundaryWeylAdapter.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V23BoundaryWeylMainline.lean'
@@ -99,6 +100,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticAdjacentCoreHilbertPi.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/AdjacentArchimedeanHilbertSchmidt.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/AdjacentArchimedeanSharpGap.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/FirstAnalyticMultiblockBudget.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/FiniteMatrixBoundaryWeylAdapter.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V23BoundaryWeylMainline.lean'
@@ -219,6 +221,8 @@ jobs:
           lake env lean RiemannCvs/AdjacentArchimedeanHilbertSchmidt.lean
           lake build RiemannCvs.AdjacentArchimedeanSharpGap
           lake env lean RiemannCvs/AdjacentArchimedeanSharpGap.lean
+          lake build RiemannCvs.FirstAnalyticMultiblockBudget
+          lake env lean RiemannCvs/FirstAnalyticMultiblockBudget.lean
           lake build RiemannCvs.FiniteMatrixBoundaryWeylAdapter
           lake env lean RiemannCvs/FiniteMatrixBoundaryWeylAdapter.lean
           lake build RiemannCvs.PrimeTranslationSeparatedBands
@@ -265,6 +269,7 @@ jobs:
             RiemannCvs/AsymptoticAdjacentCoreHilbertPi.lean
             RiemannCvs/AdjacentArchimedeanHilbertSchmidt.lean
             RiemannCvs/AdjacentArchimedeanSharpGap.lean
+            RiemannCvs/FirstAnalyticMultiblockBudget.lean
             RiemannCvs/FiniteMatrixBoundaryWeylAdapter.lean
           )
           if grep -nE '(^|[^[:alnum:]_])(sorry|admit)([^[:alnum:]_]|$)' "${files[@]}"; then
@@ -287,6 +292,7 @@ jobs:
           import RiemannCvs.AsymptoticAdjacentCoreHilbertPi
           import RiemannCvs.AdjacentArchimedeanHilbertSchmidt
           import RiemannCvs.AdjacentArchimedeanSharpGap
+          import RiemannCvs.FirstAnalyticMultiblockBudget
           import RiemannCvs.FiniteMatrixBoundaryWeylAdapter
           import RiemannCvs.PrimeTranslationSeparatedBands
           import RiemannCvs.PoleSeparatedBands
@@ -715,6 +721,11 @@ jobs:
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddBuilderAdjacentCrossEnergy_sq_le_27151Over7500
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13EvenBuilderAdjacent_relative_37Over40
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddBuilderAdjacent_relative_37Over40
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_firstAnalyticMultiblockBudget
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_firstAnalyticMultiblockSlack
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.relativeCoupling_of_v23AdjacentAndHistoricalBudgets
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13EvenBuilderAdjacentWithDyadicHistorical_relative_1079Over1080
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddBuilderAdjacentWithFixedAndDyadicHistorical_relative_1079Over1080
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddBuilderDyadicAdjacentCoreNewest_relative_twoFifths
           #print axioms RiemannCvs.V23BoundaryWeylMainline.finiteMatrixCouplingEuclideanForm_eq_crossEnergy
           #print axioms RiemannCvs.V23BoundaryWeylMainline.finiteMatrixBoundaryWeyl_mono_of_relativeEnergyCertificate
@@ -809,7 +820,7 @@ jobs:
 
   numeric-regression:
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
 
@@ -1132,6 +1143,25 @@ jobs:
             --require-regular-loewner-pole-half-transport \
             --json-out research/riemann-cvs-numerics/artifacts/v23_c13_previous_core_to_N7680_transport_diagnostic.json
 
+      - name: Probe the first post-frontier historical transport to N15360
+        shell: bash
+        run: |
+          set -euo pipefail
+          python research/riemann-cvs-numerics/probe_previous_core_dyadic_channels.py \
+            --c 13 \
+            --historical-cutoffs 20 120 240 480 960 1920 3840 \
+            --middle-cutoff 7680 \
+            --new-cutoff 15360 \
+            --prec 128 \
+            --shift-gain 1/1024 \
+            --reference-q 249/250 \
+            --candidate-leading 1/30 \
+            --previous-probe research/riemann-cvs-numerics/artifacts/v23_c13_previous_core_to_N7680_transport_diagnostic.json \
+            --exception-budget 1/384 \
+            --require-half-transport \
+            --source-component-diagnostic \
+            --json-out research/riemann-cvs-numerics/artifacts/v23_c13_previous_core_to_N15360_transport_diagnostic.json
+
       - name: Certify the exceptional odd fixed-base channel
         shell: bash
         run: |
@@ -1249,6 +1279,7 @@ jobs:
             research/riemann-cvs-numerics/artifacts/v23_c13_q996_N1920_to_N3840_four_ninths_scaling.json
             research/riemann-cvs-numerics/artifacts/v23_c13_previous_core_to_N3840_dyadic_channels.json
             research/riemann-cvs-numerics/artifacts/v23_c13_previous_core_to_N7680_transport_diagnostic.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_previous_core_to_N15360_transport_diagnostic.json
             research/riemann-cvs-numerics/artifacts/v23_c13_odd_base20_to_N3840_interval.json
             research/riemann-cvs-numerics/artifacts/v23_c13_odd_base20_to_N3840_interval_base_preconditioner.npy
             research/riemann-cvs-numerics/artifacts/v23_c13_odd_base20_to_N3840_interval_schur_preconditioner.npy

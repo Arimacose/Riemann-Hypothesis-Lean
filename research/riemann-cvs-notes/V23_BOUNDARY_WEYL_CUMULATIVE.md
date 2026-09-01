@@ -3086,3 +3086,67 @@ The immediate structural target is the next two-channel recursion into
 `37/40`, and fit the older `[0,3840]` channel into the remaining `3/40` reserve
 using the separated source transport.  This is still a finite/multiblock
 continuation problem, not the final infinite boundary-Weyl identification.
+
+## 2026-09-02: the first analytic multiblock budget is strictly subcritical
+
+A new midpoint route diagnostic extends the historical-source decomposition
+through the first genuinely analytic target shell `(7680,15360]`.  The file
+`v23_c13_previous_core_to_N15360_transport_diagnostic.json` has SHA-256
+`0417866453BC1DF9CF9C05188665D29C290F6B7FCB4E3207A444962C712FAFDC` and is
+explicitly marked `MIDPOINT_DIAGNOSTIC_ONLY`; it selects the proof architecture
+but is not used as a rigorous certificate or a Lean premise.
+
+The diagnostic gives historical total relative coefficients approximately
+
+```text
+even: 0.004244062573749289,
+odd:  0.005330188518377651,
+```
+
+both far below the formal aggregate allowance `1/15`.  Every *total* repeated
+historical channel is strictly smaller than half its predecessor, and the
+newest historical channels are about `0.00179` (even) and `0.00192` (odd),
+well below the leading envelope `1/30`.  There is no total-channel exception at
+this scale.  The source split reveals an important proof-design constraint:
+the Archimedean component by itself can contract as slowly as approximately
+`0.572`, whereas the combined Archimedean-plus-prime Loewner group contracts by
+at most approximately `0.46217`.  The pole part also halves.  Thus the analytic
+transport theorem should preserve the natural Loewner grouping instead of
+applying separate triangle inequalities to Archimedean and prime pieces.  The
+old odd `[1,20]` block likewise halves in total, but its separated two-piece
+triangle bound is roughly `9.94` times the previous total because it destroys
+essential cancellation; that fixed block must remain a structured sum.
+
+The decisive new formal observation is that no improvement of the already
+proved historical budget `2/27` is needed.  The sharpened adjacent estimate
+fits it exactly as
+
+```text
+37/40 + 2/27 = 1079/1080,
+1 - 1079/1080 = 1/1080.
+```
+
+`FirstAnalyticMultiblockBudget.lean` proves these identities and combines the
+two relative estimates using the weighted square
+
+```text
+((37/40) * historicalCross - (2/27) * adjacentCross)^2 >= 0,
+```
+
+avoiding the factor two in the elementary triangle-square estimate.  It then
+connects the result to the literal cutoff-13 even and odd adjacent builder
+blocks.  The exported concrete consumers are
+
+```text
+c13EvenBuilderAdjacentWithDyadicHistorical_relative_1079Over1080
+c13OddBuilderAdjacentWithFixedAndDyadicHistorical_relative_1079Over1080.
+```
+
+The even theorem consumes the existing `1/30` geometric dyadic envelope.  The
+odd theorem consumes the independent fixed-block allowance `1/384` together
+with the same regular dyadic family through the existing `2/27` adapter.  This
+closes the multiblock *composition algebra* with a strict `1/1080` reserve.
+The remaining source-level task is to prove the concrete half-transport and
+leading-envelope hypotheses uniformly in the dyadic scale, preserving the
+combined Loewner and fixed-block cancellations identified above; the infinite
+boundary--Weyl limit remains a later, separate step.

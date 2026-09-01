@@ -1257,3 +1257,30 @@ boundary is no longer `[0,3840] -> (3840,7680]`; it is the two-channel step into
 `(7680,15360]`: combine the new `37/40` adjacent channel from `(3840,7680]`
 with a separately controlled historical channel from `[0,3840]`, then iterate
 the multiblock transport toward `371293`.
+
+## 2026-09-02: weighted multiblock closure leaves `1/1080`
+
+`FirstAnalyticMultiblockBudget.lean` now performs the exact two-source
+composition required at the next step.  The adjacent analytic block costs
+`37/40`, while the already formal historical dyadic adapter costs `2/27`; a
+weighted Cauchy square proves that their summed cross form costs only the sum
+of those coefficients:
+
+```text
+37/40 + 2/27 = 1079/1080 < 1.
+```
+
+The resulting reserve is exactly `1/1080`.  Concrete even and odd endpoints
+consume the actual cutoff-13 adjacent builder, the `1/30` historical geometric
+envelope, and, in the odd sector, the independent `1/384` fixed-block budget.
+This removes a purely algebraic multiblock obstruction that would have survived
+with the older adjacent coefficient `24/25`.
+
+A separate N=15360 midpoint diagnostic confirms the intended grouping: total
+historical channels all contract by a factor below `1/2`, but an isolated
+Archimedean component need not.  The combined Archimedean-plus-prime Loewner
+group does contract below `1/2`, and the old odd `[1,20]` block must be kept as
+a structured total to preserve cancellation.  These diagnostic observations
+guide the next source-level proof; they are not imported into Lean.  What
+remains is the uniform concrete half-transport theorem and then the infinite
+boundary--Weyl passage, not additional budget arithmetic.
