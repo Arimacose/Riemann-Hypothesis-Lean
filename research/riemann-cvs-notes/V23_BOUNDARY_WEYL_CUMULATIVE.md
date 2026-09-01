@@ -3064,3 +3064,25 @@ the first instance is `(3840,7680] x (7680,15360]`.  The separate rectangle
 `[1,3840] x (3840,7680]` is still the initial finite/analytic seam and must be
 closed by a recursive or preconditioned finite certificate before the full
 dyadic tower can be assembled.
+
+## 2026-09-02: rigorous N=3840 to N=7680 seam certificate
+
+A 192-bit Arb run now closes the literal finite/analytic seam
+`[0,3840] x (3840,7680]` with `q < 249/250` and recursive reserve
+`rho < 1/12`.  It verifies all `29,495,040` solve-residual entries across the
+two parities, embeds the floating Cholesky choices as exact dyadic triangular
+matrices, and proves all `7680` preconditioned Gershgorin rows strictly
+positive.  The certificate JSON hash is
+`32FF3DEA7F17F65D9DE23DCE784B8CD142D08E282C4C6EC9611F5CF9E846376D`.
+
+The direct-parity validator was also generalized so a direct certificate can
+serve as the next recursive core while retaining source-hash/Git-blob
+provenance checks.  CI now regenerates the N=7680 artifact and its two exact
+3840-square bases.
+
+Consequently the initial seam identified in the preceding section is closed.
+The immediate structural target is the next two-channel recursion into
+`(7680,15360]`: charge the adjacent `(3840,7680]` channel by the Lean theorem
+`37/40`, and fit the older `[0,3840]` channel into the remaining `3/40` reserve
+using the separated source transport.  This is still a finite/multiblock
+continuation problem, not the final infinite boundary-Weyl identification.

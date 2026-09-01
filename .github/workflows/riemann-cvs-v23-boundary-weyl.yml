@@ -1042,6 +1042,24 @@ jobs:
             --validate-cutoff 120 \
             --json-out research/riemann-cvs-numerics/artifacts/v23_c13_q996_N1920_to_N3840_direct.json
 
+      - name: Certify the first finite-to-analytic V23 seam through N7680
+        shell: bash
+        run: |
+          set -euo pipefail
+          python research/riemann-cvs-numerics/certify_direct_parity_relative_shell.py \
+            --c 13 \
+            --low-cutoff 20 \
+            --core-cutoff 3840 \
+            --shell-cutoff 7680 \
+            --prec 192 \
+            --shift-gain 1/1024 \
+            --q-upper 249/250 \
+            --rho-upper 1/12 \
+            --threads 4 \
+            --core-certificate research/riemann-cvs-numerics/artifacts/v23_c13_q996_N1920_to_N3840_direct.json \
+            --validate-cutoff 120 \
+            --json-out research/riemann-cvs-numerics/artifacts/v23_c13_q996_N3840_to_N7680_direct.json
+
       - name: Smoke-test the relative-shell midpoint probe
         shell: bash
         run: |
@@ -1224,6 +1242,9 @@ jobs:
             research/riemann-cvs-numerics/artifacts/v23_c13_q996_N1920_to_N3840_direct.json
             research/riemann-cvs-numerics/artifacts/v23_c13_q996_N1920_to_N3840_direct_even_preconditioner.npy
             research/riemann-cvs-numerics/artifacts/v23_c13_q996_N1920_to_N3840_direct_odd_preconditioner.npy
+            research/riemann-cvs-numerics/artifacts/v23_c13_q996_N3840_to_N7680_direct.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_q996_N3840_to_N7680_direct_even_preconditioner.npy
+            research/riemann-cvs-numerics/artifacts/v23_c13_q996_N3840_to_N7680_direct_odd_preconditioner.npy
             research/riemann-cvs-numerics/artifacts/v23_c13_N120_to_N240_shell_midpoint_smoke.json
             research/riemann-cvs-numerics/artifacts/v23_c13_q996_N1920_to_N3840_four_ninths_scaling.json
             research/riemann-cvs-numerics/artifacts/v23_c13_previous_core_to_N3840_dyadic_channels.json

@@ -168,10 +168,29 @@ def _validate_preconditioned_core_certificate(
     if not 0 < prior_rho < 1:
         raise ValueError("preconditioned core certificate has invalid rho_upper")
 
-    source_script = Path(__file__).with_name(
-        "certify_preconditioned_relative_shell.py"
+    # A rigorous core can have been produced either by the first dense-parity
+    # bridge or by this direct-parity continuation.  Older artifacts do not
+    # carry an explicit generator tag, so identify the generator by the
+    # embedded source hash rather than trusting a descriptive string.  This is
+    # what lets the certified N=3840 direct shell become the core of the next
+    # N=7680 shell without weakening source provenance.
+    source_candidates = (
+        Path(__file__),
+        Path(__file__).with_name("certify_preconditioned_relative_shell.py"),
     )
-    source_record = _verify_artifact_script_hash(payload, source_script)
+    source_record = None
+    source_errors: list[str] = []
+    for source_script in source_candidates:
+        try:
+            source_record = _verify_artifact_script_hash(payload, source_script)
+            break
+        except ValueError as exc:
+            source_errors.append(f"{source_script.name}: {exc}")
+    if source_record is None:
+        raise ValueError(
+            "rigorous core certificate generator hash matches no supported "
+            "source script; " + "; ".join(source_errors)
+        )
     github_sha = os.environ.get("GITHUB_SHA")
     if github_sha is not None and payload.get("git_sha") != github_sha:
         raise ValueError("core certificate git_sha does not match GITHUB_SHA")
@@ -250,7 +269,12 @@ def _validate_preconditioned_core_certificate(
         )
 
     return {
-        "certificate_kind": "preconditioned_recursive_shell",
+        "certificate_kind": (
+            "direct_parity_recursive_shell"
+            if Path(source_record.get("source_path", source_record.get("git_path", ""))).name
+            == Path(__file__).name
+            else "preconditioned_recursive_shell"
+        ),
         "path": str(path.resolve()),
         "sha256": _sha256(path),
         "git_sha": payload.get("git_sha"),
