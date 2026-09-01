@@ -1,6 +1,8 @@
 import RiemannCvs.V22ZeroModeMainline
 import RiemannCvs.CvSParityDisplacement
 import RiemannCvs.CombinedSymbolDyadicL2
+import RiemannCvs.PrimeTranslationFourierBridge
+import RiemannCvs.PrimeTranslationPowerBound
 import RiemannCvs.C13ArchimedeanEndpoint
 import RiemannCvs.ObliqueWeylDeterminant
 import RiemannCvs.BoundaryWeylCumulative
@@ -370,6 +372,7 @@ namespace RiemannCvs.V23BoundaryWeylMainline
 
 open RiemannCvs.CombinedSymbolDyadicL2
 open RiemannCvs.BoundaryWeylSchurTail
+open RiemannCvs.PrimeTranslationFourierBridge
 open Filter
 open scoped Topology
 
@@ -1031,6 +1034,107 @@ noncomputable def finiteLogarithmicPrimeOddPositiveModeErrorMatrix
   fun i j =>
     -(finiteLogarithmicPrimeEntry c location base (mode i : ℝ) (mode j : ℝ) -
       finiteLogarithmicPrimeEntry c location base (mode i : ℝ) (-mode j : ℝ))
+
+/-- The even prime error matrix is exactly the negative even compression of
+the full signed prime-translation matrix. -/
+theorem finiteLogarithmicPrimeEvenPositiveModeErrorMatrix_eq_neg_translation
+    {ι κ : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (mode : κ → ℤ) (hc : 1 < c) :
+    finiteLogarithmicPrimeEvenPositiveModeErrorMatrix c location base mode =
+      -finitePrimeTranslationEvenModeMatrix c location base mode := by
+  ext i j
+  simp only [finiteLogarithmicPrimeEvenPositiveModeErrorMatrix,
+    Matrix.neg_apply]
+  rw [finitePrimeTranslationEvenModeMatrix_eq_source
+    c location base mode hc i j]
+
+/-- The odd prime error matrix is the negative odd translation compression. -/
+theorem finiteLogarithmicPrimeOddPositiveModeErrorMatrix_eq_neg_translation
+    {ι κ : Type*} [Fintype ι]
+    (c : ℝ) (location base : ι → ℝ) (mode : κ → ℤ) (hc : 1 < c) :
+    finiteLogarithmicPrimeOddPositiveModeErrorMatrix c location base mode =
+      -finitePrimeTranslationOddModeMatrix c location base mode := by
+  ext i j
+  simp only [finiteLogarithmicPrimeOddPositiveModeErrorMatrix,
+    Matrix.neg_apply]
+  rw [finitePrimeTranslationOddModeMatrix_eq_source
+    c location base mode hc i j]
+
+/-- One uniform full signed-translation form bound supplies the exact even
+prime-form premise used by the V23 coercivity consumer. -/
+theorem finiteLogarithmicPrimeEvenPositiveModeErrorEnergy_abs_le_of_signedTranslation
+    {ι κ : Type*} [Fintype ι] [Fintype κ]
+    (c B : ℝ) (location base : ι → ℝ) (mode : κ → ℤ)
+    (x : κ → ℝ) (hc : 1 < c)
+    (hSigned : ∀ y : κ ⊕ κ → ℝ,
+      |finiteMatrixQuadraticEnergy
+          (finitePrimeTranslationModeMatrix c location base (signedMode mode)) y| ≤
+        B * finiteVectorEuclideanNormSq y) :
+    |finiteMatrixQuadraticEnergy
+        (finiteLogarithmicPrimeEvenPositiveModeErrorMatrix
+          c location base mode) x| ≤
+      B * finiteVectorEuclideanNormSq x := by
+  have hEven := evenModeEnergy_abs_le_of_signedModeEnergy
+    c B location base mode x (by
+      simpa [finiteTranslationVectorNormSq, finiteVectorEuclideanNormSq] using
+        hSigned (evenSignedVector x))
+  rw [finiteLogarithmicPrimeEvenPositiveModeErrorMatrix_eq_neg_translation
+    c location base mode hc]
+  simpa [finiteMatrixQuadraticEnergy, finiteTranslationVectorNormSq,
+    finiteVectorEuclideanNormSq] using hEven
+
+/-- The same full signed-space hypothesis supplies the odd V23 prime form. -/
+theorem finiteLogarithmicPrimeOddPositiveModeErrorEnergy_abs_le_of_signedTranslation
+    {ι κ : Type*} [Fintype ι] [Fintype κ]
+    (c B : ℝ) (location base : ι → ℝ) (mode : κ → ℤ)
+    (x : κ → ℝ) (hc : 1 < c)
+    (hSigned : ∀ y : κ ⊕ κ → ℝ,
+      |finiteMatrixQuadraticEnergy
+          (finitePrimeTranslationModeMatrix c location base (signedMode mode)) y| ≤
+        B * finiteVectorEuclideanNormSq y) :
+    |finiteMatrixQuadraticEnergy
+        (finiteLogarithmicPrimeOddPositiveModeErrorMatrix
+          c location base mode) x| ≤
+      B * finiteVectorEuclideanNormSq x := by
+  have hOdd := oddModeEnergy_abs_le_of_signedModeEnergy
+    c B location base mode x (by
+      simpa [finiteTranslationVectorNormSq, finiteVectorEuclideanNormSq] using
+        hSigned (oddSignedVector x))
+  rw [finiteLogarithmicPrimeOddPositiveModeErrorMatrix_eq_neg_translation
+    c location base mode hc]
+  simpa [finiteMatrixQuadraticEnergy, finiteTranslationVectorNormSq,
+    finiteVectorEuclideanNormSq] using hOdd
+
+/-- Cutoff-13 even prime-form bound with the exact `10/3` constant certified
+by the sixth-power translation computation. -/
+theorem c13_finiteLogarithmicPrimeEvenPositiveModeErrorEnergy_abs_le_tenThird_of_signedTranslation
+    {ι κ : Type*} [Fintype ι] [Fintype κ]
+    (location base : ι → ℝ) (mode : κ → ℤ) (x : κ → ℝ)
+    (hSigned : ∀ y : κ ⊕ κ → ℝ,
+      |finiteMatrixQuadraticEnergy
+          (finitePrimeTranslationModeMatrix 13 location base (signedMode mode)) y| ≤
+        (10 / 3 : ℝ) * finiteVectorEuclideanNormSq y) :
+    |finiteMatrixQuadraticEnergy
+        (finiteLogarithmicPrimeEvenPositiveModeErrorMatrix
+          13 location base mode) x| ≤
+      (10 / 3 : ℝ) * finiteVectorEuclideanNormSq x := by
+  exact finiteLogarithmicPrimeEvenPositiveModeErrorEnergy_abs_le_of_signedTranslation
+    13 (10 / 3) location base mode x (by norm_num) hSigned
+
+/-- Cutoff-13 odd prime-form bound from the same full signed-space input. -/
+theorem c13_finiteLogarithmicPrimeOddPositiveModeErrorEnergy_abs_le_tenThird_of_signedTranslation
+    {ι κ : Type*} [Fintype ι] [Fintype κ]
+    (location base : ι → ℝ) (mode : κ → ℤ) (x : κ → ℝ)
+    (hSigned : ∀ y : κ ⊕ κ → ℝ,
+      |finiteMatrixQuadraticEnergy
+          (finitePrimeTranslationModeMatrix 13 location base (signedMode mode)) y| ≤
+        (10 / 3 : ℝ) * finiteVectorEuclideanNormSq y) :
+    |finiteMatrixQuadraticEnergy
+        (finiteLogarithmicPrimeOddPositiveModeErrorMatrix
+          13 location base mode) x| ≤
+      (10 / 3 : ℝ) * finiteVectorEuclideanNormSq x := by
+  exact finiteLogarithmicPrimeOddPositiveModeErrorEnergy_abs_le_of_signedTranslation
+    13 (10 / 3) location base mode x (by norm_num) hSigned
 
 noncomputable def logarithmicCvSBuilderEvenPositiveModeErrorMatrix
     {ι κ : Type*} [Fintype ι] [DecidableEq κ]

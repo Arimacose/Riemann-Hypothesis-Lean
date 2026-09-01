@@ -13,6 +13,8 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/BoundaryWeylFarLeft.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/CvSParityDisplacement.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/CombinedSymbolDyadicL2.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationFourierBridge.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationPowerBound.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/DigammaEulerMaclaurin.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/C13ArchimedeanEndpoint.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
@@ -53,6 +55,8 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/BoundaryWeylFarLeft.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/CvSParityDisplacement.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/CombinedSymbolDyadicL2.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationFourierBridge.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationPowerBound.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/DigammaEulerMaclaurin.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/C13ArchimedeanEndpoint.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
@@ -119,6 +123,10 @@ jobs:
           lake env lean RiemannCvs/CvSParityDisplacement.lean
           lake build RiemannCvs.CombinedSymbolDyadicL2
           lake env lean RiemannCvs/CombinedSymbolDyadicL2.lean
+          lake build RiemannCvs.PrimeTranslationFourierBridge
+          lake env lean RiemannCvs/PrimeTranslationFourierBridge.lean
+          lake build RiemannCvs.PrimeTranslationPowerBound
+          lake env lean RiemannCvs/PrimeTranslationPowerBound.lean
           lake build RiemannCvs.ObliqueWeylDeterminant
           lake env lean RiemannCvs/ObliqueWeylDeterminant.lean
 
@@ -151,6 +159,8 @@ jobs:
             RiemannCvs/BoundaryWeylFarLeft.lean
             RiemannCvs/CvSParityDisplacement.lean
             RiemannCvs/CombinedSymbolDyadicL2.lean
+            RiemannCvs/PrimeTranslationFourierBridge.lean
+            RiemannCvs/PrimeTranslationPowerBound.lean
             RiemannCvs/DigammaEulerMaclaurin.lean
             RiemannCvs/C13ArchimedeanEndpoint.lean
             RiemannCvs/ObliqueWeylDeterminant.lean
@@ -192,6 +202,15 @@ jobs:
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicPrimeEndpoint_sine_zero
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicPrimeEndpoint_term_zero
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.finiteLogarithmicPrimeEntry_eq_sum_eventEntries
+          #print axioms RiemannCvs.PrimeTranslationFourierBridge.truncatedTranslationFourierEntry_offDiagonal
+          #print axioms RiemannCvs.PrimeTranslationFourierBridge.logarithmicPrimeEventEntry_eq_weight_mul_truncatedTranslation
+          #print axioms RiemannCvs.PrimeTranslationFourierBridge.finiteLogarithmicPrimeEntry_eq_translationCompression
+          #print axioms RiemannCvs.PrimeTranslationFourierBridge.signedMode_evenEnergy_eq_two_mul
+          #print axioms RiemannCvs.PrimeTranslationFourierBridge.signedMode_oddEnergy_eq_two_mul
+          #print axioms RiemannCvs.PrimeTranslationFourierBridge.evenModeEnergy_abs_le_of_signedModeEnergy
+          #print axioms RiemannCvs.PrimeTranslationFourierBridge.oddModeEnergy_abs_le_of_signedModeEnergy
+          #print axioms RiemannCvs.PrimeTranslationPowerBound.norm_pow_six
+          #print axioms RiemannCvs.PrimeTranslationPowerBound.norm_lt_tenThird_of_norm_pow_six_lt
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicPrimeEndpointEventEntry_nat_zero
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.finiteLogarithmicPrimeEntry_eq_oddDifferenceKernel
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.oddDifferenceKernel_logarithmicCombined_actualDiagonal
@@ -417,6 +436,12 @@ jobs:
           #print axioms RiemannCvs.DigammaEulerMaclaurin.digamma_quadratic_remainder_bound
           #print axioms RiemannCvs.C13ArchimedeanEndpoint.c13_neg_logarithmicArchimedeanDiagonal_ge_log_sub_nineteenTwentieth_closed
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth_closed
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.finiteLogarithmicPrimeEvenPositiveModeErrorMatrix_eq_neg_translation
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.finiteLogarithmicPrimeOddPositiveModeErrorMatrix_eq_neg_translation
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.finiteLogarithmicPrimeEvenPositiveModeErrorEnergy_abs_le_of_signedTranslation
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.finiteLogarithmicPrimeOddPositiveModeErrorEnergy_abs_le_of_signedTranslation
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_finiteLogarithmicPrimeEvenPositiveModeErrorEnergy_abs_le_tenThird_of_signedTranslation
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_finiteLogarithmicPrimeOddPositiveModeErrorEnergy_abs_le_tenThird_of_signedTranslation
           LEAN
           lake env lean V23BoundaryWeylAxioms.lean | tee v23-boundary-weyl-axioms.txt
           if grep -vE 'propext|Classical.choice|Quot.sound|depends on axioms|^$' \

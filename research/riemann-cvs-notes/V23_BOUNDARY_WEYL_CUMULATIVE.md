@@ -2698,3 +2698,80 @@ right-half-plane DLMF-form quadratic remainder theorem and the single scalar
 endpoint comparison at mode `960`.  The remaining operator boundary after
 that diagonal is the Archimedean-remainder and prime parity quadratic-form
 control recorded by the certificate.
+
+## Exact digamma closure and the prime-translation Fourier bridge
+
+The preceding paragraph is now historical.  The global quadratic digamma
+remainder and the cutoff-13 scalar comparison have both been proved in Lean.
+The exact tent-kernel Euler--Maclaurin representation gives the first-neglected
+term and quadratic remainder bounds without an analytic premise, and the
+cutoff-13 endpoint arithmetic closes the Archimedean diagonal theorem.  The
+public zero-premise consumers are
+
+```text
+DigammaEulerMaclaurin.digamma_eulerMaclaurin_tent_representation
+DigammaEulerMaclaurin.digamma_first_neglected_term_bound
+DigammaEulerMaclaurin.digamma_quadratic_remainder_bound
+C13ArchimedeanEndpoint.c13_neg_logarithmicArchimedeanDiagonal_ge_log_sub_nineteenTwentieth_closed
+V23BoundaryWeylMainline.c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth_closed
+```
+
+Thus the Archimedean main diagonal is no longer part of the conditional
+operator boundary.
+
+The finite prime matrix has also acquired an exact operator source adapter.
+Write `L=log(c)`, `y=log(q)`, and let `U_y` denote translation by `y` truncated
+to the overlap interval `[0,L-y]`.  For integer Fourier modes `n,m`, Lean now
+defines twice the real normalized coefficient
+
+```text
+(2/L) * integral_{0}^{L-y}
+  cos(2*pi*((m-n)*x + m*y)/L) dx.
+```
+
+It proves the diagonal formula
+
+```text
+2*(1-y/L)*cos(2*pi*n*y/L)
+```
+
+and, for `n != m`, the off-diagonal formula
+
+```text
+(sin(2*pi*m*y/L)-sin(2*pi*n*y/L))/(pi*(n-m)).
+```
+
+After multiplication by `log(p)/sqrt(q)`, these are exactly the two branches
+of `logarithmicPrimeEventEntry`.  Summing eventwise proves
+
+```text
+finiteLogarithmicPrimeEntry
+  = finitePrimeTranslationFourierEntry
+```
+
+on every integer-mode pair.  The identity is then lifted to arbitrary finite
+mode families, the full signed lattice, and the normalized even/odd parity
+compressions.  A single full signed-space quadratic-form estimate therefore
+supplies both V23 prime-form premises with the same constant; at cutoff 13 the
+consumer exposes the certificate's literal `10/3` constant.
+
+The separate sixth-power functional-analytic step is now checked as well.  In
+any C-star algebra, Lean proves for self-adjoint `T`
+
+```text
+||T^3|| = ||T||^3,
+||T^6|| = ||T||^6,
+||T^6|| < (10/3)^6  ==>  ||T|| < 10/3.
+```
+
+Accordingly, the prime route no longer lacks matrix-entry identification,
+parity transfer, or sixth-root spectral extraction.  Its remaining boundary
+is narrower and explicit: construct the weighted truncated-translation
+operator on the chosen `L2[0,log 13]` realization, prove the positive
+length-six path-kernel expansion and symmetric Schur row-sum implication, and
+replay the finite exact-rational/Arb path certificate inside that interface.
+The other major operator input still open is the Archimedean off-diagonal
+remainder form.  Cross-scale diagnostics continue to favor keeping the
+Archimedean and prime Loewner pieces coupled where possible, because the
+combined block exhibits half-transport even when the isolated Archimedean
+component does not.
