@@ -1369,3 +1369,40 @@ while all normalization, pole absorption, endpoint monotonicity, and transport
 algebra are theorem-checked.  The next obstruction is therefore the base
 rectangular budget/finitely many early bands, followed by recursive reserve
 closure and the infinite boundary-Weyl passage.
+
+## 2026-09-02: sharp parity moments close the regular rectangular channel
+
+The apparent base rectangular obstruction came from a lossy common estimate,
+not from the complete builder itself.  `SharpParityFullBuilderTransport.lean`
+uses the exact even and odd reflected Loewner numerators.  Under `2p<=q`, the
+even channel retains `p^2*f(p)^2/q^4`, while the odd channel retains
+`p^2*f(q)^2/q^4`; neither term is replaced by an unsuppressed `q^-2` mass.
+
+Combining these formulas with the sharp weighted full-symbol constant
+`197/2000` and the newly certified raw unweighted average `<2` produces the
+exact base entry-square constants
+
+```text
+even: 499/1125,
+odd:  1037/2250.
+```
+
+The worse odd value is still strictly below
+`(1/30)*(428/125)*(207/50)`.  Hence both literal parity matrices satisfy the
+required `1/30` relative-energy estimate at `N=4B` for every regular
+`B>=3840`.  At `N=4B*2^k`, the proof propagates the actual entry moments with
+coefficient `(1/30)*2^(-k)` and packages any finite regular family inside the
+existing `2/27` previous-core budget.  This route does not consume the older
+generic `rectangularSymbolSquareBudget` premise.
+
+The current 256-bit affine-prefix replay gives unweighted average upper
+`1.9129521415701273581...`, with slack `0.0870478584298726419...` below `2`;
+the 384-bit replay returns the same enclosure at higher precision.  The
+weighted `97/100` conclusion and this unweighted `2` conclusion are now emitted
+together, ensuring that the two moments used by Lean refer to one source
+certificate and one cutoff-13 symbol.
+
+The next live boundary is finite/global rather than regular-rectangular:
+attach the below-threshold bands and the odd fixed block to their exact energy
+coordinates, then identify the resulting recursive shell form with the
+infinite boundary-Weyl operator and pass to the uniform limit.

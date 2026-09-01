@@ -187,6 +187,7 @@ def certify(
     start_mode: int,
     centered_decay: Fraction,
     target_scaled_upper: Fraction,
+    target_unweighted_average: Fraction,
     precision: int,
     archimedean_certificate: Path,
 ) -> dict[str, Any]:
@@ -211,6 +212,7 @@ def certify(
     center = pi / 4
     decay = _fraction_arb(centered_decay)
     target = _fraction_arb(target_scaled_upper)
+    unweighted_target = _fraction_arb(target_unweighted_average)
 
     all_prime_data = prime_powers_up_to(c)
     prime_data = [(q, p) for q, p in all_prime_data if q < c]
@@ -282,10 +284,16 @@ def certify(
         main + linear_decay_coefficient / n + quadratic_decay_coefficient / n**2
     )
     scaled_weighted_upper = prefix_slope / 2 + geometric_error * n / (n + 1) ** 2
+    unweighted_average_upper = prefix_slope + geometric_error / n
     if not scaled_weighted_upper < target:
         raise RuntimeError(
             "combined-symbol dyadic L2 target failed: "
             f"upper={scaled_weighted_upper}, target={target}"
+        )
+    if not unweighted_average_upper < unweighted_target:
+        raise RuntimeError(
+            "combined-symbol dyadic unweighted-average target failed: "
+            f"upper={unweighted_average_upper}, target={unweighted_target}"
         )
 
     monotone_coefficients = [
@@ -310,6 +318,7 @@ def certify(
         "precision_bits": precision,
         "start_mode": start_mode,
         "target_scaled_upper": str(target_scaled_upper),
+        "target_unweighted_average": str(target_unweighted_average),
         "centered_decay_coefficient": str(centered_decay),
         "proved_for_every_integer_mode": f"N >= {start_mode}",
         "prime_powers_below_c": [list(item) for item in prime_data],
@@ -608,6 +617,10 @@ def certify(
         "abel_consequence": (
             "N*sum_{n=N+1}^{2*N} F_n^2/n^2 <= prefixSlope/2+geometricError*N/(N+1)^2"
         ),
+        "unweighted_dyadic_consequence": (
+            "sum_{n=N+1}^{2*N} F_n^2/N <= "
+            "prefixSlope+geometricError/N"
+        ),
         "monotonicity_certificate": {
             "all_decaying_coefficients_nonnegative": True,
             "reciprocal_terms": "1/N and 1/N^2 decrease for N>=1",
@@ -636,8 +649,15 @@ def certify(
             "endpoint_prefix_slope": _ball_record(prefix_slope),
             "endpoint_scaled_weighted_upper": _ball_record(scaled_weighted_upper),
             "endpoint_slack_below_target": _ball_record(target - scaled_weighted_upper),
+            "endpoint_unweighted_average_upper": _ball_record(
+                unweighted_average_upper
+            ),
+            "endpoint_unweighted_slack_below_target": _ball_record(
+                unweighted_target - unweighted_average_upper
+            ),
         },
         "strict_target_pass": True,
+        "strict_unweighted_target_pass": True,
         "lean_interfaces": {
             "affine_abel": (
                 "RiemannCvs.CombinedSymbolDyadicL2."
@@ -656,7 +676,8 @@ def certify(
             "conditional on the Archimedean source and parity-shell identifications, for every "
             f"integer N>={start_mode}, "
             "sum F_n^2/n^2 over N<n<=2N is "
-            f"< {target_scaled_upper}/N"
+            f"< {target_scaled_upper}/N and the unweighted square sum is "
+            f"< {target_unweighted_average}*N"
         ),
         "source_dependencies": {
             "archimedean_certificate": arch_metadata,
@@ -679,6 +700,7 @@ def main() -> int:
     parser.add_argument("--start-mode", type=int, default=1920)
     parser.add_argument("--centered-decay", default="1/4")
     parser.add_argument("--target-scaled-upper", default="1")
+    parser.add_argument("--target-unweighted-average", default="2")
     parser.add_argument("--prec", type=int, default=256)
     parser.add_argument(
         "--archimedean-certificate",
@@ -694,6 +716,9 @@ def main() -> int:
         centered_decay=_positive_fraction(args.centered_decay, "centered_decay"),
         target_scaled_upper=_positive_fraction(
             args.target_scaled_upper, "target_scaled_upper"
+        ),
+        target_unweighted_average=_positive_fraction(
+            args.target_unweighted_average, "target_unweighted_average"
         ),
         precision=args.prec,
         archimedean_certificate=args.archimedean_certificate.resolve(),
@@ -712,11 +737,20 @@ def main() -> int:
                 "precision_bits": result["precision_bits"],
                 "start_mode": result["start_mode"],
                 "strict_target_pass": result["strict_target_pass"],
+                "strict_unweighted_target_pass": result[
+                    "strict_unweighted_target_pass"
+                ],
                 "endpoint_scaled_weighted_upper": result["constants"][
                     "endpoint_scaled_weighted_upper"
                 ],
                 "endpoint_slack_below_target": result["constants"][
                     "endpoint_slack_below_target"
+                ],
+                "endpoint_unweighted_average_upper": result["constants"][
+                    "endpoint_unweighted_average_upper"
+                ],
+                "endpoint_unweighted_slack_below_target": result["constants"][
+                    "endpoint_unweighted_slack_below_target"
                 ],
                 "artifact": str(args.json_out.resolve()),
                 "sha256": _sha256(args.json_out.resolve()),

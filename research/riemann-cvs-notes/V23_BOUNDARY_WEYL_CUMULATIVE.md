@@ -3396,3 +3396,83 @@ The remaining regular-shell input is now only the source rectangular base
 budget.  Separately, the finitely many source bands below `960`, including the
 structured old odd band, must be attached to finite energy certificates before
 the recursive reserve and infinite boundary-Weyl limit can be completed.
+
+## 2026-09-02: exact parity moments remove the regular base-budget premise
+
+`SharpParityFullBuilderTransport.lean` removes the last provisional
+rectangular-budget hypothesis from every regular historical channel.  The old
+row estimate bounded both parity compressions by
+
+```text
+32 * (f(q)^2/q^2 + f(p)^2/q^2),
+```
+
+which erases the powers of `p/q` and is too large at the critical separation
+`N=4B`.  Expanding the exact odd-symbol Loewner numerators instead gives, for
+`0 <= p` and `2p <= q`,
+
+```text
+even entry^2 <= (128/9) * (f(q)^2/q^2 + p^2*f(p)^2/q^4),
+odd  entry^2 <= (128/9) * (p^2*f(q)^2/q^4 + f(p)^2/q^2).
+```
+
+Lean proves these inequalities directly from the off-diagonal parity formulas
+and the denominator floor `(q^2-p^2)^2 >= (9/16)q^4`.  It then uses two
+different scalar moments, rather than forcing both channels through one
+Frobenius estimate:
+
+```text
+weighted target:  sum f(q)^2/q^2 <= (197/2000)/N,
+unweighted source: sum f(p)^2       <= (21/100)B.
+```
+
+The second line follows from the raw unweighted combined-symbol estimate
+`sum F(p)^2 <= 2B`, Fourier normalization by `1/pi`, and the rational-pole
+tail.  At `N=4B`, exact summation of the retained moments gives
+
+```text
+even entry-square budget <= 499/1125,
+odd  entry-square budget <= 1037/2250.
+```
+
+Both fit below the available coercive product:
+
+```text
+entry budget <= (1/30) * (428/125) * (207/50).
+```
+
+Consequently the literal complete builder matrices now have direct relative
+coupling coefficient `1/30` at the base separation, with no
+`rectangularSymbolSquareBudget` or `hPreviousBudget` premise.
+
+The proof also retains the different decay rates.  At
+`N=4B*2^k`, the `q^-4` terms decay as `2^(-3k)` and the remaining terms as
+`2^(-k)`.  This yields theorem-checked actual-matrix bounds
+
+```text
+c13HistoricalRemoteEvenBuilder_dyadic_relative_oneThirtieth
+c13HistoricalRemoteOddBuilder_dyadic_relative_oneThirtieth
+```
+
+with coefficient `(1/30)*2^(-k)`.  The new regular finite-family endpoints
+sum these literal channels directly and fit them inside the established
+`2/27` previous-core allocation.  Thus the regular source-shell obstruction
+is no longer a missing base budget; the remaining finite work is confined to
+the source bands below the regular `B>=3840` threshold and the structured odd
+fixed block, followed by the recursive reserve/operator identification and
+the infinite boundary-Weyl limit.
+
+The companion Arb certifier now emits both norms from the same affine-prefix
+certificate.  At `N=1920`, the 256-bit and independent 384-bit replays give
+
+```text
+weighted scaled upper        = 0.9692102614364212589966291674... < 0.97,
+unweighted average upper     = 1.9129521415701273581392597166... < 2,
+unweighted average slack     = 0.0870478584298726418607402833....
+```
+
+The unweighted conclusion is uniform for every integer `N>=1920`, just as the
+weighted conclusion is.  These interval statements remain explicit analytic
+inputs; the parity algebra, normalization, moment conversion, matrix Cauchy
+step, coercive floors, dyadic propagation, and finite-family composition are
+all checked in Lean.
