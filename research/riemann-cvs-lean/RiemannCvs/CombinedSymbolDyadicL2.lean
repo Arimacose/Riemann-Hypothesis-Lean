@@ -2482,6 +2482,44 @@ theorem c13_archimedeanDiagonalAsymptoticConstant_eq :
   rw [hLogPiInv, hLogPiRatio, hLogTarget]
   linarith
 
+/-- Replacing `atan (sqrt 13)` by the reciprocal arctangent and combining the
+two logarithms removes `π` from the cutoff-13 asymptotic constant itself. -/
+theorem c13_archimedeanDiagonalAsymptoticConstant_eq_reciprocal :
+    archimedeanDiagonalAsymptoticConstant 13 =
+      2 * Real.arctan (Real.sqrt 13)⁻¹ -
+        Real.log (6 * Real.log 13 / (7 + Real.sqrt 13)) -
+        13 * Real.sqrt 13 / 42 := by
+  rw [c13_archimedeanDiagonalAsymptoticConstant_eq]
+  have hs : 0 < Real.sqrt (13 : ℝ) := Real.sqrt_pos.2 (by norm_num)
+  have hL : 0 < Real.log (13 : ℝ) := Real.log_pos (by norm_num)
+  have hAtan := Real.arctan_inv_of_pos hs
+  have hsq : Real.sqrt (13 : ℝ) ^ 2 = 13 :=
+    Real.sq_sqrt (by norm_num)
+  have hLogSquare :
+      2 * Real.log (Real.sqrt 13 + 1) =
+        Real.log (2 * (7 + Real.sqrt 13)) := by
+    rw [show 2 * Real.log (Real.sqrt 13 + 1) =
+        (2 : ℕ) * Real.log (Real.sqrt 13 + 1) by norm_num,
+      ← Real.log_pow]
+    congr 1
+    nlinarith
+  have hLogNumerator :
+      Real.log (2 * (7 + Real.sqrt 13)) =
+        Real.log 2 + Real.log (7 + Real.sqrt 13) := by
+    rw [Real.log_mul (by norm_num) (ne_of_gt (by positivity))]
+  have hLogDenominator :
+      Real.log (12 * Real.log 13) =
+        Real.log 2 + Real.log (6 * Real.log 13) := by
+    rw [show (12 : ℝ) * Real.log 13 = 2 * (6 * Real.log 13) by ring,
+      Real.log_mul (by norm_num) (ne_of_gt (mul_pos (by norm_num) hL))]
+  have hLogRatio :
+      Real.log (6 * Real.log 13 / (7 + Real.sqrt 13)) =
+        Real.log (6 * Real.log 13) - Real.log (7 + Real.sqrt 13) := by
+    rw [Real.log_div (ne_of_gt (mul_pos (by norm_num) hL))
+      (ne_of_gt (by positivity))]
+  rw [hLogSquare, hLogNumerator, hLogDenominator, hLogRatio]
+  linarith
+
 theorem c13_archimedeanDiagonalAsymptoticError_eq :
     archimedeanDiagonalAsymptoticError 13 960 =
       (1 / 8 + Real.sqrt 2 / 6) /

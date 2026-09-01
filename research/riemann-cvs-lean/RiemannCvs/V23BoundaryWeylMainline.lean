@@ -1,6 +1,7 @@
 import RiemannCvs.V22ZeroModeMainline
 import RiemannCvs.CvSParityDisplacement
 import RiemannCvs.CombinedSymbolDyadicL2
+import RiemannCvs.C13ArchimedeanEndpoint
 import RiemannCvs.ObliqueWeylDeterminant
 import RiemannCvs.BoundaryWeylCumulative
 import RiemannCvs.BoundaryWeylUniformLimit
@@ -319,7 +320,10 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   trigamma real floor to decay of the shifted digamma derivative through a
   differentiated shift equation and finite telescoping, proves the remaining
   error antitone, and reduces the cutoff-13 all-mode floor to one scalar
-  endpoint comparison at mode `960`.
+  endpoint comparison at mode `960`.  `C13ArchimedeanEndpoint` now proves that
+  comparison from explicit rational bounds for `log`, `arctan`, `π`, and square
+  roots, so the diagonal route retains only the global quadratic digamma
+  remainder as an analytic premise.
   The combined-symbol certificate
   now also rests on a Lean proof of the finite nonresonant geometric-sum bound,
   including arbitrary starting indices and its sine/cosine projections; Arb
@@ -1636,6 +1640,24 @@ theorem c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth_
     c13_neg_logarithmicArchimedeanDiagonal_ge_log_sub_nineteenTwentieth_of_quadratic_remainder_bound
       (n : ℝ) hMode hRemainder hEndpoint
   linarith
+
+/-- The literal cutoff-13 shell diagonal with its mode-960 scalar endpoint
+closed by `C13ArchimedeanEndpoint`; only the global quadratic digamma remainder
+remains as a premise. -/
+theorem c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth_of_quadratic_remainder_bound_closed_endpoint
+    (old shell : ℕ) (hOld : 960 ≤ old)
+    (hRemainder : ∀ w : ℂ, 0 < w.re →
+      ‖Complex.digamma w - (Complex.log w - 1 / (2 * w))‖ ≤
+        (Real.sqrt 2 / 6) / ‖w‖ ^ 2) :
+    ∀ j : Fin shell,
+      Real.log (old : ℝ) - 19 / 20 ≤
+        -logarithmicCvSArchimedeanEntry 13
+          (finGlobalShellPositiveMode old shell j)
+          (finGlobalShellPositiveMode old shell j) := by
+  exact
+    c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth_of_quadratic_remainder_bound
+      old shell hOld hRemainder
+        RiemannCvs.C13ArchimedeanEndpoint.c13_archimedeanEndpoint_bound
 
 theorem logarithmicCvSPoleEntry_even_factorization (c : ℝ) (n m : ℤ) :
     logarithmicCvSPoleEntry c n m + logarithmicCvSPoleEntry c n (-m) =
