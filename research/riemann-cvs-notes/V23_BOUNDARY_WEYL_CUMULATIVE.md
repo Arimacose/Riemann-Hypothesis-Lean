@@ -3015,3 +3015,31 @@ tail is already explicit and the prime term is fixed at `10/3`; the only
 substantive operator estimate still exposed is the Archimedean off-diagonal
 remainder.  This is the next proof target.  These results close a component of
 the V23 reduction; they are not by themselves a proof of RH.
+
+## 2026-09-02: initial post-3840 adjacent bridge closed
+
+The Archimedean off-diagonal target identified above is now sharpened on the
+specific geometry needed immediately after the rigorous finite frontier.
+`AdjacentArchimedeanHilbertSchmidt.lean` decomposes the actual adjacent cross
+block `(M,2M] x (2M,4M]` into its reflected Hankel leading term and two
+centered remainders.  Reciprocal-square summation gives the premise-free
+even/odd amplitude
+
+```text
+Arch_adjacent(M) <= 241/1000,   M >= 3840,
+```
+
+in place of the previous whole-core `667/1000` charge.  With the literal pole
+and prime components the complete builder amplitude is `2719/750`; retaining
+the first two dynamic diagonal gaps proves
+
+```text
+cross_builder(M,2M)^2
+  <= (24/25) * baseEnergy(M,2M) * tailEnergy(M,2M)
+```
+
+for both parities and every `M >= 3840`.  Thus the analytic dyadic chain can
+now start at the current finite endpoint rather than waiting until `13^5`.
+The active boundary is the finite multiblock composition through `371293` and
+its exact principal restriction, followed by the already isolated infinite
+boundary-Weyl passage.

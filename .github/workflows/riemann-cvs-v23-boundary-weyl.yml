@@ -33,6 +33,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticCoreHilbert.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticCoreHilbertPi.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticAdjacentCoreHilbertPi.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/AdjacentArchimedeanHilbertSchmidt.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/FiniteMatrixBoundaryWeylAdapter.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V23BoundaryWeylMainline.lean'
@@ -95,6 +96,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticCoreHilbert.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticCoreHilbertPi.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticAdjacentCoreHilbertPi.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/AdjacentArchimedeanHilbertSchmidt.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/FiniteMatrixBoundaryWeylAdapter.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V23BoundaryWeylMainline.lean'
@@ -211,6 +213,8 @@ jobs:
           lake env lean RiemannCvs/AsymptoticCoreHilbertPi.lean
           lake build RiemannCvs.AsymptoticAdjacentCoreHilbertPi
           lake env lean RiemannCvs/AsymptoticAdjacentCoreHilbertPi.lean
+          lake build RiemannCvs.AdjacentArchimedeanHilbertSchmidt
+          lake env lean RiemannCvs/AdjacentArchimedeanHilbertSchmidt.lean
           lake build RiemannCvs.FiniteMatrixBoundaryWeylAdapter
           lake env lean RiemannCvs/FiniteMatrixBoundaryWeylAdapter.lean
           lake build RiemannCvs.PrimeTranslationSeparatedBands
@@ -255,6 +259,7 @@ jobs:
             RiemannCvs/AsymptoticCoreHilbert.lean
             RiemannCvs/AsymptoticCoreHilbertPi.lean
             RiemannCvs/AsymptoticAdjacentCoreHilbertPi.lean
+            RiemannCvs/AdjacentArchimedeanHilbertSchmidt.lean
             RiemannCvs/FiniteMatrixBoundaryWeylAdapter.lean
           )
           if grep -nE '(^|[^[:alnum:]_])(sorry|admit)([^[:alnum:]_]|$)' "${files[@]}"; then
@@ -275,6 +280,7 @@ jobs:
           import RiemannCvs.AsymptoticCoreHilbert
           import RiemannCvs.AsymptoticCoreHilbertPi
           import RiemannCvs.AsymptoticAdjacentCoreHilbertPi
+          import RiemannCvs.AdjacentArchimedeanHilbertSchmidt
           import RiemannCvs.FiniteMatrixBoundaryWeylAdapter
           import RiemannCvs.PrimeTranslationSeparatedBands
           import RiemannCvs.PoleSeparatedBands
@@ -693,6 +699,10 @@ jobs:
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_logarithmicCvSBuilderOddAdjacentCore_energy_ge_fiftyNineTenths
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_completeCrossBudget_le_twoFifths_adjacentGapProduct
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13EvenBuilderDyadicAdjacentCoreNewest_relative_twoFifths
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13EvenArchimedeanAdjacentCrossEnergy_sq_le_241Thousandths
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddArchimedeanAdjacentCrossEnergy_sq_le_241Thousandths
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13EvenBuilderAdjacent_relative_24Over25
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddBuilderAdjacent_relative_24Over25
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddBuilderDyadicAdjacentCoreNewest_relative_twoFifths
           #print axioms RiemannCvs.V23BoundaryWeylMainline.finiteMatrixCouplingEuclideanForm_eq_crossEnergy
           #print axioms RiemannCvs.V23BoundaryWeylMainline.finiteMatrixBoundaryWeyl_mono_of_relativeEnergyCertificate

@@ -1083,3 +1083,86 @@ operator estimate:
 This is a substantive new no-crossing ingredient, but the global continuation
 and limiting identifications listed above are still separate obligations; the
 result is therefore not, by itself, a proof of RH.
+
+## 2026-09-02: the initial analytic adjacent shell now has a subunit coefficient
+
+The previous whole-core Archimedean rectangle estimate charged every entry by
+the same envelope and produced amplitude `667/1000`.  That estimate is stable
+for an arbitrarily long historical core, but it is unnecessarily expensive for
+the first genuinely adjacent pair
+
+```text
+low  = (M,2M],
+high = (2M,4M].
+```
+
+`AdjacentArchimedeanHilbertSchmidt.lean` keeps the exact reflected formula and
+splits the cross matrix into three pieces:
+
+```text
+same-sign centered quotient,
+1/(2*(p+q)) reflected Hankel leading term,
+reflected centered quotient.
+```
+
+The same-sign piece retains the distance `q-p`.  For each low row its squared
+distance kernel is bounded by the elementary reciprocal-square mass
+
+```text
+sum_{j>=1} 1/j^2 <= 2,
+```
+
+which yields squared coefficient `1/(18*M)`.  The centered reflected piece
+retains its `1/(12*p*q)` envelope and has squared coefficient
+`1/(288*M^2)`.  The leading reflected rectangle has exactly `M*(2M)` entries,
+each at most `1/(6M)`, so its squared Hilbert--Schmidt coefficient is `1/18`.
+At `M >= 3840` the three rational amplitude majorants are therefore
+
+```text
+same-sign centered       <= 39/10000,
+reflected leading        <= 237/1000,
+reflected centered       <= 1/10000,
+total Archimedean        <= 241/1000.
+```
+
+This replaces `667/1000` on the adjacent geometry without changing the exact
+CvS builder matrix.  Adding the anchored pole and prime channels gives
+
+```text
+51/1000 + 241/1000 + 10/3 = 2719/750.
+```
+
+The dynamic shell gaps are also kept at the first scale.  Lean proves, for
+every `M >= 3840`,
+
+```text
+c13ShellDynamicGap(M)   >= 27/8,
+c13ShellDynamicGap(2*M) >= 813/200,
+(2719/750)^2
+  <= (24/25) * (27/8) * (813/200).
+```
+
+Consequently both literal even and odd builder blocks satisfy
+
+```text
+cross(M,2M)^2 <= (24/25) * baseEnergy * tailEnergy.
+```
+
+Principal new theorems:
+
+- `c13AdjacentSameSignBilinear_sq_le`
+- `c13AdjacentReflectedLeadingBilinear_sq_le`
+- `c13AdjacentReflectedCenteredBilinear_sq_le`
+- `c13EvenArchimedeanAdjacentCrossEnergy_sq_le_241Thousandths`
+- `c13OddArchimedeanAdjacentCrossEnergy_sq_le_241Thousandths`
+- `c13EvenBuilderAdjacentCrossEnergy_sq_le_2719Over750`
+- `c13OddBuilderAdjacentCrossEnergy_sq_le_2719Over750`
+- `c13EvenBuilderAdjacent_relative_24Over25`
+- `c13OddBuilderAdjacent_relative_24Over25`
+
+This removes the first-scale adjacent-shell obstruction at `3840`.  The next
+formal step is to compose the finitely many dyadic blocks through a cutoff
+beyond `371293`, then pass coercivity to the principal restriction ending
+exactly at `371293`.  That multiblock composition and the later infinite limit
+remain distinct obligations, so this result is a stronger bridge rather than
+a completed RH proof.
