@@ -2,6 +2,7 @@ import Mathlib.Analysis.Real.Pi.Bounds
 import Mathlib.Analysis.SpecialFunctions.Log.Deriv
 import Mathlib.Analysis.SpecialFunctions.Complex.Arctan
 import RiemannCvs.CombinedSymbolDyadicL2
+import RiemannCvs.DigammaQuadraticRemainder
 
 namespace RiemannCvs.C13ArchimedeanEndpoint
 
@@ -254,5 +255,20 @@ theorem c13_neg_logarithmicArchimedeanDiagonal_ge_log_sub_nineteenTwentieth
   exact
     RiemannCvs.CombinedSymbolDyadicL2.c13_neg_logarithmicArchimedeanDiagonal_ge_log_sub_nineteenTwentieth_of_quadratic_remainder_bound
       x hx hRemainder c13_archimedeanEndpoint_bound
+
+/-- The same closed endpoint route with the right-half-plane sector factor
+also discharged.  The premise is precisely the DLMF 5.11(ii)
+first-neglected-term estimate before the elementary `sec³` bound. -/
+theorem c13_neg_logarithmicArchimedeanDiagonal_ge_log_sub_nineteenTwentieth_of_first_neglected_term
+    (x : ℝ) (hx : (960 : ℝ) ≤ x)
+    (hFirst : ∀ w : ℂ, 0 < w.re →
+      ‖Complex.digamma w - (Complex.log w - 1 / (2 * w))‖ ≤
+        ((1 / 12 : ℝ) * (Real.cos (w.arg / 2))⁻¹ ^ 3) / ‖w‖ ^ 2) :
+    Real.log x - 19 / 20 ≤
+      -logarithmicArchimedeanDiagonal 13 x := by
+  exact c13_neg_logarithmicArchimedeanDiagonal_ge_log_sub_nineteenTwentieth
+    x hx
+      (RiemannCvs.DigammaQuadraticRemainder.quadratic_remainder_bound_of_first_neglected_term
+        hFirst)
 
 end RiemannCvs.C13ArchimedeanEndpoint

@@ -1659,6 +1659,25 @@ theorem c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth_
       old shell hOld hRemainder
         RiemannCvs.C13ArchimedeanEndpoint.c13_archimedeanEndpoint_bound
 
+/-- The shell-diagonal route with both the scalar endpoint and the
+right-half-plane sector factor closed.  The remaining premise is exactly the
+DLMF first-neglected-term estimate. -/
+theorem c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth_of_first_neglected_term
+    (old shell : ℕ) (hOld : 960 ≤ old)
+    (hFirst : ∀ w : ℂ, 0 < w.re →
+      ‖Complex.digamma w - (Complex.log w - 1 / (2 * w))‖ ≤
+        ((1 / 12 : ℝ) * (Real.cos (w.arg / 2))⁻¹ ^ 3) / ‖w‖ ^ 2) :
+    ∀ j : Fin shell,
+      Real.log (old : ℝ) - 19 / 20 ≤
+        -logarithmicCvSArchimedeanEntry 13
+          (finGlobalShellPositiveMode old shell j)
+          (finGlobalShellPositiveMode old shell j) := by
+  exact
+    c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth_of_quadratic_remainder_bound_closed_endpoint
+      old shell hOld
+        (RiemannCvs.DigammaQuadraticRemainder.quadratic_remainder_bound_of_first_neglected_term
+          hFirst)
+
 theorem logarithmicCvSPoleEntry_even_factorization (c : ℝ) (n m : ℤ) :
     logarithmicCvSPoleEntry c n m + logarithmicCvSPoleEntry c n (-m) =
       2 * logarithmicCvSPoleScale c *
