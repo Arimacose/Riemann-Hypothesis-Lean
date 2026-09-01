@@ -2775,3 +2775,88 @@ remainder form.  Cross-scale diagnostics continue to favor keeping the
 Archimedean and prime Loewner pieces coupled where possible, because the
 combined block exhibits half-transport even when the isolated Archimedean
 component does not.
+
+## A direct positive supersolution replaces the six-step prime path as the preferred route
+
+The length-six certificate remains valid, but it is no longer the shortest
+known route to the cutoff-13 prime bound.  In multiplicative physical
+coordinates `t=exp(x)` on `[1,13]`, the positive prime translation is
+
+```text
+(T h)(t) = sum_{q=p^a<13} log(p)/sqrt(q) *
+  (1_{t*q<=13} h(t*q) + 1_{q<=t} h(t/q)).
+```
+
+A numerical Perron probe placed the true positive spectral scale near `3.099`,
+well below `10/3`, and revealed that a very small rational step function is
+already a strict supersolution.  The chosen function is symmetric under
+`t -> 13/t`.  Its multiplicative boundary thresholds and successive heights
+are
+
+```text
+thresholds = [6/5, 3/2, 5/3, 15/8],
+heights    = [1, 5/6, 10/13, 5/7, 9/13].
+```
+
+The eight true weights, in location order `[2,3,4,5,7,8,9,11]`, are bounded
+in Lean by
+
+```text
+[491,635,347,720,736,246,367,724] / 1000.
+```
+
+These are not imported decimal assertions.  `PrimeTranslationSupersolution`
+proves rational upper bounds for `log 2`, `log 3`, `log 5`, `log 7`, and
+`log 11` using the finite `log_div` series, proves the needed square-root
+lower bounds algebraically, and derives all eight strict
+`log(p)/sqrt(q)` inequalities.  Weight monotonicity then proves that the true
+row is below the rational-envelope row at every rational test point.
+
+All support and layer changes occur at 62 rational breakpoints.  The 61 open
+cells and all 62 endpoints give the exact rational maximum
+
+```text
+max (T_upper h)/h = 33223/10000,
+10/3 - 33223/10000 = 331/30000 > 0.
+```
+
+The worst open cell is `(39/25,13/8)`, sampled exactly at `637/400`.
+The independent 256-bit Arb replay gives the true ratio there as
+
+```text
+3.3183648737458053186903603272898534948691120282671
+```
+
+with radius below `3.34e-76`.  The new script
+`certify_prime_translation_supersolution.py` verifies exact breakpoint
+geometry, constancy of every open-cell signature, all exact rational rows,
+all true Arb rows, and the stated exact margin.  Its local PASS artifact is
+`c13_prime_translation_supersolution.json`.
+
+The algebraic Schur core is also formal now.  For every finite nonnegative
+symmetric real kernel `A`, positive vector `h`, and row supersolution
+`A*h <= B*h`, `WeightedSchurSupersolution.weightedSchur_quadratic` proves
+
+```text
+|sum_{i,j} A(i,j) x(i) x(j)| <= B * sum_i x(i)^2.
+```
+
+It uses the exact weighted square inequality
+
+```text
+2*a*b <= (h_j/h_i)*a^2 + (h_i/h_j)*b^2
+```
+
+and symmetry to identify the two oriented sums.  Thus the direct route has
+already replaced 415642 admissible length-six paths by 61 atomic cells at the
+certificate level, while retaining the sixth-power route as an independent
+fallback.
+
+Two analytic connections remain before this becomes the literal V23 prime
+premise.  First, Lean must promote the representative/end-point table to an
+all-point (almost-everywhere) cell-coverage theorem; the Python certificate
+already checks the exact signature constancy.  Second, the finite weighted
+Schur skeleton must be lifted to the bounded partial-translation operator on
+`L2[0,log 13]` and composed with the proved Fourier-compression identity.
+This is now a one-step positive-supersolution interface rather than a
+six-fold path-kernel expansion.

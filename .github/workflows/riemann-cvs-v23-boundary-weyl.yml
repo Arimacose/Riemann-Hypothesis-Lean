@@ -15,6 +15,8 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/CombinedSymbolDyadicL2.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationFourierBridge.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationPowerBound.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationSupersolution.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/WeightedSchurSupersolution.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/DigammaEulerMaclaurin.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/C13ArchimedeanEndpoint.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
@@ -36,6 +38,7 @@ on:
       - 'research/riemann-cvs-numerics/probe_dyadic_shell_scaling.py'
       - 'research/riemann-cvs-numerics/probe_previous_core_dyadic_channels.py'
       - 'research/riemann-cvs-numerics/certify_prime_translation_power_bound.py'
+      - 'research/riemann-cvs-numerics/certify_prime_translation_supersolution.py'
       - 'research/riemann-cvs-numerics/certify_archimedean_tail_envelope.py'
       - 'research/riemann-cvs-numerics/certify_combined_symbol_dyadic_l2.py'
       - 'research/riemann-cvs-numerics/certify_combined_symbol_newest_energy.py'
@@ -57,6 +60,8 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/CombinedSymbolDyadicL2.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationFourierBridge.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationPowerBound.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationSupersolution.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/WeightedSchurSupersolution.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/DigammaEulerMaclaurin.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/C13ArchimedeanEndpoint.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
@@ -78,6 +83,7 @@ on:
       - 'research/riemann-cvs-numerics/probe_dyadic_shell_scaling.py'
       - 'research/riemann-cvs-numerics/probe_previous_core_dyadic_channels.py'
       - 'research/riemann-cvs-numerics/certify_prime_translation_power_bound.py'
+      - 'research/riemann-cvs-numerics/certify_prime_translation_supersolution.py'
       - 'research/riemann-cvs-numerics/certify_archimedean_tail_envelope.py'
       - 'research/riemann-cvs-numerics/certify_combined_symbol_dyadic_l2.py'
       - 'research/riemann-cvs-numerics/certify_combined_symbol_newest_energy.py'
@@ -127,6 +133,10 @@ jobs:
           lake env lean RiemannCvs/PrimeTranslationFourierBridge.lean
           lake build RiemannCvs.PrimeTranslationPowerBound
           lake env lean RiemannCvs/PrimeTranslationPowerBound.lean
+          lake build RiemannCvs.WeightedSchurSupersolution
+          lake env lean RiemannCvs/WeightedSchurSupersolution.lean
+          lake build RiemannCvs.PrimeTranslationSupersolution
+          lake env lean RiemannCvs/PrimeTranslationSupersolution.lean
           lake build RiemannCvs.ObliqueWeylDeterminant
           lake env lean RiemannCvs/ObliqueWeylDeterminant.lean
 
@@ -161,6 +171,8 @@ jobs:
             RiemannCvs/CombinedSymbolDyadicL2.lean
             RiemannCvs/PrimeTranslationFourierBridge.lean
             RiemannCvs/PrimeTranslationPowerBound.lean
+            RiemannCvs/PrimeTranslationSupersolution.lean
+            RiemannCvs/WeightedSchurSupersolution.lean
             RiemannCvs/DigammaEulerMaclaurin.lean
             RiemannCvs/C13ArchimedeanEndpoint.lean
             RiemannCvs/ObliqueWeylDeterminant.lean
@@ -176,6 +188,8 @@ jobs:
           fi
           cat > V23BoundaryWeylAxioms.lean <<'LEAN'
           import RiemannCvs.V23BoundaryWeylMainline
+          import RiemannCvs.PrimeTranslationSupersolution
+          import RiemannCvs.WeightedSchurSupersolution
           #print axioms RiemannCvs.BoundaryGapNoCrossing.boundaryValueNonzeroOfStrictConstraintGap
           #print axioms RiemannCvs.BoundaryGapNoCrossing.noCommonEigenvalueFromConstraintGaps
           #print axioms RiemannCvs.CvSParityDisplacement.oddDifferenceKernel_displacement
@@ -211,6 +225,15 @@ jobs:
           #print axioms RiemannCvs.PrimeTranslationFourierBridge.oddModeEnergy_abs_le_of_signedModeEnergy
           #print axioms RiemannCvs.PrimeTranslationPowerBound.norm_pow_six
           #print axioms RiemannCvs.PrimeTranslationPowerBound.norm_lt_tenThird_of_norm_pow_six_lt
+          #print axioms RiemannCvs.PrimeTranslationSupersolution.c13PrimeTranslationWeight_lt_upper
+          #print axioms RiemannCvs.PrimeTranslationSupersolution.c13Supersolution_endpoint_rows_le
+          #print axioms RiemannCvs.PrimeTranslationSupersolution.c13Supersolution_open_rows_le
+          #print axioms RiemannCvs.PrimeTranslationSupersolution.c13ActualPrimeTranslationRow_le_upper
+          #print axioms RiemannCvs.PrimeTranslationSupersolution.c13UpperPrimeTranslationRow_eq_ratCast
+          #print axioms RiemannCvs.PrimeTranslationSupersolution.c13ActualPrimeTranslationRow_openSamples_lt
+          #print axioms RiemannCvs.PrimeTranslationSupersolution.c13ActualPrimeTranslationRow_breakpoints_lt
+          #print axioms RiemannCvs.WeightedSchurSupersolution.weightedTwoMul_le
+          #print axioms RiemannCvs.WeightedSchurSupersolution.weightedSchur_quadratic
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.logarithmicPrimeEndpointEventEntry_nat_zero
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.finiteLogarithmicPrimeEntry_eq_oddDifferenceKernel
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.oddDifferenceKernel_logarithmicCombined_actualDiagonal
@@ -234,6 +257,23 @@ jobs:
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.summable_archimedeanCosineGeometricSeries_terms
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.summable_archimedeanXOneGeometricSeries_terms
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.summable_archimedeanXTwoGeometricSeries_terms
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.archimedeanGeometricMass
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.archimedeanGeometricFirstMoment
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.tsum_archimedeanExponential_eq_geometricMass
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.tsum_archimedeanExponentialMoment_eq_geometricFirstMoment
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.summable_archimedeanExponentialMoment_terms
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.archimedeanGeometricMass_nonneg
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.archimedeanGeometricSeries_nonneg
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.archimedeanGeometricSeries_le_mass
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.abs_archimedeanFrequency_mul_geometricSeries_le_mass
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.archimedeanCosineGeometricSeries_nonneg
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.archimedeanCosineGeometricSeries_le_mass
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.archimedeanXOneGeometricSeries_nonneg
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.archimedeanXOneGeometricSeries_le_firstMoment
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.abs_archimedeanXTwoGeometricSeries_le_mass
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.neg_two_mul_archimedeanCosineCorrection_ge
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.archimedeanCrossCorrection_ge
+          #print axioms RiemannCvs.CombinedSymbolDyadicL2.neg_logarithmicArchimedeanDiagonal_ge_of_digamma
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.archimedeanCosineGeometricSeries_neg
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.archimedeanXOneGeometricSeries_neg
           #print axioms RiemannCvs.CombinedSymbolDyadicL2.archimedeanXTwoGeometricSeries_neg
@@ -510,6 +550,14 @@ jobs:
             --target 10/3 \
             --prec 256 \
             --json-out research/riemann-cvs-numerics/artifacts/v23_c13_prime_translation_power6.json
+
+      - name: Certify the direct c13 prime-translation supersolution
+        shell: bash
+        run: |
+          set -euo pipefail
+          python research/riemann-cvs-numerics/certify_prime_translation_supersolution.py \
+            --prec 256 \
+            --json-out research/riemann-cvs-numerics/artifacts/v23_c13_prime_translation_supersolution.json
 
       - name: Certify the c13 Archimedean tail envelope
         shell: bash
