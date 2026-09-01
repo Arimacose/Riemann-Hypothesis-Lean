@@ -24,6 +24,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/C13ArchimedeanEndpoint.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ArchimedeanRemainderSchur.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticTailRelativeCoupling.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticTailOperatorBound.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V23BoundaryWeylMainline.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V22ZeroModeMainline.lean'
@@ -76,6 +77,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/C13ArchimedeanEndpoint.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ArchimedeanRemainderSchur.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticTailRelativeCoupling.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticTailOperatorBound.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V23BoundaryWeylMainline.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V22ZeroModeMainline.lean'
@@ -179,6 +181,8 @@ jobs:
           lake env lean RiemannCvs/ArchimedeanRemainderSchur.lean
           lake build RiemannCvs.AsymptoticTailRelativeCoupling
           lake env lean RiemannCvs/AsymptoticTailRelativeCoupling.lean
+          lake build RiemannCvs.AsymptoticTailOperatorBound
+          lake env lean RiemannCvs/AsymptoticTailOperatorBound.lean
 
       - name: Reject placeholders and audit theorem axioms
         working-directory: research/riemann-cvs-lean
@@ -206,6 +210,7 @@ jobs:
             RiemannCvs/V23BoundaryWeylMainline.lean
             RiemannCvs/ArchimedeanRemainderSchur.lean
             RiemannCvs/AsymptoticTailRelativeCoupling.lean
+            RiemannCvs/AsymptoticTailOperatorBound.lean
           )
           if grep -nE '(^|[^[:alnum:]_])(sorry|admit)([^[:alnum:]_]|$)' "${files[@]}"; then
             echo 'proof placeholder detected' >&2
@@ -219,6 +224,7 @@ jobs:
           import RiemannCvs.V23BoundaryWeylMainline
           import RiemannCvs.ArchimedeanRemainderSchur
           import RiemannCvs.AsymptoticTailRelativeCoupling
+          import RiemannCvs.AsymptoticTailOperatorBound
           import RiemannCvs.PrimeTranslationSupersolution
           import RiemannCvs.PrimeTranslationContinuousSupersolution
           import RiemannCvs.PrimeTranslationContinuousSchur
@@ -567,8 +573,25 @@ jobs:
           #print axioms RiemannCvs.V23BoundaryWeylMainline.relativeCoupling_fourNinth_of_nineFifthsHighGap
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_logarithmicCvSBuilderEvenTowerCross_relative_fourNinth_of_squaredNormBudget
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_logarithmicCvSBuilderOddTowerCross_relative_fourNinth_of_squaredNormBudget
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.finiteMatrixBlockCrossEnergy_sq_le_of_quadratic_abs_bound
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13EvenShellTotalError_energy_abs_le_fourHundredEightyOneHundredths
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddShellTotalError_energy_abs_le_fourHundredEightyOneHundredths
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13EvenAdjacentDyadicShellCrossEnergy_sq_le_operatorBudget
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddAdjacentDyadicShellCrossEnergy_sq_le_operatorBudget
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_operatorBudget_le_fourNinth_dynamicGap_product
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13EvenAdjacentDyadicShellCrossEnergy_relative_fourNinth_of_ge_371293
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddAdjacentDyadicShellCrossEnergy_relative_fourNinth_of_ge_371293
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13DyadicGapLower_le_dynamicGap
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13DyadicRelativeEnvelope_budget
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.summable_c13DyadicRelativeEnvelope
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13EvenDyadicShellCrossEnergy_relative_summableEnvelope
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddDyadicShellCrossEnergy_relative_summableEnvelope
           LEAN
           lake env lean V23BoundaryWeylAxioms.lean | tee v23-boundary-weyl-axioms.txt
+          if grep -E 'sorryAx' v23-boundary-weyl-axioms.txt; then
+            echo 'proof placeholder dependency detected' >&2
+            exit 1
+          fi
           if grep -vE 'propext|Classical.choice|Quot.sound|depends on axioms|^$' \
               v23-boundary-weyl-axioms.txt | grep -E 'axiom'; then
             echo 'unexpected axiom detected' >&2

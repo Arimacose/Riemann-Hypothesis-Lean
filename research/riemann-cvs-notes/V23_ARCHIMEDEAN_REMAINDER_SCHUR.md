@@ -4,6 +4,7 @@ Date: 2026-09-01
 Branch: `research/cvs-boundary-weyl-v23`
 Lean module: `research/riemann-cvs-lean/RiemannCvs/ArchimedeanRemainderSchur.lean`
 Coupling module: `research/riemann-cvs-lean/RiemannCvs/AsymptoticTailRelativeCoupling.lean`
+Operator module: `research/riemann-cvs-lean/RiemannCvs/AsymptoticTailOperatorBound.lean`
 
 ## Result
 
@@ -211,6 +212,149 @@ cross, and tail energies. They therefore remove the high-block coercivity
 premise from the recursive step rather than merely restating a generic Schur
 lemma.
 
+## Operator-compression advance
+
+The first attempt to close the remaining cross budget with an entrywise
+Frobenius or absolute-value Schur estimate was deliberately tested before being
+formalized. Exploratory high-precision calculations gave the following warning
+signs:
+
+- on the adjacent split `[481,960]` versus `[961,1920]`, the squared Frobenius
+  budgets are about `2.164` and `2.174`, while the spectral norms are only about
+  `1.104` and `1.142`;
+- on `[961,1920]` versus `[1921,3840]`, the squared Frobenius budgets rise to
+  about `2.730`, although the spectral norms remain about `1.212` and `1.215`;
+- taking absolute values before the Schur product is much worse: at cutoff
+  `1920` it gives products about `20.74` and `17.55`.
+
+These values are route-selection diagnostics, not proof inputs. They show that
+entrywise absolute values erase precisely the cancellation that the analytic
+argument must retain.
+
+The formal replacement uses the exact decomposition
+
+\[
+A=D+E_{\rm pole}+E_{\rm arch}+E_{\rm prime}.
+\]
+
+The diagonal matrix `D` has zero cross block. On the full three-shell union
+`[N+1,4N]`, the remaining quadratic forms satisfy
+
+\[
+|Q_{E_{\rm pole}}(z)|\le\frac{13}{60}\|z\|_2^2,
+\qquad
+|Q_{E_{\rm arch}}(z)|\le\frac{63}{50}\|z\|_2^2,
+\qquad
+|Q_{E_{\rm prime}}(z)|\le\frac{10}{3}\|z\|_2^2.
+\]
+
+Hence the total error operator has the scale-independent form bound
+
+\[
+|Q_E(z)|\le \frac{481}{100}\|z\|_2^2.
+\]
+
+The new polarization theorem applies this full quadratic-form estimate to the
+two block vectors `(r*x,y)` and `(r*x,-y)` for every real `r`. The resulting
+discriminant inequality keeps the same operator coefficient and proves
+
+\[
+|\operatorname{cross}_E(x,y)|^2
+ \le \left(\frac{481}{100}\right)^2
+       \|x\|_2^2\|y\|_2^2.
+\]
+
+This avoids both the Frobenius loss and the absolute-entry Schur loss.
+
+The actual index equivalence is also internal: `Fin (3*N)` is split as
+`Fin N ⊕ Fin (2*N)`, corresponding exactly to
+`[N+1,2N] ⊕ [2N+1,4N]`. Lean proves that the two diagonal blocks are the
+literal cutoff-13 even or odd shell matrices and that the builder cross block
+equals the total-error cross block.
+
+## Closed large-scale adjacent-shell coefficient
+
+Rather than flattening the shell reserve to `9/5`, the new module retains
+
+\[
+g(N)=\log N-\frac{19}{20}
+ -\left(\frac{\operatorname{poleScale}(13)}{8\pi^2N}
+       +\frac12+\frac{10}{3}\right).
+\]
+
+The already proved pole estimate gives the simpler lower envelope
+
+\[
+g(N)\ge \log N-5.
+\]
+
+Since `371293 = 13^5` and the elementary arctanh certificate gives
+`log 13 > 64/25`, every `N >= 371293` satisfies
+
+\[
+g(N)\ge\frac{39}{5},\qquad g(2N)\ge\frac{39}{5}.
+\]
+
+The remaining scalar comparison is then exact rational arithmetic:
+
+\[
+\left(\frac{481}{100}\right)^2
+ < \frac49\left(\frac{39}{5}\right)^2.
+\]
+
+Consequently, for every `N >= 371293`, both actual parity matrices on the
+adjacent dyadic shells satisfy
+
+\[
+|\operatorname{cross}(x,y)|^2
+ \le \frac49\,Q_{[N+1,2N]}(x)\,Q_{[2N+1,4N]}(y).
+\]
+
+This is a new analytic all-scale theorem, independent of the exploratory
+floating-point values. It is still an adjacent-shell statement rather than the
+full historical-core/new-shell estimate required by the terminal tower.
+
+## Summable dyadic envelope
+
+The scale-dependent gain is also retained formally. Set
+
+\[
+N_n=13^5 2^n=371293\cdot2^n,
+\qquad
+L_n=\frac{39}{5}+\frac{69}{100}n.
+\]
+
+The exact identities for `log (13^5 2^n)`, together with
+`log 13 > 64/25` and `log 2 > 69/100`, prove
+
+\[
+L_n\le g(N_n),\qquad L_n\le g(2N_n).
+\]
+
+Define the relative envelope
+
+\[
+q_n=\frac{(481/100)^2}{L_n^2}.
+\]
+
+Lean now proves all three facts needed for a multiscale use of this sequence:
+
+1. `q_n >= 0`;
+2. `(481/100)^2 <= q_n g(N_n) g(2N_n)`;
+3. `Summable q_n`.
+
+For the last point, the denominator is rewritten as
+
+\[
+L_n=\frac{69}{100}\left(n+\frac{260}{23}\right),
+\]
+
+so summability follows directly from the real shifted `p=2` series already in
+Mathlib. The final even and odd theorems apply this summable coefficient to the
+literal adjacent-shell builder matrices. Thus the expected
+`1/(log N)^2`, equivalently `1/n^2` on dyadic scales, is no longer only an
+asymptotic heuristic.
+
 ## Principal Lean theorems
 
 - `c13_centeredLogarithmicArchimedeanSymbol_abs_le`
@@ -233,23 +377,40 @@ lemma.
 - `relativeCoupling_fourNinth_of_nineFifthsHighGap`
 - `c13_logarithmicCvSBuilderEvenTowerCross_relative_fourNinth_of_squaredNormBudget`
 - `c13_logarithmicCvSBuilderOddTowerCross_relative_fourNinth_of_squaredNormBudget`
+- `finiteMatrixBlockCrossEnergy_sq_le_of_quadratic_abs_bound`
+- `c13EvenShellTotalError_energy_abs_le_fourHundredEightyOneHundredths`
+- `c13OddShellTotalError_energy_abs_le_fourHundredEightyOneHundredths`
+- `c13ShellDynamicGap_ge_log_sub_five`
+- `c13EvenAdjacentDyadicShellCrossEnergy_sq_le_operatorBudget`
+- `c13OddAdjacentDyadicShellCrossEnergy_sq_le_operatorBudget`
+- `c13_operatorBudget_le_fourNinth_dynamicGap_product`
+- `c13EvenAdjacentDyadicShellCrossEnergy_relative_fourNinth_of_ge_371293`
+- `c13OddAdjacentDyadicShellCrossEnergy_relative_fourNinth_of_ge_371293`
+- `c13DyadicGapLower_le_dynamicGap`
+- `c13DyadicRelativeEnvelope_budget`
+- `summable_c13DyadicRelativeEnvelope`
+- `c13EvenDyadicShellCrossEnergy_relative_summableEnvelope`
+- `c13OddDyadicShellCrossEnergy_relative_summableEnvelope`
 
 The corresponding nonnegativity adapters are also retained.
 
 ## Next formal boundary
 
-The strongest next target is a structural stitching theorem:
+The strongest next target is now a multiscale aggregation theorem:
 
-1. express the boundary-Weyl increment/cumulative residue in terms of the
-   newly closed actual tower-tail quadratic forms;
-2. prove the remaining concrete cross-square estimate
-   \(B_{\mathrm{cross}}\le(4/5)g_{\mathrm{core}}\); the uniform \(9/5\)
-   high-block gap and the conversion to relative coefficient \(4/9\) are now
-   internal theorems;
-3. isolate the finite prefix below \(960\) as a compact exact certificate;
-4. feed the combined result into the existing
+1. combine the newly summable adjacent-shell cross bounds into the
+   historical-core/new-shell
+   estimate without reintroducing a divergent triangle or Frobenius loss;
+2. determine the correct weighted Hilbert direct-sum/Cauchy interface so that
+   the sum of square-root cross coefficients is controlled by the proved
+   `Summable q_n` information;
+3. bridge the finite interval between the existing certified cutoff ladder and
+   the analytic base `13^5`, or sharpen the component constants enough to lower
+   that base substantially;
+4. express the boundary-Weyl increment/cumulative residue in terms of this
+   stitched tower estimate and feed it into the existing
    `BoundaryWeylCumulative`, `BoundaryGapNoCrossing`, and
    `ParityOrderContinuation` chain.
 
-That step would turn the new local asymptotic coercivity theorem into a global
-no-crossing advance.
+Those steps would turn the new adjacent-shell operator theorem into a global
+no-crossing advance. No claim of an RH proof is made at this stage.
