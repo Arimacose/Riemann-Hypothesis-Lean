@@ -3043,3 +3043,24 @@ now start at the current finite endpoint rather than waiting until `13^5`.
 The active boundary is the finite multiblock composition through `371293` and
 its exact principal restriction, followed by the already isolated infinite
 boundary-Weyl passage.
+
+## 2026-09-02: adjacent coefficient sharpened to `37/40`
+
+The follow-up module `AdjacentArchimedeanSharpGap.lean` replaces the coarse
+`log` and `pi` decimals in the preceding bridge with kernel-checked bounds for
+`log 2`, `log 3`, `log 5`, and `pi`.  The pole amplitude at the first scale is
+`229/5000`, the complete cross amplitude is `27151/7500`, and the two diagonal
+gaps are `428/125` and `207/50`.  Exact rational arithmetic yields, in both
+parities,
+
+```text
+cross_builder(M,2M)^2
+  <= (37/40) * baseEnergy(M,2M) * tailEnergy(M,2M),  M >= 3840.
+```
+
+The gain from `24/25` to `37/40` leaves a `3/40` local reserve for multiblock
+transport.  The controlled rectangle is `(M,2M] x (2M,4M]`; in particular,
+the first instance is `(3840,7680] x (7680,15360]`.  The separate rectangle
+`[1,3840] x (3840,7680]` is still the initial finite/analytic seam and must be
+closed by a recursive or preconditioned finite certificate before the full
+dyadic tower can be assembled.

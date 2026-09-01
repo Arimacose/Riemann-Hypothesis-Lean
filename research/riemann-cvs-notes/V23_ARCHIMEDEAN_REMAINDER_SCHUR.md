@@ -1166,3 +1166,48 @@ beyond `371293`, then pass coercivity to the principal restriction ending
 exactly at `371293`.  That multiblock composition and the later infinite limit
 remain distinct obligations, so this result is a stronger bridge rather than
 a completed RH proof.
+
+## 2026-09-02: sharp constants expose a `3/40` adjacent reserve
+
+`AdjacentArchimedeanSharpGap.lean` revisits only the constants in the preceding
+operator proof; it does not weaken or replace any matrix identity.  Mathlib's
+kernel-checked decimal bounds give
+
+```text
+log(3840) = 8*log(2) + log(3) + log(5) > 20633/2500,
+pi > 314/100.
+```
+
+Together with `logarithmicCvSPoleScale 13 <= 13872`, the pole amplitudes improve
+to `229/5000` at `M` and `229/10000` at `2M`.  The literal three-source
+amplitude and the two dynamic gaps become
+
+```text
+229/5000 + 241/1000 + 10/3 = 27151/7500,
+c13ShellDynamicGap(M)   >= 428/125,
+c13ShellDynamicGap(2*M) >= 207/50.
+```
+
+Lean then closes the exact rational budget
+
+```text
+(27151/7500)^2 <= (37/40) * (428/125) * (207/50),
+```
+
+so both parity blocks satisfy
+
+```text
+cross_builder(M,2M)^2 <= (37/40) * baseEnergy * tailEnergy.
+```
+
+This retains `3/40` of local relative-energy budget, compared with `1/25` in
+the first proof.  The main exported endpoints are
+`c13EvenBuilderAdjacent_relative_37Over40` and
+`c13OddBuilderAdjacent_relative_37Over40`; their proof dependencies are only
+standard Lean quotient/extensionality principles.
+
+Scope is important: this theorem controls the analytic adjacent pair
+`(M,2M] x (2M,4M]`, beginning with `(3840,7680] x (7680,15360]`.  It does not
+yet control the different first rectangle `[1,3840] x (3840,7680]`.  That
+finite-prefix-to-first-shell bridge, followed by finite multiblock assembly and
+the infinite boundary-Weyl limit, remains the active structural boundary.
