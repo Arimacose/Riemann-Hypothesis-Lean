@@ -3229,3 +3229,84 @@ scalar inequality itself, the finite bridge values for every early shell, the
 structured old odd `[1,20]` total, the sum over all historical shells, or the
 infinite boundary--Weyl limit.  Those are now the exposed remaining boundaries;
 no midpoint diagnostic is used as a theorem premise.
+
+## 2026-09-02: the pole is itself Loewner, so the full builder is one symbol
+
+The preceding two-amplitude route was mathematically valid but still discarded
+one layer of cancellation.  `FullBuilderLoewnerTransport.lean` records the
+stronger algebraic observation.  For
+
+```text
+g(x) = -scale * x / (a + b*x^2),
+```
+
+direct rational simplification gives
+
+```text
+(g(q) - g(p)) / (p - q)
+  = scale * (a - b*p*q) / ((a + b*p^2) * (a + b*q^2)).
+```
+
+The right side is exactly the rational `W_{0,2}` pole kernel.  With the
+corresponding diagonal value this identity also holds when `p=q`; Lean proves
+the fully global theorem
+
+```text
+poleKernel_eq_oddDifferenceKernel_rationalPoleLoewner.
+```
+
+Therefore the complete cutoff-13 kernel
+
+```text
+pole - (Archimedean + finite-prime Loewner)
+```
+
+is one odd-symbol Loewner kernel, with symbol
+
+```text
+c13HistoricalBuilderLoewnerSymbol
+  = logarithmicPoleLoewnerSymbol 13
+      - c13HistoricalCombinedLoewnerSymbol.
+```
+
+The formal development identifies the literal even and odd remote builder
+matrix entries and bilinear cross energies with this full symbol.  It then
+repeats the separated-row estimate only once, on the complete source.  As a
+result the actual builder itself, rather than two triangle-combined pieces,
+has exact target-doubling transport `q -> q/2`.
+
+The new arbitrary-distance endpoints are
+
+```text
+c13HistoricalRemoteEvenBuilder_dyadicTransport_fullLoewner
+c13HistoricalRemoteOddBuilder_dyadicTransport_fullLoewner,
+```
+
+and their exact coefficient is `q * (1/2)^k`.  The finite-family endpoints
+
+```text
+c13HistoricalRemoteEvenBuilder_dyadicFamily_fullLoewner
+c13HistoricalRemoteOddBuilder_dyadicFamily_fullLoewner
+```
+
+apply weighted Cauchy directly to actual historical builder matrices and prove
+that an arbitrary finite family consumes at most `2 * leading`, uniformly in
+the number of earlier regular shells.  This is the previously missing concrete
+bridge into `relativeCoupling_of_dyadicChannelBudgets`.
+
+The existing N=15360 midpoint diagnostic explains why the stronger grouping
+matters.  In the old odd `[1,20]` channel, the actual full coefficient is about
+`5.0704e-4`, while the pole/Loewner two-piece triangle coefficient is about
+`1.1047e-2`, a factor of `21.79` larger.  The full-symbol representation keeps
+that cancellation algebraically instead of treating the band as intrinsically
+exceptional.  For regular channels the split loss is small, but the same single
+representation now handles every distance.  These floating values are route
+diagnostics only and are not theorem premises.
+
+This closes the symbolic multi-step transport and regular finite-family
+summation.  The exposed analytic boundary is narrower: prove or consume the
+full-symbol square-sum estimate with one base rectangular budget for each
+newly introduced shell, connect the finitely many source bands below `960` to
+their certified energies, and then feed the resulting uniform coefficient into
+the recursive reserve and infinite boundary-Weyl limit.  Neither those scalar
+certificates nor the infinite limit is asserted here.

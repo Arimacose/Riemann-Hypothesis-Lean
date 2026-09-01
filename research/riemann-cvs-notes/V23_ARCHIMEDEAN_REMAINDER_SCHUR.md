@@ -1307,3 +1307,32 @@ longer open.  The remaining work is scalar and global: internalize/consume the
 uniform combined-symbol estimate, discharge the early finite bridge budgets,
 retain the exceptional old odd block as one structured total, sum all source
 shells, and pass to the infinite boundary--Weyl limit.
+
+## 2026-09-02: full-builder Loewner closure removes the two-source split
+
+`FullBuilderLoewnerTransport.lean` strengthens the preceding transport layer.
+The rational pole kernel is exactly the Loewner quotient of
+
+```text
+-scale * x / (a + b*x^2).
+```
+
+Hence the actual `pole - Archimedean - prime` remote block is a single odd
+Loewner symbol, not merely a sum of one Loewner channel and one rank-two
+channel.  Lean proves the equality entrywise, at the bilinear cross-energy
+level, and for both parity compressions.
+
+This gives exact `q/2` transport for the complete builder, iterates to
+`q*(1/2)^k`, and connects any finite family of literal historical-shell
+matrices to the existing geometric-budget summation theorem with total cost at
+most `2*leading`.  It also preserves the cancellation in the old odd `[1,20]`
+band that made the two-piece triangle route look exceptional.  The N=15360
+midpoint data show the size of that distinction (`5.07e-4` actual versus
+`1.10e-2` after the two-piece triangle), but no midpoint quantity enters the
+Lean proof.
+
+The regular multiscale representation, half transport, arbitrary-distance
+iteration, and finite-family composition are now closed.  Remaining work is
+to certify the scalar full-symbol square sums/base budgets, attach the finitely
+many bands below the analytic `960` threshold to their finite energy
+certificates, and complete the recursive/infinite boundary-Weyl passage.
