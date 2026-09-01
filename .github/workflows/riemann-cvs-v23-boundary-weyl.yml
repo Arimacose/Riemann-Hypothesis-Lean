@@ -16,6 +16,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationFourierBridge.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationSeparatedBands.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PoleSeparatedBands.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/ArchimedeanSeparatedBands.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationPowerBound.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationSupersolution.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationContinuousSupersolution.lean'
@@ -77,6 +78,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationFourierBridge.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationSeparatedBands.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PoleSeparatedBands.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/ArchimedeanSeparatedBands.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationPowerBound.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationSupersolution.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/PrimeTranslationContinuousSupersolution.lean'
@@ -215,6 +217,8 @@ jobs:
           lake env lean RiemannCvs/PrimeTranslationSeparatedBands.lean
           lake build RiemannCvs.PoleSeparatedBands
           lake env lean RiemannCvs/PoleSeparatedBands.lean
+          lake build RiemannCvs.ArchimedeanSeparatedBands
+          lake env lean RiemannCvs/ArchimedeanSeparatedBands.lean
 
       - name: Reject placeholders and audit theorem axioms
         working-directory: research/riemann-cvs-lean
@@ -232,6 +236,7 @@ jobs:
             RiemannCvs/PrimeTranslationFourierBridge.lean
             RiemannCvs/PrimeTranslationSeparatedBands.lean
             RiemannCvs/PoleSeparatedBands.lean
+            RiemannCvs/ArchimedeanSeparatedBands.lean
             RiemannCvs/PrimeTranslationPowerBound.lean
             RiemannCvs/PrimeTranslationSupersolution.lean
             RiemannCvs/PrimeTranslationContinuousSupersolution.lean
@@ -273,6 +278,7 @@ jobs:
           import RiemannCvs.FiniteMatrixBoundaryWeylAdapter
           import RiemannCvs.PrimeTranslationSeparatedBands
           import RiemannCvs.PoleSeparatedBands
+          import RiemannCvs.ArchimedeanSeparatedBands
           import RiemannCvs.PrimeTranslationSupersolution
           import RiemannCvs.PrimeTranslationContinuousSupersolution
           import RiemannCvs.PrimeTranslationContinuousSchur
@@ -736,6 +742,29 @@ jobs:
           #print axioms RiemannCvs.PoleSeparatedBands.c13_fixed3840_remoteOddPoleCrossEnergy_sq_le_oneFifth
           #print axioms RiemannCvs.PoleSeparatedBands.c13_fixed3840_remoteEvenPoleCrossEnergy_sq_le_dyadic
           #print axioms RiemannCvs.PoleSeparatedBands.c13_fixed3840_remoteOddPoleCrossEnergy_sq_le_dyadic
+          #print axioms RiemannCvs.ArchimedeanSeparatedBands.c13_centeredLogarithmicArchimedeanSymbol_abs_le_twoFifths
+          #print axioms RiemannCvs.ArchimedeanSeparatedBands.c13_fixedRemoteArchimedeanSameSignEntry_abs_le
+          #print axioms RiemannCvs.ArchimedeanSeparatedBands.c13_fixedRemoteArchimedeanReflectedEntry_abs_le
+          #print axioms RiemannCvs.ArchimedeanSeparatedBands.c13_fixedRemoteEvenArchimedeanEntry_abs_le_one_div_gap
+          #print axioms RiemannCvs.ArchimedeanSeparatedBands.c13_fixedRemoteOddArchimedeanEntry_abs_le_one_div_gap
+          #print axioms RiemannCvs.ArchimedeanSeparatedBands.c13_fixedRemoteEvenBuilderError_one
+          #print axioms RiemannCvs.ArchimedeanSeparatedBands.c13_fixedRemoteOddBuilderError_one
+          #print axioms RiemannCvs.ArchimedeanSeparatedBands.c13_fixed3840_remoteArchimedeanCoefficient_le_oneNinetieth
+          #print axioms RiemannCvs.ArchimedeanSeparatedBands.c13_fixed3840_remoteArchimedeanCoefficient_dyadic_le
+          #print axioms RiemannCvs.ArchimedeanSeparatedBands.c13_fixed3840_remoteEvenArchimedeanCrossEnergy_sq_le_dyadic
+          #print axioms RiemannCvs.ArchimedeanSeparatedBands.c13_fixed3840_remoteOddArchimedeanCrossEnergy_sq_le_dyadic
+          #print axioms RiemannCvs.ArchimedeanSeparatedBands.c13_fixedRemoteEvenBuilderError_sum_eq_total
+          #print axioms RiemannCvs.ArchimedeanSeparatedBands.c13_fixedRemoteOddBuilderError_sum_eq_total
+          #print axioms RiemannCvs.ArchimedeanSeparatedBands.c13_fixed3840_remoteEvenTotalErrorCrossEnergy_sq_le_dyadic
+          #print axioms RiemannCvs.ArchimedeanSeparatedBands.c13_fixed3840_remoteOddTotalErrorCrossEnergy_sq_le_dyadic
+          #print axioms RiemannCvs.ArchimedeanSeparatedBands.c13FixedRemoteEvenBuilderMatrix_crossEnergy_eq_totalError
+          #print axioms RiemannCvs.ArchimedeanSeparatedBands.c13FixedRemoteOddBuilderMatrix_crossEnergy_eq_totalError
+          #print axioms RiemannCvs.ArchimedeanSeparatedBands.c13_fixed3840_remoteEvenBuilderCrossEnergy_sq_le_dyadic
+          #print axioms RiemannCvs.ArchimedeanSeparatedBands.c13_fixed3840_remoteOddBuilderCrossEnergy_sq_le_dyadic
+          #print axioms RiemannCvs.ArchimedeanSeparatedBands.c13_fixed3840_remoteEvenBuilderCrossEnergy_sq_le_summableAmplitude
+          #print axioms RiemannCvs.ArchimedeanSeparatedBands.c13_fixed3840_remoteOddBuilderCrossEnergy_sq_le_summableAmplitude
+          #print axioms RiemannCvs.ArchimedeanSeparatedBands.summable_c13_fixedRemoteBuilderDyadicAmplitude
+          #print axioms RiemannCvs.ArchimedeanSeparatedBands.tsum_c13_fixedRemoteBuilderDyadicAmplitude
           LEAN
           lake env lean V23BoundaryWeylAxioms.lean | tee v23-boundary-weyl-axioms.txt
           if grep -E 'sorryAx' v23-boundary-weyl-axioms.txt; then

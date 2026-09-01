@@ -960,25 +960,123 @@ Principal pole-band theorems:
 - `c13_fixed3840_remoteEvenPoleCrossEnergy_sq_le_dyadic`
 - `c13_fixed3840_remoteOddPoleCrossEnergy_sq_le_dyadic`
 
+## Complete fixed-prefix builder bridge
+
+The Archimedean component and the literal three-source builder cross block are
+now closed in `ArchimedeanSeparatedBands.lean`.  The new input at the bottom of
+the spectrum is a premise-free rational estimate
+
+```text
+|centeredArchimedeanSymbol13(x)| <= 2/5,       x >= 1.
+```
+
+It follows directly from the proved digamma Euler--Maclaurin model, the
+cutoff-13 geometric-mass bound, `log 13 < 513/200`, and `pi > 3`; no finite
+floating-point table is used.  For a fixed mode `a` and remote mode `b`, the
+same-sign and reflected entries retain the Fourier gap:
+
+```text
+|ArchSame(a,b)|       <= (13/60)/(N+1-F),
+|ArchReflected(a,-b)| <= (43/60)/(N+1-F).
+```
+
+Both parity combinations therefore fit below the unit kernel
+
+```text
+|ArchParity(i,j)| <= 1/(N+1-F).
+```
+
+Rectangular Cauchy--Schwarz gives
+
+```text
+A(F,N) = F*N*(1/(N+1-F))^2
+       = (1/36)*C_prime(F,N).
+```
+
+Consequently, at `F=3840`,
+
+```text
+A(3840,371293*2^k) <= (1/90)*(1/2)^k.
+```
+
+The Archimedean matrix is proved by reflexivity to be builder-error component
+one.  Combining it with component zero (pole) and component two (the actual
+prime-error sign convention), and using rational square-root majorants
+
+```text
+sqrt(1/5)  <= 448/1000,
+sqrt(1/90) <= 106/1000,
+sqrt(2/5)  <= 633/1000,
+```
+
+produces the complete literal builder estimate
+
+```text
+cross_builder(k)^2
+  <= (1187/1000)^2 * (1/2)^k * ||x||^2 * ||y||^2.
+```
+
+The diagonal Archimedean matrix has zero fixed/remote cross entry, so the full
+builder cross coordinate is proved equal to the three-source total error
+coordinate, rather than merely compared to an auxiliary matrix.  Finally,
+
+```text
+(1/2)^k <= ((3/4)^k)^2
+```
+
+gives a summable amplitude envelope
+
+```text
+|cross_builder(k)| amplitude <= (6/5)*(3/4)^k,
+sum_k (6/5)*(3/4)^k = 24/5.
+```
+
+This is the first formal, geometrically summable estimate for the complete
+fixed-prefix-to-remote CvS builder channel in both parity sectors.
+
+Principal complete-bridge theorems:
+
+- `c13_centeredLogarithmicArchimedeanSymbol_abs_le_twoFifths`
+- `c13_fixedRemoteArchimedeanSameSignEntry_abs_le`
+- `c13_fixedRemoteArchimedeanReflectedEntry_abs_le`
+- `c13_fixedRemoteEvenArchimedeanEntry_abs_le_one_div_gap`
+- `c13_fixedRemoteOddArchimedeanEntry_abs_le_one_div_gap`
+- `c13_fixedRemoteEvenBuilderError_one`
+- `c13_fixedRemoteOddBuilderError_one`
+- `c13_fixed3840_remoteArchimedeanCoefficient_dyadic_le`
+- `c13_fixed3840_remoteEvenArchimedeanCrossEnergy_sq_le_dyadic`
+- `c13_fixed3840_remoteOddArchimedeanCrossEnergy_sq_le_dyadic`
+- `c13_fixedRemoteEvenBuilderError_sum_eq_total`
+- `c13_fixedRemoteOddBuilderError_sum_eq_total`
+- `c13_fixed3840_remoteEvenBuilderCrossEnergy_sq_le_dyadic`
+- `c13_fixed3840_remoteOddBuilderCrossEnergy_sq_le_dyadic`
+- `c13_fixed3840_remoteEvenBuilderCrossEnergy_sq_le_summableAmplitude`
+- `c13_fixed3840_remoteOddBuilderCrossEnergy_sq_le_summableAmplitude`
+- `summable_c13_fixedRemoteBuilderDyadicAmplitude`
+- `tsum_c13_fixedRemoteBuilderDyadicAmplitude`
+
 ## Next formal boundary
 
 The fixed historical-core floor and the full old-core/new-shell estimate are
 now closed.  The next boundary is structural rather than an unproved local
 operator estimate:
 
-1. complete the Archimedean component of the fixed `[1,3840]` to remote-shell
-   channel, then combine it with the now-proved geometrically decaying prime
-   and pole components and the exact finite-prefix coercive certificate;
-2. retain the adjacent `2/5` and older-band decomposition as a reserve-rich
-   fallback if the direct fixed-prefix channel cannot fit the `2/25` slack of
-   the anchored full-core certificate;
+1. turn the rigorous finite computation through `3840` into an explicit Lean
+   coercivity certificate, then close the remaining near bridge from that
+   prefix into the initial analytic core `(3840,371293]`; the theorem above
+   already controls every later dyadic remote shell;
+2. combine the finite-prefix certificate, the anchored analytic-core
+   `23/25` result, and the new summable fixed/remote builder channel in a
+   multiblock Schur certificate; retain the adjacent `2/5` decomposition as a
+   reserve-rich route for the near bridge;
 3. instantiate the now-exact Euclidean form adapter with the actual finite and
    split weak resolvent equations, then connect its monotonic response to
    `BoundaryWeylCumulative`, `BoundaryGapNoCrossing`, and
    `ParityOrderContinuation`;
-4. formulate the infinite dyadic block limit so that finite-core
-   coercivity and the relative `< 4/9` estimate pass to the limiting
-   self-adjoint form without reintroducing a divergent square-root budget;
+4. formulate the infinite dyadic block limit using the new explicit
+   `(6/5)*(3/4)^k` summable amplitude, so finite-core coercivity passes to the
+   limiting self-adjoint form without reintroducing a divergent square-root
+   budget;
 5. retain the adjacent-shell summable theorem as a separate tool for any
    later cumulative-residue estimate that genuinely requires summability.
 
