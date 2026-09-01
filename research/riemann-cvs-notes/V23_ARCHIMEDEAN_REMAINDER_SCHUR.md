@@ -408,6 +408,17 @@ asymptotic heuristic.
 - `c13EvenBuilderDyadicCoreNewest_relative_vanishingEnvelope`
 - `c13OddBuilderDyadicCoreNewest_relative_vanishingEnvelope`
 - `exists_c13CoreNewestRelativeEnvelope_lt_fourNinth`
+- `c13CoreHilbertKernel_energy_abs_le_four`
+- `c13CoreReflectedHilbertLeading_energy_abs_le_two`
+- `c13CoreArchimedeanSameSign_entry_sq_sum_le_oneOverNineM`
+- `c13CoreArchimedeanSameSign_energy_abs_le_oneEighth`
+- `c13CoreArchimedeanReflectedCentered_energy_abs_le_oneOver11520`
+- `c13EvenCoreArchimedeanCenteredResidual_energy_abs_le_quarter`
+- `c13OddCoreArchimedeanCenteredResidual_energy_abs_le_quarter`
+- `c13_logarithmicCvSBuilderEvenCore_energy_ge_oneTwentieth`
+- `c13_logarithmicCvSBuilderOddCore_energy_ge_oneTwentieth`
+- `c13EvenBuilderDyadicCoreNewest_relative_fourNinth`
+- `c13OddBuilderDyadicCoreNewest_relative_fourNinth`
 
 The corresponding nonnegativity adapters are also retained.
 
@@ -455,22 +466,72 @@ Lean theorems identify the resulting block with the literal cutoff-13 even and
 odd builder matrices.  Hence the estimate applies to the actual historical
 core/newest-shell coupling rather than to a surrogate matrix.
 
-If the historical core has a scale-independent Euclidean coercivity floor
-`g_core > 0`, while the newest shell uses the proved dynamic lower gap
-`g(N)`, the complete relative coefficient is bounded by
+The historical-core premise is now discharged in
+`AsymptoticCoreHilbert.lean`.  The new proof splits the full Archimedean
+remainder on every consecutive core `(M,M+L]` into a reflected half-Hilbert
+kernel and two centered corrections.  With the weight
+
+\[
+h_p=p^{-1/2},
+\]
+
+elementary telescoping bounds for the low and high parts of a row give the
+dimension-free Schur estimate
+
+\[
+\left|\sum_{p,q}\frac{x_px_q}{p+q}\right|
+ \le 4\sum_p x_p^2.
+\]
+
+The reflected leading term therefore costs at most `2`.  The centered
+reflected correction is a rank-one envelope costing at most `1/11520` above
+`M=960`.  For the same-sign divided-difference kernel, the pointwise square
+bound factors through
+
+\[
+D_{ij}=\mathbf 1_{i\ne j}|i-j|^{-2},
+\qquad \sum_jD_{ij}\le4,
+\]
+
+and the telescoping reciprocal-square sum
+
+\[
+\sum_{p>M}p^{-2}\le M^{-1}.
+\]
+
+Consequently its quadratic form costs at most `1/8`.  In both parity sectors
+the complete centered residual is thus bounded by
+
+\[
+\frac18+\frac1{11520}<\frac14.
+\]
+
+Reallocating the old Archimedean allowance from `1/2` to `9/4` in the scalar
+reserve leaves the exact uniform core floor
+
+\[
+\frac95+\frac12-\frac94=\frac1{20}.
+\]
+
+Lean therefore proves, without any upper bound on the core length, that every
+cutoff-13 even and odd historical-core builder beginning at `M >= 960` has
+Euclidean coercivity at least `1/20`.
+
+Using this proved floor and the newest-shell dynamic gap, the complete relative
+coefficient is bounded by
 
 \[
 q_n^{\rm core/new}
- =\frac{(4217/1000)^2}{g_{\rm core}L_n},
+ =\frac{(4217/1000)^2}{(1/20)L_n},
 \qquad
 L_n=\frac{39}{5}+\frac{69}{100}n.
 \]
 
 Lean proves that this envelope is nonnegative, pays the exact operator budget,
-and tends to zero.  In particular, for every fixed positive `g_core`, it is
-eventually strictly below `4/9`.  This coefficient behaves like `1/n`; it is
-not the summable `1/n^2` adjacent-shell envelope, and the two statements are
-kept separate.
+tends to zero, and is already strictly below `4/9` for every `n >= 1150`.
+The final theorems are unconditional and apply to the literal even and odd
+builder blocks.  This coefficient behaves like `1/n`; it is not the summable
+`1/n^2` adjacent-shell envelope, and the two statements remain separate.
 
 For reference, the existing finite-channel aggregation theorem
 `relativeCoupling_of_finsetChannelBudgets` sums the relative budgets `q_i`
@@ -479,20 +540,23 @@ that aggregation altogether for the full old-core channel.
 
 ## Next formal boundary
 
-The main analytic premise has now moved:
+The fixed historical-core floor and the full old-core/new-shell estimate are
+now closed.  The next boundary is structural rather than an unproved local
+operator estimate:
 
-1. prove a fixed positive Euclidean coercivity floor for every growing
-   historical core, or replace it with a source-normalized lower bound that is
-   strong enough for the same relative adapter;
-2. connect that core floor and the new eventual `< 4/9` theorem to the existing
+1. connect the uniform `1/20` core floor and the unconditional `n >= 1150`
+   `< 4/9` theorem to the existing
    `BoundaryWeylCumulative`, `BoundaryGapNoCrossing`, and
    `ParityOrderContinuation` no-crossing chain;
-3. bridge the finite interval between the certified cutoff ladder and the
+2. bridge the finite interval between the certified cutoff ladder and the
    analytic bases (`M >= 960` and the dyadic tail base `13^5`), or sharpen the
    constants enough to lower those thresholds;
+3. formulate the infinite dyadic block limit so that uniform finite-core
+   coercivity and the relative `< 4/9` estimate pass to the limiting
+   self-adjoint form without reintroducing a divergent square-root budget;
 4. retain the adjacent-shell summable theorem as a separate tool for any
    later cumulative-residue estimate that genuinely requires summability.
 
-This closes a previously open full-core cross-channel estimate, conditional
-only at the relative-energy stage on the historical-core floor.  It does not
-yet supply that floor and therefore is not, by itself, a proof of RH.
+This is a substantive new no-crossing ingredient, but the global continuation
+and limiting identifications listed above are still separate obligations; the
+result is therefore not, by itself, a proof of RH.

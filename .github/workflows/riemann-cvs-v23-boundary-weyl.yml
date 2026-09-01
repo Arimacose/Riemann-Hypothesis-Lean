@@ -27,6 +27,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticTailOperatorBound.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticCoreNewestArchimedean.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticCoreNewestTotalError.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticCoreHilbert.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V23BoundaryWeylMainline.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V22ZeroModeMainline.lean'
@@ -82,6 +83,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticTailOperatorBound.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticCoreNewestArchimedean.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticCoreNewestTotalError.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticCoreHilbert.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V23BoundaryWeylMainline.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V22ZeroModeMainline.lean'
@@ -191,6 +193,8 @@ jobs:
           lake env lean RiemannCvs/AsymptoticCoreNewestArchimedean.lean
           lake build RiemannCvs.AsymptoticCoreNewestTotalError
           lake env lean RiemannCvs/AsymptoticCoreNewestTotalError.lean
+          lake build RiemannCvs.AsymptoticCoreHilbert
+          lake env lean RiemannCvs/AsymptoticCoreHilbert.lean
 
       - name: Reject placeholders and audit theorem axioms
         working-directory: research/riemann-cvs-lean
@@ -221,6 +225,7 @@ jobs:
             RiemannCvs/AsymptoticTailOperatorBound.lean
             RiemannCvs/AsymptoticCoreNewestArchimedean.lean
             RiemannCvs/AsymptoticCoreNewestTotalError.lean
+            RiemannCvs/AsymptoticCoreHilbert.lean
           )
           if grep -nE '(^|[^[:alnum:]_])(sorry|admit)([^[:alnum:]_]|$)' "${files[@]}"; then
             echo 'proof placeholder detected' >&2
@@ -237,6 +242,7 @@ jobs:
           import RiemannCvs.AsymptoticTailOperatorBound
           import RiemannCvs.AsymptoticCoreNewestArchimedean
           import RiemannCvs.AsymptoticCoreNewestTotalError
+          import RiemannCvs.AsymptoticCoreHilbert
           import RiemannCvs.PrimeTranslationSupersolution
           import RiemannCvs.PrimeTranslationContinuousSupersolution
           import RiemannCvs.PrimeTranslationContinuousSchur
@@ -615,6 +621,14 @@ jobs:
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13EvenBuilderDyadicCoreNewest_relative_vanishingEnvelope
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddBuilderDyadicCoreNewest_relative_vanishingEnvelope
           #print axioms RiemannCvs.V23BoundaryWeylMainline.exists_c13CoreNewestRelativeEnvelope_lt_fourNinth
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13CoreHilbertKernel_energy_abs_le_four
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13CoreArchimedeanSameSign_entry_sq_sum_le_oneOverNineM
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13EvenCoreArchimedeanCenteredResidual_energy_abs_le_quarter
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddCoreArchimedeanCenteredResidual_energy_abs_le_quarter
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_logarithmicCvSBuilderEvenCore_energy_ge_oneTwentieth
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_logarithmicCvSBuilderOddCore_energy_ge_oneTwentieth
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13EvenBuilderDyadicCoreNewest_relative_fourNinth
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddBuilderDyadicCoreNewest_relative_fourNinth
           LEAN
           lake env lean V23BoundaryWeylAxioms.lean | tee v23-boundary-weyl-axioms.txt
           if grep -E 'sorryAx' v23-boundary-weyl-axioms.txt; then
