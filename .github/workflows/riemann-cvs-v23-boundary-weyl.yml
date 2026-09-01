@@ -22,6 +22,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/WeightedSchurSupersolution.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/DigammaEulerMaclaurin.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/C13ArchimedeanEndpoint.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/ArchimedeanRemainderSchur.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V23BoundaryWeylMainline.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V22ZeroModeMainline.lean'
@@ -50,6 +51,7 @@ on:
       - 'research/riemann-cvs-numerics/certify_boundary_weyl_cumulative.py'
       - 'research/riemann-cvs-numerics/certify_parity_gap.py'
       - 'research/riemann-cvs-notes/V23_BOUNDARY_WEYL_CUMULATIVE.md'
+      - 'research/riemann-cvs-notes/V23_ARCHIMEDEAN_REMAINDER_SCHUR.md'
       - '.github/workflows/riemann-cvs-v23-boundary-weyl.yml'
   pull_request:
     branches:
@@ -71,6 +73,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/WeightedSchurSupersolution.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/DigammaEulerMaclaurin.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/C13ArchimedeanEndpoint.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/ArchimedeanRemainderSchur.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V23BoundaryWeylMainline.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V22ZeroModeMainline.lean'
@@ -99,6 +102,7 @@ on:
       - 'research/riemann-cvs-numerics/certify_boundary_weyl_cumulative.py'
       - 'research/riemann-cvs-numerics/certify_parity_gap.py'
       - 'research/riemann-cvs-notes/V23_BOUNDARY_WEYL_CUMULATIVE.md'
+      - 'research/riemann-cvs-notes/V23_ARCHIMEDEAN_REMAINDER_SCHUR.md'
       - '.github/workflows/riemann-cvs-v23-boundary-weyl.yml'
   workflow_dispatch:
 
@@ -169,6 +173,8 @@ jobs:
           lake env lean RiemannCvs/BoundaryWeylFarLeft.lean
           lake build RiemannCvs.V23BoundaryWeylMainline
           lake env lean RiemannCvs/V23BoundaryWeylMainline.lean
+          lake build RiemannCvs.ArchimedeanRemainderSchur
+          lake env lean RiemannCvs/ArchimedeanRemainderSchur.lean
 
       - name: Reject placeholders and audit theorem axioms
         working-directory: research/riemann-cvs-lean
@@ -194,6 +200,7 @@ jobs:
             RiemannCvs/C13ArchimedeanEndpoint.lean
             RiemannCvs/ObliqueWeylDeterminant.lean
             RiemannCvs/V23BoundaryWeylMainline.lean
+            RiemannCvs/ArchimedeanRemainderSchur.lean
           )
           if grep -nE '(^|[^[:alnum:]_])(sorry|admit)([^[:alnum:]_]|$)' "${files[@]}"; then
             echo 'proof placeholder detected' >&2
@@ -205,6 +212,7 @@ jobs:
           fi
           cat > V23BoundaryWeylAxioms.lean <<'LEAN'
           import RiemannCvs.V23BoundaryWeylMainline
+          import RiemannCvs.ArchimedeanRemainderSchur
           import RiemannCvs.PrimeTranslationSupersolution
           import RiemannCvs.PrimeTranslationContinuousSupersolution
           import RiemannCvs.PrimeTranslationContinuousSchur
@@ -527,6 +535,24 @@ jobs:
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_logarithmicCvSBuilderOddShell_coerciveFloor_primeClosed
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_logarithmicCvSBuilderEvenTowerTailEnergy_coerciveFloor_primeClosed
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_logarithmicCvSBuilderOddTowerTailEnergy_coerciveFloor_primeClosed
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_centeredLogarithmicArchimedeanSymbol_abs_le
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.logarithmicCvSArchimedeanEntry_reflected_eq
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.logarithmicCvSArchimedeanEntry_sameSign_eq
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.energy_abs_le_card_mul_of_entry_abs_le
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_centeredArchimedeanSymbol_shell_abs_le
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_evenRemainder_energy_abs_le_half
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_oddRemainder_energy_abs_le_half
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_logarithmicCvSPoleTail_le_thirteenSixtieth
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_shell_complete_scalar_reserve_nonneg
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_shell_complete_scalar_reserve_ge_threeTwentyFive
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_logarithmicCvSBuilderEvenShell_energy_nonneg
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_logarithmicCvSBuilderOddShell_energy_nonneg
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_logarithmicCvSBuilderEvenShell_energy_ge_threeTwentyFive_normSq
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_logarithmicCvSBuilderOddShell_energy_ge_threeTwentyFive_normSq
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_logarithmicCvSBuilderEvenTowerTailEnergy_nonneg
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_logarithmicCvSBuilderOddTowerTailEnergy_nonneg
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_logarithmicCvSBuilderEvenTowerTailEnergy_ge_threeTwentyFive_normSq
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_logarithmicCvSBuilderOddTowerTailEnergy_ge_threeTwentyFive_normSq
           LEAN
           lake env lean V23BoundaryWeylAxioms.lean | tee v23-boundary-weyl-axioms.txt
           if grep -vE 'propext|Classical.choice|Quot.sound|depends on axioms|^$' \
