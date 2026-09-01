@@ -288,4 +288,13 @@ theorem c13_neg_logarithmicArchimedeanDiagonal_ge_log_sub_nineteenTwentieth_of_e
       (RiemannCvs.DigammaEulerMaclaurin.quadratic_remainder_bound_of_eulerMaclaurin_tent_representation
         hRepresentation)
 
+/-- The cutoff-13 diagonal estimate with the Euler--Maclaurin representation,
+tent mass, sector factor, and scalar endpoint all proved in the library. -/
+theorem c13_neg_logarithmicArchimedeanDiagonal_ge_log_sub_nineteenTwentieth_closed
+    (x : ℝ) (hx : (960 : ℝ) ≤ x) :
+    Real.log x - 19 / 20 ≤
+      -logarithmicArchimedeanDiagonal 13 x := by
+  exact c13_neg_logarithmicArchimedeanDiagonal_ge_log_sub_nineteenTwentieth
+    x hx RiemannCvs.DigammaEulerMaclaurin.digamma_quadratic_remainder_bound
+
 end RiemannCvs.C13ArchimedeanEndpoint

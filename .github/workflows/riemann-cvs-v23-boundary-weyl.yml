@@ -13,6 +13,8 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/BoundaryWeylFarLeft.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/CvSParityDisplacement.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/CombinedSymbolDyadicL2.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/DigammaEulerMaclaurin.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/C13ArchimedeanEndpoint.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V23BoundaryWeylMainline.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V22ZeroModeMainline.lean'
@@ -51,6 +53,8 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/BoundaryWeylFarLeft.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/CvSParityDisplacement.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/CombinedSymbolDyadicL2.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/DigammaEulerMaclaurin.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/C13ArchimedeanEndpoint.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V23BoundaryWeylMainline.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V22ZeroModeMainline.lean'
@@ -147,6 +151,8 @@ jobs:
             RiemannCvs/BoundaryWeylFarLeft.lean
             RiemannCvs/CvSParityDisplacement.lean
             RiemannCvs/CombinedSymbolDyadicL2.lean
+            RiemannCvs/DigammaEulerMaclaurin.lean
+            RiemannCvs/C13ArchimedeanEndpoint.lean
             RiemannCvs/ObliqueWeylDeterminant.lean
             RiemannCvs/V23BoundaryWeylMainline.lean
           )
@@ -406,6 +412,11 @@ jobs:
           #print axioms RiemannCvs.BoundaryWeylFarLeft.finiteBoundaryWeyl_ge_farLeftMargin
           #print axioms RiemannCvs.BoundaryWeylFarLeft.boundaryWeylLimit_pos_of_uniformFarLeftMoment
           #print axioms RiemannCvs.BoundaryWeylFarLeft.positiveOn_openNegativeTail_of_compact_and_farLeft
+          #print axioms RiemannCvs.DigammaEulerMaclaurin.digamma_eulerMaclaurin_tent_representation
+          #print axioms RiemannCvs.DigammaEulerMaclaurin.digamma_first_neglected_term_bound
+          #print axioms RiemannCvs.DigammaEulerMaclaurin.digamma_quadratic_remainder_bound
+          #print axioms RiemannCvs.C13ArchimedeanEndpoint.c13_neg_logarithmicArchimedeanDiagonal_ge_log_sub_nineteenTwentieth_closed
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth_closed
           LEAN
           lake env lean V23BoundaryWeylAxioms.lean | tee v23-boundary-weyl-axioms.txt
           if grep -vE 'propext|Classical.choice|Quot.sound|depends on axioms|^$' \

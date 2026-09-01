@@ -1698,6 +1698,21 @@ theorem c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth_
         (RiemannCvs.DigammaEulerMaclaurin.quadratic_remainder_bound_of_eulerMaclaurin_tent_representation
           hRepresentation)
 
+/-- Premise-free cutoff-13 shell-diagonal floor: the exact digamma
+Euler--Maclaurin representation and the mode-960 endpoint are both internal
+theorems. -/
+theorem c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth_closed
+    (old shell : ℕ) (hOld : 960 ≤ old) :
+    ∀ j : Fin shell,
+      Real.log (old : ℝ) - 19 / 20 ≤
+        -logarithmicCvSArchimedeanEntry 13
+          (finGlobalShellPositiveMode old shell j)
+          (finGlobalShellPositiveMode old shell j) := by
+  exact
+    c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth_of_quadratic_remainder_bound_closed_endpoint
+      old shell hOld
+        RiemannCvs.DigammaEulerMaclaurin.digamma_quadratic_remainder_bound
+
 theorem logarithmicCvSPoleEntry_even_factorization (c : ℝ) (n m : ℤ) :
     logarithmicCvSPoleEntry c n m + logarithmicCvSPoleEntry c n (-m) =
       2 * logarithmicCvSPoleScale c *
