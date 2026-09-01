@@ -2897,3 +2897,61 @@ formalize the partial translations on `L2[0,log 13]`, integrate the weighted
 AM-GM inequality under translation, and compose the resulting norm bound with
 the existing Fourier-compression/parity bridge.  No sixth-power path
 enumeration is needed on this preferred route.
+
+## The continuous weighted-Schur operator passage is formal
+
+The weighted AM--GM integration step is now a proved Lean theorem rather than
+an operator-level plan.  `PrimeTranslationContinuousSchur` defines, for a
+finite family of shifts `a_i` and nonnegative weights `w_i`, the literal
+partial-translation form
+
+```text
+sum_i 2*w_i * integral_0^(L-a_i) f(x)*f(x+a_i) dx.
+```
+
+For one shift, `oneShift_abs_integral_le` applies the positive-weight square
+inequality pointwise on the open overlap, integrates it, and uses the exact
+interval-translation identity to turn the second Schur half into an integral
+over `[a_i,L]`.  The finite theorem then sums these estimates.  Two truncation
+lemmas prove that the weak upper test `x <= L-a_i` and strict lower test
+`a_i < x` reconstruct the full interval integral without double-counting the
+shared endpoint.  Consequently
+
+```text
+finiteTranslationIntegratedRows
+  = integral_0^L finiteTranslationNormalizedRow(x) * f(x)^2 dx,
+```
+
+and `finiteTranslationSchur` proves the continuous analogue of the finite
+matrix Schur test with exactly the same row constant `B`.
+
+The cutoff-13 specialization is also closed at the pointwise-coordinate
+level.  It pulls the generated height back by `t=exp(x)`, sets
+`a_i=log(q_i)`, proves all eight shifts lie in `[0,log 13]`, and verifies the
+exponential identities for both translated neighbors.  The strict lower
+overlap convention can omit only the equality point `q_i=exp(x)`, so its row
+is bounded by the already-certified closed-support multiplicative row.  Lean
+therefore proves
+
+```text
+c13_finiteTranslationNormalizedRow_lt_tenThird
+  (x in (0,log 13)) : normalizedRow(x) < 10/3
+```
+
+and the consumer `c13PrimeTranslationSchur` gives
+
+```text
+|sum_i 2*w_i * integral_0^(log(13)-log(q_i))
+    f(x)*f(x+log(q_i)) dx|
+  <= (10/3) * integral_0^log(13) f(x)^2 dx.
+```
+
+Its only explicit side conditions are interval integrability of the test
+function square, the overlap products, and the two truncated weighted row
+integrands.  The difficult constant and all support geometry are discharged
+internally.  The remaining prime-side bridge is correspondingly narrower:
+instantiate these routine integrability obligations for the finite Fourier
+polynomials, prove the complex real/imaginary energy identity and Parseval
+normalization, and feed the result through the existing signed-mode parity
+compression.  The continuous positive-Schur estimate itself is no longer an
+open premise.
