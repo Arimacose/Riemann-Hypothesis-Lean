@@ -280,17 +280,12 @@ theorem c13_neg_logarithmicArchimedeanDiagonal_ge_log_sub_nineteenTwentieth_of_e
       Complex.digamma w - (Complex.log w - 1 / (2 * w)) =
         -(∫ t : ℝ in Set.Ioi 0,
           (RiemannCvs.DigammaEulerMaclaurin.periodicTentWeight t : ℂ) *
-            (w + (t : ℂ))⁻¹ ^ 3))
-    (hRealMass : ∀ r : ℝ, 0 < r →
-      ∫ t : ℝ in Set.Ioi 0,
-          RiemannCvs.DigammaEulerMaclaurin.periodicTentWeight t *
-            (1 / (r + t) ^ 3) ≤
-        1 / (12 * r ^ 2)) :
+            (w + (t : ℂ))⁻¹ ^ 3)) :
     Real.log x - 19 / 20 ≤
       -logarithmicArchimedeanDiagonal 13 x := by
   exact c13_neg_logarithmicArchimedeanDiagonal_ge_log_sub_nineteenTwentieth
     x hx
-      (RiemannCvs.DigammaEulerMaclaurin.quadratic_remainder_bound_of_eulerMaclaurin_tent
-        hRepresentation hRealMass)
+      (RiemannCvs.DigammaEulerMaclaurin.quadratic_remainder_bound_of_eulerMaclaurin_tent_representation
+        hRepresentation)
 
 end RiemannCvs.C13ArchimedeanEndpoint
