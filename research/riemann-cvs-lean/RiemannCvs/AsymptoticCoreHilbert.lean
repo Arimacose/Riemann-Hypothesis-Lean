@@ -15,16 +15,16 @@ Two elementary telescoping square-root estimates give a dimension-free
 weighted-Schur constant `4` for `1 / (p + q)`, hence constant `2` for the
 half-Hilbert quadratic form.  The centered reflected term costs only
 `1 / 11520` above cutoff `960`.  A reciprocal-square distance-kernel estimate
-and finite Hilbert--Schmidt argument bound the same-sign term by `1 / 8`.
-Thus the complete centered residual fits inside `1 / 4` in both parity
-channels.
+and finite Hilbert--Schmidt argument first bound the same-sign term by `1 / 8`
+and then sharpen it to `1 / 90`.  Thus the complete centered residual costs
+only `43 / 3840` in both parity channels.
 
 Combining this operator estimate with the diagonal, pole, and prime budgets
-proves a uniform `1 / 20` coercivity floor for every historical core beginning
-at `M >= 960`, without restricting its length.  As a concrete no-crossing
+proves a uniform `1109 / 3840` coercivity floor for every historical core
+beginning at `M >= 960`, without restricting its length.  As a concrete no-crossing
 consequence, the actual even and odd CvS builder blocks satisfy the full
 historical-core/newest-shell relative `4 / 9` bound on the dyadic tail for
-every `n >= 1150`.
+every `n >= 190`.
 -/
 
 noncomputable section
@@ -1462,5 +1462,349 @@ theorem c13OddBuilderDyadicCoreNewest_relative_fourNinth
     n hn x y
     (c13OddCoreArchimedeanCenteredResidual_energy_abs_le_quarter
       960 (c13DyadicShellBase n - 960) (by norm_num) x)
+
+/-!
+## Sharpened rational budget
+
+The Hilbert--Schmidt square estimate contains substantially more information
+than the coarse `1 / 8` adapter above.  At `M >= 960`, its square root is below
+`1 / 90`.  Keeping this sharper rational constant improves the global core
+floor and lowers the explicit dyadic no-crossing threshold.
+-/
+
+theorem c13CoreArchimedeanSameSign_energy_abs_le_oneNinetieth
+    (M L : ℕ) (hM : 960 ≤ M) (x : Fin L → ℝ) :
+    |finiteMatrixQuadraticEnergy
+        (c13CoreArchimedeanSameSignMatrix M L) x| ≤
+      (1 / 90 : ℝ) * finiteVectorEuclideanNormSq x := by
+  have hSqBase := finiteMatrixQuadraticEnergy_sq_le_entrySqSum_mul_normSq_sq
+    (c13CoreArchimedeanSameSignMatrix M L) x
+  have hEntries :=
+    c13CoreArchimedeanSameSign_entry_sq_sum_le_oneOverNineM M L hM
+  have hNormSq : 0 ≤ (finiteVectorEuclideanNormSq x) ^ 2 := sq_nonneg _
+  have hSq :
+      (finiteMatrixQuadraticEnergy
+          (c13CoreArchimedeanSameSignMatrix M L) x) ^ 2 ≤
+        (1 / (9 * (M : ℝ))) *
+          (finiteVectorEuclideanNormSq x) ^ 2 :=
+    hSqBase.trans (mul_le_mul_of_nonneg_right hEntries hNormSq)
+  have hCoeff : 1 / (9 * (M : ℝ)) ≤ (1 / 90 : ℝ) ^ 2 := by
+    rw [div_le_iff₀ (by positivity : (0 : ℝ) < 9 * (M : ℝ))]
+    have hMR : (960 : ℝ) ≤ M := by exact_mod_cast hM
+    norm_num
+    linarith
+  have hSqTarget :
+      (finiteMatrixQuadraticEnergy
+          (c13CoreArchimedeanSameSignMatrix M L) x) ^ 2 ≤
+        ((1 / 90 : ℝ) * finiteVectorEuclideanNormSq x) ^ 2 := by
+    calc
+      _ ≤ (1 / (9 * (M : ℝ))) *
+          (finiteVectorEuclideanNormSq x) ^ 2 := hSq
+      _ ≤ (1 / 90 : ℝ) ^ 2 *
+          (finiteVectorEuclideanNormSq x) ^ 2 :=
+        mul_le_mul_of_nonneg_right hCoeff hNormSq
+      _ = ((1 / 90 : ℝ) * finiteVectorEuclideanNormSq x) ^ 2 := by ring
+  apply (sq_le_sq₀ (abs_nonneg _)
+    (mul_nonneg (by norm_num) (finiteVectorEuclideanNormSq_nonneg x))).1
+  simpa only [sq_abs] using hSqTarget
+
+theorem c13EvenCoreArchimedeanCenteredResidual_energy_abs_le_fortyThreeOver3840
+    (M L : ℕ) (hM : 960 ≤ M) (x : Fin L → ℝ) :
+    |finiteMatrixQuadraticEnergy
+        (c13EvenCoreArchimedeanCenteredResidualMatrix M L) x| ≤
+      (43 / 3840 : ℝ) * finiteVectorEuclideanNormSq x := by
+  rw [c13EvenCoreArchimedeanCenteredResidualMatrix_eq,
+    finiteMatrixQuadraticEnergy_add, finiteMatrixQuadraticEnergy_neg]
+  calc
+    |-finiteMatrixQuadraticEnergy
+          (c13CoreArchimedeanSameSignMatrix M L) x +
+        finiteMatrixQuadraticEnergy
+          (c13CoreArchimedeanReflectedCenteredMatrix M L) x| ≤
+        |-finiteMatrixQuadraticEnergy
+          (c13CoreArchimedeanSameSignMatrix M L) x| +
+        |finiteMatrixQuadraticEnergy
+          (c13CoreArchimedeanReflectedCenteredMatrix M L) x| :=
+      abs_add_le _ _
+    _ = |finiteMatrixQuadraticEnergy
+          (c13CoreArchimedeanSameSignMatrix M L) x| +
+        |finiteMatrixQuadraticEnergy
+          (c13CoreArchimedeanReflectedCenteredMatrix M L) x| := by
+      rw [abs_neg]
+    _ ≤ (1 / 90 : ℝ) * finiteVectorEuclideanNormSq x +
+        (1 / 11520 : ℝ) * finiteVectorEuclideanNormSq x :=
+      add_le_add
+        (c13CoreArchimedeanSameSign_energy_abs_le_oneNinetieth M L hM x)
+        (c13CoreArchimedeanReflectedCentered_energy_abs_le_oneOver11520
+          M L hM x)
+    _ = (43 / 3840 : ℝ) * finiteVectorEuclideanNormSq x := by ring
+
+theorem c13OddCoreArchimedeanCenteredResidual_energy_abs_le_fortyThreeOver3840
+    (M L : ℕ) (hM : 960 ≤ M) (x : Fin L → ℝ) :
+    |finiteMatrixQuadraticEnergy
+        (c13OddCoreArchimedeanCenteredResidualMatrix M L) x| ≤
+      (43 / 3840 : ℝ) * finiteVectorEuclideanNormSq x := by
+  rw [c13OddCoreArchimedeanCenteredResidualMatrix_eq, sub_eq_add_neg,
+    finiteMatrixQuadraticEnergy_add, finiteMatrixQuadraticEnergy_neg,
+    finiteMatrixQuadraticEnergy_neg]
+  calc
+    |-finiteMatrixQuadraticEnergy
+          (c13CoreArchimedeanSameSignMatrix M L) x +
+        -finiteMatrixQuadraticEnergy
+          (c13CoreArchimedeanReflectedCenteredMatrix M L) x| ≤
+        |-finiteMatrixQuadraticEnergy
+          (c13CoreArchimedeanSameSignMatrix M L) x| +
+        |-finiteMatrixQuadraticEnergy
+          (c13CoreArchimedeanReflectedCenteredMatrix M L) x| :=
+      abs_add_le _ _
+    _ = |finiteMatrixQuadraticEnergy
+          (c13CoreArchimedeanSameSignMatrix M L) x| +
+        |finiteMatrixQuadraticEnergy
+          (c13CoreArchimedeanReflectedCenteredMatrix M L) x| := by
+      rw [abs_neg, abs_neg]
+    _ ≤ (1 / 90 : ℝ) * finiteVectorEuclideanNormSq x +
+        (1 / 11520 : ℝ) * finiteVectorEuclideanNormSq x :=
+      add_le_add
+        (c13CoreArchimedeanSameSign_energy_abs_le_oneNinetieth M L hM x)
+        (c13CoreArchimedeanReflectedCentered_energy_abs_le_oneOver11520
+          M L hM x)
+    _ = (43 / 3840 : ℝ) * finiteVectorEuclideanNormSq x := by ring
+
+theorem c13EvenCoreArchimedeanRemainder_energy_abs_le_7723Over3840
+    (M L : ℕ) (hM : 960 ≤ M) (x : Fin L → ℝ) :
+    |finiteMatrixQuadraticEnergy
+        (logarithmicCvSArchimedeanEvenPositiveModeRemainderMatrix
+          13 (finGlobalShellPositiveMode M L)) x| ≤
+      (7723 / 3840 : ℝ) * finiteVectorEuclideanNormSq x := by
+  rw [c13EvenCoreArchimedeanRemainder_eq_leading_add_centered,
+    finiteMatrixQuadraticEnergy_add]
+  calc
+    |finiteMatrixQuadraticEnergy
+          (c13CoreReflectedHilbertLeadingMatrix M L) x +
+        finiteMatrixQuadraticEnergy
+          (c13EvenCoreArchimedeanCenteredResidualMatrix M L) x| ≤
+        |finiteMatrixQuadraticEnergy
+          (c13CoreReflectedHilbertLeadingMatrix M L) x| +
+        |finiteMatrixQuadraticEnergy
+          (c13EvenCoreArchimedeanCenteredResidualMatrix M L) x| :=
+      abs_add_le _ _
+    _ ≤ 2 * finiteVectorEuclideanNormSq x +
+        (43 / 3840 : ℝ) * finiteVectorEuclideanNormSq x :=
+      add_le_add
+        (c13CoreReflectedHilbertLeading_energy_abs_le_two M L x)
+        (c13EvenCoreArchimedeanCenteredResidual_energy_abs_le_fortyThreeOver3840
+          M L hM x)
+    _ = (7723 / 3840 : ℝ) * finiteVectorEuclideanNormSq x := by ring
+
+theorem c13OddCoreArchimedeanRemainder_energy_abs_le_7723Over3840
+    (M L : ℕ) (hM : 960 ≤ M) (x : Fin L → ℝ) :
+    |finiteMatrixQuadraticEnergy
+        (logarithmicCvSArchimedeanOddPositiveModeRemainderMatrix
+          13 (finGlobalShellPositiveMode M L)) x| ≤
+      (7723 / 3840 : ℝ) * finiteVectorEuclideanNormSq x := by
+  rw [c13OddCoreArchimedeanRemainder_eq_leading_add_centered,
+    finiteMatrixQuadraticEnergy_add]
+  calc
+    |finiteMatrixQuadraticEnergy
+          (c13OddCoreReflectedHilbertLeadingMatrix M L) x +
+        finiteMatrixQuadraticEnergy
+          (c13OddCoreArchimedeanCenteredResidualMatrix M L) x| ≤
+        |finiteMatrixQuadraticEnergy
+          (c13OddCoreReflectedHilbertLeadingMatrix M L) x| +
+        |finiteMatrixQuadraticEnergy
+          (c13OddCoreArchimedeanCenteredResidualMatrix M L) x| :=
+      abs_add_le _ _
+    _ ≤ 2 * finiteVectorEuclideanNormSq x +
+        (43 / 3840 : ℝ) * finiteVectorEuclideanNormSq x :=
+      add_le_add
+        (c13OddCoreReflectedHilbertLeading_energy_abs_le_two M L x)
+        (c13OddCoreArchimedeanCenteredResidual_energy_abs_le_fortyThreeOver3840
+          M L hM x)
+    _ = (7723 / 3840 : ℝ) * finiteVectorEuclideanNormSq x := by ring
+
+lemma c13_globalCore_scalar_reserve_ge_1109Over3840
+    (M : ℕ) (hM : 960 ≤ M) :
+    (1109 / 3840 : ℝ) ≤ Real.log (M : ℝ) - 19 / 20 -
+      (logarithmicCvSPoleScale 13 /
+          (8 * Real.pi ^ 2 * (M : ℝ)) +
+        7723 / 3840 + 10 / 3) := by
+  nlinarith [c13_shell_complete_scalar_reserve_ge_nineFifths M hM]
+
+theorem c13_logarithmicCvSBuilderEvenCore_energy_ge_1109Over3840
+    (M L : ℕ) (hM : 960 ≤ M) (x : Fin L → ℝ) :
+    (1109 / 3840 : ℝ) * finiteVectorEuclideanNormSq x ≤
+      finiteMatrixQuadraticEnergy
+        (logarithmicCvSBuilderEvenPositiveModeMatrix
+          13 c13PrimePowerLocation c13PrimePowerBase
+          (finGlobalShellPositiveMode M L)) x := by
+  have hArch := c13EvenCoreArchimedeanRemainder_energy_abs_le_7723Over3840
+    M L hM x
+  have h := c13_logarithmicCvSBuilderEvenShell_coerciveFloor_primeClosed
+    M L (by omega) x
+    (Real.log (M : ℝ) - 19 / 20) 0 (1109 / 3840) (7723 / 3840)
+    (c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth_closed
+      M L hM)
+    hArch
+    (by simpa using c13_globalCore_scalar_reserve_ge_1109Over3840 M hM)
+  simpa using h
+
+theorem c13_logarithmicCvSBuilderOddCore_energy_ge_1109Over3840
+    (M L : ℕ) (hM : 960 ≤ M) (x : Fin L → ℝ) :
+    (1109 / 3840 : ℝ) * finiteVectorEuclideanNormSq x ≤
+      finiteMatrixQuadraticEnergy
+        (logarithmicCvSBuilderOddPositiveModeMatrix
+          13 c13PrimePowerLocation c13PrimePowerBase
+          (finGlobalShellPositiveMode M L)) x := by
+  have hArch := c13OddCoreArchimedeanRemainder_energy_abs_le_7723Over3840
+    M L hM x
+  have h := c13_logarithmicCvSBuilderOddShell_coerciveFloor_primeClosed
+    M L (by omega) x
+    (Real.log (M : ℝ) - 19 / 20) 0 (1109 / 3840) (7723 / 3840)
+    (c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth_closed
+      M L hM)
+    hArch
+    (by simpa using c13_globalCore_scalar_reserve_ge_1109Over3840 M hM)
+  simpa using h
+
+theorem c13EvenBuilderCoreNewestBaseEnergy_ge_1109Over3840
+    (M N : ℕ) (hM : 960 ≤ M) (x : Fin (N - M) → ℝ) :
+    (1109 / 3840 : ℝ) * finiteVectorEuclideanNormSq x ≤
+      finiteMatrixBlockBaseEnergy (c13EvenBuilderCoreNewestBlock M N) x := by
+  have h := c13_logarithmicCvSBuilderEvenCore_energy_ge_1109Over3840
+    M (N - M) hM x
+  unfold finiteMatrixBlockBaseEnergy
+  simpa only [c13EvenBuilderCoreNewestBlock_inl_inl,
+    finiteMatrixQuadraticEnergy] using h
+
+theorem c13OddBuilderCoreNewestBaseEnergy_ge_1109Over3840
+    (M N : ℕ) (hM : 960 ≤ M) (x : Fin (N - M) → ℝ) :
+    (1109 / 3840 : ℝ) * finiteVectorEuclideanNormSq x ≤
+      finiteMatrixBlockBaseEnergy (c13OddBuilderCoreNewestBlock M N) x := by
+  have h := c13_logarithmicCvSBuilderOddCore_energy_ge_1109Over3840
+    M (N - M) hM x
+  unfold finiteMatrixBlockBaseEnergy
+  simpa only [c13OddBuilderCoreNewestBlock_inl_inl,
+    finiteMatrixQuadraticEnergy] using h
+
+theorem c13EvenBuilderCoreNewest_relative_1109Over3840
+    (M N : ℕ) (hM : 960 ≤ M) (hMN : M ≤ N)
+    (x : Fin (N - M) → ℝ) (y : Fin N → ℝ) (q : ℝ) (hq : 0 ≤ q)
+    (hBudget : (4217 / 1000 : ℝ) ^ 2 ≤
+      q * (1109 / 3840 : ℝ) * c13ShellDynamicGap N) :
+    (finiteMatrixBlockCrossEnergy (c13EvenBuilderCoreNewestBlock M N) x y) ^ 2 ≤
+      q * finiteMatrixBlockBaseEnergy (c13EvenBuilderCoreNewestBlock M N) x *
+        finiteMatrixBlockTailEnergy (c13EvenBuilderCoreNewestBlock M N) y := by
+  exact c13EvenBuilderCoreNewest_relative_of_coreFloor
+    M N hM hMN x y (1109 / 3840) q (by norm_num) hq
+    (c13EvenBuilderCoreNewestBaseEnergy_ge_1109Over3840 M N hM x)
+    hBudget
+
+theorem c13OddBuilderCoreNewest_relative_1109Over3840
+    (M N : ℕ) (hM : 960 ≤ M) (hMN : M ≤ N)
+    (x : Fin (N - M) → ℝ) (y : Fin N → ℝ) (q : ℝ) (hq : 0 ≤ q)
+    (hBudget : (4217 / 1000 : ℝ) ^ 2 ≤
+      q * (1109 / 3840 : ℝ) * c13ShellDynamicGap N) :
+    (finiteMatrixBlockCrossEnergy (c13OddBuilderCoreNewestBlock M N) x y) ^ 2 ≤
+      q * finiteMatrixBlockBaseEnergy (c13OddBuilderCoreNewestBlock M N) x *
+        finiteMatrixBlockTailEnergy (c13OddBuilderCoreNewestBlock M N) y := by
+  exact c13OddBuilderCoreNewest_relative_of_coreFloor
+    M N hM hMN x y (1109 / 3840) q (by norm_num) hq
+    (c13OddBuilderCoreNewestBaseEnergy_ge_1109Over3840 M N hM x)
+    hBudget
+
+theorem c13CoreNewestRelativeEnvelope_1109Over3840_lt_fourNinth
+    (n : ℕ) (hn : 190 ≤ n) :
+    c13CoreNewestRelativeEnvelope (1109 / 3840) n < (4 / 9 : ℝ) := by
+  have hnR : (190 : ℝ) ≤ (n : ℝ) := by exact_mod_cast hn
+  have hgap : 0 < c13DyadicGapLower n := c13DyadicGapLower_pos n
+  unfold c13CoreNewestRelativeEnvelope
+  apply (div_lt_iff₀ (mul_pos (by norm_num) hgap)).2
+  have hscaled : (190 : ℝ) * (69 / 100 : ℝ) ≤
+      (n : ℝ) * (69 / 100 : ℝ) :=
+    mul_le_mul_of_nonneg_right hnR (by norm_num)
+  unfold c13DyadicGapLower
+  norm_num at hscaled ⊢
+  nlinarith
+
+theorem c13EvenBuilderDyadicCoreNewest_relative_fourNinth_of_ge_190
+    (n : ℕ) (hn : 190 ≤ n)
+    (x : Fin (c13DyadicShellBase n - 960) → ℝ)
+    (y : Fin (c13DyadicShellBase n) → ℝ) :
+    (finiteMatrixBlockCrossEnergy
+        (c13EvenBuilderCoreNewestBlock 960 (c13DyadicShellBase n)) x y) ^ 2 ≤
+      (4 / 9 : ℝ) *
+        finiteMatrixBlockBaseEnergy
+          (c13EvenBuilderCoreNewestBlock 960 (c13DyadicShellBase n)) x *
+        finiteMatrixBlockTailEnergy
+          (c13EvenBuilderCoreNewestBlock 960 (c13DyadicShellBase n)) y := by
+  have hMN : 960 ≤ c13DyadicShellBase n := by
+    unfold c13DyadicShellBase
+    have hpow : 1 ≤ 2 ^ n := one_le_pow₀ (by norm_num)
+    nlinarith
+  have hCore := c13EvenBuilderCoreNewestBaseEnergy_ge_1109Over3840
+    960 (c13DyadicShellBase n) (by norm_num) x
+  have hTail := c13EvenBuilderCoreNewestTailEnergy_ge_dynamicGap_normSq
+    960 (c13DyadicShellBase n) (by
+      unfold c13DyadicShellBase
+      have hpow : 1 ≤ 2 ^ n := one_le_pow₀ (by norm_num)
+      nlinarith) y
+  have hBaseNonneg : 0 ≤ finiteMatrixBlockBaseEnergy
+      (c13EvenBuilderCoreNewestBlock 960 (c13DyadicShellBase n)) x :=
+    (mul_nonneg (by norm_num) (finiteVectorEuclideanNormSq_nonneg x)).trans hCore
+  have hTailNonneg : 0 ≤ finiteMatrixBlockTailEnergy
+      (c13EvenBuilderCoreNewestBlock 960 (c13DyadicShellBase n)) y :=
+    (mul_nonneg (c13ShellDynamicGap_nonneg _ (by
+      unfold c13DyadicShellBase
+      have hpow : 1 ≤ 2 ^ n := one_le_pow₀ (by norm_num)
+      nlinarith)) (finiteVectorEuclideanNormSq_nonneg y)).trans hTail
+  have hRelative := c13EvenBuilderDyadicCoreNewest_relative_vanishingEnvelope
+    960 n (by norm_num) hMN x y (1109 / 3840) (by norm_num) hCore
+  exact hRelative.trans (by
+    exact mul_le_mul_of_nonneg_right
+      (mul_le_mul_of_nonneg_right
+        (le_of_lt
+          (c13CoreNewestRelativeEnvelope_1109Over3840_lt_fourNinth n hn))
+        hBaseNonneg)
+      hTailNonneg)
+
+theorem c13OddBuilderDyadicCoreNewest_relative_fourNinth_of_ge_190
+    (n : ℕ) (hn : 190 ≤ n)
+    (x : Fin (c13DyadicShellBase n - 960) → ℝ)
+    (y : Fin (c13DyadicShellBase n) → ℝ) :
+    (finiteMatrixBlockCrossEnergy
+        (c13OddBuilderCoreNewestBlock 960 (c13DyadicShellBase n)) x y) ^ 2 ≤
+      (4 / 9 : ℝ) *
+        finiteMatrixBlockBaseEnergy
+          (c13OddBuilderCoreNewestBlock 960 (c13DyadicShellBase n)) x *
+        finiteMatrixBlockTailEnergy
+          (c13OddBuilderCoreNewestBlock 960 (c13DyadicShellBase n)) y := by
+  have hMN : 960 ≤ c13DyadicShellBase n := by
+    unfold c13DyadicShellBase
+    have hpow : 1 ≤ 2 ^ n := one_le_pow₀ (by norm_num)
+    nlinarith
+  have hCore := c13OddBuilderCoreNewestBaseEnergy_ge_1109Over3840
+    960 (c13DyadicShellBase n) (by norm_num) x
+  have hTail := c13OddBuilderCoreNewestTailEnergy_ge_dynamicGap_normSq
+    960 (c13DyadicShellBase n) (by
+      unfold c13DyadicShellBase
+      have hpow : 1 ≤ 2 ^ n := one_le_pow₀ (by norm_num)
+      nlinarith) y
+  have hBaseNonneg : 0 ≤ finiteMatrixBlockBaseEnergy
+      (c13OddBuilderCoreNewestBlock 960 (c13DyadicShellBase n)) x :=
+    (mul_nonneg (by norm_num) (finiteVectorEuclideanNormSq_nonneg x)).trans hCore
+  have hTailNonneg : 0 ≤ finiteMatrixBlockTailEnergy
+      (c13OddBuilderCoreNewestBlock 960 (c13DyadicShellBase n)) y :=
+    (mul_nonneg (c13ShellDynamicGap_nonneg _ (by
+      unfold c13DyadicShellBase
+      have hpow : 1 ≤ 2 ^ n := one_le_pow₀ (by norm_num)
+      nlinarith)) (finiteVectorEuclideanNormSq_nonneg y)).trans hTail
+  have hRelative := c13OddBuilderDyadicCoreNewest_relative_vanishingEnvelope
+    960 n (by norm_num) hMN x y (1109 / 3840) (by norm_num) hCore
+  exact hRelative.trans (by
+    exact mul_le_mul_of_nonneg_right
+      (mul_le_mul_of_nonneg_right
+        (le_of_lt
+          (c13CoreNewestRelativeEnvelope_1109Over3840_lt_fourNinth n hn))
+        hBaseNonneg)
+      hTailNonneg)
 
 end RiemannCvs.V23BoundaryWeylMainline

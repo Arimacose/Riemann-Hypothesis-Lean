@@ -419,6 +419,16 @@ asymptotic heuristic.
 - `c13_logarithmicCvSBuilderOddCore_energy_ge_oneTwentieth`
 - `c13EvenBuilderDyadicCoreNewest_relative_fourNinth`
 - `c13OddBuilderDyadicCoreNewest_relative_fourNinth`
+- `c13CoreArchimedeanSameSign_energy_abs_le_oneNinetieth`
+- `c13EvenCoreArchimedeanCenteredResidual_energy_abs_le_fortyThreeOver3840`
+- `c13OddCoreArchimedeanCenteredResidual_energy_abs_le_fortyThreeOver3840`
+- `c13EvenCoreArchimedeanRemainder_energy_abs_le_7723Over3840`
+- `c13OddCoreArchimedeanRemainder_energy_abs_le_7723Over3840`
+- `c13_logarithmicCvSBuilderEvenCore_energy_ge_1109Over3840`
+- `c13_logarithmicCvSBuilderOddCore_energy_ge_1109Over3840`
+- `c13CoreNewestRelativeEnvelope_1109Over3840_lt_fourNinth`
+- `c13EvenBuilderDyadicCoreNewest_relative_fourNinth_of_ge_190`
+- `c13OddBuilderDyadicCoreNewest_relative_fourNinth_of_ge_190`
 
 The corresponding nonnegativity adapters are also retained.
 
@@ -499,36 +509,38 @@ and the telescoping reciprocal-square sum
 \sum_{p>M}p^{-2}\le M^{-1}.
 \]
 
-Consequently its quadratic form costs at most `1/8`.  In both parity sectors
-the complete centered residual is thus bounded by
+The first coarse adapter records `1/8`, but the Hilbert--Schmidt square bound
+itself gives the sharper rational estimate `1/90` because `M >= 960`.  In both
+parity sectors the complete centered residual is therefore bounded by
 
 \[
-\frac18+\frac1{11520}<\frac14.
+\frac1{90}+\frac1{11520}=\frac{43}{3840}.
 \]
 
-Reallocating the old Archimedean allowance from `1/2` to `9/4` in the scalar
-reserve leaves the exact uniform core floor
+The full Archimedean allowance becomes `7723/3840`.  Reallocating the old
+allowance `1/2` in the scalar reserve then leaves the exact uniform core floor
 
 \[
-\frac95+\frac12-\frac94=\frac1{20}.
+\frac95+\frac12-\frac{7723}{3840}
+ =\frac{1109}{3840}\approx0.288802.
 \]
 
 Lean therefore proves, without any upper bound on the core length, that every
 cutoff-13 even and odd historical-core builder beginning at `M >= 960` has
-Euclidean coercivity at least `1/20`.
+Euclidean coercivity at least `1109/3840`.
 
 Using this proved floor and the newest-shell dynamic gap, the complete relative
 coefficient is bounded by
 
 \[
 q_n^{\rm core/new}
- =\frac{(4217/1000)^2}{(1/20)L_n},
+ =\frac{(4217/1000)^2}{(1109/3840)L_n},
 \qquad
 L_n=\frac{39}{5}+\frac{69}{100}n.
 \]
 
 Lean proves that this envelope is nonnegative, pays the exact operator budget,
-tends to zero, and is already strictly below `4/9` for every `n >= 1150`.
+tends to zero, and is already strictly below `4/9` for every `n >= 190`.
 The final theorems are unconditional and apply to the literal even and odd
 builder blocks.  This coefficient behaves like `1/n`; it is not the summable
 `1/n^2` adjacent-shell envelope, and the two statements remain separate.
@@ -544,7 +556,7 @@ The fixed historical-core floor and the full old-core/new-shell estimate are
 now closed.  The next boundary is structural rather than an unproved local
 operator estimate:
 
-1. connect the uniform `1/20` core floor and the unconditional `n >= 1150`
+1. connect the uniform `1109/3840` core floor and the unconditional `n >= 190`
    `< 4/9` theorem to the existing
    `BoundaryWeylCumulative`, `BoundaryGapNoCrossing`, and
    `ParityOrderContinuation` no-crossing chain;

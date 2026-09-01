@@ -629,6 +629,14 @@ jobs:
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_logarithmicCvSBuilderOddCore_energy_ge_oneTwentieth
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13EvenBuilderDyadicCoreNewest_relative_fourNinth
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddBuilderDyadicCoreNewest_relative_fourNinth
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13CoreArchimedeanSameSign_energy_abs_le_oneNinetieth
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13EvenCoreArchimedeanCenteredResidual_energy_abs_le_fortyThreeOver3840
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddCoreArchimedeanCenteredResidual_energy_abs_le_fortyThreeOver3840
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_logarithmicCvSBuilderEvenCore_energy_ge_1109Over3840
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13_logarithmicCvSBuilderOddCore_energy_ge_1109Over3840
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13CoreNewestRelativeEnvelope_1109Over3840_lt_fourNinth
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13EvenBuilderDyadicCoreNewest_relative_fourNinth_of_ge_190
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddBuilderDyadicCoreNewest_relative_fourNinth_of_ge_190
           LEAN
           lake env lean V23BoundaryWeylAxioms.lean | tee v23-boundary-weyl-axioms.txt
           if grep -E 'sorryAx' v23-boundary-weyl-axioms.txt; then
