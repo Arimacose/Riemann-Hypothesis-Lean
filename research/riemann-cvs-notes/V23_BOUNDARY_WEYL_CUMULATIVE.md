@@ -3150,3 +3150,82 @@ The remaining source-level task is to prove the concrete half-transport and
 leading-envelope hypotheses uniformly in the dyadic scale, preserving the
 combined Loewner and fixed-block cancellations identified above; the infinite
 boundary--Weyl limit remains a later, separate step.
+
+## 2026-09-02: concrete combined-Loewner and pole half transport
+
+`HistoricalCombinedLoewnerTransport.lean` now formalizes the grouping selected
+by the N=15360 diagnostic on the literal cutoff-13 source.  For every historical
+shell `(B,2B]` and remote target `(N,2N]` with `4B <= N`, it defines the actual
+Fourier-normalized odd symbol
+
+```text
+F13 = (ArchimedeanSymbol13 + finitePrimeSymbol13) / pi
+```
+
+with the actual diagonal, proves its even/odd separated-row square estimates,
+and lifts them through rectangular Cauchy to the complete cross form.  The
+Archimedean and prime pieces are never separated in this chain.
+
+The fixed-source matrix budget is proportional to `1/N`, so Lean proves its
+exact scaling law under `N -> 2N`.  The new monotonicity theorem
+`c13ShellDynamicGap_mono` then connects this algebra to the already closed
+premise-free cutoff-13 shell coercivity.  The concrete endpoints
+
+```text
+c13EvenHistoricalCombinedLoewner_halfTransport_shellEnergy
+c13OddHistoricalCombinedLoewner_halfTransport_shellEnergy
+```
+
+show that a previous combined-Loewner coefficient `q` becomes `q/2` against the
+actual source-shell and doubled-target builder energies.  Their remaining
+analytic inputs are displayed rather than hidden: the next weighted symbol
+square bound and the preceding rectangular scalar budget.
+
+The rational pole channel is stronger than the older fixed-prefix interface.
+Because the low coordinates form `(B,2B]`, not `[1,B]`, both pole weight masses
+decay:
+
+```text
+low mass  = O(1/B),
+high mass = O(1/N),
+pole squared coefficient = O(1/(B*N)).
+```
+
+The rank-one factorization and reciprocal-square shell bounds are entirely
+kernel-checked.  Both even and odd pole coefficients halve exactly when `N`
+doubles, and the theorems
+
+```text
+c13EvenHistoricalPole_halfTransport_shellEnergy
+c13OddHistoricalPole_halfTransport_shellEnergy
+```
+
+normalize that fact by the same actual shell energies without a numerical
+premise.
+
+Finally, the module defines the literal positive-mode builder on
+`(B,2B] ⊕ (N,2N]` and proves entrywise and bilinear identities
+
+```text
+actual builder cross = pole cross - combined-Loewner cross.
+```
+
+The endpoints
+
+```text
+c13HistoricalRemoteEvenBuilder_halfTransport_amplitude
+c13HistoricalRemoteOddBuilder_halfTransport_amplitude
+```
+
+reassemble those two channels with the exact amplitude coefficient
+`(ampPole + ampLoewner)^2`.  This is the root-free interface needed to prove a
+one-half total transport using rational amplitude majorants, and it avoids the
+fixed factor-two triangle loss.
+
+This closes the concrete matrix representation, pole transport, coercive-energy
+normalization, and structured two-source composition for every regular
+historical shell.  It does not yet supply the source-specific combined-symbol
+scalar inequality itself, the finite bridge values for every early shell, the
+structured old odd `[1,20]` total, the sum over all historical shells, or the
+infinite boundary--Weyl limit.  Those are now the exposed remaining boundaries;
+no midpoint diagnostic is used as a theorem premise.

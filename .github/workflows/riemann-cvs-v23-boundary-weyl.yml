@@ -36,6 +36,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/AdjacentArchimedeanHilbertSchmidt.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/AdjacentArchimedeanSharpGap.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/FirstAnalyticMultiblockBudget.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/HistoricalCombinedLoewnerTransport.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/FiniteMatrixBoundaryWeylAdapter.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V23BoundaryWeylMainline.lean'
@@ -101,6 +102,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/AdjacentArchimedeanHilbertSchmidt.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/AdjacentArchimedeanSharpGap.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/FirstAnalyticMultiblockBudget.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/HistoricalCombinedLoewnerTransport.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/FiniteMatrixBoundaryWeylAdapter.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V23BoundaryWeylMainline.lean'
@@ -223,6 +225,8 @@ jobs:
           lake env lean RiemannCvs/AdjacentArchimedeanSharpGap.lean
           lake build RiemannCvs.FirstAnalyticMultiblockBudget
           lake env lean RiemannCvs/FirstAnalyticMultiblockBudget.lean
+          lake build RiemannCvs.HistoricalCombinedLoewnerTransport
+          lake env lean RiemannCvs/HistoricalCombinedLoewnerTransport.lean
           lake build RiemannCvs.FiniteMatrixBoundaryWeylAdapter
           lake env lean RiemannCvs/FiniteMatrixBoundaryWeylAdapter.lean
           lake build RiemannCvs.PrimeTranslationSeparatedBands
@@ -270,6 +274,7 @@ jobs:
             RiemannCvs/AdjacentArchimedeanHilbertSchmidt.lean
             RiemannCvs/AdjacentArchimedeanSharpGap.lean
             RiemannCvs/FirstAnalyticMultiblockBudget.lean
+            RiemannCvs/HistoricalCombinedLoewnerTransport.lean
             RiemannCvs/FiniteMatrixBoundaryWeylAdapter.lean
           )
           if grep -nE '(^|[^[:alnum:]_])(sorry|admit)([^[:alnum:]_]|$)' "${files[@]}"; then
@@ -293,6 +298,7 @@ jobs:
           import RiemannCvs.AdjacentArchimedeanHilbertSchmidt
           import RiemannCvs.AdjacentArchimedeanSharpGap
           import RiemannCvs.FirstAnalyticMultiblockBudget
+          import RiemannCvs.HistoricalCombinedLoewnerTransport
           import RiemannCvs.FiniteMatrixBoundaryWeylAdapter
           import RiemannCvs.PrimeTranslationSeparatedBands
           import RiemannCvs.PoleSeparatedBands
@@ -726,6 +732,20 @@ jobs:
           #print axioms RiemannCvs.V23BoundaryWeylMainline.relativeCoupling_of_v23AdjacentAndHistoricalBudgets
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13EvenBuilderAdjacentWithDyadicHistorical_relative_1079Over1080
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddBuilderAdjacentWithFixedAndDyadicHistorical_relative_1079Over1080
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13HistoricalCombinedLoewnerSymbol_odd
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13ShellDynamicGap_mono
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13EvenHistoricalLoewnerRemoteCrossEnergy_sq_le_symbolBudget
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddHistoricalLoewnerRemoteCrossEnergy_sq_le_symbolBudget
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13EvenHistoricalCombinedLoewner_halfTransport_shellEnergy
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddHistoricalCombinedLoewner_halfTransport_shellEnergy
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13HistoricalRemoteEvenBuilderMatrix_crossEnergy_eq
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13HistoricalRemoteOddBuilderMatrix_crossEnergy_eq
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13HistoricalEvenPoleShellCoefficient_two_mul
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13HistoricalOddPoleShellCoefficient_two_mul
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13EvenHistoricalPole_halfTransport_shellEnergy
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddHistoricalPole_halfTransport_shellEnergy
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13HistoricalRemoteEvenBuilder_halfTransport_amplitude
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13HistoricalRemoteOddBuilder_halfTransport_amplitude
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddBuilderDyadicAdjacentCoreNewest_relative_twoFifths
           #print axioms RiemannCvs.V23BoundaryWeylMainline.finiteMatrixCouplingEuclideanForm_eq_crossEnergy
           #print axioms RiemannCvs.V23BoundaryWeylMainline.finiteMatrixBoundaryWeyl_mono_of_relativeEnergyCertificate

@@ -216,4 +216,3 @@ theorem c13OddBuilderAdjacentWithFixedAndDyadicHistorical_relative_1079Over1080
   simpa [tail] using hHistorical
 
 end RiemannCvs.V23BoundaryWeylMainline
-

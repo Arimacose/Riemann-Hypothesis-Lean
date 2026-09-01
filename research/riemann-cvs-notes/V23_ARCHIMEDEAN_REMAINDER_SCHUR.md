@@ -1284,3 +1284,26 @@ a structured total to preserve cancellation.  These diagnostic observations
 guide the next source-level proof; they are not imported into Lean.  What
 remains is the uniform concrete half-transport theorem and then the infinite
 boundary--Weyl passage, not additional budget arithmetic.
+
+## 2026-09-02: actual historical-shell half transport is connected
+
+`HistoricalCombinedLoewnerTransport.lean` converts the N=15360 architectural
+observation into a kernel-checked matrix theorem.  On `(B,2B]` to `(N,2N]` it
+keeps the Archimedean and prime terms inside one normalized odd Loewner symbol,
+proves exact `N -> 2N` halving of the fixed-source symbol-square matrix budget,
+and normalizes the result by the premise-free dynamic cutoff-13 shell energies.
+The only remaining Loewner inputs are the explicitly stated weighted symbol
+square bound and preceding scalar budget.
+
+The same file improves the rational pole treatment from a fixed-prefix mass to
+two shell masses.  Consequently its squared coefficient is `O(1/(B*N))` and
+halves exactly in the target scale.  Lean then identifies the literal builder
+cross form as `pole - combinedLoewner` and combines the two transported pieces
+at amplitude level, producing `(ampPole + ampLoewner)^2` without a factor-two
+triangle loss.  Both parities have complete actual-matrix endpoints.
+
+Thus the regular historical-shell representation and transport layer is no
+longer open.  The remaining work is scalar and global: internalize/consume the
+uniform combined-symbol estimate, discharge the early finite bridge budgets,
+retain the exceptional old odd block as one structured total, sum all source
+shells, and pass to the infinite boundary--Weyl limit.
