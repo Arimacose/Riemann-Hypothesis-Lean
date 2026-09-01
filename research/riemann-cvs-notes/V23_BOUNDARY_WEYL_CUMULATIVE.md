@@ -2635,3 +2635,66 @@ by the square expansion nonzero: single, doubled, pair-difference, and
 pair-sum.  Arb continues to enclose their absolute magnitudes to obtain the
 explicit constant `geometricError`; it no longer carries the logical burden
 of proving phase nonresonance.
+
+## The trigamma tail now follows from the same global DLMF remainder
+
+The separate shifted-digamma-derivative premise has now been eliminated from
+the narrowest cutoff-13 route.  On the right half-plane Lean considers
+
+```text
+R(w) = digamma(w) - (log(w) - 1/(2*w)).
+```
+
+For a fixed `z` with positive real part and any radius `0<r<Re(z)`, every
+closed ball centered at `z+N` stays in the right half-plane.  The Gamma-based
+analyticity theorem for `digamma`, the slit-plane derivative of `log`, and the
+elementary inverse derivative make `R` differentiable on each such ball.
+Cauchy's first-derivative estimate therefore proves
+
+```text
+sup_{|w-(z+N)|=r} ||R(w)|| <= epsilon(N),  epsilon(N) -> 0
+  ==> ||R'(z+N)|| <= epsilon(N)/r
+  ==> R'(z+N) -> 0.
+```
+
+Lean separately computes the derivative of the asymptotic model as
+
+```text
+(log(w) - 1/(2*w))' = 1/w + 1/(2*w^2)
+```
+
+and proves that this expression tends to zero along `z+N`.  Adding the two
+limits yields `digamma'(z+N) -> 0`, which feeds the already checked finite
+telescoping theorem and produces the canonical reciprocal-square `HasSum`.
+
+A global quadratic remainder bound
+
+```text
+0 < Re(w) ==> ||R(w)|| <= C / ||w||^2
+```
+
+automatically supplies the shrinking circle envelope: on the radius-`r`
+circle, `||w||` is at least `N+Re(z)-r`, so one may take
+`epsilon(N)=C/(N+Re(z)-r)^2`.  For the literal Archimedean argument,
+`height=Im(z)<=||z||`; the same global bound also gives the exact pointwise
+`C/height^2` estimate used by the diagonal floor.  Consequently the choice
+`C=sqrt(2)/6` discharges both the digamma floor and the trigamma series from
+one analytic hypothesis.
+
+This Cauchy/global-remainder layer adds nine public theorem interfaces:
+
+* `tendsto_deriv_digamma_natTranslate_of_uniform_asymptotic`;
+* `tendsto_deriv_digamma_natTranslate_of_quadratic_remainder_bound`;
+* `hasSum_one_div_complex_add_sq_of_uniform_asymptotic`;
+* `hasSum_one_div_complex_add_sq_of_quadratic_remainder_bound`;
+* `archimedeanTrigammaSeries_hasSum_of_uniform_asymptotic`;
+* `archimedeanTrigammaSeries_hasSum_of_quadratic_remainder_bound`;
+* `archimedean_digamma_remainder_le_of_quadratic_remainder_bound`;
+* `c13_neg_logarithmicArchimedeanDiagonal_ge_log_sub_nineteenTwentieth_of_quadratic_remainder_bound`;
+* `c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth_of_quadratic_remainder_bound`.
+
+Thus the narrowest Archimedean diagonal boundary now consists of one global
+right-half-plane DLMF-form quadratic remainder theorem and the single scalar
+endpoint comparison at mode `960`.  The remaining operator boundary after
+that diagonal is the Archimedean-remainder and prime parity quadratic-form
+control recorded by the certificate.

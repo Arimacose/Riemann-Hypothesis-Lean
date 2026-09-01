@@ -1,7 +1,9 @@
 import Mathlib.Algebra.Ring.GeomSum
 import Mathlib.Analysis.Calculus.Deriv.Star
+import Mathlib.Analysis.Complex.Liouville
 import Mathlib.Analysis.Complex.Trigonometric
 import Mathlib.Analysis.PSeries
+import Mathlib.Analysis.SpecificLimits.Basic
 import Mathlib.Analysis.SpecialFunctions.Gamma.Digamma
 import RiemannCvs.BoundaryWeylCumulative
 import RiemannCvs.CvSParityDisplacement
@@ -46,11 +48,14 @@ and simultaneous-reflection invariance are also proved, so the finite recursive
   remaining operator input is the concrete Archimedean diagonal/remainder and
   prime-form bound.  The exponential-series mass and first moment are evaluated
   exactly below, closing every geometric correction in the Archimedean symbol
-  and diagonal.  Its lower bound is now reduced further to a DLMF-form digamma
-  norm remainder, decay of the digamma derivative along positive-integer
-  translates, and one cutoff-13 endpoint scalar comparison.  Lean derives the
-  canonical trigamma `HasSum` identity by a differentiated shift equation and
-  finite telescoping, then converts those inputs to the all-mode shell floor.
+  and diagonal.  Its lower bound is now reduced further to one global
+  DLMF-form quadratic digamma remainder and one cutoff-13 endpoint scalar
+  comparison.  Lean derives the canonical trigamma `HasSum` identity by a
+  differentiated shift equation and finite telescoping.  A Cauchy estimate on
+  fixed complex circles turns the same quadratic remainder into decay of the
+  shifted digamma derivative, so the pointwise digamma and trigamma inputs are
+  both discharged by that single analytic bound before the all-mode shell
+  floor is formed.
   The scalar pole-weight tail estimate is now closed by
   pointwise reciprocal-square bounds and a consecutive-shell reindexing.  The
   all-scale shell-tower compatibility, the exact positive-mode component
@@ -65,6 +70,7 @@ namespace RiemannCvs.CombinedSymbolDyadicL2
 
 open Finset
 open Filter
+open Metric
 open scoped BigOperators Topology
 
 /-!
@@ -1724,8 +1730,10 @@ shift equation and telescoping gives
 
 `sum_{n < N} 1 / (z + n)^2 = digamma'(z) - digamma'(z + N)`.
 
-The summands are absolutely summable there.  Hence the sole remaining input
-for the canonical trigamma series is that `digamma'(z + N)` tends to zero.
+The summands are absolutely summable there.  Hence the immediate input for the
+canonical trigamma series is that `digamma'(z + N)` tends to zero.  The Cauchy
+layer below derives this decay from either a vanishing uniform circle envelope
+or a single global `C / ‖z‖²` remainder bound.
 -/
 
 private lemma gamma_analyticAt_of_re_pos (z : ℂ) (hz : 0 < z.re) :
@@ -1854,6 +1862,296 @@ theorem archimedeanTrigammaSeries_hasSum_of_tendsto_deriv_digamma
     1 / (archimedeanArgument c x + (n : ℂ)) ^ 2) _
   exact hasSum_one_div_complex_add_sq_of_tendsto_deriv_digamma
     (archimedeanArgument c x) (by simp) hTail
+
+private lemma closedBall_natTranslate_subset_re_pos
+    (z : ℂ) (r : ℝ) (hr : r < z.re) (N : ℕ) :
+    closedBall (z + (N : ℂ)) r ⊆ {w : ℂ | 0 < w.re} := by
+  intro w hw
+  have hdist : dist w (z + (N : ℂ)) ≤ r := mem_closedBall.mp hw
+  have hnorm : ‖w - (z + (N : ℂ))‖ ≤ r := by
+    simpa [dist_eq_norm] using hdist
+  have hreNorm : |w.re - (z + (N : ℂ)).re| ≤
+      ‖w - (z + (N : ℂ))‖ := by
+    simpa using Complex.abs_re_le_norm (w - (z + (N : ℂ)))
+  have hre : |w.re - (z + (N : ℂ)).re| ≤ r := hreNorm.trans hnorm
+  have hlow := (abs_le.mp hre).1
+  change 0 < w.re
+  simp only [Complex.add_re, Complex.natCast_re] at hlow
+  have hN : (0 : ℝ) ≤ (N : ℝ) := Nat.cast_nonneg N
+  nlinarith
+
+private lemma digamma_asymptotic_model_differentiableAt
+    (w : ℂ) (hw : 0 < w.re) :
+    DifferentiableAt ℂ
+      (fun u : ℂ => Complex.log u - 1 / (2 * u)) w := by
+  have hw0 : w ≠ 0 := Complex.ne_zero_of_re_pos hw
+  have hLog : DifferentiableAt ℂ Complex.log w :=
+    Complex.differentiableAt_log (Complex.mem_slitPlane_iff.mpr (Or.inl hw))
+  have hDen : DifferentiableAt ℂ (fun u : ℂ => 2 * u) w := by
+    fun_prop
+  have hRecip : DifferentiableAt ℂ (fun u : ℂ => 1 / (2 * u)) w := by
+    exact (differentiableAt_const (c := (1 : ℂ))).div hDen
+      (mul_ne_zero (by norm_num) hw0)
+  exact hLog.sub hRecip
+
+private lemma digamma_asymptotic_remainder_differentiableOn_re_pos :
+    DifferentiableOn ℂ
+      (fun w : ℂ => Complex.digamma w -
+        (Complex.log w - 1 / (2 * w)))
+      {w : ℂ | 0 < w.re} := by
+  intro w hw
+  exact ((digamma_differentiableAt_of_re_pos w hw).sub
+    (digamma_asymptotic_model_differentiableAt w hw)).differentiableWithinAt
+
+private lemma norm_deriv_digamma_asymptotic_remainder_natTranslate_le
+    (z : ℂ) (r : ℝ) (hr0 : 0 < r) (hrz : r < z.re)
+    (ε : ℕ → ℝ)
+    (hSphere : ∀ N : ℕ, ∀ w ∈ sphere (z + (N : ℂ)) r,
+      ‖Complex.digamma w - (Complex.log w - 1 / (2 * w))‖ ≤ ε N)
+    (N : ℕ) :
+    ‖deriv (fun w : ℂ => Complex.digamma w -
+      (Complex.log w - 1 / (2 * w))) (z + (N : ℂ))‖ ≤ ε N / r := by
+  exact Complex.norm_deriv_le_of_forall_mem_sphere_norm_le hr0
+    (digamma_asymptotic_remainder_differentiableOn_re_pos.diffContOnCl_ball
+      (closedBall_natTranslate_subset_re_pos z r hrz N))
+    (hSphere N)
+
+private lemma tendsto_deriv_digamma_asymptotic_remainder_natTranslate
+    (z : ℂ) (r : ℝ) (hr0 : 0 < r) (hrz : r < z.re)
+    (ε : ℕ → ℝ) (hε : Tendsto ε atTop (𝓝 0))
+    (hSphere : ∀ N : ℕ, ∀ w ∈ sphere (z + (N : ℂ)) r,
+      ‖Complex.digamma w - (Complex.log w - 1 / (2 * w))‖ ≤ ε N) :
+    Tendsto (fun N : ℕ =>
+      deriv (fun w : ℂ => Complex.digamma w -
+        (Complex.log w - 1 / (2 * w))) (z + (N : ℂ)))
+      atTop (𝓝 0) := by
+  refine squeeze_zero_norm (fun N =>
+    norm_deriv_digamma_asymptotic_remainder_natTranslate_le
+      z r hr0 hrz ε hSphere N) ?_
+  simpa using hε.div_const r
+
+private lemma deriv_digamma_asymptotic_model (w : ℂ) (hw : 0 < w.re) :
+    deriv (fun u : ℂ => Complex.log u - 1 / (2 * u)) w =
+      w⁻¹ + 1 / (2 * w ^ 2) := by
+  have hw0 : w ≠ 0 := Complex.ne_zero_of_re_pos hw
+  have hLog : HasDerivAt Complex.log w⁻¹ w :=
+    Complex.hasDerivAt_log
+      (Complex.mem_slitPlane_iff.mpr (Or.inl hw))
+  have hRecipRaw : HasDerivAt
+      (fun u : ℂ => (1 / 2 : ℂ) * u⁻¹)
+      ((1 / 2 : ℂ) * (-(w ^ 2)⁻¹)) w :=
+    (hasDerivAt_inv hw0).const_mul (1 / 2 : ℂ)
+  have hRecip : HasDerivAt
+      (fun u : ℂ => 1 / (2 * u))
+      (-(1 / (2 * w ^ 2))) w := by
+    convert hRecipRaw using 1 <;>
+      simp [div_eq_mul_inv, mul_inv_rev, mul_comm]
+  change deriv (Complex.log - fun u : ℂ => 1 / (2 * u)) w = _
+  simpa only [sub_neg_eq_add] using (hLog.sub hRecip).deriv
+
+private lemma tendsto_inv_natTranslate (z : ℂ) (hz : 0 < z.re) :
+    Tendsto (fun N : ℕ => (z + (N : ℂ))⁻¹) atTop (𝓝 0) := by
+  refine squeeze_zero_norm
+    (a := fun N : ℕ => 1 / ((N : ℝ) + z.re)) (fun N => ?_) ?_
+  · have hRePos : 0 < (N : ℝ) + z.re :=
+      add_pos_of_nonneg_of_pos (Nat.cast_nonneg N) hz
+    have hReNorm : (N : ℝ) + z.re ≤ ‖z + (N : ℂ)‖ := by
+      simpa [add_comm] using Complex.re_le_norm (z + (N : ℂ))
+    rw [norm_inv]
+    simpa only [one_div] using one_div_le_one_div_of_le hRePos hReNorm
+  · have hReal :=
+      (tendsto_mul_add_inv_atTop_nhds_zero 1 z.re (by norm_num)).comp
+        (tendsto_natCast_atTop_atTop (R := ℝ))
+    simpa only [Function.comp_def, one_mul, one_div] using hReal
+
+private lemma tendsto_deriv_digamma_asymptotic_model_natTranslate
+    (z : ℂ) (hz : 0 < z.re) :
+    Tendsto (fun N : ℕ =>
+      deriv (fun w : ℂ => Complex.log w - 1 / (2 * w))
+        (z + (N : ℂ))) atTop (𝓝 0) := by
+  have hInv := tendsto_inv_natTranslate z hz
+  have hSq : Tendsto (fun N : ℕ =>
+      (z + (N : ℂ))⁻¹ ^ 2) atTop (𝓝 (0 ^ 2)) := hInv.pow 2
+  have hHalfSq : Tendsto (fun N : ℕ =>
+      1 / (2 * (z + (N : ℂ)) ^ 2)) atTop (𝓝 0) := by
+    simpa [div_eq_mul_inv, mul_inv_rev, inv_pow, mul_comm] using
+      ((tendsto_const_nhds : Tendsto (fun _ : ℕ => (1 / 2 : ℂ))
+        atTop (𝓝 (1 / 2 : ℂ))).mul hSq)
+  have hModel : Tendsto (fun N : ℕ =>
+      (z + (N : ℂ))⁻¹ + 1 / (2 * (z + (N : ℂ)) ^ 2))
+      atTop (𝓝 0) := by
+    simpa using hInv.add hHalfSq
+  apply hModel.congr'
+  filter_upwards with N
+  rw [deriv_digamma_asymptotic_model]
+  simpa using add_pos_of_pos_of_nonneg hz (Nat.cast_nonneg N)
+
+/-- A vanishing uniform digamma-remainder envelope on fixed circles implies
+decay of the shifted digamma derivative by Cauchy's first-derivative estimate. -/
+theorem tendsto_deriv_digamma_natTranslate_of_uniform_asymptotic
+    (z : ℂ) (r : ℝ) (hr0 : 0 < r) (hrz : r < z.re)
+    (ε : ℕ → ℝ) (hε : Tendsto ε atTop (𝓝 0))
+    (hSphere : ∀ N : ℕ, ∀ w ∈ sphere (z + (N : ℂ)) r,
+      ‖Complex.digamma w - (Complex.log w - 1 / (2 * w))‖ ≤ ε N) :
+    Tendsto (fun N : ℕ =>
+      deriv Complex.digamma (z + (N : ℂ))) atTop (𝓝 0) := by
+  have hz : 0 < z.re := hr0.trans hrz
+  have hRemainder :=
+    tendsto_deriv_digamma_asymptotic_remainder_natTranslate
+      z r hr0 hrz ε hε hSphere
+  have hModel :=
+    tendsto_deriv_digamma_asymptotic_model_natTranslate z hz
+  have hSum := hRemainder.add hModel
+  have hSum0 : Tendsto (fun N : ℕ =>
+      deriv (fun w : ℂ => Complex.digamma w -
+        (Complex.log w - 1 / (2 * w))) (z + (N : ℂ)) +
+      deriv (fun w : ℂ => Complex.log w - 1 / (2 * w))
+        (z + (N : ℂ))) atTop (𝓝 0) := by
+    simpa using hSum
+  apply hSum0.congr'
+  filter_upwards with N
+  have hw : 0 < (z + (N : ℂ)).re := by
+    simpa using add_pos_of_pos_of_nonneg hz (Nat.cast_nonneg N)
+  have hDigamma := digamma_differentiableAt_of_re_pos
+    (z + (N : ℂ)) hw
+  have hAsymptotic := digamma_asymptotic_model_differentiableAt
+    (z + (N : ℂ)) hw
+  rw [deriv_fun_sub hDigamma hAsymptotic]
+  ring
+
+/-- A global quadratic DLMF-form remainder bound on the right half-plane
+supplies the circle envelopes required by the Cauchy bridge. -/
+theorem tendsto_deriv_digamma_natTranslate_of_quadratic_remainder_bound
+    (z : ℂ) (hz : 0 < z.re) (C : ℝ) (hC : 0 ≤ C)
+    (hRemainder : ∀ w : ℂ, 0 < w.re →
+      ‖Complex.digamma w - (Complex.log w - 1 / (2 * w))‖ ≤
+        C / ‖w‖ ^ 2) :
+    Tendsto (fun N : ℕ =>
+      deriv Complex.digamma (z + (N : ℂ))) atTop (𝓝 0) := by
+  let r : ℝ := z.re / 2
+  let ε : ℕ → ℝ := fun N =>
+    C / (((N : ℝ) + z.re - r) ^ 2)
+  have hr0 : 0 < r := by dsimp [r]; linarith
+  have hrz : r < z.re := by dsimp [r]; linarith
+  have hε : Tendsto ε atTop (𝓝 0) := by
+    have hInv : Tendsto (fun N : ℕ =>
+        (((N : ℝ) + (z.re - r))⁻¹)) atTop (𝓝 0) := by
+      have hReal :=
+        (tendsto_mul_add_inv_atTop_nhds_zero 1 (z.re - r) (by norm_num)).comp
+          (tendsto_natCast_atTop_atTop (R := ℝ))
+      simpa only [Function.comp_def, one_mul] using hReal
+    have hSq := hInv.pow 2
+    have hScaled :=
+      (tendsto_const_nhds : Tendsto (fun _ : ℕ => C) atTop (𝓝 C)).mul hSq
+    simpa [ε, div_eq_mul_inv, inv_pow, sub_eq_add_neg, add_assoc] using hScaled
+  refine tendsto_deriv_digamma_natTranslate_of_uniform_asymptotic
+    z r hr0 hrz ε hε ?_
+  intro N w hwSphere
+  have hwClosed : w ∈ closedBall (z + (N : ℂ)) r :=
+    sphere_subset_closedBall hwSphere
+  have hwPos : 0 < w.re :=
+    closedBall_natTranslate_subset_re_pos z r hrz N hwClosed
+  have hRaw := hRemainder w hwPos
+  have hdist : dist w (z + (N : ℂ)) ≤ r := mem_closedBall.mp hwClosed
+  have hnorm : ‖w - (z + (N : ℂ))‖ ≤ r := by
+    simpa [dist_eq_norm] using hdist
+  have hreNorm : |w.re - (z + (N : ℂ)).re| ≤
+      ‖w - (z + (N : ℂ))‖ := by
+    simpa using Complex.abs_re_le_norm (w - (z + (N : ℂ)))
+  have hre : |w.re - (z + (N : ℂ)).re| ≤ r := hreNorm.trans hnorm
+  have hlow := (abs_le.mp hre).1
+  have hBasePos : 0 < (N : ℝ) + z.re - r := by
+    have hN : (0 : ℝ) ≤ (N : ℝ) := Nat.cast_nonneg N
+    linarith
+  have hBaseRe : (N : ℝ) + z.re - r ≤ w.re := by
+    simp only [Complex.add_re, Complex.natCast_re] at hlow
+    linarith
+  have hBaseNorm : (N : ℝ) + z.re - r ≤ ‖w‖ :=
+    hBaseRe.trans (Complex.re_le_norm w)
+  have hSq : ((N : ℝ) + z.re - r) ^ 2 ≤ ‖w‖ ^ 2 := by
+    nlinarith [norm_nonneg w]
+  exact hRaw.trans (div_le_div_of_nonneg_left hC
+    (sq_pos_of_pos hBasePos) hSq)
+
+/-- The reciprocal-square `HasSum` identity under a vanishing fixed-circle
+remainder envelope. -/
+theorem hasSum_one_div_complex_add_sq_of_uniform_asymptotic
+    (z : ℂ) (r : ℝ) (hr0 : 0 < r) (hrz : r < z.re)
+    (ε : ℕ → ℝ) (hε : Tendsto ε atTop (𝓝 0))
+    (hSphere : ∀ N : ℕ, ∀ w ∈ sphere (z + (N : ℂ)) r,
+      ‖Complex.digamma w - (Complex.log w - 1 / (2 * w))‖ ≤ ε N) :
+    HasSum (fun n : ℕ => 1 / (z + (n : ℂ)) ^ 2)
+      (deriv Complex.digamma z) := by
+  exact hasSum_one_div_complex_add_sq_of_tendsto_deriv_digamma
+    z (hr0.trans hrz)
+      (tendsto_deriv_digamma_natTranslate_of_uniform_asymptotic
+        z r hr0 hrz ε hε hSphere)
+
+/-- The reciprocal-square `HasSum` identity under one global quadratic
+digamma-remainder bound. -/
+theorem hasSum_one_div_complex_add_sq_of_quadratic_remainder_bound
+    (z : ℂ) (hz : 0 < z.re) (C : ℝ) (hC : 0 ≤ C)
+    (hRemainder : ∀ w : ℂ, 0 < w.re →
+      ‖Complex.digamma w - (Complex.log w - 1 / (2 * w))‖ ≤
+        C / ‖w‖ ^ 2) :
+    HasSum (fun n : ℕ => 1 / (z + (n : ℂ)) ^ 2)
+      (deriv Complex.digamma z) := by
+  exact hasSum_one_div_complex_add_sq_of_tendsto_deriv_digamma z hz
+    (tendsto_deriv_digamma_natTranslate_of_quadratic_remainder_bound
+      z hz C hC hRemainder)
+
+/-- The literal Archimedean trigamma series from radius-`1/8` circle
+envelopes around all positive-integer translates. -/
+theorem archimedeanTrigammaSeries_hasSum_of_uniform_asymptotic
+    (c x : ℝ) (ε : ℕ → ℝ) (hε : Tendsto ε atTop (𝓝 0))
+    (hSphere : ∀ N : ℕ,
+      ∀ w ∈ sphere (archimedeanArgument c x + (N : ℂ)) (1 / 8 : ℝ),
+        ‖Complex.digamma w - (Complex.log w - 1 / (2 * w))‖ ≤ ε N) :
+    HasSum (archimedeanTrigammaSeriesTerm c x)
+      (deriv Complex.digamma (archimedeanArgument c x)) := by
+  change HasSum (fun n : ℕ =>
+    1 / (archimedeanArgument c x + (n : ℂ)) ^ 2) _
+  exact hasSum_one_div_complex_add_sq_of_uniform_asymptotic
+    (archimedeanArgument c x) (1 / 8) (by norm_num) (by
+      norm_num [archimedeanArgument]) ε hε hSphere
+
+/-- The literal Archimedean trigamma series from one global quadratic
+digamma-remainder estimate. -/
+theorem archimedeanTrigammaSeries_hasSum_of_quadratic_remainder_bound
+    (c x C : ℝ) (hC : 0 ≤ C)
+    (hRemainder : ∀ w : ℂ, 0 < w.re →
+      ‖Complex.digamma w - (Complex.log w - 1 / (2 * w))‖ ≤
+        C / ‖w‖ ^ 2) :
+    HasSum (archimedeanTrigammaSeriesTerm c x)
+      (deriv Complex.digamma (archimedeanArgument c x)) := by
+  change HasSum (fun n : ℕ =>
+    1 / (archimedeanArgument c x + (n : ℂ)) ^ 2) _
+  exact hasSum_one_div_complex_add_sq_of_quadratic_remainder_bound
+    (archimedeanArgument c x) (by simp) C hC hRemainder
+
+/-- A global norm-squared remainder bound specializes to the exact
+Archimedean height denominator used by the diagonal certificate. -/
+theorem archimedean_digamma_remainder_le_of_quadratic_remainder_bound
+    (c x C : ℝ) (hc : 1 < c) (hx : 0 < x) (hC : 0 ≤ C)
+    (hRemainder : ∀ w : ℂ, 0 < w.re →
+      ‖Complex.digamma w - (Complex.log w - 1 / (2 * w))‖ ≤
+        C / ‖w‖ ^ 2) :
+    ‖Complex.digamma (archimedeanArgument c x) -
+        (Complex.log (archimedeanArgument c x) -
+          1 / (2 * archimedeanArgument c x))‖ ≤
+      C / archimedeanAsymptoticHeight c x ^ 2 := by
+  have hy : 0 < archimedeanAsymptoticHeight c x :=
+    archimedeanAsymptoticHeight_pos c x hc hx
+  have hRaw := hRemainder (archimedeanArgument c x) (by simp)
+  have hImNorm : archimedeanAsymptoticHeight c x ≤
+      ‖archimedeanArgument c x‖ := by
+    have h := Complex.abs_im_le_norm (archimedeanArgument c x)
+    simpa [abs_of_pos hy] using h
+  have hSq : archimedeanAsymptoticHeight c x ^ 2 ≤
+      ‖archimedeanArgument c x‖ ^ 2 := by
+    nlinarith [norm_nonneg (archimedeanArgument c x)]
+  exact hRaw.trans
+    (div_le_div_of_nonneg_left hC (sq_pos_of_pos hy) hSq)
 
 @[simp] theorem archimedeanTrigammaSeriesTerm_re
     (c x : ℝ) (n : ℕ) :
@@ -2277,6 +2575,40 @@ theorem c13_neg_logarithmicArchimedeanDiagonal_ge_log_sub_nineteenTwentieth_of_t
       x hx hDigammaRemainder
         (archimedeanTrigammaSeries_hasSum_of_tendsto_deriv_digamma
           13 x hTrigammaTail)
+        hEndpoint
+
+/-- The cutoff-13 diagonal route with both the pointwise digamma floor and the
+trigamma series discharged by one global DLMF-form quadratic remainder bound. -/
+theorem c13_neg_logarithmicArchimedeanDiagonal_ge_log_sub_nineteenTwentieth_of_quadratic_remainder_bound
+    (x : ℝ) (hx : (960 : ℝ) ≤ x)
+    (hRemainder : ∀ w : ℂ, 0 < w.re →
+      ‖Complex.digamma w - (Complex.log w - 1 / (2 * w))‖ ≤
+        (Real.sqrt 2 / 6) / ‖w‖ ^ 2)
+    (hEndpoint : -(19 / 20 : ℝ) ≤
+      archimedeanDiagonalAsymptoticConstant 13 -
+        archimedeanDiagonalAsymptoticError 13 960) :
+    Real.log x - 19 / 20 ≤ -logarithmicArchimedeanDiagonal 13 x := by
+  have hxPos : 0 < x := (by norm_num : (0 : ℝ) < 960).trans_le hx
+  have hC : 0 ≤ Real.sqrt 2 / 6 :=
+    div_nonneg (Real.sqrt_nonneg _) (by norm_num)
+  have hPointRaw :=
+    archimedean_digamma_remainder_le_of_quadratic_remainder_bound
+      13 x (Real.sqrt 2 / 6) (by norm_num) hxPos hC hRemainder
+  have hPoint :
+      ‖Complex.digamma (archimedeanArgument 13 x) -
+          (Complex.log (archimedeanArgument 13 x) -
+            1 / (2 * archimedeanArgument 13 x))‖ ≤
+        Real.sqrt 2 /
+          (6 * archimedeanAsymptoticHeight 13 x ^ 2) := by
+    calc
+      _ ≤ (Real.sqrt 2 / 6) /
+          archimedeanAsymptoticHeight 13 x ^ 2 := hPointRaw
+      _ = _ := by ring
+  exact
+    c13_neg_logarithmicArchimedeanDiagonal_ge_log_sub_nineteenTwentieth_of_trigammaSeries
+      x hx hPoint
+        (archimedeanTrigammaSeries_hasSum_of_quadratic_remainder_bound
+          13 x (Real.sqrt 2 / 6) hC hRemainder)
         hEndpoint
 
 theorem logarithmicArchimedeanDiagonal_neg (c x : ℝ) :

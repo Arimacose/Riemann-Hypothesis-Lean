@@ -1458,10 +1458,11 @@ theorem logarithmicCvSArchimedeanShellDiagonal_ge
 
 /-!
 The cutoff-13 asymptotic envelope now feeds the literal shell diagonal.  For
-an old cutoff at least `960`, the diagonal floor is `log old - 19/20`; the
-narrowest diagonal premises are the DLMF norm remainder, decay of the shifted
-digamma derivative on each shell mode, and one scalar endpoint comparison at
-`960`.
+an old cutoff at least `960`, the diagonal floor is `log old - 19/20`.  The
+legacy adapters expose separate pointwise digamma, trigamma-series, and
+shifted-derivative premises; the narrowest adapter below derives all of them
+from one global DLMF-form quadratic remainder bound and one scalar endpoint
+comparison at `960`.
 -/
 theorem c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth
     (old shell : ℕ) (hOld : 960 ≤ old)
@@ -1601,6 +1602,40 @@ theorem c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth_
             13 (finGlobalShellPositiveMode old shell j : ℝ)
               (hTrigammaTail j))
         hEndpoint
+
+/-- Every cutoff-13 shell diagonal has the certified floor once a single
+global quadratic digamma-remainder bound and the cutoff-960 endpoint hold. -/
+theorem c13_logarithmicCvSArchimedeanShellDiagonal_ge_log_sub_nineteenTwentieth_of_quadratic_remainder_bound
+    (old shell : ℕ) (hOld : 960 ≤ old)
+    (hRemainder : ∀ w : ℂ, 0 < w.re →
+      ‖Complex.digamma w - (Complex.log w - 1 / (2 * w))‖ ≤
+        (Real.sqrt 2 / 6) / ‖w‖ ^ 2)
+    (hEndpoint : -(19 / 20 : ℝ) ≤
+      archimedeanDiagonalAsymptoticConstant 13 -
+        archimedeanDiagonalAsymptoticError 13 960) :
+    ∀ j : Fin shell,
+      Real.log (old : ℝ) - 19 / 20 ≤
+        -logarithmicCvSArchimedeanEntry 13
+          (finGlobalShellPositiveMode old shell j)
+          (finGlobalShellPositiveMode old shell j) := by
+  apply logarithmicCvSArchimedeanShellDiagonal_ge
+  intro j
+  let n := finGlobalShellPositiveMode old shell j
+  have hModeNat : 960 ≤ old + 1 + (j : ℕ) := by omega
+  have hMode : (960 : ℝ) ≤ (n : ℝ) := by
+    dsimp [n, finGlobalShellPositiveMode]
+    exact_mod_cast hModeNat
+  have hOldPos : 0 < (old : ℝ) := by
+    exact_mod_cast (show 0 < old by omega)
+  have hOldMode : (old : ℝ) ≤ (n : ℝ) := by
+    dsimp [n, finGlobalShellPositiveMode]
+    exact_mod_cast (show old ≤ old + 1 + (j : ℕ) by omega)
+  have hLog : Real.log (old : ℝ) ≤ Real.log (n : ℝ) :=
+    Real.log_le_log hOldPos hOldMode
+  have hDiagonal :=
+    c13_neg_logarithmicArchimedeanDiagonal_ge_log_sub_nineteenTwentieth_of_quadratic_remainder_bound
+      (n : ℝ) hMode hRemainder hEndpoint
+  linarith
 
 theorem logarithmicCvSPoleEntry_even_factorization (c : ℝ) (n m : ℤ) :
     logarithmicCvSPoleEntry c n m + logarithmicCvSPoleEntry c n (-m) =
