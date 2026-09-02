@@ -47,6 +47,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/AdjacentLoewnerCompression.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/LoewnerAdiTelescope.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/CvSLoewnerAdiInstantiation.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/K1920AdiShiftBinding.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/AdjacentShellRebalancedCompression.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/FiniteMatrixBoundaryWeylAdapter.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
@@ -68,6 +69,7 @@ on:
       - 'research/riemann-cvs-numerics/certify_fixed_source_gram_floor.py'
       - 'research/riemann-cvs-numerics/certify_adjacent_loewner_compression_tail.py'
       - 'research/riemann-cvs-numerics/certify_k1920_adjacent_compressed_gram.py'
+      - 'research/riemann-cvs-numerics/certify_k1920_adi_shift_cells.py'
       - 'research/riemann-cvs-numerics/certify_k1920_old_core_source_gram.py'
       - 'research/riemann-cvs-numerics/probe_relative_shell_budget.py'
       - 'research/riemann-cvs-numerics/probe_dyadic_shell_scaling.py'
@@ -129,6 +131,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/AdjacentLoewnerCompression.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/LoewnerAdiTelescope.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/CvSLoewnerAdiInstantiation.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/K1920AdiShiftBinding.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/AdjacentShellRebalancedCompression.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/FiniteMatrixBoundaryWeylAdapter.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
@@ -150,6 +153,7 @@ on:
       - 'research/riemann-cvs-numerics/certify_fixed_source_gram_floor.py'
       - 'research/riemann-cvs-numerics/certify_adjacent_loewner_compression_tail.py'
       - 'research/riemann-cvs-numerics/certify_k1920_adjacent_compressed_gram.py'
+      - 'research/riemann-cvs-numerics/certify_k1920_adi_shift_cells.py'
       - 'research/riemann-cvs-numerics/certify_k1920_old_core_source_gram.py'
       - 'research/riemann-cvs-numerics/probe_relative_shell_budget.py'
       - 'research/riemann-cvs-numerics/probe_dyadic_shell_scaling.py'
@@ -279,6 +283,8 @@ jobs:
           lake env lean RiemannCvs/LoewnerAdiTelescope.lean
           lake build RiemannCvs.CvSLoewnerAdiInstantiation
           lake env lean RiemannCvs/CvSLoewnerAdiInstantiation.lean
+          lake build RiemannCvs.K1920AdiShiftBinding
+          lake env lean RiemannCvs/K1920AdiShiftBinding.lean
           lake build RiemannCvs.AdjacentShellRebalancedCompression
           lake env lean RiemannCvs/AdjacentShellRebalancedCompression.lean
           lake build RiemannCvs.FiniteMatrixBoundaryWeylAdapter
@@ -339,6 +345,7 @@ jobs:
             RiemannCvs/AdjacentLoewnerCompression.lean
             RiemannCvs/LoewnerAdiTelescope.lean
             RiemannCvs/CvSLoewnerAdiInstantiation.lean
+            RiemannCvs/K1920AdiShiftBinding.lean
             RiemannCvs/AdjacentShellRebalancedCompression.lean
             RiemannCvs/FiniteMatrixBoundaryWeylAdapter.lean
           )
@@ -374,6 +381,7 @@ jobs:
           import RiemannCvs.AdjacentLoewnerCompression
           import RiemannCvs.LoewnerAdiTelescope
           import RiemannCvs.CvSLoewnerAdiInstantiation
+          import RiemannCvs.K1920AdiShiftBinding
           import RiemannCvs.AdjacentShellRebalancedCompression
           import RiemannCvs.FiniteMatrixBoundaryWeylAdapter
           import RiemannCvs.PrimeTranslationSeparatedBands
@@ -915,6 +923,11 @@ jobs:
           #print axioms RiemannCvs.scaledLoewnerEntry_adi_factorization_rationalProduct
           #print axioms RiemannCvs.oddDifferenceKernel_eq_scaledLoewnerEntry_rescaled
           #print axioms RiemannCvs.oddDifferenceKernel_adi_factorization_rescaled
+          #print axioms RiemannCvs.K1920AdiShiftBinding.gridCell_ne
+          #print axioms RiemannCvs.K1920AdiShiftBinding.same_noncollision
+          #print axioms RiemannCvs.K1920AdiShiftBinding.reflected_noncollision
+          #print axioms RiemannCvs.K1920AdiShiftBinding.same_factorization
+          #print axioms RiemannCvs.K1920AdiShiftBinding.reflected_factorization
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13CoreHilbertKernel_adjacent_energy_abs_le_half
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13EvenCoreArchimedeanRemainder_adjacent_energy_abs_le_1003Over3840
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddCoreArchimedeanRemainder_adjacent_energy_abs_le_1003Over3840
@@ -1287,7 +1300,17 @@ jobs:
           python -m py_compile \
             research/riemann-cvs-numerics/certify_adjacent_loewner_compression_tail.py \
             research/riemann-cvs-numerics/certify_k1920_adjacent_compressed_gram.py \
+            research/riemann-cvs-numerics/certify_k1920_adi_shift_cells.py \
             research/riemann-cvs-numerics/certify_k1920_old_core_source_gram.py
+          python research/riemann-cvs-numerics/certify_k1920_adi_shift_cells.py \
+            --prec 256 \
+            --threads 4 \
+            --json-out research/riemann-cvs-numerics/artifacts/v23_c13_K1920_adi_shift_cells_256bit.json
+          python research/riemann-cvs-numerics/certify_k1920_adi_shift_cells.py \
+            --prec 384 \
+            --threads 4 \
+            --reference-json research/riemann-cvs-numerics/artifacts/v23_c13_K1920_adi_shift_cells_256bit.json \
+            --json-out research/riemann-cvs-numerics/artifacts/v23_c13_K1920_adi_shift_cells_384bit.json
           python research/riemann-cvs-numerics/certify_adjacent_loewner_compression_tail.py \
             --start-mode 1920 \
             --bridge-count 1 \
@@ -1665,6 +1688,8 @@ jobs:
             research/riemann-cvs-numerics/artifacts/v23_adjacent_loewner_tail_384bit.json
             research/riemann-cvs-numerics/artifacts/v23_c13_K1920_adaptive_loewner_tail_256bit.json
             research/riemann-cvs-numerics/artifacts/v23_c13_K1920_adaptive_loewner_tail_384bit.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_K1920_adi_shift_cells_256bit.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_K1920_adi_shift_cells_384bit.json
             research/riemann-cvs-numerics/artifacts/v23_c13_K1920_compressed_gram_256bit.json
             research/riemann-cvs-numerics/artifacts/v23_c13_K1920_compressed_gram_256bit_*.npy
             research/riemann-cvs-numerics/artifacts/v23_c13_K1920_compressed_gram_384bit.json

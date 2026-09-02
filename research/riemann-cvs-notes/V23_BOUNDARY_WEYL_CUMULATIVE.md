@@ -4013,3 +4013,70 @@ structure, target-floor adapter, `1/28` specialization, and weighted
 `443/3780` recombination.  The old-core `1/15` item is therefore superseded;
 the literal K1920 ADI shift binding is the remaining concrete first-bridge
 algebraic interface.
+
+### Literal K1920 ADI shift binding
+
+That final algebraic interface is now implemented in
+`K1920AdiShiftBinding.lean`.  The module does not replace roots and poles by
+decimal constants: it defines the endpoint cross ratio, the associated
+`alpha`, the logarithmic nodes
+
+```text
+exp(log(alpha) * (2*i+1)/(2*n)),
+```
+
+and a closed inverse cross-ratio map.  It therefore fixes exact `Fin 31` and
+`Fin 12` shift functions for the same-sign and reflected geometries.  It also
+embeds the following two Arb-certified pole-cell transcripts:
+
+```text
+same:
+3841,3841,3841,3841,3842,3842,3843,3844,3845,3847,3849,
+3852,3856,3861,3867,3876,3887,3903,3923,3949,3985,4031,
+4094,4178,4292,4447,4660,4958,5384,6012,6983
+
+reflected:
+3942,4155,4384,4629,4893,5178,5484,5815,6173,6560,6980,7436.
+```
+
+The companion `certify_k1920_adi_shift_cells.py` evaluates those literal
+formulas with Arb.  At both 256 and 384 bits it proves, for all 43 factors,
+
+```text
+same:      root < 2 < pole,
+reflected: 0 < root and pole < 0,
+m < 1920*abs(pole) < m+1.
+```
+
+This is `86` strict range comparisons plus `86` strict cell comparisons per
+run.  The narrowest cell margins at 256 bits are
+`0.0025378742375879395...` (same-sign) and
+`0.0034431239246604142...` (reflected).  Cell integers are selected from
+midpoints, then every strict comparison is proved from the full interval; the
+midpoints themselves are not evidence.  An independent inverse cross-ratio
+evaluation also checks all `43+43` production-minus-literal root/pole
+residuals, each of which contains zero.  The 384-bit run consumes the 256-bit
+artifact as a reference and confirms byte-for-byte equality of both cell
+lists.
+
+The final hashes are
+
+```text
+script: 4C10E789A68B0F9DE10456214363BF598FD3BAED2D926BFCA74EC590E16B4CC9
+256:    0997E2C74CCB463E8DC1307B6C183ED305356954775BC16B5E81ADE2E4CD7858
+384:    07CDCFCA9A2E64A13026FB36C6B67BA4318176A9A0811A8886848251C72F5548
+```
+
+From the interval-certificate fields, Lean proves the natural-grid exclusion
+lemma, all same/reflected noncollisions, and the exact two literal
+factorizations by direct application of the generic ADI telescope.  Axiom
+audits for `gridCell_ne`, both noncollision theorems, and both literal
+factorizations report only `propext`, `Classical.choice`, and `Quot.sound`.
+Consequently the first K1920 bridge now has a complete, explicit interface:
+rank-86 Gram caps, residual caps, coercive floors, the `1/28 + 11/135 =
+443/3780` ledger, literal shifts, and exact factorization.  The finite Arb
+inequalities remain named certificate premises rather than hidden kernel
+claims.  The next finite work is the other thirteen compressed bridge Grams;
+after them remain the uniform coefficient summation, source-specific form
+convergence, and the infinite boundary--Weyl closed-operator/no-crossing
+identification.

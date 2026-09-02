@@ -1876,3 +1876,78 @@ closed to the same explicit finite-certificate interface as the adjacent Gram.
 The remaining K1920 algebraic binding is the literal ADI root/pole lists and
 their noncollision intervals; later compressed bridges and the infinite
 operator passage remain separate.
+
+## 2026-09-02: literal K1920 ADI shifts are bound to the exact telescope
+
+`K1920AdiShiftBinding.lean` now fixes the 31 same-sign and 12 reflected shift
+families as literal real expressions.  The endpoint cross ratio defines
+`alpha`; each normalized node is
+
+```text
+exp(log(alpha) * (2*i+1)/(2*n)),
+```
+
+and `inverseEndpointMap` is an explicit inverse cross-ratio formula rather than
+an opaque numeric constant.  The same-sign endpoint quadruple is
+
+```text
+(1921/1920, 2, 3841/1920, 4),
+```
+
+while the reflected quadruple is
+
+```text
+(-4, -3841/1920, 1921/1920, 2).
+```
+
+For same-sign shifts, `root < 2 < pole` disposes of the source-pole and
+target-root collisions.  For reflected shifts, `0 < root` and `pole < 0` do
+the analogous work.  The only delicate comparisons are target grid points
+against the poles.  The new Arb certifier proves strict unit-cell enclosures
+
+```text
+m_i < 1920*pole_i < m_i+1,
+m_i < 1920*(-reflectedPole_i) < m_i+1.
+```
+
+The literal cell transcripts are
+
+```text
+same:
+3841,3841,3841,3841,3842,3842,3843,3844,3845,3847,3849,
+3852,3856,3861,3867,3876,3887,3903,3923,3949,3985,4031,
+4094,4178,4292,4447,4660,4958,5384,6012,6983
+
+reflected:
+3942,4155,4384,4629,4893,5178,5484,5815,6173,6560,6980,7436.
+```
+
+Midpoints select each integer cell, but provide no proof evidence.  Every
+lower and upper inequality is then checked against the complete Arb ball.
+At 256 bits, the smallest same-sign cell margin is
+`0.0025378742375879395...`; the smallest reflected cell margin is
+`0.0034431239246604142...`.  In total, each run passes `86` strict sign/range
+checks and `86` strict cell-side checks.  A second inverse-Mobius construction
+using the closed cross-ratio formula independently encloses the literal Lean
+shifts; all `43` root and `43` pole production-minus-literal residual balls
+contain zero.  The 384-bit run also verifies that both complete cell lists and
+their hashes exactly match the 256-bit run.
+
+The final script SHA-256 is
+`4C10E789A68B0F9DE10456214363BF598FD3BAED2D926BFCA74EC590E16B4CC9`.
+The 256- and 384-bit JSON SHA-256 values are
+`0997E2C74CCB463E8DC1307B6C183ED305356954775BC16B5E81ADE2E4CD7858`
+and
+`07CDCFCA9A2E64A13026FB36C6B67BA4318176A9A0811A8886848251C72F5548`.
+
+Lean proves that a strict unit-width cell excludes every natural grid point,
+derives all six same/reflected noncollision families, and instantiates
+`oddDifferenceKernel_adi_factorization_rescaled` for the literal 31- and
+12-shift lists.  The five key axiom audits contain only `propext`,
+`Classical.choice`, and `Quot.sound`; the source contains no placeholder or
+user-declared axiom.  Thus the previously open K1920 *algebraic binding* is
+closed: the remaining external boundary is precisely the recorded finite Arb
+inequality certificate, just as for the two Gram bounds.  The live research
+front has moved to the other thirteen compressed bridge Grams, their uniform
+coefficient ledger, source-specific form convergence, and the infinite closed
+operator/no-crossing identification.

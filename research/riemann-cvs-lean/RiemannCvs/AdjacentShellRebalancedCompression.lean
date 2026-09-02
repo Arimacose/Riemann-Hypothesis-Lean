@@ -1,5 +1,5 @@
 import RiemannCvs.AdjacentLoewnerCompression
-import RiemannCvs.CvSLoewnerAdiInstantiation
+import RiemannCvs.K1920AdiShiftBinding
 import RiemannCvs.AsymptoticCoreHilbert
 import RiemannCvs.AdjacentArchimedeanSharpGap
 
@@ -21,8 +21,10 @@ single geometry:
 The resulting scalar ledger accepts the explicit rank-86 ADI posterior at
 `K=1920`.  The strengthened total is `443/3780`, leaving exact reserve
 `13/420` below `4/27`.  The adjacent compressed Gram and old-core source-Gram
-bounds remain explicit certificate premises; no floating-point diagnostic is
-promoted to a theorem.
+bounds remain explicit certificate premises.  `K1920AdiShiftBinding` fixes the
+literal 31+12 shift formulas and proves that its Arb-certified range/cell fields
+supply every noncollision premise of the exact ADI telescope; no floating-point
+diagnostic is promoted to a theorem.
 -/
 
 noncomputable section
