@@ -368,10 +368,19 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   builder transport for every historical source shell `B>=960` at common target
   `T>=15360`.  At the first post-seam coordinate `T=15360`, after the separately
   certified finite seam `T=7680`, the first three analytic budgets total
-  `7/120`; the complete transported finite budgets leave positive exact slack.
-  The remaining open inputs are the fixed source shells below `960`, their
-  concrete finite-energy attachment, the fourteen finite middle bridges, a
-  uniform coefficient partial-sum bound, and source-specific form convergence.
+  `7/120`.  A second finite-moment route now attaches the three standard source
+  shells `B=480,240,120` directly to this target using only their fixed symbol
+  moments and parity energy floors, with costs `1/350`, `1/500`, and `1/795`.
+  A coercivity-adapted partition then closes the residual band `(20,120]` as
+  `(60,120]`, `(30,60]`, and `(20,30]`, each at relative cost `1/900`; unlike a
+  single weakly coercive block, these intervals retain a strict rational parity
+  floor.  The exact remaining previous-core reserve is therefore
+  `63031/10017000`, or `7650593/1282176000` after also reserving the transported
+  odd fixed-block cost `1/3072`.  Rigorous Arb certificates discharge the twelve
+  finite matrix/moment inputs externally; the Lean bridges keep every input
+  explicit.  The remaining open inputs are the structured fixed modes `[1,20]`,
+  the fourteen finite middle bridges, a uniform coefficient partial-sum bound,
+  and source-specific form convergence.
 -/
 
 namespace RiemannCvs.V23BoundaryWeylMainline

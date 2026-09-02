@@ -3564,3 +3564,135 @@ remote target shells continue to consume the uniform `97/100` certificate.
 The remaining historical exceptions are now genuinely fixed below `B=960`,
 after which the live obstruction is their finite-energy attachment and the
 recursive/infinite boundary-Weyl identification.
+
+## 2026-09-02: finite source moments replace three growing remote certificates
+
+`FiniteMomentLowModeTransport.lean` takes a different route through the three
+standard shells immediately below the analytic frontier.  Instead of carrying
+a complete finite Schur certificate from target `1920` through three successively
+larger matrices, it keeps the remote target entirely analytic and extracts only
+two invariants from each fixed source shell:
+
+```text
+even source: sum_{B<n<=2B} n^2 * builderSymbol(n)^2,
+odd source:  sum_{B<n<=2B}       builderSymbol(n)^2,
+both sectors: sourceGap * ||x||_2^2 <= sourceEnergy(x).
+```
+
+The exact reflected Loewner numerators then give the source-moment/target-moment
+Frobenius budgets
+
+```text
+even = (64/9) * ((3/2)*B*(197/2000)/N
+                 + 3*sourceSecond/(2*N^3)),
+odd  = (64/9) * (3*(4*B^3)*(197/2000)/N^3
+                 + (3/2)*sourceZero/(2*N)).
+```
+
+At the literal target `N=15360`, exact rational arithmetic selects:
+
+| source shell | energy floor | even moment upper | odd moment upper | relative cost |
+|---|---:|---:|---:|---:|
+| `(480,960]` | `129/50` | `49740000` | `92` | `1/350` |
+| `(240,480]` | `177/100` | `6274000` | `47` | `1/500` |
+| `(120,240]` | `137/100` | `735000` | `219/10` | `1/795` |
+
+The six specialized endpoints act on the literal full builder matrices.  For
+example,
+
+```text
+c13HistoricalRemoteEvenBuilder_480_15360_relative_oneOver350
+c13HistoricalRemoteOddBuilder_480_15360_relative_oneOver350
+```
+
+take a 480-dimensional source certificate and the already established analytic
+target symbol premise; no `480 x 15360` remote matrix certificate occurs.  The
+other four endpoints are the analogous `240/500` and `120/795` pairs.
+
+After charging the analytic `B=3840,1920,960` channels and these three fixed
+source channels, Lean proves the exact residual identity
+
+```text
+2/27 - 7/120 - 1/350 - 1/500 - 1/795
+  = 96421/10017000
+  > 0.0096.
+```
+
+The companion script `certify_finite_source_moment_floor.py` rigorously
+discharges the finite premises with direct Arb formulas.  It evaluates the
+complete builder symbol, proves every moment upper bound with positive interval
+slack, constructs each unshifted parity source matrix, subtracts the rational
+gap, and proves the resulting matrix positive by an exact-dyadic congruence and
+strict interval Gershgorin.  Before those checks, a canonical full-matrix replay
+through cutoff `120` proves that all `14641` even and `14400` odd
+direct-minus-canonical entry intervals contain exact zero.
+
+## 2026-09-02: coercivity-adapted partition closes `(20,120]`
+
+A first attempt to treat `(20,120]` as one source interval was rejected rather
+than rounded into a certificate: canonical parity indexing gives an odd
+midpoint minimum eigenvalue near `0.09378`, too weak for the proposed common
+gap.  The replacement is structural rather than a higher-precision retry.
+`FiniteResidualBandTransport.lean` generalizes the source-moment proof from a
+dyadic `(B,2B]` shell to an arbitrary consecutive interval `(A,A+M]`, then
+partitions the residual band at its natural coercivity changes:
+
+| source interval | dimension | common parity floor | even moment upper | odd moment upper | exact `sum n^2` | relative cost |
+|---|---:|---:|---:|---:|---:|---:|
+| `(60,120]` | `60` | `22/25` | `107500` | `49/4` | `509410` | `1/900` |
+| `(30,60]` | `30` | `49/100` | `12110` | `27/5` | `64355` | `1/900` |
+| `(20,30]` | `10` | `19/100` | `1530` | `47/20` | `6585` | `1/900` |
+
+The exact arbitrary-interval Loewner entry identities feed the same analytic
+target at `N=15360`; only these small source matrices remain numerical.  The
+six literal endpoints are the even/odd pairs
+
+```text
+c13FiniteIntervalRemote{Even,Odd}Builder_60_60_15360_relative_oneOver900
+c13FiniteIntervalRemote{Even,Odd}Builder_30_30_15360_relative_oneOver900
+c13FiniteIntervalRemote{Even,Odd}Builder_20_10_15360_relative_oneOver900.
+```
+
+Their total cost is `1/300`.  Lean kernel-checks the two exact ledger endpoints
+
+```text
+2/27 - 7/120 - 1/350 - 1/500 - 1/795 - 3*(1/900)
+  = 63031/10017000
+  = 0.006292402...,
+
+63031/10017000 - 1/3072
+  = 7650593/1282176000
+  = 0.005966882....
+```
+
+The second line also reserves the transported exceptional odd fixed-block
+allowance.  Thus the finite source not yet incorporated by this moment route is
+only the structured fixed block `[1,20]`; `(20,120]` is closed.
+
+The extended certifier checks the three standard shells and these three
+residual intervals in one direct/canonical replay.  At each precision all
+`1680 + 200 = 1880` strict Gershgorin rows pass.  The smallest preconditioned
+margin midpoint is `0.9999999999999608`; the largest radius is below `1.22e-69`
+at 256 bits and below `3.63e-108` at 384 bits.  All twelve exact-dyadic
+preconditioner hashes agree across the independent precision runs.  The
+tightest scalar enclosure is the odd `(20,30]` moment:
+
+```text
+2.3445951216285382382958985633884... < 47/20,
+slack = 0.00540487837146176170410143661158....
+```
+
+Local JSON SHA-256 values are
+`71F9F0906D20FAA1653DD37A73B2481B77CE746AED951603AECD8812223EB9D7`
+at 256 bits and
+`38B31EF48DEDFD4C079D1023830171172867F594E07F25CA4BFA9F625D280341`
+at 384 bits.  Both record script SHA-256
+`4DB7918CB4040A8B9573AC59BD4BFBB763F99201B28AEB6BF9476D4DD73ADC54`.
+CI replays both certificates and uploads both JSON files plus all twenty-four
+preconditioner files.
+
+This closes six finite source bands as external interval certificates attached
+to kernel-checked analytic transport bridges.  It does not replace the
+structured fixed-block argument, the fourteen finite middle bridges, the
+recursive coefficient summation, or the infinite boundary--Weyl form/operator
+identification; those are now the localized remaining boundaries.

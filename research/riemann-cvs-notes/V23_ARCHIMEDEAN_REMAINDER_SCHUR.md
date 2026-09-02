@@ -1446,3 +1446,132 @@ identities are checked in Lean.  The remaining task is thus no longer an
 expanding below-threshold family: it is a fixed finite attachment problem for
 shells below `960`, followed by the recursive reserve and infinite operator
 limit.
+
+## 2026-09-02: a finite-moment Schur bridge closes `(120,960]`
+
+The transported-ledger argument above proves that enough budget exists, but it
+still moves an old finite certificate through every intervening target.  A new
+source-local construction avoids that dependency.  For a source band
+`(B,2B]` and remote target `(N,2N]`, the exact parity estimates separate into a
+small source moment and the already analytic target moment:
+
+```text
+even source moment = sum p^2 f(p)^2,
+odd source moment  = sum     f(p)^2,
+target weighted moment <= (197/2000)/N.
+```
+
+The `q^-4` term also consumes the elementary remote inverse fourth-power sum,
+while the `q^-2` term consumes the inverse square sum.  This produces the Lean
+definitions `c13EvenFiniteMomentRemoteBudget` and
+`c13OddFiniteMomentRemoteBudget` without a lower bound on `B`.  Matrix Cauchy
+converts the entry-square estimates to cross-energy estimates, and
+`relativeCoupling_of_squaredNormBudget` combines them with a source floor and
+the analytic target floor `24/5` at `N>=15360`.
+
+The certificate interfaces are deliberately minimal:
+
+```text
+C13EvenFiniteSourceMomentCertificate B sourceSecond sourceGap
+C13OddFiniteSourceMomentCertificate  B sourceZero   sourceGap.
+```
+
+They contain only the relevant scalar symbol moment and the quadratic source
+floor.  For `B=480,240,120`, the exact selected tuples are
+
+```text
+(49740000, 92,   129/50,  1/350),
+( 6274000, 47,  177/100, 1/500),
+(  735000, 219/10, 137/100, 1/795),
+```
+
+where the entries are `(evenMoment, oddMoment, sourceGap, relativeCost)`.  Six
+literal matrix theorems connect these records to the target `15360` block.
+Their sum leaves
+
+```text
+2/27 - 7/120 - 1/350 - 1/500 - 1/795
+  = 96421/10017000.
+```
+
+The new Arb certifier evaluates the same complete cutoff-13 builder symbol as
+the direct parity kernel:
+
+```text
+f(n) = -poleScale*n/(log(13)^2 + 16*pi^2*n^2)
+       - (archSymbol(n)+primeSymbol(n))/pi.
+```
+
+For each band it interval-sums both moments and proves positivity of the even
+and odd matrices `H-sourceGap*I`.  Positivity uses a floating Cholesky basis
+only as a selector; the saved doubles are reloaded byte-for-byte, embedded as
+radius-zero dyadic Arb numbers, and checked by exact congruence plus strict
+Gershgorin.  A canonical replay through cutoff `120` also checks all `14641`
+even and `14400` odd direct-formula entries against the full reflected matrix,
+with every difference interval containing zero.  Both a 256-bit and an
+independent 384-bit run pass all six standard source matrices.
+The largest source-moment values are
+
+```text
+B=480: even = 49735025.6414292310457642924280... < 49740000,
+       odd  =       91.9883392171744386771882... < 92;
+B=240: even =  6273031.3049495534120677941423... < 6274000,
+       odd  =       46.7556363958564815585277... < 47;
+B=120: even =   734034.2034987587578728165086... < 735000,
+       odd  =       21.8048987999989431296010... < 219/10.
+```
+
+## 2026-09-02: an interval moment bridge closes the residual source band
+
+The remaining `(20,120]` block should not be certified with one uniform source
+gap.  A corrected direct odd-parity diagnostic gives a minimum eigenvalue near
+`0.09378` for that unified block.  `FiniteResidualBandTransport.lean` therefore
+introduces the consecutive source coordinate `finiteIntervalMode A M i` and
+proves the complete even/odd Loewner moment estimates for every interval
+`(A,A+M]`.  Splitting where the source coercivity changes gives:
+
+```text
+interval       evenMoment  oddMoment  exact sum(n^2)  commonGap  cost
+(60,120]       107500      49/4       509410          22/25      1/900
+(30,60]         12110      27/5        64355          49/100     1/900
+(20,30]          1530      47/20        6585          19/100     1/900.
+```
+
+These are certificate inputs, not decimal replacements: each moment is proved
+by an Arb interval upper enclosure, each rational gap by strict positive
+definiteness, and the arbitrary-interval Lean theorem transports it to the same
+analytic target shell.  The exact residual ledger becomes
+
+```text
+2/27 - 7/120 - 1/350 - 1/500 - 1/795 - 1/300
+  = 63031/10017000 > 0,
+
+63031/10017000 - 1/3072
+  = 7650593/1282176000 > 0.
+```
+
+The second identity includes the already transported odd fixed-block charge.
+Across the standard and residual blocks, each precision run proves all
+`1880` Gershgorin rows strictly positive.  The twelve saved exact-dyadic
+preconditioners have identical hashes at 256 and 384 bits.  In particular, the
+tight residual moment is still separated strictly:
+
+```text
+sum_{20<n<=30} f(n)^2
+  = 2.3445951216285382382958985633884...
+  < 47/20
+```
+
+The combined 256-bit JSON SHA-256 is
+`71F9F0906D20FAA1653DD37A73B2481B77CE746AED951603AECD8812223EB9D7`;
+the 384-bit JSON SHA-256 is
+`38B31EF48DEDFD4C079D1023830171172867F594E07F25CA4BFA9F625D280341`.
+The script source hash recorded by both is
+`4DB7918CB4040A8B9573AC59BD4BFBB763F99201B28AEB6BF9476D4DD73ADC54`.
+
+This route is structurally stronger than another large remote finite matrix:
+the numerical object never exceeds dimension `480`, while the target is handled
+by the same analytic estimate used at later scales.  The unresolved finite
+source is now only the structured fixed `[1,20]` block.  The fourteen finite
+middle bridges, recursive coefficient summation, and closed boundary--Weyl
+operator identification remain separate.
