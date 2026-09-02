@@ -376,11 +376,16 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   single weakly coercive block, these intervals retain a strict rational parity
   floor.  The exact remaining previous-core reserve is therefore
   `63031/10017000`, or `7650593/1282176000` after also reserving the transported
-  odd fixed-block cost `1/3072`.  Rigorous Arb certificates discharge the twelve
-  finite matrix/moment inputs externally; the Lean bridges keep every input
-  explicit.  The remaining open inputs are the structured fixed modes `[1,20]`,
-  the fourteen finite middle bridges, a uniform coefficient partial-sum bound,
-  and source-specific form convergence.
+  odd fixed-block cost `1/3072`.  A new source-preconditioned alternative avoids
+  that transport premise: it proves `C*C^T <= (3/1250)*S` for the complete
+  shifted/reference `[1,20]` source Gram matrix `S`, then uses only the analytic
+  target floor `24/5`.  Its direct relative cost is `1/2000`, leaving exact
+  reserve `23209/4006800`.  Rigorous Arb certificates discharge the twelve band
+  matrix/moment premises and this one fixed-source Gram premise externally; the
+  Lean bridges keep every input explicit.  Thus all finite previous-core source
+  bands are attached directly at `N=15360`.  The remaining open inputs are the
+  fourteen finite middle bridges, a uniform coefficient partial-sum bound, and
+  source-specific form convergence.
 -/
 
 namespace RiemannCvs.V23BoundaryWeylMainline

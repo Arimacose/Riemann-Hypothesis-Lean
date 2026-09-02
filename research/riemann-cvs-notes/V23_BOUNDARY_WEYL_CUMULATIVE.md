@@ -3696,3 +3696,85 @@ to kernel-checked analytic transport bridges.  It does not replace the
 structured fixed-block argument, the fourteen finite middle bridges, the
 recursive coefficient summation, or the infinite boundary--Weyl form/operator
 identification; those are now the localized remaining boundaries.
+
+## 2026-09-02: source-Gram whitening closes the fixed odd block directly
+
+The last fixed interval behaves differently from the six moment-controlled
+bands.  On `[1,20]` the unshifted odd source matrix has near-null directions, so
+replacing its full energy by a scalar Euclidean gap makes the remote cost worse
+by several orders of magnitude.  The new route preserves those directions.
+Define the exact shifted/reference source matrix and remote crossblock by
+
+```text
+S = (249/250) * (H_odd,[1,20] + (1/1024) I),
+C = H_odd,[1,20] x [15361,30720].
+```
+
+`FiniteFixedSourceGramTransport.lean` introduces the corresponding source
+energy `c13OddFixedReferenceEnergy` and column energy
+
+```text
+sum_j (sum_i C_ij x_i)^2.
+```
+
+A finite Cauchy theorem first bounds the actual builder cross term by that
+column energy times `||y||_2^2`.  The certificate interface retains the full
+source geometry:
+
+```text
+C13OddFixedSourceGramCertificate 20 15360 (3/1250):
+  ||C^T x||_2^2 <= (3/1250) * (x^T S x).
+```
+
+Since the target shell has the already proved analytic energy floor `24/5` and
+
+```text
+3/1250 = (1/2000) * (24/5),
+```
+
+Lean derives the literal endpoint
+`c13OddFixedRemoteBuilder_20_15360_relative_oneOver2000`.  This is a direct
+fixed-source-to-analytic-shell bridge: it does not use the earlier midpoint
+half-transport hypothesis and does not construct or invert a `15360 x 15360`
+target matrix.  The complete finite-source ledger now has the exact positive
+remainder
+
+```text
+2/27 - 7/120 - 1/350 - 1/500 - 1/795 - 3*(1/900) - 1/2000
+  = 23209/4006800
+  = 0.0057924029....
+```
+
+The direct route spends slightly more than the conditionally transported
+`1/3072` allowance, but removes the transport premise entirely and still keeps
+more than `0.00579` reserve.
+
+`certify_fixed_source_gram_floor.py` evaluates `210` source-triangle entries and
+the complete `20 x 15360 = 307200` crossblock with direct Arb formulas.  Arb
+then encloses all `6,144,000` products in `C*C^T` and proves
+
+```text
+(3/1250) S - C*C^T > 0
+```
+
+by an exact-dyadic congruence.  All `20/20` Gershgorin rows pass at both 256 and
+384 bits.  The minimum preconditioned margin midpoint is
+`0.999999999999867`; the largest radius is below `2.49e-68` at 256 bits and
+below `7.81e-107` at 384 bits.  Both runs reload the identical preconditioner
+with SHA-256
+`8A09B178DEFD216CC37D23F6DA56E93846BF00832DFFB331B7B1E4B8647E5CB0`.
+The midpoint generalized critical coefficient `0.00201123859...` is recorded
+only as a diagnostic; the proof uses the strict interval matrix certificate at
+the rational value `3/1250 = 0.0024`.
+
+The 256-bit JSON SHA-256 is
+`D0ABABA4F39D5914BE76CF03529A9C5EBA946054F9E7C6D0658432540BA1EE67`;
+the 384-bit JSON SHA-256 is
+`3B474B20C1D6B1D609CB016A3D7A44CD689497BDDCCFF0C43DB3FE83C0B431EC`.
+Both record script SHA-256
+`FC6A5A4E8C8D86BED026468DB1F8809BBAFB20B235DE470394B97F9B8BDB379F`.
+
+Consequently every finite previous-core source block is now attached directly
+to the first analytic target at `N=15360`.  The live finite obstruction has
+moved to the fourteen middle-channel bridges; after those come the uniform
+coefficient summation and infinite boundary--Weyl form/operator limit.

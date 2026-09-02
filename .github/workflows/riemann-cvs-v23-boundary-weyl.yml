@@ -43,6 +43,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/SharpParityLowFrontierTransport.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/FiniteMomentLowModeTransport.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/FiniteResidualBandTransport.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/FiniteFixedSourceGramTransport.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/FiniteMatrixBoundaryWeylAdapter.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V23BoundaryWeylMainline.lean'
@@ -60,6 +61,7 @@ on:
       - 'research/riemann-cvs-numerics/certify_odd_fixed_base_channel.py'
       - 'research/riemann-cvs-numerics/certify_regular_previous_core_channels.py'
       - 'research/riemann-cvs-numerics/certify_finite_source_moment_floor.py'
+      - 'research/riemann-cvs-numerics/certify_fixed_source_gram_floor.py'
       - 'research/riemann-cvs-numerics/probe_relative_shell_budget.py'
       - 'research/riemann-cvs-numerics/probe_dyadic_shell_scaling.py'
       - 'research/riemann-cvs-numerics/probe_previous_core_dyadic_channels.py'
@@ -116,6 +118,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/SharpParityLowFrontierTransport.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/FiniteMomentLowModeTransport.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/FiniteResidualBandTransport.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/FiniteFixedSourceGramTransport.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/FiniteMatrixBoundaryWeylAdapter.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V23BoundaryWeylMainline.lean'
@@ -133,6 +136,7 @@ on:
       - 'research/riemann-cvs-numerics/certify_odd_fixed_base_channel.py'
       - 'research/riemann-cvs-numerics/certify_regular_previous_core_channels.py'
       - 'research/riemann-cvs-numerics/certify_finite_source_moment_floor.py'
+      - 'research/riemann-cvs-numerics/certify_fixed_source_gram_floor.py'
       - 'research/riemann-cvs-numerics/probe_relative_shell_budget.py'
       - 'research/riemann-cvs-numerics/probe_dyadic_shell_scaling.py'
       - 'research/riemann-cvs-numerics/probe_previous_core_dyadic_channels.py'
@@ -253,6 +257,8 @@ jobs:
           lake env lean RiemannCvs/FiniteMomentLowModeTransport.lean
           lake build RiemannCvs.FiniteResidualBandTransport
           lake env lean RiemannCvs/FiniteResidualBandTransport.lean
+          lake build RiemannCvs.FiniteFixedSourceGramTransport
+          lake env lean RiemannCvs/FiniteFixedSourceGramTransport.lean
           lake build RiemannCvs.FiniteMatrixBoundaryWeylAdapter
           lake env lean RiemannCvs/FiniteMatrixBoundaryWeylAdapter.lean
           lake build RiemannCvs.PrimeTranslationSeparatedBands
@@ -307,6 +313,7 @@ jobs:
             RiemannCvs/SharpParityLowFrontierTransport.lean
             RiemannCvs/FiniteMomentLowModeTransport.lean
             RiemannCvs/FiniteResidualBandTransport.lean
+            RiemannCvs/FiniteFixedSourceGramTransport.lean
             RiemannCvs/FiniteMatrixBoundaryWeylAdapter.lean
           )
           if grep -nE '(^|[^[:alnum:]_])(sorry|admit)([^[:alnum:]_]|$)' "${files[@]}"; then
@@ -337,6 +344,7 @@ jobs:
           import RiemannCvs.SharpParityLowFrontierTransport
           import RiemannCvs.FiniteMomentLowModeTransport
           import RiemannCvs.FiniteResidualBandTransport
+          import RiemannCvs.FiniteFixedSourceGramTransport
           import RiemannCvs.FiniteMatrixBoundaryWeylAdapter
           import RiemannCvs.PrimeTranslationSeparatedBands
           import RiemannCvs.PoleSeparatedBands
@@ -856,6 +864,11 @@ jobs:
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13FiniteIntervalRemoteOddBuilder_30_30_15360_relative_oneOver900
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13FiniteIntervalRemoteEvenBuilder_20_10_15360_relative_oneOver900
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13FiniteIntervalRemoteOddBuilder_20_10_15360_relative_oneOver900
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddFixedRemote_crossEnergy_sq_le_columnEnergy_mul_norm
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddFixedRemote_relative_of_sourceGram
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddFixedRemoteBudget_20_15360
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_lowFrontier_afterFixedGramChannel
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddFixedRemoteBuilder_20_15360_relative_oneOver2000
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddBuilderDyadicAdjacentCoreNewest_relative_twoFifths
           #print axioms RiemannCvs.V23BoundaryWeylMainline.finiteMatrixCouplingEuclideanForm_eq_crossEnergy
           #print axioms RiemannCvs.V23BoundaryWeylMainline.finiteMatrixBoundaryWeyl_mono_of_relativeEnergyCertificate
@@ -1161,6 +1174,27 @@ jobs:
             --validate-cutoff 120 \
             --json-out research/riemann-cvs-numerics/artifacts/v23_c13_finite_source_moments_384bit.json
 
+      - name: Certify the fixed-source Gram bridge to the analytic shell
+        shell: bash
+        run: |
+          set -euo pipefail
+          python research/riemann-cvs-numerics/certify_fixed_source_gram_floor.py \
+            --c 13 \
+            --fixed-cutoff 20 \
+            --target-base 15360 \
+            --prec 256 \
+            --threads 4 \
+            --validate-cutoff 120 \
+            --json-out research/riemann-cvs-numerics/artifacts/v23_c13_fixed_source_gram_256bit.json
+          python research/riemann-cvs-numerics/certify_fixed_source_gram_floor.py \
+            --c 13 \
+            --fixed-cutoff 20 \
+            --target-base 15360 \
+            --prec 384 \
+            --threads 4 \
+            --validate-cutoff 120 \
+            --json-out research/riemann-cvs-numerics/artifacts/v23_c13_fixed_source_gram_384bit.json
+
       - name: Certify the finite V23 relative-energy coupling route
         shell: bash
         run: |
@@ -1452,6 +1486,10 @@ jobs:
             research/riemann-cvs-numerics/artifacts/v23_c13_finite_source_moments_256bit_B*_preconditioner.npy
             research/riemann-cvs-numerics/artifacts/v23_c13_finite_source_moments_384bit.json
             research/riemann-cvs-numerics/artifacts/v23_c13_finite_source_moments_384bit_B*_preconditioner.npy
+            research/riemann-cvs-numerics/artifacts/v23_c13_fixed_source_gram_256bit.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_fixed_source_gram_256bit_gram_preconditioner.npy
+            research/riemann-cvs-numerics/artifacts/v23_c13_fixed_source_gram_384bit.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_fixed_source_gram_384bit_gram_preconditioner.npy
             research/riemann-cvs-numerics/artifacts/v23_c13_N20_to_N120_relative_energy.json
             research/riemann-cvs-numerics/artifacts/v23_c13_recursive_relative_energy_shells.json
             research/riemann-cvs-numerics/artifacts/v23_c13_q996_N480_to_N960_shell.json

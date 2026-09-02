@@ -1575,3 +1575,58 @@ by the same analytic estimate used at later scales.  The unresolved finite
 source is now only the structured fixed `[1,20]` block.  The fourteen finite
 middle bridges, recursive coefficient summation, and closed boundary--Weyl
 operator identification remain separate.
+
+## 2026-09-02: full source geometry removes the fixed-block transport premise
+
+The residual fixed odd block cannot efficiently use a scalar source gap: its
+unshifted `[1,20]` matrix has nearly null directions.  A source-preconditioned
+Gram estimate keeps exactly the energy that the earlier fixed-base Schur
+certificate identified,
+
+```text
+S = (249/250) * (H_odd,[1,20] + (1/1024) I),
+C = H_odd,[1,20] x [15361,30720].
+```
+
+The new external certificate proves the `20 x 20` Loewner inequality
+
+```text
+C*C^T <= (3/1250) S.
+```
+
+This statement controls every source direction simultaneously.  Finite
+Cauchy--Schwarz turns it into
+
+```text
+|x^T C y|^2 <= (3/1250) * (x^T S x) * ||y||_2^2,
+```
+
+and the kernel-checked remote energy floor
+`(24/5)||y||_2^2 <= H_remote(y)` gives exact relative cost `1/2000` because
+`3/1250=(1/2000)(24/5)`.  Thus
+`c13OddFixedRemoteBuilder_20_15360_relative_oneOver2000` reaches the analytic
+target directly and does not assume that the original `1/384` finite Schur
+coefficient halves three times.
+
+The Arb construction evaluates the complete `20 x 15360` crossblock, encloses
+`C*C^T`, and proves `(3/1250)S-C*C^T` positive by an exact-dyadic congruence.
+Both independent precisions pass `20/20` strict rows and use preconditioner hash
+`8A09B178DEFD216CC37D23F6DA56E93846BF00832DFFB331B7B1E4B8647E5CB0`.
+The 256/384-bit JSON hashes are respectively
+`D0ABABA4F39D5914BE76CF03529A9C5EBA946054F9E7C6D0658432540BA1EE67`
+and
+`3B474B20C1D6B1D609CB016A3D7A44CD689497BDDCCFF0C43DB3FE83C0B431EC`;
+both record script hash
+`FC6A5A4E8C8D86BED026468DB1F8809BBAFB20B235DE470394B97F9B8BDB379F`.
+
+Charging this unconditional direct route leaves
+
+```text
+2/27 - 7/120 - 1/350 - 1/500 - 1/795 - 1/300 - 1/2000
+  = 23209/4006800 > 0.
+```
+
+All finite previous-core source blocks are therefore connected to the analytic
+`N=15360` shell.  The next finite target is the fourteen middle-channel
+bridges, followed by the recursive coefficient sum and infinite operator
+passage.
