@@ -3778,3 +3778,109 @@ Consequently every finite previous-core source block is now attached directly
 to the first analytic target at `N=15360`.  The live finite obstruction has
 moved to the fourteen middle-channel bridges; after those come the uniform
 coefficient summation and infinite boundary--Weyl form/operator limit.
+
+## 2026-09-02: rational Loewner compression replaces huge middle matrices
+
+The adjacent middle channel has a structure that the previous scalar estimate
+did not exploit.  If `p` lies in `(K,2K]` and `q` in `(2K,4K]`, its same-sign
+piece is a rectangular Loewner matrix
+
+```text
+L(p,q) = (F(p)-F(q))/(p-q).
+```
+
+It therefore has displacement rank two:
+
+```text
+D_p L - L D_q = F(p) * 1^T - 1 * F(q)^T.
+```
+
+The reflected piece is the same construction on the separated negative target
+interval.  This connects the CvS block directly to the explicit Zolotarev
+singular-value theory of Beckermann--Townsend,
+`On the singular values of matrices with displacement structure`
+([arXiv:1609.09494](https://arxiv.org/abs/1609.09494),
+[DOI 10.1137/16M1096426](https://doi.org/10.1137/16M1096426)).  Their general
+displacement theorem gives `sigma_(j+2k) <= Z_k sigma_j` for a Loewner block;
+the rank depends logarithmically, rather than linearly, on the bridge size.
+
+A direct matrix-free FFT reconstruction was first checked against the dense
+SVD.  For the first open bridge `K=1920`, the complete combined-Loewner norms
+are
+
+```text
+even  0.93222685088685...
+odd   0.91998164783758...
+```
+
+while the existing coarse diagonal floors allow norm
+`0.92632438219167...`.  Thus the odd scalar route already passes, whereas the
+even route misses by less than one percent and should retain the full finite
+energy.  At `K=3840` the combined norms are about `0.96369032` and `0.98919717`,
+against an allowed norm `1.11584462`; both pass with room.  Later norms are not
+monotone (`K=30720` is about `1.17`), so monotone extrapolation was discarded.
+The same FFT operator nevertheless scales beyond the dense frontier and
+confirms that the growing logarithmic gaps, not monotonicity of the block, are
+the correct mechanism.
+
+The low-rank observation is much stronger than a fast matrix-vector product.
+At `K=1920` the twentieth singular value is already below `4e-5`.  An explicit
+ADI-style rational compression was then built.  Map the two mode intervals by
+a Mobius transformation to `[-alpha,-1]` and `[1,alpha]`, and take logarithmic
+shifts
+
+```text
+s_j = alpha^((j+1/2)/k),
+r(w) = product_j (w+s_j)/(w-s_j).
+```
+
+For every `t in [1,alpha]`, one shift lies within half a logarithmic grid cell.
+That factor has magnitude at most `tanh(log(alpha)/(4k))`; every other factor
+is at most one.  Symmetry gives the rigorous residual ratio
+
+```text
+Z <= tanh(log(alpha)/(4k))^2.
+```
+
+Using `64` factors for the same-sign block and `12` for the much better
+separated reflected block gives displacement-rank ledger
+
+```text
+2*64 + 2*12 = 152.
+```
+
+The tracked Arb audit
+`certify_adjacent_loewner_compression_tail.py` verifies all fourteen dyadic
+bridges at both 256 and 384 bits.  The largest same-sign residual bound occurs
+at `K=15728640` and is
+
+```text
+0.0046860295734951956146961269... < 1/200;
+```
+
+the largest reflected bound is
+
+```text
+0.00018612896082536405... < 1/4000.
+```
+
+The 256/384-bit JSON SHA-256 values are respectively
+`E5DD81C5655FB585457B06DC3505E5067F9C80F8A6286978A8CD410F79FC152C`
+and
+`4B3EA34EBCF8D007C8E9958C7B78E213B26463B62C892593319FAC5F7936ACA3`;
+the script SHA-256 is
+`CFB585B9F404550A30D24F44FA6B5EB1DBBFB5561B0184DAF48A11BA887A1C43`.
+
+`AdjacentLoewnerCompression.lean` kernel-checks the posterior step.  If a
+compressed block has norm `Y`, residual norm at most `z X`, and `z<1`, then
+`X <= Y/(1-z)`.  The parity theorem keeps the sum of the two compressed blocks
+intact and charges only residual inflations `1/199` and `1/3999`, preserving
+the same-sign/reflected cancellation.  It then invokes the existing coercive
+norm adapter to produce the relative-energy inequality.
+
+This does not yet certify the fourteen middle bridges.  It changes their
+computational and formal shape: the thirteen post-initial bridges now require
+only interval Gram certificates of rank at most `152`, while `K=1920` keeps one
+direct full-energy certificate because its even scalar-floor route is slightly
+too coarse.  The next implementation target is the exact low-rank factor/Gram
+certifier and its literal bridge endpoints.

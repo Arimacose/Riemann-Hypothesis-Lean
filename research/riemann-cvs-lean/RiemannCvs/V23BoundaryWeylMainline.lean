@@ -383,8 +383,15 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   reserve `23209/4006800`.  Rigorous Arb certificates discharge the twelve band
   matrix/moment premises and this one fixed-source Gram premise externally; the
   Lean bridges keep every input explicit.  Thus all finite previous-core source
-  bands are attached directly at `N=15360`.  The remaining open inputs are the
-  fourteen finite middle bridges, a uniform coefficient partial-sum bound, and
+  bands are attached directly at `N=15360`.  The adjacent middle blocks also
+  support a new scalable reduction: same-sign and reflected Loewner pieces are
+  compressed by logarithmic rational shifts, while a kernel-checked posterior
+  lemma preserves cancellation in their combined low-rank part.  A 64/12
+  factor split has combined rank cap 152 and interval-certified residual caps
+  `1/200` and `1/4000` throughout the fourteen finite modes.  What remains for
+  that channel is the family of small compressed Gram certificates (plus the
+  first full-energy bridge), rather than fourteen enormous dense matrices.
+  The later open inputs are a uniform coefficient partial-sum bound and
   source-specific form convergence.
 -/
 

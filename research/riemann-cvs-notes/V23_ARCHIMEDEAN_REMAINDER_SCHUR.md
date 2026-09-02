@@ -1630,3 +1630,38 @@ All finite previous-core source blocks are therefore connected to the analytic
 `N=15360` shell.  The next finite target is the fourteen middle-channel
 bridges, followed by the recursive coefficient sum and infinite operator
 passage.
+
+## 2026-09-02: displacement-rank route for the finite adjacent bridges
+
+The fourteen middle blocks should not be represented as fourteen dense
+matrices.  Their same-sign kernels are rectangular Loewner matrices and obey a
+rank-two Sylvester displacement equation; the reflected kernels are Loewner
+blocks on an even better separated interval pair.  Beckermann--Townsend's
+Zolotarev bound for displacement-structured matrices therefore supplies the
+right compression architecture.
+
+The selected explicit compression maps each interval pair to
+`[-alpha,-1]` and `[1,alpha]`, then uses logarithmically spaced rational shifts.
+With 64 same-sign factors and 12 reflected factors, the combined rank cap is
+152.  The elementary nearest-shift estimate gives
+
+```text
+Z <= tanh(log(alpha)/(4*k))^2.
+```
+
+Independent 256/384-bit Arb replays prove this is below `1/200` for every
+same-sign bridge and below `1/4000` for every reflected bridge.  Their JSON
+hashes are
+`E5DD81C5655FB585457B06DC3505E5067F9C80F8A6286978A8CD410F79FC152C`
+and
+`4B3EA34EBCF8D007C8E9958C7B78E213B26463B62C892593319FAC5F7936ACA3`;
+the tracked script hash is
+`CFB585B9F404550A30D24F44FA6B5EB1DBBFB5561B0184DAF48A11BA887A1C43`.
+
+`AdjacentLoewnerCompression.lean` proves the a posteriori step and preserves
+cancellation in the combined compressed parity block.  The residual factors
+inflate the two compressed norms only by `1/199` and `1/3999`.  The remaining
+finite work is now a family of at-most-152-dimensional interval Gram
+certificates, plus a direct full-energy certificate for the first `K=1920`
+bridge; the latter is needed because the even raw-norm/coarse-gap diagnostic
+misses `2/27` by about `9.47e-4` in relative coefficient.
