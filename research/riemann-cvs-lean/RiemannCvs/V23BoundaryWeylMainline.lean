@@ -362,11 +362,14 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   product lemmas turn the last bound into the explicit positive floor `1-total`.
   This is followed by convergence of the finite-support energies to the closed
   tail form.
-  The triangular transport induction, two-source amplitude adapter, full
-  block-sum normalization, finite-product floor adapter, and strict order-limit
-  passage are kernel-checked; the source-specific Loewner/pole transport bound
-  and shell-energy identification, the fourteen finite middle bridges, the
-  summable coefficient bound, and source-specific form convergence remain open.
+  The triangular transport induction, full block-sum normalization,
+  finite-product floor adapter, and strict order-limit passage are
+  kernel-checked.  Exact weighted parity moments now close the literal complete
+  builder transport for every historical source shell `B>=960` at common target
+  `T>=15360`, with the first three analytic budgets totaling `7/120`.  The
+  remaining open inputs are the fixed source shells below `960`, their concrete
+  finite-energy attachment, the fourteen finite middle bridges, a uniform
+  coefficient partial-sum bound, and source-specific form convergence.
 -/
 
 namespace RiemannCvs.V23BoundaryWeylMainline

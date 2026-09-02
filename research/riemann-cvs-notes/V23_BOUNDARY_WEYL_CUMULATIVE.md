@@ -3476,3 +3476,75 @@ weighted conclusion is.  These interval statements remain explicit analytic
 inputs; the parity algebra, normalization, moment conversion, matrix Cauchy
 step, coercive floors, dyadic propagation, and finite-family composition are
 all checked in Lean.
+
+## 2026-09-02: asymmetric parity weights lower the analytic source frontier to 960
+
+`SharpParityLowFrontierTransport.lean` applies a second asymmetric split, now
+inside the exact even and odd parity numerators.  The two channels need
+opposite weights:
+
+```text
+even: (a-b)^2 <= (3/2)*a^2 + 3*b^2,
+odd:  (a-b)^2 <= 3*a^2 + (3/2)*b^2.
+```
+
+This is materially sharper than using `2*a^2+2*b^2` in both sectors.  At
+separation `N=4B` the corresponding entry-square constants become
+
+```text
+even: 151/375,
+odd:  617/1500,
+```
+
+and for every positive dyadic distance `k` both are bounded by
+`(8/25)*2^(-k)`.  The proof retains the target/source assignment of every
+`q^-2` and `q^-4` moment rather than optimizing only a final decimal constant.
+
+The module also reuses the already proved sharp cutoff-13 pole-scale inequality
+to replace the old coarse pole tail by `1/(2B)`.  Exact elementary logarithm
+bounds then give theorem-checked coercive floors
+
+```text
+c13ShellDynamicGap(B) >= 2       for B >= 960,
+c13ShellDynamicGap(T) >= 24/5    for T >= 15360.
+```
+
+Since `(1/30)*2*(24/5)=8/25`, every historical source shell with `B>=960`
+and common target `T>=15360` now satisfies the literal full-builder relative
+coefficient `(1/30)*2^(-k)`.  The `k=0` channel uses the stronger existing
+`428/125` source floor forced by `T=4B>=15360`; all `k>=1` channels use the new
+uniform floor `2`.  This lowers the analytic source threshold from `3840` to
+`960` without adding a rectangular-budget premise.
+
+At the first analytic target there are therefore three analytic historical
+shells:
+
+```text
+B = 3840, 1920, 960,
+budget sum = 1/30 + 1/60 + 1/120 = 7/120.
+```
+
+The exact residual inside `2/27` is `17/1080`.  The remaining two even finite
+budgets `1/240+1/480` leave `41/4320`; the remaining odd regular budget
+`1/240` plus the fixed `1/384` exception leave `31/3456`.  Lean proves all four
+rational identities, so the new analytic frontier splices exactly into the
+already certified finite allocation rather than changing its bookkeeping.
+
+The scalar source premise at `B=960` was replayed independently at 256 and 384
+bits.  The affine-prefix certificate gives
+
+```text
+scaled weighted upper    = 0.9953092043212243611655675874... < 1,
+unweighted average upper = 1.9397877368301653214535977573... < 2,
+unweighted slack         = 0.0602122631698346785464022427....
+```
+
+The JSON SHA-256 values are
+`2FA43F823DBB9FFFCB3D7A2B4FB1657D7849C43974C51D7A133212D0A0743DE4`
+and
+`BF649E6A47894C94B39C2AB8C4E472EC1828012A0436F205BD94198453205B45`.
+The weaker weighted target `1` is used only to certify the old source shell;
+remote target shells continue to consume the uniform `97/100` certificate.
+The remaining historical exceptions are now genuinely fixed below `B=960`,
+after which the live obstruction is their finite-energy attachment and the
+recursive/infinite boundary-Weyl identification.

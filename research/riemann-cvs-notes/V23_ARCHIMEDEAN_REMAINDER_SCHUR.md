@@ -1406,3 +1406,37 @@ The next live boundary is finite/global rather than regular-rectangular:
 attach the below-threshold bands and the odd fixed block to their exact energy
 coordinates, then identify the resulting recursive shell form with the
 infinite boundary-Weyl operator and pass to the uniform limit.
+
+## 2026-09-02: weighted parity numerators reach the natural 960 coercive floor
+
+`SharpParityLowFrontierTransport.lean` shows that the previous `B>=3840`
+source cutoff was not intrinsic.  The even numerator is weighted
+`(3/2,3)`, while the odd numerator is weighted `(3,3/2)`, matching which term
+carries the remote target symbol.  Their dyadic Frobenius budgets are bounded
+by `(8/25)*2^(-k)` as soon as `k>=1`.
+
+Independently, the sharp pole-symbol work already implies
+
+```text
+poleScale/(8*pi^2*B) <= 1/(2B).
+```
+
+Together with exact logarithm bounds this yields builder-energy floors `2` on
+every source shell `B>=960` and `24/5` on every target shell `T>=15360`.
+The identity
+
+```text
+(1/30) * 2 * (24/5) = 8/25
+```
+
+then closes both actual parity matrices at every positive shell distance; the
+zero-distance historical channel is even easier because `T>=15360` forces
+`B>=3840`.  Hence all regular historical shells at or above the same `960`
+cutoff where the Archimedean coercivity theorem begins are now analytic.
+
+For `T=15360`, the three analytic budgets total `7/120` and leave `17/1080`
+for the fixed early shells.  This residual exactly accommodates the previous
+finite even and odd allocations with positive slacks `41/4320` and `31/3456`.
+The remaining task is thus no longer an expanding below-threshold family: it
+is a fixed finite attachment problem for shells below `960`, followed by the
+recursive reserve and infinite operator limit.
