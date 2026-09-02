@@ -3975,3 +3975,41 @@ The certifier also checks `98` deterministic factor-reconstruction entries,
 all containing zero.  This now tests that the concrete Arb construction agrees
 with the separately kernel-checked universal identity; the pending work is its
 literal K1920 instantiation, not the telescope algebra itself.
+
+### Strengthened K1920 old-core source Gram
+
+The first old-core channel is now certified without a 3840-dimensional target
+Schur complement.  Direct Arb parity formulas build the complete old/new
+crossblock, including prime--Archimedean cancellation, pole terms, and the even
+zero mode, and prove
+
+```text
+C*C^T < (13/100) R_q(old)
+```
+
+for both source dimensions `1921` and `1920`.  Combining this with the proved
+target floor `351629/96000` gives the stronger coefficient `1/28`, since
+
+```text
+(1/28)*(351629/96000) - 13/100 = 2189/2688000.
+```
+
+The first-bridge total and recovered reserve are therefore
+
+```text
+old core + adjacent = 1/28 + 11/135 = 443/3780,
+4/27 - 443/3780 = 13/420.
+```
+
+Independent 256/384-bit proofs pass `3841` strict Gershgorin rows and replay
+the same exact-dyadic preconditioners at both precisions.  Their JSON hashes are
+`5CC43F1E2E449FE3BDA62E197A860BB2E0133F450B24E47CDE8E66E7015E8494`
+and
+`29A8EC9313C577DC921B6411D14EE905E01E8DAB3736D89CB82D0CBC6AFB4E92`;
+the final script hash is
+`29AFD703D06AC1A4DFC45712C0E8BED786E79F018C42B655FF640411CD2D56CF`.
+Lean now contains the finite rectangular Cauchy proof, source-Gram certificate
+structure, target-floor adapter, `1/28` specialization, and weighted
+`443/3780` recombination.  The old-core `1/15` item is therefore superseded;
+the literal K1920 ADI shift binding is the remaining concrete first-bridge
+algebraic interface.

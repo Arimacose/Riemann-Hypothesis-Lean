@@ -68,6 +68,7 @@ on:
       - 'research/riemann-cvs-numerics/certify_fixed_source_gram_floor.py'
       - 'research/riemann-cvs-numerics/certify_adjacent_loewner_compression_tail.py'
       - 'research/riemann-cvs-numerics/certify_k1920_adjacent_compressed_gram.py'
+      - 'research/riemann-cvs-numerics/certify_k1920_old_core_source_gram.py'
       - 'research/riemann-cvs-numerics/probe_relative_shell_budget.py'
       - 'research/riemann-cvs-numerics/probe_dyadic_shell_scaling.py'
       - 'research/riemann-cvs-numerics/probe_previous_core_dyadic_channels.py'
@@ -149,6 +150,7 @@ on:
       - 'research/riemann-cvs-numerics/certify_fixed_source_gram_floor.py'
       - 'research/riemann-cvs-numerics/certify_adjacent_loewner_compression_tail.py'
       - 'research/riemann-cvs-numerics/certify_k1920_adjacent_compressed_gram.py'
+      - 'research/riemann-cvs-numerics/certify_k1920_old_core_source_gram.py'
       - 'research/riemann-cvs-numerics/probe_relative_shell_budget.py'
       - 'research/riemann-cvs-numerics/probe_dyadic_shell_scaling.py'
       - 'research/riemann-cvs-numerics/probe_previous_core_dyadic_channels.py'
@@ -922,6 +924,10 @@ jobs:
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddBuilderAdjacentShell_energy_ge_351629Over96000
           #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_k1920_twoLoewnerCompression_posterior
           #print axioms RiemannCvs.V23BoundaryWeylMainline.relativeCoupling_of_k1920_rank86Compression
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.relativeCoupling_of_sourceGramAndTargetFloor
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.finiteRectangularCrossEnergy_sq_le_sourceColumnEnergy_mul_norm
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_k1920_finiteRectangular_oldCore_relative_oneOver28
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.relativeCoupling_of_oneOver28_and_elevenOver135
           #print axioms RiemannCvs.V23BoundaryWeylMainline.relativeCoupling_of_oneFifteenth_and_elevenOver135
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddBuilderDyadicAdjacentCoreNewest_relative_twoFifths
           #print axioms RiemannCvs.V23BoundaryWeylMainline.finiteMatrixCouplingEuclideanForm_eq_crossEnergy
@@ -1280,7 +1286,8 @@ jobs:
           set -euo pipefail
           python -m py_compile \
             research/riemann-cvs-numerics/certify_adjacent_loewner_compression_tail.py \
-            research/riemann-cvs-numerics/certify_k1920_adjacent_compressed_gram.py
+            research/riemann-cvs-numerics/certify_k1920_adjacent_compressed_gram.py \
+            research/riemann-cvs-numerics/certify_k1920_old_core_source_gram.py
           python research/riemann-cvs-numerics/certify_adjacent_loewner_compression_tail.py \
             --start-mode 1920 \
             --bridge-count 1 \
@@ -1323,6 +1330,41 @@ jobs:
             --prec 384 \
             --threads 4 \
             --json-out research/riemann-cvs-numerics/artifacts/v23_c13_K1920_compressed_gram_384bit.json
+
+      - name: Certify the strengthened K1920 old-core source Gram
+        shell: bash
+        run: |
+          set -euo pipefail
+          python research/riemann-cvs-numerics/certify_k1920_old_core_source_gram.py \
+            --c 13 \
+            --low-cutoff 20 \
+            --source-cutoff 1920 \
+            --target-start 3841 \
+            --target-cutoff 7680 \
+            --shift-gain 1/1024 \
+            --q-upper 249/250 \
+            --beta-upper 13/100 \
+            --target-floor 351629/96000 \
+            --relative-budget 1/28 \
+            --prec 256 \
+            --threads 4 \
+            --validate-cutoff 120 \
+            --json-out research/riemann-cvs-numerics/artifacts/v23_c13_K1920_old_core_source_gram_256bit.json
+          python research/riemann-cvs-numerics/certify_k1920_old_core_source_gram.py \
+            --c 13 \
+            --low-cutoff 20 \
+            --source-cutoff 1920 \
+            --target-start 3841 \
+            --target-cutoff 7680 \
+            --shift-gain 1/1024 \
+            --q-upper 249/250 \
+            --beta-upper 13/100 \
+            --target-floor 351629/96000 \
+            --relative-budget 1/28 \
+            --prec 384 \
+            --threads 4 \
+            --validate-cutoff 120 \
+            --json-out research/riemann-cvs-numerics/artifacts/v23_c13_K1920_old_core_source_gram_384bit.json
 
       - name: Certify the finite V23 relative-energy coupling route
         shell: bash
@@ -1627,6 +1669,10 @@ jobs:
             research/riemann-cvs-numerics/artifacts/v23_c13_K1920_compressed_gram_256bit_*.npy
             research/riemann-cvs-numerics/artifacts/v23_c13_K1920_compressed_gram_384bit.json
             research/riemann-cvs-numerics/artifacts/v23_c13_K1920_compressed_gram_384bit_*.npy
+            research/riemann-cvs-numerics/artifacts/v23_c13_K1920_old_core_source_gram_256bit.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_K1920_old_core_source_gram_256bit_*_source_gram_margin_preconditioner.npy
+            research/riemann-cvs-numerics/artifacts/v23_c13_K1920_old_core_source_gram_384bit.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_K1920_old_core_source_gram_384bit_*_source_gram_margin_preconditioner.npy
             research/riemann-cvs-numerics/artifacts/v23_c13_N20_to_N120_relative_energy.json
             research/riemann-cvs-numerics/artifacts/v23_c13_recursive_relative_energy_shells.json
             research/riemann-cvs-numerics/artifacts/v23_c13_q996_N480_to_N960_shell.json

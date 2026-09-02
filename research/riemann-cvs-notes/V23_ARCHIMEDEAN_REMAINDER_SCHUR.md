@@ -1808,3 +1808,71 @@ old-core/new-shell relative coefficient
 and two-channel arithmetic sides are already certified.  Later compressed
 bridges, the uniform coefficient summation, and the infinite closed-form/
 operator passage remain separate global tasks.
+
+## 2026-09-02: a source-side Gram closes the K1920 old-core channel at `1/28`
+
+The old-core target does not require the 3840-dimensional Schur complement of
+the complete new-shell energy.  Retaining the full recursive source geometry
+and using the already proved target Euclidean floor reverses the elimination
+direction.  For the complete direct-parity crossblock
+
+```text
+C : old modes [0,1920] or [1,1920]  ->  new modes [3841,7680]
+```
+
+the new interval certifier proves in both parity sectors
+
+```text
+C*C^T < (13/100) * R_q(old),       q = 249/250.
+```
+
+Here `R_q` is the shifted source reference with its complete low-low block
+multiplied by `q`.  The crossblock is not split: it retains the combined
+Archimedean/prime Loewner cancellation, the pole term, and the normalized even
+zero-mode row.  Finite Cauchy--Schwarz and the kernel-checked target floor give
+
+```text
+|s^T C t|^2
+  < (13/100) R_q(s,s) ||t||^2
+  <= (1/28) R_q(s,s) H_new(t,t),
+
+(1/28)*(351629/96000) - 13/100 = 2189/2688000 > 0.
+```
+
+This improves the requested old-core coefficient from `1/15` to `1/28`.
+Together with the adjacent rank-86 coefficient,
+
+```text
+1/28 + 11/135 = 443/3780,
+4/27 - 443/3780 = 13/420.
+```
+
+The Arb proof constructs about 9.22 million exact-form entries per sector,
+encloses the source Grams of dimensions `1921` and `1920`, and proves all
+`3841` exact-dyadic congruence/Gershgorin rows strictly positive.  Independent
+256/384-bit runs select byte-identical preconditioners:
+
+```text
+even 3A05F5856A139DF80F930E5BE19E110374B2CAAD6BD0820F90465B8F4DCFF19A,
+odd  6A1CD207291A38B228954C2273310C9144323E0C833186F0BCA991519699FD35.
+```
+
+Their JSON SHA-256 values are
+`5CC43F1E2E449FE3BDA62E197A860BB2E0133F450B24E47CDE8E66E7015E8494`
+and
+`29A8EC9313C577DC921B6411D14EE905E01E8DAB3736D89CB82D0CBC6AFB4E92`;
+both record final script SHA-256
+`29AFD703D06AC1A4DFC45712C0E8BED786E79F018C42B655FF640411CD2D56CF`.
+The small canonical replay also checks `14641+14400` direct-minus-canonical
+entries, every interval containing exact zero.  Midpoint generalized thresholds
+`0.0345884...` (even) and `0.1255003...` (odd) were used only to choose the
+rational cap and are not proof evidence.
+
+`AdjacentShellRebalancedCompression.lean` now proves the generic finite
+rectangular Cauchy theorem, the minimal source-Gram certificate interface, the
+source-Gram/target-floor adapter, the exact `1/28` specialization, and the
+weighted `443/3780` recombination.  Thus the old-core first-step boundary is
+closed to the same explicit finite-certificate interface as the adjacent Gram.
+The remaining K1920 algebraic binding is the literal ADI root/pole lists and
+their noncollision intervals; later compressed bridges and the infinite
+operator passage remain separate.

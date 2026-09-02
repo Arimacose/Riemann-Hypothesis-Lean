@@ -13,13 +13,16 @@ single geometry:
 * on a square adjacent shell, every entry of the reflected Hilbert kernel is
   at most `1 / (2 * (M+1))`, so the half-Hilbert leading matrix costs `1/4`
   rather than the dimension-free historical-core constant `2`;
-* the two reference channels need only have coefficients whose *sum* is
-  `4/27`.  Tight small-Gram caps permit the natural split
-  `1/15 + 11/135 = 4/27`, leaving a larger target for the old-core channel.
+* the two reference channels need only have coefficients whose *sum* is at
+  most `4/27`.  Tight small-Gram caps first permitted the split
+  `1/15 + 11/135 = 4/27`; a full-coupling source-Gram certificate subsequently
+  improves the old-core coefficient to `1/28`.
 
 The resulting scalar ledger accepts the explicit rank-86 ADI posterior at
-`K=1920`.  The compressed Gram bounds and the old-core `1/15` estimate remain
-explicit premises; no floating-point diagnostic is promoted to a theorem.
+`K=1920`.  The strengthened total is `443/3780`, leaving exact reserve
+`13/420` below `4/27`.  The adjacent compressed Gram and old-core source-Gram
+bounds remain explicit certificate premises; no floating-point diagnostic is
+promoted to a theorem.
 -/
 
 noncomputable section
@@ -410,6 +413,186 @@ theorem relativeCoupling_of_k1920_rank86Compression
     (by
       simpa [epsilon] using
         v23_k1920_compressionPosterior_fits_elevenOver135)
+
+/-- A source-side Gram inequality can be paired with a Euclidean target floor
+without constructing the target Schur complement.  `columnEnergy` is the
+quadratic form of `C * Cᵀ`; finite Cauchy--Schwarz supplies `hCross`, while an
+external interval certificate may supply `hGram`. -/
+theorem relativeCoupling_of_sourceGramAndTargetFloor
+    (sourceEnergy targetEnergy cross columnEnergy targetNormSq
+      beta targetFloor q : ℝ)
+    (hBeta : 0 < beta) (hq : 0 ≤ q)
+    (hColumnNonneg : 0 ≤ columnEnergy)
+    (hTargetNormNonneg : 0 ≤ targetNormSq)
+    (hGram : columnEnergy ≤ beta * sourceEnergy)
+    (hTarget : targetFloor * targetNormSq ≤ targetEnergy)
+    (hBudget : beta ≤ q * targetFloor)
+    (hCross : cross ^ 2 ≤ columnEnergy * targetNormSq) :
+    cross ^ 2 ≤ q * sourceEnergy * targetEnergy := by
+  have hSourceNonneg : 0 ≤ sourceEnergy := by
+    nlinarith
+  have hGramScaled :=
+    mul_le_mul_of_nonneg_right hGram hTargetNormNonneg
+  have hBudgetSource :=
+    mul_le_mul_of_nonneg_right hBudget hSourceNonneg
+  have hBudgetScaled :=
+    mul_le_mul_of_nonneg_right hBudgetSource hTargetNormNonneg
+  have hTargetScaled :=
+    mul_le_mul_of_nonneg_left hTarget (mul_nonneg hq hSourceNonneg)
+  calc
+    cross ^ 2 ≤ columnEnergy * targetNormSq := hCross
+    _ ≤ (beta * sourceEnergy) * targetNormSq := hGramScaled
+    _ ≤ ((q * targetFloor) * sourceEnergy) * targetNormSq := by
+      simpa [mul_assoc] using hBudgetScaled
+    _ = (q * sourceEnergy) * (targetFloor * targetNormSq) := by ring
+    _ ≤ (q * sourceEnergy) * targetEnergy := hTargetScaled
+    _ = q * sourceEnergy * targetEnergy := by ring
+
+/-- The rigorous source-Gram cap selected for both K1920 parity sectors fits
+the stronger old-core coefficient `1/28`. -/
+lemma v23_k1920_oldCoreGramBudget :
+    (13 / 100 : ℝ) ≤ (1 / 28) * (351629 / 96000) := by
+  norm_num
+
+/-- Exact rational slack in the source-Gram/target-floor conversion. -/
+lemma v23_k1920_oldCoreGramBudget_slack :
+    (1 / 28 : ℝ) * (351629 / 96000) - 13 / 100 =
+      2189 / 2688000 := by
+  norm_num
+
+/-- End-to-end scalar adapter for the K1920 old-core source-Gram certificate.
+The finite interval artifact proves `hGram`; the target floor is already
+kernel-checked for both parity sectors. -/
+theorem v23_k1920_oldCore_relative_oneOver28
+    (sourceEnergy targetEnergy cross columnEnergy targetNormSq : ℝ)
+    (hColumnNonneg : 0 ≤ columnEnergy)
+    (hTargetNormNonneg : 0 ≤ targetNormSq)
+    (hGram : columnEnergy ≤ (13 / 100 : ℝ) * sourceEnergy)
+    (hTarget : (351629 / 96000 : ℝ) * targetNormSq ≤ targetEnergy)
+    (hCross : cross ^ 2 ≤ columnEnergy * targetNormSq) :
+    cross ^ 2 ≤ (1 / 28 : ℝ) * sourceEnergy * targetEnergy := by
+  exact relativeCoupling_of_sourceGramAndTargetFloor
+    sourceEnergy targetEnergy cross columnEnergy targetNormSq
+    (13 / 100) (351629 / 96000) (1 / 28)
+    (by norm_num) (by norm_num)
+    hColumnNonneg hTargetNormNonneg hGram hTarget
+    v23_k1920_oldCoreGramBudget hCross
+
+/-- Rectangular bilinear form used by the source-Gram certificate interface. -/
+noncomputable def finiteRectangularCrossEnergy
+    {ι κ : Type*} [Fintype ι] [Fintype κ]
+    (C : Matrix ι κ ℝ) (x : ι → ℝ) (y : κ → ℝ) : ℝ :=
+  ∑ i, ∑ j, x i * C i j * y j
+
+/-- The quadratic form of `C * Cᵀ`, evaluated without introducing a matrix
+inverse or a target energy matrix. -/
+noncomputable def finiteSourceColumnEnergy
+    {ι κ : Type*} [Fintype ι] [Fintype κ]
+    (C : Matrix ι κ ℝ) (x : ι → ℝ) : ℝ :=
+  ∑ j, (∑ i, C i j * x i) ^ 2
+
+/-- Finite Cauchy--Schwarz converts a source Gram into a bilinear bound. -/
+theorem finiteRectangularCrossEnergy_sq_le_sourceColumnEnergy_mul_norm
+    {ι κ : Type*} [Fintype ι] [Fintype κ]
+    (C : Matrix ι κ ℝ) (x : ι → ℝ) (y : κ → ℝ) :
+    (finiteRectangularCrossEnergy C x y) ^ 2 ≤
+      finiteSourceColumnEnergy C x * (∑ j, y j ^ 2) := by
+  unfold finiteRectangularCrossEnergy finiteSourceColumnEnergy
+  have hRewrite :
+      (∑ i, ∑ j, x i * C i j * y j) =
+        ∑ j, (∑ i, C i j * x i) * y j := by
+    rw [Finset.sum_comm]
+    apply Finset.sum_congr rfl
+    intro j _hj
+    rw [Finset.sum_mul]
+    apply Finset.sum_congr rfl
+    intro i _hi
+    ring
+  rw [hRewrite]
+  simpa using Finset.sum_mul_sq_le_sq_mul_sq
+    (Finset.univ : Finset κ)
+    (fun j => ∑ i, C i j * x i) y
+
+/-- Minimal proposition exported by an exact finite source-Gram artifact. -/
+structure V23K1920OldCoreSourceGramCertificate
+    {ι κ : Type*} [Fintype ι] [Fintype κ]
+    (C : Matrix ι κ ℝ) (sourceEnergy : (ι → ℝ) → ℝ)
+    (beta : ℝ) : Prop where
+  sourceGram : ∀ x,
+    finiteSourceColumnEnergy C x ≤ beta * sourceEnergy x
+
+/-- Matrix-level source-Gram/target-floor adapter.  The bilinear
+Cauchy--Schwarz step and both nonnegativity obligations are internal. -/
+theorem finiteRectangular_relative_of_sourceGramAndTargetFloor
+    {ι κ : Type*} [Fintype ι] [Fintype κ]
+    (C : Matrix ι κ ℝ)
+    (sourceEnergy : (ι → ℝ) → ℝ)
+    (targetEnergy : (κ → ℝ) → ℝ)
+    (beta targetFloor q : ℝ)
+    (hBeta : 0 < beta) (hq : 0 ≤ q)
+    (hBudget : beta ≤ q * targetFloor)
+    (hSource : V23K1920OldCoreSourceGramCertificate C sourceEnergy beta)
+    (hTarget : ∀ y, targetFloor * (∑ j, y j ^ 2) ≤ targetEnergy y)
+    (x : ι → ℝ) (y : κ → ℝ) :
+    (finiteRectangularCrossEnergy C x y) ^ 2 ≤
+      q * sourceEnergy x * targetEnergy y := by
+  exact relativeCoupling_of_sourceGramAndTargetFloor
+    (sourceEnergy x) (targetEnergy y)
+    (finiteRectangularCrossEnergy C x y)
+    (finiteSourceColumnEnergy C x) (∑ j, y j ^ 2)
+    beta targetFloor q hBeta hq
+    (by unfold finiteSourceColumnEnergy; positivity)
+    (by positivity)
+    (hSource.sourceGram x) (hTarget y) hBudget
+    (finiteRectangularCrossEnergy_sq_le_sourceColumnEnergy_mul_norm C x y)
+
+/-- The exact finite-matrix interface consumed by the K1920 `13/100` Arb
+source-Gram artifact. -/
+theorem v23_k1920_finiteRectangular_oldCore_relative_oneOver28
+    {ι κ : Type*} [Fintype ι] [Fintype κ]
+    (C : Matrix ι κ ℝ)
+    (sourceEnergy : (ι → ℝ) → ℝ)
+    (targetEnergy : (κ → ℝ) → ℝ)
+    (hSource : V23K1920OldCoreSourceGramCertificate
+      C sourceEnergy (13 / 100 : ℝ))
+    (hTarget : ∀ y,
+      (351629 / 96000 : ℝ) * (∑ j, y j ^ 2) ≤ targetEnergy y)
+    (x : ι → ℝ) (y : κ → ℝ) :
+    (finiteRectangularCrossEnergy C x y) ^ 2 ≤
+      (1 / 28 : ℝ) * sourceEnergy x * targetEnergy y := by
+  exact finiteRectangular_relative_of_sourceGramAndTargetFloor
+    C sourceEnergy targetEnergy
+    (13 / 100) (351629 / 96000) (1 / 28)
+    (by norm_num) (by norm_num)
+    v23_k1920_oldCoreGramBudget hSource hTarget x y
+
+/-- The stronger old-core result and the adjacent rank-86 result consume only
+`443/3780`, strictly below the steady `4/27` allowance. -/
+lemma v23_k1920_strengthenedBudget :
+    (1 / 28 : ℝ) + 11 / 135 = 443 / 3780 := by
+  norm_num
+
+/-- Reserve recovered relative to the previous rebalanced K1920 ledger. -/
+lemma v23_k1920_strengthenedBudget_reserve :
+    (4 / 27 : ℝ) - 443 / 3780 = 13 / 420 := by
+  norm_num
+
+/-- Weighted two-channel Cauchy with the strengthened old-core coefficient. -/
+theorem relativeCoupling_of_oneOver28_and_elevenOver135
+    (oldEnergy adjacentEnergy tail oldCross adjacentCross : ℝ)
+    (hOld : oldCross ^ 2 ≤
+      (1 / 28 : ℝ) * oldEnergy * tail)
+    (hAdjacent : adjacentCross ^ 2 ≤
+      (11 / 135 : ℝ) * adjacentEnergy * tail) :
+    (oldCross + adjacentCross) ^ 2 ≤
+      (443 / 3780 : ℝ) * (oldEnergy + adjacentEnergy) * tail := by
+  have hOldScaled := mul_le_mul_of_nonneg_left hOld
+    (show (0 : ℝ) ≤ 11 / 135 by norm_num)
+  have hAdjacentScaled := mul_le_mul_of_nonneg_left hAdjacent
+    (show (0 : ℝ) ≤ 1 / 28 by norm_num)
+  have hWeighted := sq_nonneg
+    ((11 / 135 : ℝ) * oldCross - (1 / 28 : ℝ) * adjacentCross)
+  nlinarith
 
 /-- The rebalanced old-core and adjacent coefficients exactly renew the
 steady reference budget. -/

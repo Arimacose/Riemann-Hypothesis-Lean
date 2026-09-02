@@ -395,15 +395,18 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   factor split has rank 86, residual caps `19/4000` and `3/16000`, and
   interval-certified compressed norms `8881/10000`, `22301/100000`, and common
   parity total `93223/100000`.  The exact posterior is below `23413/25000`,
-  which fits adjacent coefficient `11/135`; combining it with an old-core
-  coefficient `1/15`
-  exactly renews `4/27`.  Thus a dense first full-energy certificate is no
-  longer intrinsic.  `LoewnerAdiTelescope` now kernel-checks the universal
-  rational-product telescope and rank-two factor identity.  The still-explicit
-  K1920 premises are binding its literal Arb root/pole lists and noncollision
-  checks to the generic theorem, plus the old-core `1/15` estimate.  The other small compressed
-  Grams, a uniform coefficient partial-sum bound, and source-specific form
-  convergence remain later inputs.  The K1920 energy/posterior theorems live in
+  which fits adjacent coefficient `11/135`.  A new full-coupling source-side
+  Gram certificate retains the combined prime/Archimedean cancellation, pole
+  term, and even zero mode, proving `C*C^T < (13/100)R_q` in both sectors.
+  The target floor converts this to old-core coefficient `1/28`; the combined
+  coefficient is therefore `443/3780`, leaving exact reserve `13/420` below
+  `4/27`.  Thus a dense first full-energy certificate is no longer intrinsic.
+  `LoewnerAdiTelescope` now kernel-checks the universal rational-product
+  telescope and rank-two factor identity.  The still-explicit K1920 premise is
+  binding its literal Arb root/pole lists and noncollision checks to the generic
+  theorem.  The other small compressed Grams, a uniform coefficient
+  partial-sum bound, and source-specific form convergence remain later inputs.
+  The K1920 energy/posterior/source-Gram adapter theorems live in
   `AdjacentShellRebalancedCompression`, a downstream leaf, to avoid an import
   cycle with this umbrella.
 -/
