@@ -1434,9 +1434,15 @@ zero-distance historical channel is even easier because `T>=15360` forces
 `B>=3840`.  Hence all regular historical shells at or above the same `960`
 cutoff where the Archimedean coercivity theorem begins are now analytic.
 
-For `T=15360`, the three analytic budgets total `7/120` and leave `17/1080`
-for the fixed early shells.  This residual exactly accommodates the previous
-finite even and odd allocations with positive slacks `41/4320` and `31/3456`.
-The remaining task is thus no longer an expanding below-threshold family: it
-is a fixed finite attachment problem for shells below `960`, followed by the
-recursive reserve and infinite operator limit.
+The coordinate `T=15360` is the first target covered by this theorem after the
+separately certified finite seam at `T=7680`.  Its three analytic budgets total
+`7/120` and leave `17/1080` for the fixed early shells.  The finite allocations
+are anchored at target coordinate `T=1920` and therefore undergo three dyadic
+halvings before they are attached here.  The complete even budget becomes
+`(31/480)*(1/2)^3=31/3840`, leaving slack `53/6912`; the complete odd budget,
+including the fixed `[1,20]` block, becomes
+`(1/16+1/384)*(1/2)^3=25/3072`, leaving slack `1051/138240`.  These four exact
+identities are checked in Lean.  The remaining task is thus no longer an
+expanding below-threshold family: it is a fixed finite attachment problem for
+shells below `960`, followed by the recursive reserve and infinite operator
+limit.

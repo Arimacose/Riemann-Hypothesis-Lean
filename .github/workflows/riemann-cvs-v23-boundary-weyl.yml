@@ -815,6 +815,10 @@ jobs:
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13HistoricalRemoteEvenBuilder_lowFrontierDyadicFamily_relative_twoOver27
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13HistoricalRemoteOddBuilder_lowFrontierDyadicFamily_relative_twoOver27
           #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_lowFrontier_firstThreeResidual
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_lowFrontier_evenTransportedFiniteBudget
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_lowFrontier_evenFiniteResidual
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_lowFrontier_oddTransportedFiniteBudget
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_lowFrontier_oddFiniteResidual
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddBuilderDyadicAdjacentCoreNewest_relative_twoFifths
           #print axioms RiemannCvs.V23BoundaryWeylMainline.finiteMatrixCouplingEuclideanForm_eq_crossEnergy
           #print axioms RiemannCvs.V23BoundaryWeylMainline.finiteMatrixBoundaryWeyl_mono_of_relativeEnergyCertificate

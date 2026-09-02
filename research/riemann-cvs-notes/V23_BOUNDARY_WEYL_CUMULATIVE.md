@@ -3516,19 +3516,35 @@ coefficient `(1/30)*2^(-k)`.  The `k=0` channel uses the stronger existing
 uniform floor `2`.  This lowers the analytic source threshold from `3840` to
 `960` without adding a rectangular-budget premise.
 
-At the first analytic target there are therefore three analytic historical
-shells:
+At the first target covered after the separately certified `T=7680` finite
+seam, namely `T=15360`, there are three analytic historical shells:
 
 ```text
 B = 3840, 1920, 960,
 budget sum = 1/30 + 1/60 + 1/120 = 7/120.
 ```
 
-The exact residual inside `2/27` is `17/1080`.  The remaining two even finite
-budgets `1/240+1/480` leave `41/4320`; the remaining odd regular budget
-`1/240` plus the fixed `1/384` exception leave `31/3456`.  Lean proves all four
-rational identities, so the new analytic frontier splices exactly into the
-already certified finite allocation rather than changing its bookkeeping.
+The exact residual inside `2/27` is `17/1080`.  The finite certificate is
+anchored at target coordinate `T=1920`, three dyadic halvings before `T=15360`.
+Its complete even allocation is
+
+```text
+1/30 + 1/60 + 1/120 + 1/240 + 1/480 = 31/480,
+(31/480) * (1/2)^3 = 31/3840,
+17/1080 - 31/3840 = 53/6912 > 0.
+```
+
+The complete odd allocation has the same four regular bands, totaling `1/16`,
+plus the fixed `[1,20]` exception at `1/384`; hence
+
+```text
+(1/16 + 1/384) * (1/2)^3 = 25/3072,
+17/1080 - 25/3072 = 1051/138240 > 0.
+```
+
+Lean proves these transport and residual identities.  Thus the new analytic
+frontier splices exactly into the complete certified finite allocation rather
+than silently omitting its three larger regular bands.
 
 The scalar source premise at `B=960` was replayed independently at 256 and 384
 bits.  The affine-prefix certificate gives

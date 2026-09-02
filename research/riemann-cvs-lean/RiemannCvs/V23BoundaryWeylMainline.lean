@@ -366,10 +366,12 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   finite-product floor adapter, and strict order-limit passage are
   kernel-checked.  Exact weighted parity moments now close the literal complete
   builder transport for every historical source shell `B>=960` at common target
-  `T>=15360`, with the first three analytic budgets totaling `7/120`.  The
-  remaining open inputs are the fixed source shells below `960`, their concrete
-  finite-energy attachment, the fourteen finite middle bridges, a uniform
-  coefficient partial-sum bound, and source-specific form convergence.
+  `T>=15360`.  At the first post-seam coordinate `T=15360`, after the separately
+  certified finite seam `T=7680`, the first three analytic budgets total
+  `7/120`; the complete transported finite budgets leave positive exact slack.
+  The remaining open inputs are the fixed source shells below `960`, their
+  concrete finite-energy attachment, the fourteen finite middle bridges, a
+  uniform coefficient partial-sum bound, and source-specific form convergence.
 -/
 
 namespace RiemannCvs.V23BoundaryWeylMainline

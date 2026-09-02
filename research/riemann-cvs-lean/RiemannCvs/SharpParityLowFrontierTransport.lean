@@ -18,12 +18,13 @@ moments and fit below `(1/30)2^{-k}` whenever the target shell begins at
 reuses the already checked sharp pole-scale estimate to establish coercive
 gaps `2` at `B >= 960` and `24/5` at `T >= 15360`.
 
-Consequently the first analytic target has three fully analytic historical
-channels, `B = 3840, 1920, 960`, consuming exactly `7/120`.  Only the fixed
-shells below `960` remain finite exceptions, and their old certified budgets
-fit in the exact residual `17/1080` with positive even and odd slack.  All
-matrix statements below concern the literal cutoff-13 builder restrictions;
-the only numerical inputs are the displayed raw combined-symbol inequalities.
+Consequently the first target covered after the finite `T = 7680` seam has
+three fully analytic historical channels, `B = 3840, 1920, 960`, consuming
+exactly `7/120`.  The fixed shells below `960` are transported three dyadic
+steps from their `T = 1920` certificate, so their complete even and odd budgets
+fit in the exact residual `17/1080` with positive slack.  All matrix statements
+below concern the literal cutoff-13 builder restrictions; the only numerical
+inputs are the displayed raw combined-symbol inequalities.
 -/
 
 noncomputable section
@@ -1315,9 +1316,11 @@ theorem c13HistoricalRemoteOddBuilder_lowFrontierDyadicFamily_relative_twoOver27
       (1 / 30 : ℝ) (2 / 27 : ℝ)
       hEnergy hBudget hTail (by norm_num) hEnvelope (by norm_num) hRelative
 
-/-- The first analytic target `T = 15360` has exactly three historical source
-shells at or above the new analytic frontier: `B = 3840, 1920, 960`.  Their
-geometric budgets consume only `7/120`, not the full `2/27` allowance. -/
+/-- At the first target coordinate covered by this low-frontier theorem,
+`T = 15360`, exactly three historical source shells are at or above the new
+analytic frontier: `B = 3840, 1920, 960`.  Their geometric budgets consume
+only `7/120`, not the full `2/27` allowance.  The preceding target coordinate
+`T = 7680` is the separately certified finite seam. -/
 lemma v23_lowFrontier_firstThreeBudget :
     (∑ i ∈ Finset.range 3,
       (1 / 30 : ℝ) * (1 / 2 : ℝ) ^ i) = 7 / 120 := by
@@ -1328,16 +1331,33 @@ lemma v23_lowFrontier_firstThreeResidual :
     (2 / 27 : ℝ) - 7 / 120 = 17 / 1080 := by
   norm_num
 
-/-- The two remaining even regular finite bands cost `1/240 + 1/480`; the
-resulting slack reproduces the independently certified finite allocation. -/
-lemma v23_lowFrontier_evenFiniteResidual :
-    (17 / 1080 : ℝ) - (1 / 240 + 1 / 480) = 41 / 4320 := by
+/-- The complete even finite allocation at target coordinate `T = 1920` is
+`31/480`: four regular source bands with budgets `1/30`, `1/60`, `1/120`,
+`1/240`, together with the fixed even block at `1/480`.  Three exact dyadic
+halvings transport it to `31/3840` at `T = 15360`. -/
+lemma v23_lowFrontier_evenTransportedFiniteBudget :
+    (31 / 480 : ℝ) * (1 / 2) ^ 3 = 31 / 3840 := by
   norm_num
 
-/-- In the odd sector the remaining `1/240` regular band and the `1/384`
-fixed-base exception leave the same positive slack as the finite certificate. -/
+/-- After all five transported even finite bands are charged, the low-frontier
+historical allowance retains the positive slack `53/6912`. -/
+lemma v23_lowFrontier_evenFiniteResidual :
+    (17 / 1080 : ℝ) - 31 / 3840 = 53 / 6912 := by
+  norm_num
+
+/-- The complete odd finite allocation at target coordinate `T = 1920` is
+`1/16 + 1/384`: the four regular source bands total `1/16`, and the fixed odd
+block uses `1/384`.  Three exact dyadic halvings transport it to `25/3072` at
+`T = 15360`. -/
+lemma v23_lowFrontier_oddTransportedFiniteBudget :
+    ((1 / 16 : ℝ) + 1 / 384) * (1 / 2) ^ 3 = 25 / 3072 := by
+  norm_num
+
+/-- After all four transported odd regular bands and the transported odd fixed
+block are charged, the low-frontier historical allowance retains the positive
+slack `1051/138240`. -/
 lemma v23_lowFrontier_oddFiniteResidual :
-    (17 / 1080 : ℝ) - (1 / 240 + 1 / 384) = 31 / 3456 := by
+    (17 / 1080 : ℝ) - 25 / 3072 = 1051 / 138240 := by
   norm_num
 
 end RiemannCvs.V23BoundaryWeylMainline
