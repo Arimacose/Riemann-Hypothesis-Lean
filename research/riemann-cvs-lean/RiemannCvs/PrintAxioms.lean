@@ -1,4 +1,8 @@
 import RiemannCvs
+import RiemannCvs.AdjacentAdiShiftBinding
+import RiemannCvs.K1920AdiShiftBinding
+import RiemannCvs.K3840AdiShiftBinding
+import RiemannCvs.K3840AdjacentCompression
 
 #print axioms RiemannCvs.PrimeEventTransfer.derivativeJump
 #print axioms RiemannCvs.PrimeEventTransfer.functionalDerivativeJump
@@ -40,3 +44,11 @@ import RiemannCvs
 #print axioms RiemannCvs.ProlateLeakage.normalizedBoundaryLeakage
 #print axioms RiemannCvs.ProlateLeakage.normalizedLeakageUpperBound
 #print axioms RiemannCvs.ProlateLeakage.normalizedLeakageLowerBound
+#print axioms RiemannCvs.AdjacentAdiShiftBinding.gridCell_ne
+#print axioms RiemannCvs.AdjacentAdiShiftBinding.same_factorization_of_gridCertificate
+#print axioms RiemannCvs.K1920AdiShiftBinding.same_factorization
+#print axioms RiemannCvs.K1920AdiShiftBinding.reflected_factorization
+#print axioms RiemannCvs.K3840AdiShiftBinding.same_factorization
+#print axioms RiemannCvs.K3840AdiShiftBinding.reflected_factorization
+#print axioms RiemannCvs.V23BoundaryWeylMainline.v23_k3840_compressionPosterior_budgetSlack
+#print axioms RiemannCvs.V23BoundaryWeylMainline.relativeCoupling_of_k3840_rank152Compression

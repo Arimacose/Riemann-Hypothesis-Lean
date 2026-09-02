@@ -1948,6 +1948,93 @@ derives all six same/reflected noncollision families, and instantiates
 user-declared axiom.  Thus the previously open K1920 *algebraic binding* is
 closed: the remaining external boundary is precisely the recorded finite Arb
 inequality certificate, just as for the two Gram bounds.  The live research
-front has moved to the other thirteen compressed bridge Grams, their uniform
+front has moved to the remaining twelve compressed bridge Grams, their uniform
 coefficient ledger, source-specific form convergence, and the infinite closed
 operator/no-crossing identification.
+
+## 2026-09-03: the K3840 adjacent bridge is closed at rank 152
+
+The second finite adjacent channel is now reduced to the same explicit
+certificate interface as K1920:
+
+```text
+source = (3840,7680],
+target = (7680,15360].
+```
+
+`AdjacentAdiShiftBinding.lean` extracts the mode-independent Mobius map,
+logarithmic nodes, unit-cell grid exclusion, all same/reflected noncollision
+families, and the exact ADI telescope binding.  `K1920AdiShiftBinding.lean`
+now delegates to that generic layer without changing its public theorem names.
+For K3840, `K3840AdiShiftBinding.lean` fixes 64 same-sign and 12 reflected
+literal shifts, hence combined rank
+
+```text
+2*64 + 2*12 = 152.
+```
+
+The 256- and 384-bit Arb shift-cell runs each prove 152 strict endpoint/range
+comparisons, 152 strict cell-side comparisons, and independently replay all
+`76+76` production-versus-literal root/pole formulas with residual balls
+containing zero.  The complete cell transcripts agree across precisions, with
+SHA-256
+
+```text
+same cells:      03EA3A32E8FECDDC46843BBB018B446C22EA49F659D3E6E62D860A7C394DD9FF
+reflected cells: F8384506770E832CAF44B30E97866F16724AF23C4CE21E0008D16F6929C62F30.
+```
+
+The compressed-Gram certificate uses the already uniform residual caps
+`1/200` and `1/4000` and proves
+
+```text
+same-sign compressed norm <= 99/100,
+reflected compressed norm <= 1/4,
+even total compressed norm <= 199/200,
+odd total compressed norm <= 199/200.
+```
+
+For both precisions, strict left/right Gershgorin positivity holds in all
+`128/128` same-sign rows, `24/24` reflected rows, and `152/152` rows in each
+of the even and odd total families.  The 256/384 reference audit also matches
+the factor reconstruction samples and every selector and left/right exact-
+dyadic preconditioner.  The principal selector SHA-256 values are
+
+```text
+same:      5CC54EBD01A41812FC7D1672F75C5053904C29C5F34B65D1793E3DFA4193A8C6
+reflected: DEEACB16604781E247916C6E1B8DD8F869639C5B254D60EEB16F3ACF90BD5E5E
+total:     BD13BAF2B5F24090056DEEFC864F87BF95E24182CB03B95C25E83686A30B142D.
+```
+
+`K3840AdjacentCompression.lean` kernel-checks the exact posterior
+
+```text
+199/200 + (1/199)*(99/100) + (1/3999)*(1/4)
+  = 159166151/159160200,
+```
+
+and, using source/target coercive floors `428/125` and `207/50`, proves that it
+fits relative coefficient `2/27`.  The exact positive reserve is
+
+```text
+(2/27)*(428/125)*(207/50) - (159166151/159160200)^2
+  = 6326898111337867/126659846320200000 > 0.
+```
+
+The current local shift JSON SHA-256 values are
+`C846A8452CE896FBA1AB65770BF097221A07EDDFD2EE9BEE9703FA9B2D43598F`
+and `9EF588B451DB328535252CDFA4766C1A2C77AE1F2D4D0E0754F66192142BA55C`;
+the current local Gram JSON values are
+`66506AC1CB51640EC732217F061D888218EAE3E82E66963A49FF1E717FC8BF7D`
+and `07DB105012D6CC9D82552BF6251C7AE2755649B847ACC997F97AE4FDE9F6D463`.
+These whole-file hashes are local snapshots, not CI equality targets, because
+the JSON records timestamps, absolute paths, and the generating Git SHA.  CI
+must instead verify the structural fields and the stable cell, selector, and
+preconditioner hashes.  The parameterized Gram and shift scripts have SHA-256
+`E30769B98F9911E043CB00E54595455C27B4BF34430BD0D48B0D39C2E8929681`
+and `82DA3B656FBB7B83FC281EE969B3A5C7CE9E7BFD2379EB7F36128C8837389B06`.
+
+This closes the second finite adjacent channel only.  Twelve compressed finite
+bridges, a uniform coefficient partial-sum theorem, source-specific form
+convergence, the infinite closed-operator passage, and the final no-crossing/RH
+identification remain unproved.

@@ -401,14 +401,18 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   The target floor converts this to old-core coefficient `1/28`; the combined
   coefficient is therefore `443/3780`, leaving exact reserve `13/420` below
   `4/27`.  Thus a dense first full-energy certificate is no longer intrinsic.
-  `LoewnerAdiTelescope` now kernel-checks the universal rational-product
-  telescope and rank-two factor identity.  The still-explicit K1920 premise is
-  binding its literal Arb root/pole lists and noncollision checks to the generic
-  theorem.  The other small compressed Grams, a uniform coefficient
-  partial-sum bound, and source-specific form convergence remain later inputs.
-  The K1920 energy/posterior/source-Gram adapter theorems live in
-  `AdjacentShellRebalancedCompression`, a downstream leaf, to avoid an import
-  cycle with this umbrella.
+  `LoewnerAdiTelescope` kernel-checks the universal rational-product telescope
+  and rank-two factor identity, while `AdjacentAdiShiftBinding` proves the
+  mode-independent grid noncollision adapter.  `K1920AdiShiftBinding` closes
+  the first literal shift list.  The second finite bridge at `K=3840` now has a
+  complete rank-152 leaf interface: compressed caps `99/100`, `1/4`, and
+  `199/200`, exact posterior `159166151/159160200`, coercive floors `428/125`
+  and `207/50`, and relative coefficient `2/27`.  Its 64/12 literal shifts and
+  pole cells are bound by `K3840AdiShiftBinding`.  The remaining twelve small
+  compressed Grams, a uniform coefficient partial-sum bound, source-specific
+  form convergence, and the closed-operator/no-crossing identification remain
+  later inputs.  The K1920 and K3840 energy adapters live in downstream leaf
+  modules to avoid an import cycle with this umbrella.
 -/
 
 namespace RiemannCvs.V23BoundaryWeylMainline
