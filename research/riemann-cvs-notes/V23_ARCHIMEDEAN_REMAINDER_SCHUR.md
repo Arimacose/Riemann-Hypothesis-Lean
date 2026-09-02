@@ -1660,8 +1660,151 @@ the tracked script hash is
 
 `AdjacentLoewnerCompression.lean` proves the a posteriori step and preserves
 cancellation in the combined compressed parity block.  The residual factors
-inflate the two compressed norms only by `1/199` and `1/3999`.  The remaining
-finite work is now a family of at-most-152-dimensional interval Gram
-certificates, plus a direct full-energy certificate for the first `K=1920`
-bridge; the latter is needed because the even raw-norm/coarse-gap diagnostic
-misses `2/27` by about `9.47e-4` in relative coefficient.
+inflate the two compressed norms only by `1/199` and `1/3999`.  This first
+rank-152 architecture localized the finite work to small Gram matrices.  The
+next section records a sharper first-bridge geometry which supersedes the
+earlier claim that a direct full-energy certificate at `K=1920` is mandatory.
+
+## 2026-09-02: rebalanced rank-86 compression clears the K1920 adjacent channel
+
+The coarse first-bridge failure came from spending a historical-core
+Archimedean constant on a square adjacent shell.  For source coordinates
+`M+i+1` and `M+j+1`, every entry of the unscaled reflected Hilbert kernel obeys
+
+```text
+1 / ((M+i+1) + (M+j+1)) <= 1 / (2*(M+1)).
+```
+
+There are only `M` columns.  Its row sum is therefore at most
+`M/(2*(M+1)) <= 1/2`, and ordinary Schur gives quadratic-form norm `1/2`.
+The reflected leading matrix carries the additional factor `1/2`, so it costs
+only `1/4`, rather than the generic historical-core allowance.  Adding the
+already proved centered remainder `43/3840` yields the exact even/odd bound
+
+```text
+1/4 + 43/3840 = 1003/3840.
+```
+
+Relative to the old `1/2` loss this recovers `917/3840`.  The resulting
+kernel-checked coercive floors are
+
+```text
+source M >= 1920 : 2257/768,
+target M >= 3840 : 351629/96000,
+```
+
+in both parity sectors.  These statements are proved in
+`AdjacentShellRebalancedCompression.lean`; they do not depend on numerical
+eigenvalues.
+
+At the first bridge the rational shifts can then be reduced to `31` same-sign
+and `12` reflected factors, with combined rank
+
+```text
+2*31 + 2*12 = 86.
+```
+
+The independent 256/384-bit Arb tail replays give the same enclosures
+
+```text
+same-sign residual
+  0.004729016336806176011156285610921492... < 19/4000,
+reflected residual
+  0.000185926254974419371752006879809042... < 3/16000.
+```
+
+Their JSON SHA-256 values are respectively
+`DB39044FD42298074A6E2C84FEACE109D79EACDECAE25D1D0CE6CE6E54193363`
+and
+`9ECD64319225A57ECCB62F7FFB229B2AC43373D03AD173E56D6630D9F1B8E57C`;
+both record the existing tail-certifier source hash
+`CFB585B9F404550A30D24F44FA6B5EB1DBBFB5561B0184DAF48A11BA887A1C43`.
+
+The new `certify_k1920_adjacent_compressed_gram.py` constructs the complete
+cutoff-13 source symbol through mode `7680`, the explicit Arb Mobius maps and
+ADI factors, and the small factor Grams `G_U=U^T U`, `G_V=V^T V`.  A floating
+Cholesky computation only selects an exact-dyadic lower triangular matrix
+`R`; after replaying every stored double as a radius-zero dyadic Arb number,
+the certificate proves
+
+```text
+G_U < R*R^T,
+R^T*G_V*R < epsilon^2*I
+```
+
+by exact congruence and strict interval Gershgorin.  Thus the compressed
+operator bounds are
+
+```text
+same-sign <= 8881/10000,
+reflected <= 22301/100000,
+even total <= 93223/100000,
+odd total <= 93223/100000.
+```
+
+The midpoint transformed norms `0.888088...`, `0.223002...`, `0.932228...`,
+and `0.919988...` are diagnostics only.  Each precision proves `516` strict
+Gershgorin rows.  All four Gram selectors and all eight positivity
+preconditioners have byte-identical hashes across precisions; the three
+distinct selector hashes are
+
+```text
+same-sign 49EE6C295E5CD6CB1C4BDF67B96B6764B47C30068150DC1D7AFBCA1C241ED2B9,
+reflected 16DF2C9466A9A2A2C1A15A3855D1EDCC1421C46911BD7AE721A6DF427633DF05,
+combined  25D9D6343A62A834B105CAC7CAC9ABFA71D64512E77DECBF016B7E22D9D2EBBC.
+```
+
+The script also checks `49+49` deterministic entries of
+`X*(1-r(A)/r(B))-U*V^T`; all `98` interval residuals contain zero.  This is a
+strong construction audit of the concrete implementation.  The general
+entrywise identity is now kernel-checked in `LoewnerAdiTelescope.lean`: for an
+arbitrary field, arbitrary ordered root/pole list, and any rank-two
+displacement generator, it proves exactly two factor columns per shift and
+rewrites the residual as the ordinary rational-product quotient.  Its scaled
+Loewner specialization also derives exactly the balanced generators used by
+the Python script; positive and reflected spectral intervals differ only in
+the sign of the right coordinate.  The CI-pinned `python-flint 0.8.0`
+256/384-bit Gram JSON SHA-256 values are
+`A89545C3E8988F7F7E27150E05E07A96784E7DB3B42E1BB4D894FB7FB1EB7A2A`
+and
+`25272CADF535B277EC0BD4D255F45B414AE2F1CB4E7FFF17D858AFF058CE3D08`;
+both record script SHA-256
+`22A48F56137882F30C3A5A2C4BCA093F9E7BE2CB2A13120689A61F1CF60788FB`.
+
+The initially tempting `921/1000` bound covers the odd diagnostic but not the
+even block.  The first valid common cap was `933/1000`; a second exact-dyadic
+Gram replay tightens it to `93223/100000` while also lowering both component
+caps.  The exact posterior ledger is now
+
+```text
+93223/100000 + (19/3981)*(8881/10000)
+  + (3/15997)*(22301/100000)
+  = 186377448887/199012678125
+  = 0.9365104306065174...
+  < 23413/25000.
+```
+
+The rational norm `23413/25000` fits the sharper adjacent coefficient:
+
+```text
+(23413/25000)^2
+  <= (11/135)*(2257/768)*(351629/96000).
+```
+
+Finally, the steady reference allowance is not intrinsically two equal
+`2/27` channels.  At this first geometry it can be reallocated exactly as
+
+```text
+1/15 + 11/135 = 4/27.
+```
+
+Consequently the adjacent K1920 channel no longer needs a dense direct
+full-energy certificate.  The abstract ADI telescope/factor identity is now
+closed.  The rebalanced shell step retains two sharply localized concrete
+interfaces: (1) bind the literal Arb K1920 root/pole lists and their interval
+noncollision certificates to the generic theorem, and (2) prove the
+old-core/new-shell relative coefficient
+`<=1/15` at this first step.  The Gram, residual, coercive-floor, posterior,
+and two-channel arithmetic sides are already certified.  Later compressed
+bridges, the uniform coefficient summation, and the infinite closed-form/
+operator passage remain separate global tasks.

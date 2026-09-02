@@ -388,11 +388,24 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   compressed by logarithmic rational shifts, while a kernel-checked posterior
   lemma preserves cancellation in their combined low-rank part.  A 64/12
   factor split has combined rank cap 152 and interval-certified residual caps
-  `1/200` and `1/4000` throughout the fourteen finite modes.  What remains for
-  that channel is the family of small compressed Gram certificates (plus the
-  first full-energy bridge), rather than fourteen enormous dense matrices.
-  The later open inputs are a uniform coefficient partial-sum bound and
-  source-specific form convergence.
+  `1/200` and `1/4000` throughout the fourteen finite modes.  The first
+  `K=1920` bridge now has a sharper leaf-module route: square adjacent Hilbert
+  geometry lowers the complete Archimedean remainder to `1003/3840`, raising
+  the source/target floors to `2257/768` and `351629/96000`.  An adaptive 31/12
+  factor split has rank 86, residual caps `19/4000` and `3/16000`, and
+  interval-certified compressed norms `8881/10000`, `22301/100000`, and common
+  parity total `93223/100000`.  The exact posterior is below `23413/25000`,
+  which fits adjacent coefficient `11/135`; combining it with an old-core
+  coefficient `1/15`
+  exactly renews `4/27`.  Thus a dense first full-energy certificate is no
+  longer intrinsic.  `LoewnerAdiTelescope` now kernel-checks the universal
+  rational-product telescope and rank-two factor identity.  The still-explicit
+  K1920 premises are binding its literal Arb root/pole lists and noncollision
+  checks to the generic theorem, plus the old-core `1/15` estimate.  The other small compressed
+  Grams, a uniform coefficient partial-sum bound, and source-specific form
+  convergence remain later inputs.  The K1920 energy/posterior theorems live in
+  `AdjacentShellRebalancedCompression`, a downstream leaf, to avoid an import
+  cycle with this umbrella.
 -/
 
 namespace RiemannCvs.V23BoundaryWeylMainline

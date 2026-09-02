@@ -3878,9 +3878,100 @@ intact and charges only residual inflations `1/199` and `1/3999`, preserving
 the same-sign/reflected cancellation.  It then invokes the existing coercive
 norm adapter to produce the relative-energy inequality.
 
-This does not yet certify the fourteen middle bridges.  It changes their
-computational and formal shape: the thirteen post-initial bridges now require
-only interval Gram certificates of rank at most `152`, while `K=1920` keeps one
-direct full-energy certificate because its even scalar-floor route is slightly
-too coarse.  The next implementation target is the exact low-rank factor/Gram
-certifier and its literal bridge endpoints.
+This first compression package changes the computational and formal shape of
+the fourteen middle bridges.  The sharper first-step result below supersedes
+the provisional conclusion that `K=1920` must keep a dense direct full-energy
+certificate.
+
+## 2026-09-02: K1920 is reduced to rank 86 by a rebalanced energy split
+
+The missing first bridge was not intrinsically a dense-matrix phenomenon.  Its
+coarse failure came from applying a historical-core Archimedean loss to the
+square adjacent source and target shells.  For `i,j : Fin M`, the positive
+Hilbert denominator is at least `2*(M+1)`.  Hence its row sum is at most `1/2`,
+and the reflected half-Hilbert leading form costs `1/4`.  Together with the
+centered bound `43/3840`, Lean now proves the complete adjacent Archimedean
+remainder bound
+
+```text
+1003/3840
+```
+
+for both parity sectors.  This raises the source and target coercive floors to
+
+```text
+a = 2257/768       at M >= 1920,
+b = 351629/96000   at M >= 3840.
+```
+
+The K1920 rational compression can consequently use `31` same-sign and `12`
+reflected factors, for rank cap `86`.  Independent 256/384-bit Arb runs prove
+
+```text
+z_same <= 19/4000,
+z_reflected <= 3/16000,
+```
+
+and the new compressed-Gram certifier proves
+
+```text
+Y_same <= 8881/10000,
+Y_reflected <= 22301/100000,
+Y_even <= 93223/100000,
+Y_odd <= 93223/100000.
+```
+
+For `C=U*V^T`, each Gram proof uses exact-dyadic `R` and independently checks
+`G_U<R*R^T` and `R^T*G_V*R<epsilon^2 I` by strict interval Gershgorin.  Both
+precisions pass `516` rows and select the same proof matrices.  The full
+a-posteriori norm is therefore bounded in Lean by
+
+```text
+93223/100000 + (19/3981)*(8881/10000)
+  + (3/15997)*(22301/100000)
+  = 186377448887/199012678125
+  < 23413/25000.
+```
+
+This is enough for the adjacent coefficient `11/135`, because
+
+```text
+(23413/25000)^2 <= (11/135)*a*b.
+```
+
+The original steady budget `4/27` can be split asymmetrically without any
+loss:
+
+```text
+old core : 1/15,
+adjacent : 11/135,
+sum      : 4/27.
+```
+
+Thus the live K1920 boundary has moved again.  The residual-factor estimates,
+rank-86 Gram bounds, sharp coercive floors, exact posterior, and weighted
+two-channel recombination are closed.  `LoewnerAdiTelescope.lean` now also
+closes the general ADI telescope over an arbitrary root/pole list and its
+rank-two factorization.  The remaining first-step premises are the concrete
+K1920 Arb root/pole lists and noncollision-certificate binding to the generic
+theorem, and the old-core coefficient `<=1/15`; the latter is substantially looser than the recorded
+midpoint coefficients but still requires a rigorous certificate or analytic
+proof.  After this step, the other compressed finite bridges, uniform shell
+ledger, source-specific form convergence, and infinite boundary--Weyl operator
+identification remain.
+
+The two adaptive residual artifacts have SHA-256
+`DB39044FD42298074A6E2C84FEACE109D79EACDECAE25D1D0CE6CE6E54193363`
+and
+`9ECD64319225A57ECCB62F7FFB229B2AC43373D03AD173E56D6630D9F1B8E57C`.
+The two CI-pinned `python-flint 0.8.0` compressed-Gram JSON artifacts have
+SHA-256
+`A89545C3E8988F7F7E27150E05E07A96784E7DB3B42E1BB4D894FB7FB1EB7A2A`
+and
+`25272CADF535B277EC0BD4D255F45B414AE2F1CB4E7FFF17D858AFF058CE3D08`;
+their tracked script hash is
+`22A48F56137882F30C3A5A2C4BCA093F9E7BE2CB2A13120689A61F1CF60788FB`.
+The certifier also checks `98` deterministic factor-reconstruction entries,
+all containing zero.  This now tests that the concrete Arb construction agrees
+with the separately kernel-checked universal identity; the pending work is its
+literal K1920 instantiation, not the telescope algebra itself.
