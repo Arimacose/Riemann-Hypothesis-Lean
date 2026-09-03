@@ -411,10 +411,14 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   pole cells are bound by `K3840AdiShiftBinding`.  The third bridge at `K=7680`
   now has a parallel rank-152 leaf with caps `107/100`, `1/4`, and `27/25`,
   posterior `21594844/19895025`, floors `428/125` and `24/5`, and coefficient
-  `2/27`.  The remaining eleven small compressed Grams, a uniform coefficient
-  partial-sum bound, source-specific form convergence, and the closed-operator/
-  no-crossing identification remain later inputs.  The K1920, K3840, and K7680
-  energy adapters live in downstream leaf modules to avoid an import cycle.
+  `2/27`.  `FiniteAdjacentAdiShiftBindings` and
+  `FiniteAdjacentCompressionLedger` now close the remaining eleven finite
+  rank-152 leaves with common compressed caps `5/4`, `1/4`, and `5/4`.
+  Thus all fourteen finite adjacent bridges have explicit Arb/Lean interfaces.
+  A uniform coefficient partial-sum bound, source-specific form convergence,
+  and the closed-operator/no-crossing identification remain later inputs.  The
+  finite energy adapters live in downstream leaf modules to avoid an import
+  cycle.
 -/
 
 namespace RiemannCvs.V23BoundaryWeylMainline

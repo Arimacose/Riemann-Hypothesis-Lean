@@ -2099,3 +2099,81 @@ finite Gram, residual, splitting, and cross-energy premises to coefficient
 `N >= 15360`.  The finite result does not prove coefficient summability, form
 convergence, an infinite closed operator, no-crossing, or RH.  Eleven adjacent
 finite compressed bridges remain.
+
+## 2026-09-03: the remaining eleven finite bridges are closed
+
+The preceding sentence records the state immediately after the K7680 leaf.
+The final finite sweep now covers
+
+```text
+K = 15360, 30720, 61440, 122880, 245760, 491520,
+    983040, 1966080, 3932160, 7864320, 15728640.
+```
+
+For every listed bridge, `FiniteAdjacentAdiShiftBindings.lean` supplies 64
+same-sign and 12 reflected literal shifts and exports both exact ADI
+factorizations.  The combined rank is 152.  The 256/384-bit shift-cell runs
+both pass all 152 range checks, 152 cell-side checks, and all 76 root plus 76
+pole literal-formula replays.  Every higher-precision run locks the dependency
+hashes, Lean target and namespace, final Lean source hash, and both complete
+cell transcripts to its 256-bit reference.
+
+The scalable compressed-Gram certifier proves, at both precisions and for all
+eleven modes,
+
+```text
+same-sign <= 5/4,
+reflected <= 1/4,
+even total <= 5/4,
+odd total <= 5/4.
+```
+
+All left and right certificate rows are strict: `128/128` for same-sign,
+`24/24` for reflected, and `152/152` for each total parity family.  The 22 Gram
+JSON artifacts and their 264 exact-dyadic `.npy` selectors/preconditioners pass
+the cross-precision structure, strict-row, and byte-hash replay contract.
+
+The common residual caps remain `1/200` and `1/4000`, while both coercive
+floors are `24/5`.  `FiniteAdjacentCompressionLedger.lean` kernel-checks
+
+```text
+posterior = 5/4 + (1/199)*(5/4) + (1/3999)*(1/4)
+          = 3999199/3183204,
+
+(2/27)*(24/5)^2 - posterior^2
+          = 32492459399591/253319692640400 > 0.
+```
+
+It then exports named posterior and `2/27` relative-coupling theorems for every
+mode.  The relevant final source SHA-256 values are
+
+```text
+FiniteAdjacentAdiShiftBindings.lean
+  6F7CCCF76EA748B3648B77D562510FF8B57E0B35123220D54F84C137D66BB1AE
+FiniteAdjacentCompressionLedger.lean
+  0EC607A6D64FE907EA7D84B1AF4649188B11A66B7E404D0F1035CF438A8B9847
+certify_adjacent_adi_shift_cells.py
+  ABF3C594763DFFC123A233A677938C44A51B9225B1288E63450408DC03DE4B29
+certify_adjacent_compressed_gram_scalable.py
+  12467057B9C33F59F910A89C316361B2F7AAA5C1DE9D313D24BF02FAA98A1DBC
+```
+
+The K3840 scalable-formula regression additionally encloses all 103232 entries
+of seven centered Grams by explicit-row Arb evaluation and proves 760 strict
+rows after an explicit `10^-6` relative identity slack.  This last statement
+does not replace the algebraic unslacked Young PSD argument; it is an
+independent regression check of the scalable formulas and their stated
+boundary.
+
+Lean `4.33.0-rc2` builds the shared modules and mainline.  The audited theorem
+dependencies contain only `propext`, `Classical.choice`, and `Quot.sound`.
+The V23 GitHub Actions workflow now regenerates the eleven double-precision
+shift and Gram pairs, runs the K3840 regression, and uploads the full artifact
+set.  Its YAML, every Bash block, upload globs, and `actionlint 1.7.12` check
+locally.
+
+Thus the finite adjacent list has fourteen completed certificate interfaces:
+K1920, K3840, K7680, and the eleven modes above.  This does not establish a
+uniform coefficient summation, source-specific form convergence, the infinite
+closed boundary/Weyl operator passage, limiting no-crossing, or RH.  Those
+remain separate analytic obligations.

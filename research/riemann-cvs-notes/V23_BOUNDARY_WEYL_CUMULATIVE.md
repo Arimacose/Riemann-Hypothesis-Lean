@@ -4246,3 +4246,167 @@ for the Gram certifier and
 for the shift certifier.  Eleven finite adjacent compressed bridges remain,
 followed by the uniform coefficient sum, source-specific form convergence,
 the infinite closed-operator passage, limiting no-crossing, and RH.
+
+## 2026-09-03: all fourteen finite adjacent compression bridges are closed
+
+The preceding K7680 section records the state before the final finite sweep.
+The first three bridges at K1920, K3840, and K7680 retain their sharper
+individual leaves.  The remaining eleven modes are now closed to the same
+explicit finite certificate interface:
+
+```text
+15360, 30720, 61440, 122880, 245760, 491520,
+983040, 1966080, 3932160, 7864320, 15728640.
+```
+
+For each K, the source shell is `(K,2*K]`, the target shell is `(2*K,4*K]`,
+and the common factor allocation is
+
+```text
+same-sign factors = 64,
+reflected factors = 12,
+combined rank     = 2*64 + 2*12 = 152.
+```
+
+The scalable Arb Gram certificate proves the uniform finite caps
+
+```text
+same-sign compressed norm <= 5/4,
+reflected compressed norm <= 1/4,
+even total compressed norm <= 5/4,
+odd total compressed norm <= 5/4.
+```
+
+Together with residual caps `1/200` and `1/4000`, the exact common posterior
+is
+
+```text
+5/4 + (1/199)*(5/4) + (1/3999)*(1/4)
+  = 3999199/3183204
+  = 1.2563439226640831... .
+```
+
+Both shell coercive floors are `24/5`.  Consequently the exact `2/27`
+relative-energy reserve is
+
+```text
+(2/27)*(24/5)*(24/5) - (3999199/3183204)^2
+  = 32492459399591/253319692640400
+  = 0.1282666146516910... > 0.
+```
+
+### Literal shifts and exact ADI factorizations
+
+`FiniteAdjacentAdiShiftBindings.lean` contains one namespace `K{mode}` for
+each of the eleven modes.  Every namespace fixes 64 same-sign and 12 reflected
+literal logarithmic shifts, records the complete pole-cell transcripts, and
+exports `same_factorization` and `reflected_factorization`.  The companion
+shift certifier was rerun at 256 and 384 bits after the Lean source reached its
+final form.  Every one of the 22 runs proves
+
+```text
+same-sign: 128 strict range checks, 128 strict cell-side checks,
+           64 root replays and 64 pole replays containing zero;
+reflected: 24 strict range checks, 24 strict cell-side checks,
+           12 root replays and 12 pole replays containing zero.
+```
+
+The 384-bit artifact consumes the 256-bit artifact as a reference and requires
+identical dependency hashes, Lean target, Lean source hash, namespace, cell
+lists, and cell-list hashes.  The final source hashes are
+
+```text
+FiniteAdjacentAdiShiftBindings.lean:
+  6F7CCCF76EA748B3648B77D562510FF8B57E0B35123220D54F84C137D66BB1AE
+certify_adjacent_adi_shift_cells.py:
+  ABF3C594763DFFC123A233A677938C44A51B9225B1288E63450408DC03DE4B29
+```
+
+The stable cross-precision cell hashes are:
+
+| K | same-sign cells SHA-256 | reflected cells SHA-256 |
+|---:|---|---|
+| 15360 | `009F8542414D0381D05E6C823F11A68D1190662ED5B30E712AFCBA096D657ABB` | `40D9CFD4E172C2D8CE0013EC6C3B8E02474991DEA42C8163AAE9AFC8D891A179` |
+| 30720 | `A26E08D69DBD2A852F5AD225F0823296AD635C80F060E00534808AFA590C3E46` | `7C9E7EF809C20B430364B8188101D4193F89EACDE6201A255CB8992D0B051AF1` |
+| 61440 | `16B14991A3439A63AB898BA4F8AAC2BE15888426F61C43885559807933DA3B92` | `9D52CF727F99CD41F37703A6FEDDF7EF5BBFE16FF1BB2CC0838D50758CAF4E3A` |
+| 122880 | `14296B7893D7646C4B6E50ECAC0CB3F3577F681A2AED4046A36DBE3015009122` | `CD3D2C26589AD732E9BE493EB2635E1C410370D900EBC49AB1805BF33A73BE47` |
+| 245760 | `AD3D331297D78F94948298A8D8106A5828EF50D460D9FFC49C7B781E73C1295D` | `39208A1A87D1C4F53E7FFB3D70008474CB9C9A801E5A8367D7956D583F4798A2` |
+| 491520 | `2AC3B3BF684AF484C8ED1CA68D12FEA6C7F48D7407C218E43E0081C835AAB617` | `121D3069DC1F4F171FB0F6DFF0CCBC57F59F977830FE778E85E3836D999A3C08` |
+| 983040 | `691257F71190EA272FBC2648912000F00826F35A45E6EA6C9F34EE02B7400FBC` | `BDF99F97146CFDBA28D108C42361F33DEF84D60E0F33C7EADCAD87FFB718ACC2` |
+| 1966080 | `D4671D325EFF359CA9B32E5CCBD2905FE059D6D743BCB9577717FF3E29FFAD63` | `B31F5A2BFD4069134A6DBCEEA71621503A86ECA75AD0913379559D49BFEC1331` |
+| 3932160 | `3C8D9B3D2628E6BEFE537831A3795A8D61154F3DB2BBE7C232F75EF7F2B62B49` | `0789C82A76BFE823481F1ABE92DD4D649819514DA9C634E15BCFDA1D0DFD28F6` |
+| 7864320 | `4379F14F8A58FE559397C35ECC594746C4911BDE3EE3336CD00F02DF066267DD` | `8A9C3A36B4BF23D16BF7D31B9727E80BF5FD58971D7DDE080B97E223687A3EB7` |
+| 15728640 | `86C6CDE5B4DFB862CC5B9BC6DEB3E2E66EC5B6CC1E7CD6E064F10CDD75A3E406` | `1A700654D1E5C7BCCC5C7A3DC7170219DB1D4FF6AC20823A741477DE2E744C98` |
+
+### Scalable compressed-Gram certificates
+
+`certify_adjacent_compressed_gram_scalable.py` has final SHA-256
+
+```text
+12467057B9C33F59F910A89C316361B2F7AAA5C1DE9D313D24BF02FAA98A1DBC.
+```
+
+All 22 mode/precision JSON artifacts are `PASS`.  For each artifact, strict
+left and right exact-dyadic Gershgorin positivity holds in every row:
+
+```text
+same-sign: 128/128 on each side,
+reflected: 24/24 on each side,
+even total: 152/152 on each side,
+odd total: 152/152 on each side.
+```
+
+The complete local set contains 264 `.npy` matrices: one Gram-majorant
+selector and two margin preconditioners for each of four families, two
+precisions, and eleven modes.  Every recorded byte hash was checked against
+the file.  Every 384-bit artifact reports
+
+```text
+partial_fraction_and_frequency_structure_identical = true,
+certificate_dimensions_and_strict_rows_identical = true,
+exact_dyadic_selector_and_preconditioner_hashes_identical = true.
+```
+
+The midpoint diagnostic is used only to choose caps.  In particular the
+tightest observed case, K3932160, has total midpoint norm about `1.23477758`,
+but the theorem input is the independent full Arb certificate `<= 5/4`, not
+that floating diagnostic.
+
+### Lean posterior ledger and regression boundary
+
+`FiniteAdjacentCompressionLedger.lean` kernel-checks the common rank,
+posterior, positive reserve, and relative-energy conversion once, then exports
+named posterior, slack, and `relativeCoupling_of_k..._rank152Compression`
+theorems for all eleven modes.  Its final source SHA-256 is
+
+```text
+0EC607A6D64FE907EA7D84B1AF4649188B11A66B7E404D0F1035CF438A8B9847.
+```
+
+The two shared modules and `V23BoundaryWeylMainline.lean` build under Lean
+`4.33.0-rc2`.  The relevant axiom transcript contains only `propext`,
+`Classical.choice`, and `Quot.sound`, with no `sorryAx`, user axiom, or
+constant declaration.
+
+The independent K3840 scalable-formula regression has script SHA-256
+`A439586637EF9F4E054BBD0548E9FB27E190356BC4185FD2FC30FB6DA52B579A`
+and JSON SHA-256
+`976018B45C3CCE2C65247CC0DA0B280DA9671AB98C39DB05EE3EA3EAFE6AEA59`.
+It checks all 103232 entries across seven centered Gram matrices against
+explicit-row Arb evaluations.  It also proves strict positivity for all 760
+rows after adding `10^-6` times the dyadic spectral scale times the identity.
+This regression deliberately does not claim unslacked numerical Young
+dominance: that unslacked PSD order is supplied by the separate algebraic
+Young inequality used by the production certifier.
+
+The V23 workflow now builds both shared Lean modules, audits their terminal
+theorems, regenerates the eleven 256/384-bit shift and Gram pairs in a
+single-threaded loop, runs the K3840 regression, and uploads every JSON and
+`.npy` artifact.  Local YAML parsing, all 32 Bash syntax checks, upload-glob
+closure, and `actionlint 1.7.12` pass.
+
+This completes the finite list of fourteen adjacent bridges.  It does not
+prove a uniform coefficient summation theorem, source-specific form
+convergence, the infinite closed boundary/Weyl operator passage, limiting
+no-crossing, or the Riemann Hypothesis.  Those are the remaining analytic
+bridges and must not be inferred from the finite certificates.

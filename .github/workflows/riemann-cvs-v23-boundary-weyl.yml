@@ -54,6 +54,9 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/K3840AdjacentCompression.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/K7680AdiShiftBinding.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/K7680AdjacentCompression.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/FiniteAdjacentAdiShiftBindings.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/FiniteAdjacentCompressionLedger.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/PrintAxioms.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/FiniteMatrixBoundaryWeylAdapter.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V23BoundaryWeylMainline.lean'
@@ -74,7 +77,9 @@ on:
       - 'research/riemann-cvs-numerics/certify_fixed_source_gram_floor.py'
       - 'research/riemann-cvs-numerics/certify_adjacent_loewner_compression_tail.py'
       - 'research/riemann-cvs-numerics/certify_adjacent_compressed_gram.py'
+      - 'research/riemann-cvs-numerics/certify_adjacent_compressed_gram_scalable.py'
       - 'research/riemann-cvs-numerics/certify_adjacent_adi_shift_cells.py'
+      - 'research/riemann-cvs-numerics/audit_adjacent_scalable_gram_k3840.py'
       - 'research/riemann-cvs-numerics/certify_k1920_adjacent_compressed_gram.py'
       - 'research/riemann-cvs-numerics/certify_k1920_adi_shift_cells.py'
       - 'research/riemann-cvs-numerics/certify_k1920_old_core_source_gram.py'
@@ -145,6 +150,9 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/K3840AdjacentCompression.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/K7680AdiShiftBinding.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/K7680AdjacentCompression.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/FiniteAdjacentAdiShiftBindings.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/FiniteAdjacentCompressionLedger.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/PrintAxioms.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/FiniteMatrixBoundaryWeylAdapter.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/ObliqueWeylDeterminant.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/V23BoundaryWeylMainline.lean'
@@ -165,7 +173,9 @@ on:
       - 'research/riemann-cvs-numerics/certify_fixed_source_gram_floor.py'
       - 'research/riemann-cvs-numerics/certify_adjacent_loewner_compression_tail.py'
       - 'research/riemann-cvs-numerics/certify_adjacent_compressed_gram.py'
+      - 'research/riemann-cvs-numerics/certify_adjacent_compressed_gram_scalable.py'
       - 'research/riemann-cvs-numerics/certify_adjacent_adi_shift_cells.py'
+      - 'research/riemann-cvs-numerics/audit_adjacent_scalable_gram_k3840.py'
       - 'research/riemann-cvs-numerics/certify_k1920_adjacent_compressed_gram.py'
       - 'research/riemann-cvs-numerics/certify_k1920_adi_shift_cells.py'
       - 'research/riemann-cvs-numerics/certify_k1920_old_core_source_gram.py'
@@ -311,6 +321,10 @@ jobs:
           lake env lean RiemannCvs/K7680AdiShiftBinding.lean
           lake build RiemannCvs.K7680AdjacentCompression
           lake env lean RiemannCvs/K7680AdjacentCompression.lean
+          lake build RiemannCvs.FiniteAdjacentAdiShiftBindings
+          lake env lean RiemannCvs/FiniteAdjacentAdiShiftBindings.lean
+          lake build RiemannCvs.FiniteAdjacentCompressionLedger
+          lake env lean RiemannCvs/FiniteAdjacentCompressionLedger.lean
           lake build RiemannCvs.FiniteMatrixBoundaryWeylAdapter
           lake env lean RiemannCvs/FiniteMatrixBoundaryWeylAdapter.lean
           lake build RiemannCvs.PrimeTranslationSeparatedBands
@@ -376,6 +390,8 @@ jobs:
             RiemannCvs/K3840AdjacentCompression.lean
             RiemannCvs/K7680AdiShiftBinding.lean
             RiemannCvs/K7680AdjacentCompression.lean
+            RiemannCvs/FiniteAdjacentAdiShiftBindings.lean
+            RiemannCvs/FiniteAdjacentCompressionLedger.lean
             RiemannCvs/FiniteMatrixBoundaryWeylAdapter.lean
           )
           if grep -nE '(^|[^[:alnum:]_])(sorry|admit)([^[:alnum:]_]|$)' "${files[@]}"; then
@@ -417,6 +433,8 @@ jobs:
           import RiemannCvs.K3840AdjacentCompression
           import RiemannCvs.K7680AdiShiftBinding
           import RiemannCvs.K7680AdjacentCompression
+          import RiemannCvs.FiniteAdjacentAdiShiftBindings
+          import RiemannCvs.FiniteAdjacentCompressionLedger
           import RiemannCvs.FiniteMatrixBoundaryWeylAdapter
           import RiemannCvs.PrimeTranslationSeparatedBands
           import RiemannCvs.PoleSeparatedBands
@@ -999,6 +1017,61 @@ jobs:
           #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_k7680_compressionPosterior_budgetSlack
           #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_k7680_twoLoewnerCompression_posterior
           #print axioms RiemannCvs.V23BoundaryWeylMainline.relativeCoupling_of_k7680_rank152Compression
+          #print axioms RiemannCvs.FiniteAdjacentAdiShiftBindings.K15360.same_factorization
+          #print axioms RiemannCvs.FiniteAdjacentAdiShiftBindings.K15360.reflected_factorization
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_k15360_compressionPosterior_budgetSlack
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_k15360_twoLoewnerCompression_posterior
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.relativeCoupling_of_k15360_rank152Compression
+          #print axioms RiemannCvs.FiniteAdjacentAdiShiftBindings.K30720.same_factorization
+          #print axioms RiemannCvs.FiniteAdjacentAdiShiftBindings.K30720.reflected_factorization
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_k30720_compressionPosterior_budgetSlack
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_k30720_twoLoewnerCompression_posterior
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.relativeCoupling_of_k30720_rank152Compression
+          #print axioms RiemannCvs.FiniteAdjacentAdiShiftBindings.K61440.same_factorization
+          #print axioms RiemannCvs.FiniteAdjacentAdiShiftBindings.K61440.reflected_factorization
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_k61440_compressionPosterior_budgetSlack
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_k61440_twoLoewnerCompression_posterior
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.relativeCoupling_of_k61440_rank152Compression
+          #print axioms RiemannCvs.FiniteAdjacentAdiShiftBindings.K122880.same_factorization
+          #print axioms RiemannCvs.FiniteAdjacentAdiShiftBindings.K122880.reflected_factorization
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_k122880_compressionPosterior_budgetSlack
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_k122880_twoLoewnerCompression_posterior
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.relativeCoupling_of_k122880_rank152Compression
+          #print axioms RiemannCvs.FiniteAdjacentAdiShiftBindings.K245760.same_factorization
+          #print axioms RiemannCvs.FiniteAdjacentAdiShiftBindings.K245760.reflected_factorization
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_k245760_compressionPosterior_budgetSlack
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_k245760_twoLoewnerCompression_posterior
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.relativeCoupling_of_k245760_rank152Compression
+          #print axioms RiemannCvs.FiniteAdjacentAdiShiftBindings.K491520.same_factorization
+          #print axioms RiemannCvs.FiniteAdjacentAdiShiftBindings.K491520.reflected_factorization
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_k491520_compressionPosterior_budgetSlack
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_k491520_twoLoewnerCompression_posterior
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.relativeCoupling_of_k491520_rank152Compression
+          #print axioms RiemannCvs.FiniteAdjacentAdiShiftBindings.K983040.same_factorization
+          #print axioms RiemannCvs.FiniteAdjacentAdiShiftBindings.K983040.reflected_factorization
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_k983040_compressionPosterior_budgetSlack
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_k983040_twoLoewnerCompression_posterior
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.relativeCoupling_of_k983040_rank152Compression
+          #print axioms RiemannCvs.FiniteAdjacentAdiShiftBindings.K1966080.same_factorization
+          #print axioms RiemannCvs.FiniteAdjacentAdiShiftBindings.K1966080.reflected_factorization
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_k1966080_compressionPosterior_budgetSlack
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_k1966080_twoLoewnerCompression_posterior
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.relativeCoupling_of_k1966080_rank152Compression
+          #print axioms RiemannCvs.FiniteAdjacentAdiShiftBindings.K3932160.same_factorization
+          #print axioms RiemannCvs.FiniteAdjacentAdiShiftBindings.K3932160.reflected_factorization
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_k3932160_compressionPosterior_budgetSlack
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_k3932160_twoLoewnerCompression_posterior
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.relativeCoupling_of_k3932160_rank152Compression
+          #print axioms RiemannCvs.FiniteAdjacentAdiShiftBindings.K7864320.same_factorization
+          #print axioms RiemannCvs.FiniteAdjacentAdiShiftBindings.K7864320.reflected_factorization
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_k7864320_compressionPosterior_budgetSlack
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_k7864320_twoLoewnerCompression_posterior
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.relativeCoupling_of_k7864320_rank152Compression
+          #print axioms RiemannCvs.FiniteAdjacentAdiShiftBindings.K15728640.same_factorization
+          #print axioms RiemannCvs.FiniteAdjacentAdiShiftBindings.K15728640.reflected_factorization
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_k15728640_compressionPosterior_budgetSlack
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_k15728640_twoLoewnerCompression_posterior
+          #print axioms RiemannCvs.V23BoundaryWeylMainline.relativeCoupling_of_k15728640_rank152Compression
           #print axioms RiemannCvs.V23BoundaryWeylMainline.c13OddBuilderDyadicAdjacentCoreNewest_relative_twoFifths
           #print axioms RiemannCvs.V23BoundaryWeylMainline.finiteMatrixCouplingEuclideanForm_eq_crossEnergy
           #print axioms RiemannCvs.V23BoundaryWeylMainline.finiteMatrixBoundaryWeyl_mono_of_relativeEnergyCertificate
@@ -1350,14 +1423,16 @@ jobs:
             --threads 4 \
             --json-out research/riemann-cvs-numerics/artifacts/v23_adjacent_loewner_tail_384bit.json
 
-      - name: Certify the K1920, K3840, and K7680 adjacent compression bridges
+      - name: Certify all fourteen finite adjacent compression bridges
         shell: bash
         run: |
           set -euo pipefail
           python -m py_compile \
             research/riemann-cvs-numerics/certify_adjacent_loewner_compression_tail.py \
             research/riemann-cvs-numerics/certify_adjacent_compressed_gram.py \
+            research/riemann-cvs-numerics/certify_adjacent_compressed_gram_scalable.py \
             research/riemann-cvs-numerics/certify_adjacent_adi_shift_cells.py \
+            research/riemann-cvs-numerics/audit_adjacent_scalable_gram_k3840.py \
             research/riemann-cvs-numerics/certify_k1920_adjacent_compressed_gram.py \
             research/riemann-cvs-numerics/certify_k1920_adi_shift_cells.py \
             research/riemann-cvs-numerics/certify_k1920_old_core_source_gram.py
@@ -1489,6 +1564,65 @@ jobs:
             --threads 4 \
             --reference-json research/riemann-cvs-numerics/artifacts/v23_c13_K7680_compressed_gram_256bit.json \
             --json-out research/riemann-cvs-numerics/artifacts/v23_c13_K7680_compressed_gram_384bit.json
+          finite_modes=(
+            15360 30720 61440 122880 245760 491520
+            983040 1966080 3932160 7864320 15728640
+          )
+          for mode in "${finite_modes[@]}"; do
+            shift256="research/riemann-cvs-numerics/artifacts/v23_c13_K${mode}_adi_shift_cells_256bit.json"
+            shift384="research/riemann-cvs-numerics/artifacts/v23_c13_K${mode}_adi_shift_cells_384bit.json"
+            gram256="research/riemann-cvs-numerics/artifacts/v23_c13_K${mode}_scalable_compressed_gram_256bit.json"
+            gram384="research/riemann-cvs-numerics/artifacts/v23_c13_K${mode}_scalable_compressed_gram_384bit.json"
+            python research/riemann-cvs-numerics/certify_adjacent_adi_shift_cells.py \
+              --mode "$mode" \
+              --same-factors 64 \
+              --reflected-factors 12 \
+              --prec 256 \
+              --threads 1 \
+              --lean-path research/riemann-cvs-lean/RiemannCvs/FiniteAdjacentAdiShiftBindings.lean \
+              --lean-namespace "K${mode}" \
+              --json-out "$shift256"
+            python research/riemann-cvs-numerics/certify_adjacent_adi_shift_cells.py \
+              --mode "$mode" \
+              --same-factors 64 \
+              --reflected-factors 12 \
+              --prec 384 \
+              --threads 1 \
+              --lean-path research/riemann-cvs-lean/RiemannCvs/FiniteAdjacentAdiShiftBindings.lean \
+              --lean-namespace "K${mode}" \
+              --reference-json "$shift256" \
+              --json-out "$shift384"
+            python research/riemann-cvs-numerics/certify_adjacent_compressed_gram_scalable.py \
+              --c 13 \
+              --mode "$mode" \
+              --same-factors 64 \
+              --reflected-factors 12 \
+              --same-cap 5/4 \
+              --reflected-cap 1/4 \
+              --total-cap 5/4 \
+              --prec 256 \
+              --threads 1 \
+              --archimedean-certificate research/riemann-cvs-numerics/artifacts/v23_c13_N960_archimedean_tail.json \
+              --json-out "$gram256"
+            python research/riemann-cvs-numerics/certify_adjacent_compressed_gram_scalable.py \
+              --c 13 \
+              --mode "$mode" \
+              --same-factors 64 \
+              --reflected-factors 12 \
+              --same-cap 5/4 \
+              --reflected-cap 1/4 \
+              --total-cap 5/4 \
+              --prec 384 \
+              --threads 1 \
+              --archimedean-certificate research/riemann-cvs-numerics/artifacts/v23_c13_N960_archimedean_tail_384bit.json \
+              --reference-json "$gram256" \
+              --json-out "$gram384"
+          done
+          python research/riemann-cvs-numerics/audit_adjacent_scalable_gram_k3840.py \
+            --prec 256 \
+            --young-eta 1/100000 \
+            --relative-identity-slack 1/1000000 \
+            --json-out research/riemann-cvs-numerics/artifacts/v23_c13_K3840_scalable_gram_regression_256bit.json
 
       - name: Certify the strengthened K1920 old-core source Gram
         shell: bash
@@ -1824,24 +1958,26 @@ jobs:
             research/riemann-cvs-numerics/artifacts/v23_adjacent_loewner_tail_384bit.json
             research/riemann-cvs-numerics/artifacts/v23_c13_K1920_adaptive_loewner_tail_256bit.json
             research/riemann-cvs-numerics/artifacts/v23_c13_K1920_adaptive_loewner_tail_384bit.json
-            research/riemann-cvs-numerics/artifacts/v23_c13_K1920_adi_shift_cells_256bit.json
-            research/riemann-cvs-numerics/artifacts/v23_c13_K1920_adi_shift_cells_384bit.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_K*_adi_shift_cells_256bit.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_K*_adi_shift_cells_384bit.json
             research/riemann-cvs-numerics/artifacts/v23_c13_K1920_compressed_gram_256bit.json
             research/riemann-cvs-numerics/artifacts/v23_c13_K1920_compressed_gram_256bit_*.npy
             research/riemann-cvs-numerics/artifacts/v23_c13_K1920_compressed_gram_384bit.json
             research/riemann-cvs-numerics/artifacts/v23_c13_K1920_compressed_gram_384bit_*.npy
-            research/riemann-cvs-numerics/artifacts/v23_c13_K3840_adi_shift_cells_256bit.json
-            research/riemann-cvs-numerics/artifacts/v23_c13_K3840_adi_shift_cells_384bit.json
             research/riemann-cvs-numerics/artifacts/v23_c13_K3840_compressed_gram_256bit.json
             research/riemann-cvs-numerics/artifacts/v23_c13_K3840_compressed_gram_256bit_*.npy
             research/riemann-cvs-numerics/artifacts/v23_c13_K3840_compressed_gram_384bit.json
             research/riemann-cvs-numerics/artifacts/v23_c13_K3840_compressed_gram_384bit_*.npy
-            research/riemann-cvs-numerics/artifacts/v23_c13_K7680_adi_shift_cells_256bit.json
-            research/riemann-cvs-numerics/artifacts/v23_c13_K7680_adi_shift_cells_384bit.json
             research/riemann-cvs-numerics/artifacts/v23_c13_K7680_compressed_gram_256bit.json
             research/riemann-cvs-numerics/artifacts/v23_c13_K7680_compressed_gram_256bit_*.npy
             research/riemann-cvs-numerics/artifacts/v23_c13_K7680_compressed_gram_384bit.json
             research/riemann-cvs-numerics/artifacts/v23_c13_K7680_compressed_gram_384bit_*.npy
+            research/riemann-cvs-numerics/artifacts/v23_c13_K*_scalable_compressed_gram_256bit.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_K*_scalable_compressed_gram_256bit_*.npy
+            research/riemann-cvs-numerics/artifacts/v23_c13_K*_scalable_compressed_gram_384bit.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_K*_scalable_compressed_gram_384bit_*.npy
+            research/riemann-cvs-numerics/artifacts/v23_c13_K3840_scalable_gram_regression_256bit.json
+            research/riemann-cvs-numerics/artifacts/v23_c13_K3840_scalable_gram_regression_256bit_*_slacked_preconditioner.npy
             research/riemann-cvs-numerics/artifacts/v23_c13_K1920_old_core_source_gram_256bit.json
             research/riemann-cvs-numerics/artifacts/v23_c13_K1920_old_core_source_gram_256bit_*_source_gram_margin_preconditioner.npy
             research/riemann-cvs-numerics/artifacts/v23_c13_K1920_old_core_source_gram_384bit.json

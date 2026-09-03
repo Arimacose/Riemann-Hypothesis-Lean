@@ -293,7 +293,14 @@ def _reference_audit(reference_path: Path, payload: dict[str, Any]) -> dict[str,
     reference = json.loads(reference_path.read_text(encoding="utf-8"))
     if reference.get("status") != "PASS":
         raise RuntimeError("reference artifact is not PASS")
-    fields = ("mode", "same_sign_factor_count", "reflected_factor_count")
+    fields = (
+        "mode",
+        "same_sign_factor_count",
+        "reflected_factor_count",
+        "script_sha256",
+        "dependency_sha256",
+        "lean_target",
+    )
     for field in fields:
         if reference.get(field) != payload.get(field):
             raise RuntimeError(f"reference mismatch for {field}")
@@ -302,6 +309,11 @@ def _reference_audit(reference_path: Path, payload: dict[str, Any]) -> dict[str,
             raise RuntimeError(f"reference cell transcript mismatch for {geometry}")
         if reference[geometry]["cells_sha256"] != payload[geometry]["cells_sha256"]:
             raise RuntimeError(f"reference cell hash mismatch for {geometry}")
+    old_lean = reference.get("lean_literal_cell_audit", {})
+    new_lean = payload.get("lean_literal_cell_audit", {})
+    for field in ("sha256", "namespace", "same_sign_entries", "reflected_entries"):
+        if old_lean.get(field) != new_lean.get(field):
+            raise RuntimeError(f"reference Lean audit mismatch for {field}")
     return {
         "status": "PASS",
         "path": str(reference_path.resolve()),
@@ -312,11 +324,24 @@ def _reference_audit(reference_path: Path, payload: dict[str, Any]) -> dict[str,
 
 
 def _lean_literal_cell_audit(
-    lean_path: Path, same_cells: list[int], reflected_cells: list[int]
+    lean_path: Path,
+    same_cells: list[int],
+    reflected_cells: list[int],
+    lean_namespace: str | None,
 ) -> dict[str, Any]:
     """Parse and compare the two literal cell tables in the Lean source."""
 
     source = lean_path.read_text(encoding="utf-8")
+    if lean_namespace is not None:
+        namespace_match = re.search(
+            rf"namespace\s+{re.escape(lean_namespace)}\b(.*?)"
+            rf"end\s+{re.escape(lean_namespace)}\b",
+            source,
+            flags=re.DOTALL,
+        )
+        if namespace_match is None:
+            raise RuntimeError(f"Lean namespace not found: {lean_namespace}")
+        source = namespace_match.group(1)
 
     def extract(definition: str) -> list[int]:
         match = re.search(
@@ -340,6 +365,7 @@ def _lean_literal_cell_audit(
         "sha256": _script_hash(lean_path.resolve()),
         "same_sign_entries": len(lean_same),
         "reflected_entries": len(lean_reflected),
+        "namespace": lean_namespace,
         "both_transcripts_identical": True,
     }
 
@@ -353,6 +379,7 @@ def certify(
     threads: int,
     reference_json: Path | None,
     lean_path: Path | None,
+    lean_namespace: str | None,
 ) -> dict[str, Any]:
     if mode < 1:
         raise ValueError("mode must be positive")
@@ -411,7 +438,10 @@ def certify(
             / f"K{mode}AdiShiftBinding.lean"
         )
     lean_audit = _lean_literal_cell_audit(
-        lean_path, same["cells"], reflected["cells"]
+        lean_path,
+        same["cells"],
+        reflected["cells"],
+        lean_namespace,
     )
     _progress("Lean literal cell transcripts match every Arb-selected cell")
     production_path = Path(
@@ -443,7 +473,11 @@ def certify(
         "same_sign": same,
         "reflected": reflected,
         "lean_literal_cell_audit": lean_audit,
-        "lean_target": f"RiemannCvs.K{mode}AdiShiftBinding",
+        "lean_target": (
+            f"RiemannCvs.FiniteAdjacentAdiShiftBindings.{lean_namespace}"
+            if lean_namespace is not None
+            else f"RiemannCvs.K{mode}AdiShiftBinding"
+        ),
         "proof_boundary": (
             "Arb proves the concrete transcendental range/cell inequalities; "
             "Lean proves that those certificate fields imply every generic ADI "
@@ -466,6 +500,7 @@ def main() -> int:
     parser.add_argument("--threads", type=int, default=4)
     parser.add_argument("--reference-json", type=Path)
     parser.add_argument("--lean-path", type=Path)
+    parser.add_argument("--lean-namespace")
     parser.add_argument("--json-out", type=Path, required=True)
     args = parser.parse_args()
     payload = certify(
@@ -476,6 +511,7 @@ def main() -> int:
         threads=args.threads,
         reference_json=args.reference_json,
         lean_path=args.lean_path,
+        lean_namespace=args.lean_namespace,
     )
     args.json_out.parent.mkdir(parents=True, exist_ok=True)
     args.json_out.write_text(
