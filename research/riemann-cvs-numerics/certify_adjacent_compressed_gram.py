@@ -112,6 +112,16 @@ def _lean_targets(mode: int) -> list[str]:
                 "relativeCoupling_of_k3840_rank152Compression",
             ]
         )
+    elif mode == 7680:
+        targets.extend(
+            [
+                "RiemannCvs.K7680AdiShiftBinding.same_factorization",
+                "RiemannCvs.V23BoundaryWeylMainline."
+                "v23_k7680_twoLoewnerCompression_posterior",
+                "RiemannCvs.V23BoundaryWeylMainline."
+                "relativeCoupling_of_k7680_rank152Compression",
+            ]
+        )
     else:
         targets.append(
             "RiemannCvs.V23BoundaryWeylMainline."
@@ -132,6 +142,12 @@ def _remaining_boundary(mode: int) -> str:
             "the finite Arb Gram and literal K3840 shift-cell inequalities remain named "
             "certificate premises; later finite bridges, the uniform coefficient ledger, "
             "source-specific form convergence, and the closed-operator limit remain open"
+        )
+    if mode == 7680:
+        return (
+            "the finite Arb Gram and literal K7680 shift-cell inequalities remain named "
+            "certificate premises; eleven later finite bridges, the uniform coefficient "
+            "ledger, source-specific form convergence, and the closed-operator limit remain open"
         )
     return (
         "bind this finite Arb artifact to a literal shift-cell transcript and a Lean "
@@ -637,10 +653,12 @@ def certify(
         raise ValueError("c must exceed one and mode must be positive")
     if same_factors < 1 or reflected_factors < 1:
         raise ValueError("factor counts must be positive")
-    if not 0 < same_cap < 1 or not 0 < reflected_cap < 1:
-        raise ValueError("component norm caps must lie in (0,1)")
-    if not 0 < total_cap < 1 or delta <= 0:
-        raise ValueError("total cap must lie in (0,1) and delta be positive")
+    # These cap compressed operators, not relative residuals.  They need only
+    # be positive: later adjacent bridges can have rigorous norms above one.
+    if same_cap <= 0 or reflected_cap <= 0:
+        raise ValueError("component norm caps must be positive")
+    if total_cap <= 0 or delta <= 0:
+        raise ValueError("total cap and delta must be positive")
     if precision < 128 or threads < 1:
         raise ValueError("precision must be >=128 and threads positive")
 

@@ -2038,3 +2038,64 @@ This closes the second finite adjacent channel only.  Twelve compressed finite
 bridges, a uniform coefficient partial-sum theorem, source-specific form
 convergence, the infinite closed-operator passage, and the final no-crossing/RH
 identification remain unproved.
+
+## 2026-09-03: the K7680 adjacent bridge is closed at rank 152
+
+The third finite channel is
+
+```text
+source = (7680,15360],
+target = (15360,30720].
+```
+
+It retains 64 same-sign and 12 reflected logarithmic shifts, hence rank 152.
+The 256/384-bit residual audit gives same-sign bound
+`0.001502221596145635... < 1/200` and reflected bound
+`0.000186078286607963... < 1/4000`.  `K7680AdiShiftBinding.lean` records all
+pole cells.  Each precision proves 152 strict range checks, 152 strict cell
+checks, and all `76+76` independent literal-formula root/pole replays.  The
+cell transcript hashes are
+
+```text
+same:      15232A96F0B15457C7307168615CCFC61612D5085335518FD930B60F5868B9E4
+reflected: 6FDF86E5A94EB430BF5068451F49FD58AA1CEC812676258A62A87192F27C6679.
+```
+
+The old `<1` compressed caps do not persist at this scale: midpoint diagnostics
+are about `1.06965` for same-sign and `1.07657/1.07721` for the even/odd totals.
+Those diagnostics are not proof evidence.  Full Arb interval arithmetic proves
+
+```text
+same-sign <= 107/100,
+reflected <= 1/4,
+even total <= 27/25,
+odd total <= 27/25.
+```
+
+At both precisions every left and right exact-dyadic Gershgorin row is strictly
+positive: `128/128`, `24/24`, `152/152`, and `152/152`.  The higher-precision
+run replays all lower-precision selector and preconditioner hashes.  Principal
+selector SHA-256 values are
+
+```text
+same:      AFF9CAF235E9DE728CA5173B19EE6871D144E4EC2C9ACC03532EE36ED2A30B48
+reflected: D2BDAF1FE73FFCD87CB4165C2A315BCAF931C67587002EBEBFA61A8D82C7F853
+total:     57A2AA9C90F25C810E3BFA5C5127AEC96802FB9E7F8483DE0A6CFB63C6FFCFD7.
+```
+
+The exact Lean ledger is
+
+```text
+27/25 + (1/199)*(107/100) + (1/3999)*(1/4)
+  = 21594844/19895025,
+
+(2/27)*(428/125)*(24/5) - (21594844/19895025)^2
+  = 15533061282736/395812019750625 > 0.
+```
+
+Therefore `relativeCoupling_of_k7680_rank152Compression` converts the named
+finite Gram, residual, splitting, and cross-energy premises to coefficient
+`2/27`.  The use of `24/5` is the already-proved target shell floor for
+`N >= 15360`.  The finite result does not prove coefficient summability, form
+convergence, an infinite closed operator, no-crossing, or RH.  Eleven adjacent
+finite compressed bridges remain.

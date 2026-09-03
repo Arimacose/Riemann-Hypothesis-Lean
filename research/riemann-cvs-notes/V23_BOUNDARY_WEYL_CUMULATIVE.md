@@ -4164,3 +4164,85 @@ adjacent compressed bridges still open.  The uniform coefficient sum,
 source-specific form convergence, infinite closed boundary--Weyl operator,
 limiting spectral/no-crossing step, and RH conclusion remain separate and
 unproved.
+
+## 2026-09-03: K7680 closes the third finite adjacent channel
+
+The next explicit bridge now has the same literal-shift and rigorous-Gram
+interface:
+
+```text
+source = (7680,15360],
+target = (15360,30720],
+rank   = 2*64 + 2*12 = 152.
+```
+
+The uniform 64/12 residual certificate gives strict Arb bounds
+
+```text
+same-sign residual < 0.001502221596145635 < 1/200,
+reflected residual < 0.000186078286607963 < 1/4000
+```
+
+at both 256 and 384 bits.  `K7680AdiShiftBinding.lean` fixes the corresponding
+literal shifts.  Both shift runs prove 152 strict endpoint/range checks, 152
+strict cell checks, and all `76+76` independent production-versus-literal
+root/pole residual replays.  Their stable cell-list SHA-256 values are
+
+```text
+same:      15232A96F0B15457C7307168615CCFC61612D5085335518FD930B60F5868B9E4
+reflected: 6FDF86E5A94EB430BF5068451F49FD58AA1CEC812676258A62A87192F27C6679.
+```
+
+The K7680 midpoint diagnostic shows why the earlier contraction caps cannot
+simply be copied: the same-sign, even-total, and odd-total compressed norms are
+approximately `1.06965`, `1.07657`, and `1.07721`.  These floating values only
+select rational caps.  The actual Arb certificate proves
+
+```text
+same-sign <= 107/100,
+reflected <= 1/4,
+even total <= 27/25,
+odd total <= 27/25.
+```
+
+Every exact-dyadic Gershgorin row is strictly positive at both precisions:
+`128/128` for same-sign, `24/24` for reflected, and `152/152` for each total
+parity sector.  The 384-bit reference audit replays every 256-bit selector and
+preconditioner hash.  The principal selector hashes are
+
+```text
+same:      AFF9CAF235E9DE728CA5173B19EE6871D144E4EC2C9ACC03532EE36ED2A30B48
+reflected: D2BDAF1FE73FFCD87CB4165C2A315BCAF931C67587002EBEBFA61A8D82C7F853
+total:     57A2AA9C90F25C810E3BFA5C5127AEC96802FB9E7F8483DE0A6CFB63C6FFCFD7.
+```
+
+`K7680AdjacentCompression.lean` kernel-checks
+
+```text
+posterior
+  = 27/25 + (1/199)*(107/100) + (1/3999)*(1/4)
+  = 21594844/19895025,
+
+(2/27)*(428/125)*(24/5) - posterior^2
+  = 15533061282736/395812019750625 > 0.
+```
+
+Thus `relativeCoupling_of_k7680_rank152Compression` closes this finite channel
+at relative coefficient `2/27`.  The compressed-Gram certifier now correctly
+permits positive caps above one; only the relative residuals must be below one
+in the a posteriori theorem.  Local snapshot JSON SHA-256 values are
+
+```text
+shift 256: 05C857DDA19593F98829AC5EE21006169F9B2D8F00899864781114D750D0AF21
+shift 384: 86E73519CC55C4C2D93C426BB2CE31A2DA6AA83A72184F1FBD1A61A2AC83D9FF
+Gram 256:  1EDC9AAF20400CA1AC5F3FF83F6021C940EC65AD75036F80EE0CC73C9B9AFC7C
+Gram 384:  C019C36953FD0839D5FA685D3DA724ECA16FF2549F40841C72638A19F9BE2914.
+```
+
+The script SHA-256 values are
+`B4A30AE00EC5EE1A69AB13224AC342771A5B6332A386AE29DDAF204ABAB9D8F6`
+for the Gram certifier and
+`82DA3B656FBB7B83FC281EE969B3A5C7CE9E7BFD2379EB7F36128C8837389B06`
+for the shift certifier.  Eleven finite adjacent compressed bridges remain,
+followed by the uniform coefficient sum, source-specific form convergence,
+the infinite closed-operator passage, limiting no-crossing, and RH.

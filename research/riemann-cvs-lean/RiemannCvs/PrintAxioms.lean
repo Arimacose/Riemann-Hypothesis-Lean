@@ -3,6 +3,8 @@ import RiemannCvs.AdjacentAdiShiftBinding
 import RiemannCvs.K1920AdiShiftBinding
 import RiemannCvs.K3840AdiShiftBinding
 import RiemannCvs.K3840AdjacentCompression
+import RiemannCvs.K7680AdiShiftBinding
+import RiemannCvs.K7680AdjacentCompression
 
 #print axioms RiemannCvs.PrimeEventTransfer.derivativeJump
 #print axioms RiemannCvs.PrimeEventTransfer.functionalDerivativeJump
@@ -52,3 +54,7 @@ import RiemannCvs.K3840AdjacentCompression
 #print axioms RiemannCvs.K3840AdiShiftBinding.reflected_factorization
 #print axioms RiemannCvs.V23BoundaryWeylMainline.v23_k3840_compressionPosterior_budgetSlack
 #print axioms RiemannCvs.V23BoundaryWeylMainline.relativeCoupling_of_k3840_rank152Compression
+#print axioms RiemannCvs.K7680AdiShiftBinding.same_factorization
+#print axioms RiemannCvs.K7680AdiShiftBinding.reflected_factorization
+#print axioms RiemannCvs.V23BoundaryWeylMainline.v23_k7680_compressionPosterior_budgetSlack
+#print axioms RiemannCvs.V23BoundaryWeylMainline.relativeCoupling_of_k7680_rank152Compression
