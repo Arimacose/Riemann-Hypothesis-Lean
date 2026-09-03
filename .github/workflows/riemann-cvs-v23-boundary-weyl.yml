@@ -28,6 +28,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/ArchimedeanRemainderSchur.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticTailRelativeCoupling.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticTailOperatorBound.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/UniformCoefficientSummation.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticCoreNewestArchimedean.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticCoreNewestTotalError.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticCoreHilbert.lean'
@@ -124,6 +125,7 @@ on:
       - 'research/riemann-cvs-lean/RiemannCvs/ArchimedeanRemainderSchur.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticTailRelativeCoupling.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticTailOperatorBound.lean'
+      - 'research/riemann-cvs-lean/RiemannCvs/UniformCoefficientSummation.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticCoreNewestArchimedean.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticCoreNewestTotalError.lean'
       - 'research/riemann-cvs-lean/RiemannCvs/AsymptoticCoreHilbert.lean'
@@ -269,6 +271,8 @@ jobs:
           lake env lean RiemannCvs/AsymptoticTailRelativeCoupling.lean
           lake build RiemannCvs.AsymptoticTailOperatorBound
           lake env lean RiemannCvs/AsymptoticTailOperatorBound.lean
+          lake build RiemannCvs.UniformCoefficientSummation
+          lake env lean RiemannCvs/UniformCoefficientSummation.lean
           lake build RiemannCvs.AsymptoticCoreNewestArchimedean
           lake env lean RiemannCvs/AsymptoticCoreNewestArchimedean.lean
           lake build RiemannCvs.AsymptoticCoreNewestTotalError
@@ -364,6 +368,7 @@ jobs:
             RiemannCvs/ArchimedeanRemainderSchur.lean
             RiemannCvs/AsymptoticTailRelativeCoupling.lean
             RiemannCvs/AsymptoticTailOperatorBound.lean
+            RiemannCvs/UniformCoefficientSummation.lean
             RiemannCvs/AsymptoticCoreNewestArchimedean.lean
             RiemannCvs/AsymptoticCoreNewestTotalError.lean
             RiemannCvs/AsymptoticCoreHilbert.lean
@@ -407,6 +412,7 @@ jobs:
           import RiemannCvs.ArchimedeanRemainderSchur
           import RiemannCvs.AsymptoticTailRelativeCoupling
           import RiemannCvs.AsymptoticTailOperatorBound
+          import RiemannCvs.UniformCoefficientSummation
           import RiemannCvs.AsymptoticCoreNewestArchimedean
           import RiemannCvs.AsymptoticCoreNewestTotalError
           import RiemannCvs.AsymptoticCoreHilbert
@@ -444,6 +450,12 @@ jobs:
           import RiemannCvs.PrimeTranslationContinuousSchur
           import RiemannCvs.PrimeTranslationContinuousFourier
           import RiemannCvs.WeightedSchurSupersolution
+          #print axioms RiemannCvs.UniformCoefficientSummation.oneThirtieth_dyadic_le_summableAmplitude_sq
+          #print axioms RiemannCvs.UniformCoefficientSummation.oneThirtiethDyadic_reserveProduct_ge_oneFifth
+          #print axioms RiemannCvs.UniformCoefficientSummation.oneThirtiethDyadic_stageRelative_blockSumReserve
+          #print axioms RiemannCvs.UniformCoefficientSummation.c13DyadicReserveProduct_pos
+          #print axioms RiemannCvs.UniformCoefficientSummation.c13Dyadic_exists_pos_uniformReserveFloor
+          #print axioms RiemannCvs.UniformCoefficientSummation.finiteMatrixTower_limit_pos_of_c13DyadicRelativeEnvelope
           #print axioms RiemannCvs.BoundaryGapNoCrossing.boundaryValueNonzeroOfStrictConstraintGap
           #print axioms RiemannCvs.BoundaryGapNoCrossing.noCommonEigenvalueFromConstraintGaps
           #print axioms RiemannCvs.CvSParityDisplacement.oddDifferenceKernel_displacement

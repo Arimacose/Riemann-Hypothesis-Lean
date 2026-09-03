@@ -2177,3 +2177,30 @@ K1920, K3840, K7680, and the eleven modes above.  This does not establish a
 uniform coefficient summation, source-specific form convergence, the infinite
 closed boundary/Weyl operator passage, limiting no-crossing, or RH.  Those
 remain separate analytic obligations.
+
+## 2026-09-04: summable squared coefficients have a positive reserve product
+
+The adjacent-shell envelope used by the cutoff-13 asymptotic route is
+
+```text
+c13DyadicRelativeEnvelope(n)
+  = (481/100)^2 / (39/5 + (69/100)n)^2.
+```
+
+Its `1/n^2` decay is now consumed directly by the scalar product theorem in
+`RiemannCvs/UniformCoefficientSummation.lean`.  For a nonnegative summable
+sequence `q_n` with `q_n < 1`, the core-only Schur step retains `1-q_n` of the
+old core energy, and Mathlib's convergent infinite-product API proves
+
+```text
+0 < prod' n, (1-q_n)
+  <= prod_{i<n} (1-q_i).
+```
+
+Instantiating this with the cutoff-13 envelope closes its scalar uniform
+coefficient/product obligation.  The result is intentionally separate from
+the `9/5` coercivity calculation: the latter supplies diagonal shell control,
+whereas the product theorem consumes a **full-prefix-to-next-shell** relative
+cross estimate.  The current adjacent-shell theorem supplies only the
+source-shell-to-target-shell estimate, so the missing source decomposition and
+tower-stage identification remain explicit premises in the final adapter.

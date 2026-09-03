@@ -415,10 +415,15 @@ shape consumed by the Cauchy adapter, and preserve the odd `1/384` exception.
   `FiniteAdjacentCompressionLedger` now close the remaining eleven finite
   rank-152 leaves with common compressed caps `5/4`, `1/4`, and `5/4`.
   Thus all fourteen finite adjacent bridges have explicit Arb/Lean interfaces.
-  A uniform coefficient partial-sum bound, source-specific form convergence,
-  and the closed-operator/no-crossing identification remain later inputs.  The
-  finite energy adapters live in downstream leaf modules to avoid an import
-  cycle.
+  The scalar uniform-coefficient summation and positive reserve-product
+  adapters are now closed in the downstream leaf module
+  `UniformCoefficientSummation.lean`; in particular, a summable squared
+  coefficient sequence has a strictly positive infinite product of reserves.
+  What remains source-specific is the identification of the concrete
+  historical-source/full-prefix coefficient with the recursive tower stage,
+  together with form convergence and the closed-operator/no-crossing
+  identification.  The finite energy adapters live in downstream leaf modules
+  to avoid an import cycle.
 -/
 
 namespace RiemannCvs.V23BoundaryWeylMainline

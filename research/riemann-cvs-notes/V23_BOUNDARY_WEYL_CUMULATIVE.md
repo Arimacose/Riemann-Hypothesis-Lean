@@ -4410,3 +4410,83 @@ prove a uniform coefficient summation theorem, source-specific form
 convergence, the infinite closed boundary/Weyl operator passage, limiting
 no-crossing, or the Riemann Hypothesis.  Those are the remaining analytic
 bridges and must not be inferred from the finite certificates.
+
+## 2026-09-04: uniform coefficient summation and positive reserve product are closed
+
+`RiemannCvs/UniformCoefficientSummation.lean` now closes the scalar summation
+layer that was left after the fourteen finite adjacent certificates.  There are
+two complementary interfaces.
+
+The first is an explicit geometric majorant.  With
+
+```text
+q_n = (1/30) * (1/2)^n,
+u_n = (1/5) * (3/4)^n,
+```
+
+Lean proves
+
+```text
+q_n <= u_n^2,
+sum_n q_n = 1/15,
+sum_n u_n = 4/5,
+```
+
+and every finite amplitude reserve product satisfies
+
+```text
+prod_{i<n} (1-u_i) >= 1/5.
+```
+
+The existing recursive block-sum adapter therefore gives the exact finite
+reserve floor `1/5`, and the corresponding convergent recursive energy has a
+positive limit whenever its initial energy is positive.
+
+The sharper interface works directly with the squared coefficients.  For
+nonnegative `q_n` with `q_n < 1` and `sum_n q_n < infinity`, the core-only
+Schur inequality
+
+```text
+q * E + 2*C + T >= 0,
+C^2 <= q*E*T
+        ==> (1-q)*E <= E + 2*C + T,
+```
+
+is iterated to obtain
+
+```text
+prod_{i<n} (1-q_i) * E_0 <= E_n.
+```
+
+Mathlib's infinite-product theorem, applied to `1-q_n = 1+(-q_n)`, proves
+that `prod' n, (1-q_n)` is nonzero.  Nonnegative partial products and their
+convergence then make it strictly positive, and the antitone partial-product
+sequence proves that it is a uniform lower bound for every finite product.
+The same result is exported through the finite matrix-tower limit adapter.
+
+The actual cutoff-13 adjacent-shell envelope
+
+```text
+c13DyadicRelativeEnvelope(n)
+  = (481/100)^2 / (39/5 + (69/100)n)^2
+```
+
+is already proved summable in `AsymptoticTailOperatorBound.lean`.  The new
+module proves its terms are strictly below one and consequently establishes
+
+```text
+0 < prod' n, (1-c13DyadicRelativeEnvelope(n)),
+```
+
+as well as the finite-product lower bound and the corresponding recursive
+limit theorem, provided the stage-relative cross estimate is supplied.
+
+This closes the **pure scalar uniform coefficient summation/product layer**.
+It does not silently identify a fixed historical source shell with a tower
+stage: the existing finite CvS estimates have a source-to-target distance
+parameter, whereas a recursive tower estimate couples the entire old prefix to
+the next adjacent shell.  The theorem
+`c13Dyadic_stageRelative_initialReserve` keeps that full-prefix stage estimate
+as an explicit source-specific premise.  Therefore source-shell decomposition,
+stage indexing, form convergence, the infinite closed boundary/Weyl operator,
+limiting no-crossing, and RH remain open analytic obligations.
